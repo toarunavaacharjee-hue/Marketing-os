@@ -1,0 +1,5 @@
+This folder contains Stripe API routes:
+- POST /api/stripe/create-checkout
+- POST /api/stripe/webhook
+- POST /api/stripe/billing-portal
+
