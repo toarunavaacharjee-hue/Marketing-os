@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
 
 type Profile = {
   name: string | null;
@@ -44,10 +45,18 @@ function PurpleBar() {
 
 export function DashboardShell({
   children,
-  profile
+  profile,
+  companies,
+  products,
+  selectedCompanyId,
+  selectedProductId
 }: {
   children: React.ReactNode;
   profile: Profile | null;
+  companies: CompanyOption[];
+  products: ProductOption[];
+  selectedCompanyId: string | null;
+  selectedProductId: string | null;
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -97,6 +106,15 @@ export function DashboardShell({
           >
             ✕
           </button>
+        </div>
+
+        <div className="border-b border-[#2a2e3f]">
+          <TenantSwitcher
+            companies={companies}
+            products={products}
+            selectedCompanyId={selectedCompanyId}
+            selectedProductId={selectedProductId}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-3">
