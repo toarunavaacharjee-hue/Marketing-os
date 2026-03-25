@@ -2,6 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { CookieSerializeOptions } from "cookie";
 
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: CookieSerializeOptions;
+};
+
 function isDashboardPath(pathname: string) {
   return pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 }
@@ -18,11 +24,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(
-          cookiesToSet: Array<{
-            name: string;
-            value: string;
-            options: CookieSerializeOptions | undefined;
-          }>
+          cookiesToSet: CookieToSet[]
         ) {
           cookiesToSet.forEach(({ name, value, options }) => {
             if (options) response.cookies.set(name, value, options);
