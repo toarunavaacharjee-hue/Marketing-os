@@ -235,5 +235,4 @@ function QuickMetrics() {
     </Card>
   );
 }
-}
 

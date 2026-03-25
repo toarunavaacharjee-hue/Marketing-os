@@ -5,20 +5,15 @@ import { Button } from "@/lib/ui";
 
 export function ManageBillingButton() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function onClick() {
     setLoading(true);
-    setError(null);
-    const res = await fetch("/api/stripe/customer-portal", { method: "POST" });
-    const data = (await res.json()) as { url?: string; error?: string };
-    setLoading(false);
-
-    if (!res.ok || !data.url) {
-      setError(data.error ?? "Could not open billing portal.");
-      return;
-    }
-    window.location.href = data.url;
+    window.setTimeout(() => {
+      setLoading(false);
+      window.alert(
+        "Billing is not enabled yet. Your account is currently in free mode."
+      );
+    }, 250);
   }
 
   return (
@@ -29,9 +24,8 @@ export function ManageBillingButton() {
         disabled={loading}
         variant="secondary"
       >
-        {loading ? "Opening billing..." : "Manage / cancel subscription"}
+        {loading ? "Please wait..." : "Billing (coming soon)"}
       </Button>
-      {error ? <div className="mt-2 text-xs text-red-200">{error}</div> : null}
     </div>
   );
 }

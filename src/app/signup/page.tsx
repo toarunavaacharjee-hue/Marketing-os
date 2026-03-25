@@ -61,32 +61,7 @@ export default function SignupPage() {
       });
     }
 
-    // Immediately send paid plans to Stripe Checkout.
-    // If email confirmation is enabled in Supabase, the user may need to confirm before they can log in.
-    const chosenPlan = plan;
-    if (chosenPlan === "starter" || chosenPlan === "growth" || chosenPlan === "enterprise") {
-      const res = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          plan: chosenPlan,
-          userId,
-          email
-        })
-      });
-
-      const payload = (await res.json()) as { url?: string; error?: string };
-      setLoading(false);
-
-      if (!res.ok || !payload.url) {
-        setError(payload.error ?? "Could not start checkout. Please try again.");
-        return;
-      }
-
-      window.location.href = payload.url;
-      return;
-    }
-
+    // Free access mode: skip payment and let users in directly.
     setLoading(false);
     router.push("/dashboard/settings");
   }

@@ -1,5 +1,3 @@
-This folder contains Stripe API routes:
-- POST /api/stripe/create-checkout
-- POST /api/stripe/webhook
-- POST /api/stripe/billing-portal
+Billing routes are intentionally disabled for now.
+The product is running in free-access mode.
 
