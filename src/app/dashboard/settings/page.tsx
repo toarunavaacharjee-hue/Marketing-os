@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ManageBillingButton } from "@/app/dashboard/settings/ManageBillingButton";
 import SettingsClient from "@/app/dashboard/settings/SettingsClient";
@@ -58,6 +59,24 @@ export default async function SettingsPage() {
         initialCompany={p?.company ?? ""}
         email={user.email ?? ""}
       />
+
+      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+        <div className="text-sm text-[#f0f0f8]">Module settings</div>
+        <div className="mt-2 grid gap-2 md:grid-cols-2">
+          <Link
+            href="/dashboard/settings/segments"
+            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] hover:bg-white/5"
+          >
+            Segments → configure ICP segments
+          </Link>
+          <Link
+            href="/dashboard/settings/analytics"
+            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] hover:bg-white/5"
+          >
+            Analytics → configure GA4/LinkedIn/Meta placeholders
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
