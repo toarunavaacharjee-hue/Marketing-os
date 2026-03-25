@@ -8,6 +8,7 @@ type CookieToSet = {
   value: string;
   options?: CookieSerializeOptions;
 };
+// Helper type to satisfy strict TypeScript checks in build tooling.
 
 export function createSupabaseServerClient() {
   const cookieStore = cookies();
