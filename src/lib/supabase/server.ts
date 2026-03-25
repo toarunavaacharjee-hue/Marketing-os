@@ -1,6 +1,13 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
+import type { CookieSerializeOptions } from "cookie";
+
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: CookieSerializeOptions;
+};
 
 export function createSupabaseServerClient() {
   const cookieStore = cookies();
@@ -13,10 +20,11 @@ export function createSupabaseServerClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
+              if (options) cookieStore.set(name, value, options);
+              else cookieStore.set(name, value);
             });
           } catch {
             // Server Components can't set cookies; middleware handles refresh.
