@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/app/dashboard/DashboardShell";
+import { UserProvider } from "@/lib/user/UserProvider";
 
 export default async function DashboardLayout({
   children
@@ -20,6 +21,10 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
-  return <DashboardShell profile={profile ?? null}>{children}</DashboardShell>;
+  return (
+    <UserProvider>
+      <DashboardShell profile={profile ?? null}>{children}</DashboardShell>
+    </UserProvider>
+  );
 }
 

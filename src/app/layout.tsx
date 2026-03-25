@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
-import { UserProvider } from "@/lib/user/UserProvider";
 
 const heading = Instrument_Serif({
   subsets: ["latin"],
@@ -27,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body style={{ fontFamily: "var(--font-body)" }}>
-        <UserProvider>{children}</UserProvider>
+        {children}
       </body>
     </html>
   );
