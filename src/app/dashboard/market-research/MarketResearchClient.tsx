@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Markdown } from "@/lib/Markdown";
 
 const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
 
@@ -211,8 +212,14 @@ export default function MarketResearchClient() {
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-[var(--radius)] border border-border bg-surface p-4">
           <div className="mb-2 text-sm text-text">Latest scan summary</div>
-          <div className="whitespace-pre-wrap text-sm leading-6 text-text2">
-            {summary ?? (running ? "Generating summary…" : "Run a scan to generate a summary.")}
+          <div className="max-h-[520px] overflow-auto rounded-[var(--radius2)] border border-border bg-surface2 p-4">
+            {summary ? (
+              <Markdown content={summary} />
+            ) : (
+              <div className="text-sm leading-6 text-text2">
+                {running ? "Generating summary…" : "Run a scan to generate a summary."}
+              </div>
+            )}
           </div>
         </div>
 
@@ -244,8 +251,14 @@ export default function MarketResearchClient() {
             </button>
           </div>
 
-          <div className="mt-3 rounded-[var(--radius2)] border border-border bg-surface2 p-3 text-sm text-text2">
-            {answer ?? (asking ? "Thinking…" : "Your answer will appear here.")}
+          <div className="mt-3 max-h-[520px] overflow-auto rounded-[var(--radius2)] border border-border bg-surface2 p-4">
+            {answer ? (
+              <Markdown content={answer} />
+            ) : (
+              <div className="text-sm leading-6 text-text2">
+                {asking ? "Thinking…" : "Your answer will appear here."}
+              </div>
+            )}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
