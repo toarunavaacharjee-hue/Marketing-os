@@ -78,7 +78,7 @@ export function TenantSwitcher({
 
       <div className="mt-3 text-xs text-[#9090b0]">
         Need a new company/product?{" "}
-        <a className="text-[#7c6cff]" href="/dashboard/onboarding">
+        <a className="text-[#7c6cff]" href="/onboarding">
           Create one
         </a>
       </div>

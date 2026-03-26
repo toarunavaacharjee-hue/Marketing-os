@@ -40,7 +40,7 @@ export default async function DashboardLayout({
     })) ?? [];
 
   if (companies.length === 0) {
-    redirect("/dashboard/onboarding");
+    redirect("/onboarding");
   }
 
   const selectedCompanyId = companyIdCookie ?? companies[0].id;
@@ -66,7 +66,7 @@ export default async function DashboardLayout({
     null;
 
   if (!selectedProductId) {
-    redirect("/dashboard/onboarding");
+    redirect("/onboarding");
   }
 
   return (

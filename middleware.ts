@@ -13,6 +13,13 @@ function isDashboardPath(pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
+  // Avoid redirect loops: onboarding lives at /onboarding now.
+  if (request.nextUrl.pathname === "/dashboard/onboarding") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/onboarding";
+    return NextResponse.redirect(url);
+  }
+
   const response = NextResponse.next({ request: { headers: request.headers } });
 
   const supabase = createServerClient(
