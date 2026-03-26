@@ -1,17 +1,5 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
-
-const heading = Instrument_Serif({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-heading"
-});
-
-const body = Bricolage_Grotesque({
-  subsets: ["latin"],
-  variable: "--font-body"
-});
 
 export const metadata: Metadata = {
   title: "Marketing OS",
@@ -24,10 +12,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable}`}>
-      <body style={{ fontFamily: "var(--font-body)" }}>
-        {children}
-      </body>
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body style={{ fontFamily: "var(--font-body)" }}>{children}</body>
     </html>
   );
 }

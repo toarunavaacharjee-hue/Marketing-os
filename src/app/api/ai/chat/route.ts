@@ -136,7 +136,17 @@ export async function POST(req: Request) {
   const plan = (profile?.plan ?? "starter").toLowerCase();
   const used = profile?.ai_queries_used ?? 0;
   const company = profile?.company ?? "Unknown company";
-  const anthropicKey = (profile?.anthropic_api_key ?? "").trim();
+  // Key priority:
+  // 1) Per-request header (user pastes key in UI; stored in localStorage)
+  // 2) Profile column (optional if you decide to store it server-side later)
+  // 3) Server env var (team-wide default)
+  const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
+  const anthropicKey = (
+    headerKey ||
+    (profile?.anthropic_api_key ?? "").trim() ||
+    process.env.ANTHROPIC_API_KEY ||
+    ""
+  ).trim();
 
   if (plan === "starter" && used >= 100) {
     return NextResponse.json(

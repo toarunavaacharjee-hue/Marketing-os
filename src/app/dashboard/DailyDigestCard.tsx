@@ -8,6 +8,7 @@ const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
 type DailyBriefResponse = {
   summary?: string;
   error?: string;
+  code?: string;
 };
 
 export function DailyDigestCard() {

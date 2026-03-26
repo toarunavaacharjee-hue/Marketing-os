@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Props = {
@@ -24,6 +24,56 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
       ? window.localStorage.getItem(ANTHROPIC_KEY_STORAGE) ?? ""
       : ""
   );
+  const keyLooksValid = anthropicKey.trim().startsWith("sk-ant-");
+  const [aiStatus, setAiStatus] = useState<
+    "idle" | "checking" | "connected" | "error"
+  >("idle");
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function ping() {
+      if (!keyLooksValid) {
+        setAiStatus("idle");
+        setAiError(null);
+        return;
+      }
+
+      setAiStatus("checking");
+      setAiError(null);
+
+      try {
+        const res = await fetch("/api/ai/ping", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-anthropic-key": anthropicKey.trim()
+          }
+        });
+        const data = (await res.json()) as { ok?: boolean; error?: string };
+        if (cancelled) return;
+
+        if (!res.ok || !data.ok) {
+          setAiStatus("error");
+          setAiError(data.error ?? "Could not connect.");
+          return;
+        }
+
+        setAiStatus("connected");
+      } catch (e) {
+        if (cancelled) return;
+        setAiStatus("error");
+        setAiError(e instanceof Error ? e.message : "Could not connect.");
+      }
+    }
+
+    const t = window.setTimeout(ping, 600);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [anthropicKey, keyLooksValid]);
 
   async function saveProfile() {
     setSaving(true);
@@ -123,7 +173,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               <div className="text-xs text-[#9090b0]">Anthropic API key</div>
               <div
                 className={`h-2 w-2 rounded-full ${
-                  anthropicKey.trim().length > 0 ? "bg-[#b8ff6c]" : "bg-white/20"
+                  keyLooksValid ? "bg-[#b8ff6c]" : "bg-white/20"
                 }`}
               />
             </div>
@@ -137,6 +187,26 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               placeholder="sk-ant-..."
               className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0] focus:border-[#7c6cff] focus:outline-none focus:ring-2 focus:ring-[#7c6cff]/30"
             />
+
+            {keyLooksValid ? (
+              <div className="mt-3 rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#9090b0]">
+                {aiStatus === "checking" ? (
+                  <span>Checking connection…</span>
+                ) : aiStatus === "connected" ? (
+                  <span className="text-[#b8ff6c]">Connected to Anthropic</span>
+                ) : aiStatus === "error" ? (
+                  <span className="text-red-200">
+                    Not connected{aiError ? ` — ${aiError}` : ""}
+                  </span>
+                ) : (
+                  <span>—</span>
+                )}
+              </div>
+            ) : anthropicKey.trim().length ? (
+              <div className="mt-3 rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#9090b0]">
+                Key format looks wrong. It should start with <span className="text-[#f0f0f8]">sk-ant-</span>.
+              </div>
+            ) : null}
 
             <div className="mt-3 text-xs text-[#9090b0]">
               Tip: once set, open <span className="text-[#f0f0f8]">AI Copilot</span> to start chatting.

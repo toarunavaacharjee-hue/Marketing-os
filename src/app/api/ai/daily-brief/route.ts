@@ -5,6 +5,23 @@ type AnthropicMessageResponse = {
   error?: { message?: string };
 };
 
+function normalizeAnthropicError(message: string | undefined) {
+  const m = (message ?? "").trim();
+  const lower = m.toLowerCase();
+  if (
+    lower.includes("credit balance is too low") ||
+    lower.includes("insufficient credits") ||
+    lower.includes("billing") && lower.includes("credits")
+  ) {
+    return {
+      status: 402,
+      error:
+        "Your Anthropic account has insufficient API credits. Add credits / enable billing in the Anthropic Console, then try again."
+    };
+  }
+  return { status: 502, error: m || "Anthropic request failed." };
+}
+
 export async function POST(req: Request) {
   try {
     const headerKey = req.headers.get("x-anthropic-key")?.trim();
@@ -46,9 +63,10 @@ Length: 8-12 lines.`;
 
     const data = (await res.json()) as AnthropicMessageResponse;
     if (!res.ok) {
+      const normalized = normalizeAnthropicError(data?.error?.message);
       return NextResponse.json(
-        { error: data?.error?.message ?? "Anthropic request failed." },
-        { status: 500 }
+        { error: normalized.error, code: "ANTHROPIC_ERROR" },
+        { status: normalized.status }
       );
     }
 
