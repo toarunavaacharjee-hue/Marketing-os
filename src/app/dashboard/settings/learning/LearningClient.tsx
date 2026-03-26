@@ -8,6 +8,7 @@ type SyncRun = {
   connector: string;
   status: string;
   assets_ingested: number;
+  is_demo: boolean;
   message: string | null;
   finished_at: string | null;
   started_at: string;
@@ -19,6 +20,7 @@ type Asset = {
   asset_type: string;
   title: string;
   status: string;
+  is_demo: boolean;
   last_seen_at: string;
 };
 
@@ -57,13 +59,13 @@ export default function LearningClient({ environmentId }: { environmentId: strin
     const [syncRes, assetsRes] = await Promise.all([
       supabase
         .from("sync_runs")
-        .select("id,connector,status,assets_ingested,message,finished_at,started_at")
+        .select("id,connector,status,assets_ingested,is_demo,message,finished_at,started_at")
         .eq("environment_id", environmentId)
         .order("started_at", { ascending: false })
         .limit(20),
       supabase
         .from("assets")
-        .select("id,source,asset_type,title,status,last_seen_at")
+        .select("id,source,asset_type,title,status,is_demo,last_seen_at")
         .eq("environment_id", environmentId)
         .order("last_seen_at", { ascending: false })
         .limit(50)
@@ -88,19 +90,19 @@ export default function LearningClient({ environmentId }: { environmentId: strin
 
     const now = new Date().toISOString();
     const demoSync = [
-      { connector: "ga4", status: "success", assets_ingested: 18, message: "Pulled events + top pages", started_at: now, finished_at: now },
-      { connector: "hubspot", status: "warning", assets_ingested: 6, message: "Rate limit hit; partial import", started_at: now, finished_at: now },
-      { connector: "linkedin_ads", status: "success", assets_ingested: 12, message: "Imported campaigns + creatives", started_at: now, finished_at: now },
-      { connector: "meta_ads", status: "error", assets_ingested: 0, message: "Credentials missing", started_at: now, finished_at: now }
+      { connector: "ga4", status: "success", assets_ingested: 18, is_demo: true, message: "Pulled events + top pages", started_at: now, finished_at: now },
+      { connector: "hubspot", status: "warning", assets_ingested: 6, is_demo: true, message: "Rate limit hit; partial import", started_at: now, finished_at: now },
+      { connector: "linkedin_ads", status: "success", assets_ingested: 12, is_demo: true, message: "Imported campaigns + creatives", started_at: now, finished_at: now },
+      { connector: "meta_ads", status: "error", assets_ingested: 0, is_demo: true, message: "Credentials missing", started_at: now, finished_at: now }
     ];
 
     const demoAssets = [
-      { source: "website", asset_type: "page", title: "/pricing", status: "indexed" },
-      { source: "website", asset_type: "page", title: "/compare/acme", status: "stale" },
-      { source: "hubspot", asset_type: "deal", title: "Enterprise expansion — Q2", status: "indexed" },
-      { source: "hubspot", asset_type: "call_note", title: "Discovery call: RevOps lead", status: "indexed" },
-      { source: "linkedin_ads", asset_type: "creative", title: "Carousel: 'Stop guessing ROAS'", status: "indexed" },
-      { source: "meta_ads", asset_type: "creative", title: "Retargeting static v2", status: "failed" }
+      { source: "website", asset_type: "page", title: "/pricing", status: "indexed", is_demo: true },
+      { source: "website", asset_type: "page", title: "/compare/acme", status: "stale", is_demo: true },
+      { source: "hubspot", asset_type: "deal", title: "Enterprise expansion — Q2", status: "indexed", is_demo: true },
+      { source: "hubspot", asset_type: "call_note", title: "Discovery call: RevOps lead", status: "indexed", is_demo: true },
+      { source: "linkedin_ads", asset_type: "creative", title: "Carousel: 'Stop guessing ROAS'", status: "indexed", is_demo: true },
+      { source: "meta_ads", asset_type: "creative", title: "Retargeting static v2", status: "failed", is_demo: true }
     ].map((a) => ({ ...a, last_seen_at: now }));
 
     const ins1 = await supabase.from("sync_runs").insert(
@@ -119,6 +121,29 @@ export default function LearningClient({ environmentId }: { environmentId: strin
       return;
     }
 
+    await load();
+  }
+
+  async function clearDemo() {
+    setError(null);
+    const del1 = await supabase
+      .from("assets")
+      .delete()
+      .eq("environment_id", environmentId)
+      .eq("is_demo", true);
+    if (del1.error) {
+      setError(del1.error.message);
+      return;
+    }
+    const del2 = await supabase
+      .from("sync_runs")
+      .delete()
+      .eq("environment_id", environmentId)
+      .eq("is_demo", true);
+    if (del2.error) {
+      setError(del2.error.message);
+      return;
+    }
     await load();
   }
 
@@ -151,13 +176,27 @@ export default function LearningClient({ environmentId }: { environmentId: strin
               See whether the system has enough signal to power each module.
             </div>
           </div>
-          <button
-            onClick={seedDemo}
-            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] hover:bg-white/5"
-          >
-            Seed demo sync + assets
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={seedDemo}
+              className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] hover:bg-white/5"
+            >
+              Seed demo sync + assets
+            </button>
+            <button
+              onClick={clearDemo}
+              className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200 hover:bg-red-500/15"
+            >
+              Clear demo data
+            </button>
+          </div>
         </div>
+
+        {syncRuns.some((s) => s.is_demo) || assets.some((a) => a.is_demo) ? (
+          <div className="mt-4 rounded-xl border border-[#7c6cff]/30 bg-[#7c6cff]/10 px-3 py-2 text-sm text-[#f0f0f8]">
+            Demo data is currently enabled for this product’s Default environment.
+          </div>
+        ) : null}
 
         {error ? (
           <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">

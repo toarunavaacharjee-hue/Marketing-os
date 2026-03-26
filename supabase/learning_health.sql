@@ -8,6 +8,7 @@ create table if not exists public.sync_runs (
   connector text not null, -- e.g. ga4, hubspot, linkedin_ads, meta_ads
   status text not null default 'success', -- success | warning | error
   assets_ingested integer not null default 0,
+  is_demo boolean not null default false,
   message text,
   started_at timestamptz not null default now(),
   finished_at timestamptz
@@ -22,6 +23,7 @@ create table if not exists public.assets (
   title text not null,
   url text,
   status text not null default 'indexed', -- indexed | stale | failed
+  is_demo boolean not null default false,
   last_seen_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
