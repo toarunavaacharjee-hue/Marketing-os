@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getDefaultEnvironmentIdForSelectedProduct, getSelectedProductId } from "@/lib/productContext";
+import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -70,45 +69,46 @@ async function fetchPage(url: string) {
 }
 
 export async function POST(req: Request) {
-  const supabase = createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  try {
+    const supabase = createSupabaseServerClient();
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
-  const selected = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
-  const productId = selected.productId;
-  const environmentId = selected.environmentId;
+    const selected = await getDefaultEnvironmentIdForSelectedProduct();
+    if (!selected)
+      return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    const productId = selected.productId;
+    const environmentId = selected.environmentId;
 
-  const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-  const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
+    const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
+    const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
 
-  const admin = createSupabaseAdminClient();
+    // RLS-protected reads
+    const { data: product, error: pErr } = await supabase
+      .from("products")
+      .select("id,name,website_url,category,icp_summary,positioning_summary")
+      .eq("id", productId)
+      .maybeSingle();
+    if (pErr || !product) {
+      return NextResponse.json(
+        { error: pErr?.message ?? "Product not found." },
+        { status: 404 }
+      );
+    }
 
-  // Membership guard
-  const { data: product } = await admin
-    .from("products")
-    .select("id,company_id,name,website_url,category,icp_summary,positioning_summary")
-    .eq("id", productId)
-    .maybeSingle();
-  if (!product) return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    const { data: competitors, error: cErr } = await supabase
+      .from("product_competitors")
+      .select("id,name,website_url")
+      .eq("product_id", productId)
+      .order("created_at", { ascending: true });
+    if (cErr) {
+      return NextResponse.json({ error: cErr.message }, { status: 500 });
+    }
 
-  const { data: membership } = await admin
-    .from("company_members")
-    .select("company_id")
-    .eq("user_id", user.id)
-    .eq("company_id", product.company_id as string)
-    .maybeSingle();
-  if (!membership) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-
-  const { data: competitors } = await admin
-    .from("product_competitors")
-    .select("id,name,website_url")
-    .eq("product_id", productId)
-    .order("created_at", { ascending: true });
-
-  const baseUrl = normalizeUrl((product.website_url as string | null) ?? "");
+    const baseUrl = normalizeUrl((product.website_url as string | null) ?? "");
   const competitorUrls =
     (competitors ?? [])
       .map((c) => ({
@@ -126,7 +126,7 @@ export async function POST(req: Request) {
   }
 
   // Create scan
-  const { data: scanRow, error: scanErr } = await admin
+  const { data: scanRow, error: scanErr } = await supabase
     .from("research_scans")
     .insert({
       environment_id: environmentId,
@@ -184,9 +184,9 @@ export async function POST(req: Request) {
     }));
 
   if (snapshotsToInsert.length) {
-    const ins = await admin.from("research_snapshots").insert(snapshotsToInsert);
+    const ins = await supabase.from("research_snapshots").insert(snapshotsToInsert);
     if (ins.error) {
-      await admin.from("research_scans").update({ status: "failed" }).eq("id", scanId);
+      await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
       return NextResponse.json({ error: ins.error.message }, { status: 500 });
     }
   }
@@ -250,14 +250,14 @@ ${snapshotBlobs}`;
     const data = (await res.json()) as AnthropicMessageResponse;
     if (!res.ok) {
       const normalized = normalizeAnthropicError(data?.error?.message);
-      await admin.from("research_scans").update({ status: "failed" }).eq("id", scanId);
+      await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
       return NextResponse.json({ error: normalized.error }, { status: normalized.status });
     }
 
     summary = data.content?.find((c) => c.type === "text")?.text ?? "No summary returned.";
   }
 
-  await admin
+  await supabase
     .from("research_scans")
     .update({ status: "completed", summary })
     .eq("id", scanId);
@@ -273,5 +273,11 @@ ${snapshotBlobs}`;
       source_type: r.source_type
     }))
   });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
 }
 

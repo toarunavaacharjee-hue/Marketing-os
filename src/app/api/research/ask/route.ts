@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 
 type AnthropicMessageResponse = {
@@ -26,33 +25,36 @@ function normalizeAnthropicError(message: string | undefined) {
 }
 
 export async function POST(req: Request) {
-  const supabase = createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+  try {
+    const supabase = createSupabaseServerClient();
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
-  const selected = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
-  const { productId, environmentId } = selected;
+    const selected = await getDefaultEnvironmentIdForSelectedProduct();
+    if (!selected)
+      return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    const { productId, environmentId } = selected;
 
-  const body = (await req.json()) as { question?: string };
-  const question = (body.question ?? "").trim();
-  if (!question) return NextResponse.json({ error: "Question is required." }, { status: 400 });
+    const body = (await req.json()) as { question?: string };
+    const question = (body.question ?? "").trim();
+    if (!question)
+      return NextResponse.json({ error: "Question is required." }, { status: 400 });
 
-  const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-  const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
+    const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
+    const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
 
-  const admin = createSupabaseAdminClient();
-
-  const { data: scan } = await admin
-    .from("research_scans")
-    .select("id,summary,created_at")
-    .eq("environment_id", environmentId)
-    .eq("product_id", productId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    const { data: scan, error: sErr } = await supabase
+      .from("research_scans")
+      .select("id,summary,created_at")
+      .eq("environment_id", environmentId)
+      .eq("product_id", productId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (sErr) return NextResponse.json({ error: sErr.message }, { status: 500 });
 
   if (!scan?.id) {
     return NextResponse.json(
@@ -61,12 +63,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const { data: snaps } = await admin
+  const { data: snaps, error: snapsErr } = await supabase
     .from("research_snapshots")
     .select("url,source_type,title,text_content")
     .eq("scan_id", scan.id)
     .order("fetched_at", { ascending: true })
     .limit(10);
+  if (snapsErr) return NextResponse.json({ error: snapsErr.message }, { status: 500 });
 
   if (!anthropicKey) {
     return NextResponse.json({
@@ -115,5 +118,11 @@ If the answer is not supported by the snapshots, say what’s missing and what t
 
   const answer = data.content?.find((c) => c.type === "text")?.text ?? "No answer returned.";
   return NextResponse.json({ answer });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
 }
 

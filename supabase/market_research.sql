@@ -19,6 +19,64 @@ create table if not exists public.product_competitors (
 create index if not exists product_competitors_product_id_idx
   on public.product_competitors(product_id);
 
+-- 2b) RLS for product_competitors + product profile updates
+alter table public.product_competitors enable row level security;
+
+-- Helper: can the current user access a product?
+create or replace function public.is_product_member(pid uuid)
+returns boolean
+language sql
+stable
+as $$
+  select exists (
+    select 1
+    from public.products p
+    join public.company_members cm on cm.company_id = p.company_id
+    where p.id = pid
+      and cm.user_id = auth.uid()
+  );
+$$;
+
+drop policy if exists product_competitors_select_member on public.product_competitors;
+create policy product_competitors_select_member on public.product_competitors
+for select
+using (public.is_product_member(product_id));
+
+drop policy if exists product_competitors_insert_member on public.product_competitors;
+create policy product_competitors_insert_member on public.product_competitors
+for insert
+with check (public.is_product_member(product_id));
+
+drop policy if exists product_competitors_update_member on public.product_competitors;
+create policy product_competitors_update_member on public.product_competitors
+for update
+using (public.is_product_member(product_id))
+with check (public.is_product_member(product_id));
+
+drop policy if exists product_competitors_delete_member on public.product_competitors;
+create policy product_competitors_delete_member on public.product_competitors
+for delete
+using (public.is_product_member(product_id));
+
+-- Products table: allow members to update product profile fields
+alter table public.products enable row level security;
+
+drop policy if exists products_update_member on public.products;
+create policy products_update_member on public.products
+for update
+using (exists (
+  select 1
+  from public.company_members cm
+  where cm.company_id = public.products.company_id
+    and cm.user_id = auth.uid()
+))
+with check (exists (
+  select 1
+  from public.company_members cm
+  where cm.company_id = public.products.company_id
+    and cm.user_id = auth.uid()
+));
+
 -- 3) Research scans (per product's Default environment)
 create table if not exists public.research_scans (
   id uuid primary key default gen_random_uuid(),
