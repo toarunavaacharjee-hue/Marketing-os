@@ -64,6 +64,12 @@ export default async function SettingsPage() {
         <div className="text-sm text-[#f0f0f8]">Module settings</div>
         <div className="mt-2 grid gap-2 md:grid-cols-2">
           <Link
+            href="/dashboard/settings/product"
+            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] hover:bg-white/5"
+          >
+            Product profile → base product + competitors
+          </Link>
+          <Link
             href="/dashboard/settings/learning"
             className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] hover:bg-white/5"
           >
