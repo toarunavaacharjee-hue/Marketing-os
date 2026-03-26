@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Card } from "@/lib/ui";
 import { DailyDigestCard } from "@/app/dashboard/DailyDigestCard";
 import { ChannelBars } from "@/app/dashboard/ChannelBars";
+import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 
 export default function DashboardIndex() {
   return <CommandCentrePage />;
@@ -30,6 +31,24 @@ async function CommandCentrePage() {
     month: "short",
     day: "numeric"
   });
+
+  const ctx = await getDefaultEnvironmentIdForSelectedProduct();
+  let connectors: {
+    ga4?: { enabled?: boolean };
+    hubspot?: { enabled?: boolean };
+    linkedin_ads?: { enabled?: boolean };
+    meta_ads?: { enabled?: boolean };
+  } | null = null;
+  if (ctx?.environmentId) {
+    const { data } = await supabase
+      .from("module_settings")
+      .select("value_json")
+      .eq("environment_id", ctx.environmentId)
+      .eq("module", "integrations")
+      .eq("key", "connectors")
+      .maybeSingle();
+    connectors = (data?.value_json ?? null) as typeof connectors;
+  }
 
   return (
     <div>
@@ -60,6 +79,8 @@ async function CommandCentrePage() {
         <Kpi title="Pipeline Influence" value="$148k" delta="+18% MoM" />
       </div>
 
+      <IntegrationStatus connectors={connectors} />
+
       {/* Two-column layout */}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
@@ -73,6 +94,50 @@ async function CommandCentrePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function IntegrationStatus({
+  connectors
+}: {
+  connectors: {
+    ga4?: { enabled?: boolean };
+    hubspot?: { enabled?: boolean };
+    linkedin_ads?: { enabled?: boolean };
+    meta_ads?: { enabled?: boolean };
+  } | null;
+}) {
+  const items = [
+    { label: "GA4", on: Boolean(connectors?.ga4?.enabled) },
+    { label: "HubSpot", on: Boolean(connectors?.hubspot?.enabled) },
+    { label: "LinkedIn Ads", on: Boolean(connectors?.linkedin_ads?.enabled) },
+    { label: "Meta Ads", on: Boolean(connectors?.meta_ads?.enabled) }
+  ];
+
+  return (
+    <Card className="mt-4 border border-[#2a2e3f] bg-[#141420] p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="text-sm text-[#f0f0f8]">Integration status</div>
+        <Link
+          href="/dashboard/settings/integrations"
+          className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#f0f0f8] hover:bg-white/5"
+        >
+          Configure integrations
+        </Link>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {items.map((i) => (
+          <div
+            key={i.label}
+            className="inline-flex items-center gap-2 rounded-full border border-[#2a2e3f] bg-black/20 px-3 py-1.5 text-xs text-[#9090b0]"
+          >
+            <span className={`h-2 w-2 rounded-full ${i.on ? "bg-[#b8ff6c]" : "bg-white/20"}`} />
+            <span className="text-[#f0f0f8]">{i.label}</span>
+            <span>{i.on ? "Connected" : "Not connected"}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
