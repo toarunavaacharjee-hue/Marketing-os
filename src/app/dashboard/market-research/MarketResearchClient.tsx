@@ -522,10 +522,19 @@ function OpportunityRow({
 }: {
   segment: string;
   score: string;
-  tam: "High" | "Very High" | "Medium" | "Growing";
+  tam: "Low" | "Medium" | "High" | "Very High" | "Growing";
   comp: "Low" | "Medium" | "High";
 }) {
-  const tamTone = tam === "Very High" ? "blue" : tam === "High" ? "green" : tam === "Growing" ? "purple" : "yellow";
+  const tamTone =
+    tam === "Very High"
+      ? "blue"
+      : tam === "High"
+        ? "green"
+        : tam === "Growing"
+          ? "purple"
+          : tam === "Low"
+            ? "red"
+            : "yellow";
   const compTone = comp === "Low" ? "green" : comp === "Medium" ? "yellow" : "red";
   return (
     <tr className="border-t border-border">
