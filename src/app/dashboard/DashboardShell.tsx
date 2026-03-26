@@ -140,6 +140,21 @@ export function DashboardShell({
           </div>
         </div>
 
+        <div className="border-t border-[#2a2e3f] p-3">
+          <Link
+            href="/dashboard/settings"
+            onClick={onNavigate}
+            className={`relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${
+              pathname === "/dashboard/settings"
+                ? "bg-[#1e1e2e] text-[#f0f0f8]"
+                : "text-[#9090b0] hover:bg-white/5 hover:text-[#f0f0f8]"
+            }`}
+          >
+            {pathname === "/dashboard/settings" ? <PurpleBar /> : null}
+            <span className="pl-1">Settings</span>
+          </Link>
+        </div>
+
         <div className="border-t border-[#2a2e3f] p-4">
           <div className="mb-3">
             <div className="text-sm text-[#f0f0f8]">
