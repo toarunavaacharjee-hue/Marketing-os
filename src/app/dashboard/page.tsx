@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { Card } from "@/lib/ui";
 import { DailyDigestCard } from "@/app/dashboard/DailyDigestCard";
-import { ChannelBars } from "@/app/dashboard/ChannelBars";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 
 export default function DashboardIndex() {
@@ -26,9 +24,9 @@ async function CommandCentrePage() {
   const name = profile?.name ?? "there";
 
   const now = new Date();
-  const dateLabel = now.toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "short",
+  const dateLabel = now.toLocaleDateString(undefined, { weekday: "long" });
+  const monthDayLabel = now.toLocaleDateString(undefined, {
+    month: "long",
     day: "numeric"
   });
 
@@ -51,45 +49,56 @@ async function CommandCentrePage() {
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="pb-2">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <div
-            className="text-4xl"
-            style={{ fontFamily: "var(--font-heading)" }}
+            className="text-[28px] font-extrabold tracking-[-0.5px] text-text"
+            style={{ fontFamily: "var(--font-heading)", lineHeight: 1.1 }}
           >
-            Good morning {name} <span className="text-[#7c6cff]">⚡</span>
+            Good morning, {name} <span className="text-accent2">⚡</span>
           </div>
-          <div className="mt-2 text-sm text-[#9090b0]">{dateLabel}</div>
+          <div className="mt-2 text-[13px] text-text2">
+            {dateLabel}, {monthDayLabel} · 14 active campaigns · 3 items need
+            attention
+          </div>
         </div>
 
-        <Link
-          href="/dashboard/copilot"
-          className="rounded-xl bg-[#b8ff6c] px-4 py-3 text-sm font-medium text-black"
-        >
-          Ask AI
-        </Link>
+        <div className="flex items-center gap-2">
+          <a
+            href="#daily-digest"
+            className="inline-flex items-center gap-2 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-[13px] font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+          >
+            📋 <span>Daily Brief</span>
+          </a>
+          <Link
+            href="/dashboard/copilot"
+            className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#5b52ee]"
+          >
+            🤖 <span>Ask AI</span>
+          </Link>
+        </div>
       </div>
 
-      {/* KPI row */}
-      <div className="mt-8 grid gap-4 md:grid-cols-4">
-        <Kpi title="Active Campaigns" value="7" delta="+2 this week" />
-        <Kpi title="Content Pieces Due" value="12" delta="3 overdue" tone="warn" />
-        <Kpi title="Blended ROAS" value="3.4×" delta="+0.3 WoW" />
-        <Kpi title="Pipeline Influence" value="$148k" delta="+18% MoM" />
+      <div className="grid gap-[14px] md:grid-cols-4">
+        <Kpi title="Active Campaigns" value="14" delta="↑ 3 this week" tone="up" />
+        <Kpi title="Content Pieces Due" value="7" delta="↓ 2 overdue" tone="down" />
+        <Kpi title="Blended ROAS" value="3.8×" delta="↑ 0.4 vs last week" tone="up" />
+        <Kpi title="Pipeline Influence" value="$2.1M" delta="↑ 12% MTD" tone="up" />
       </div>
 
       <IntegrationStatus connectors={connectors} />
 
-      {/* Two-column layout */}
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
           <NeedsAttention />
           <ThisWeek />
         </div>
 
         <div className="space-y-4">
-          <DailyDigestCard />
+          <div id="daily-digest">
+            <DailyDigestCard />
+          </div>
           <QuickMetrics />
         </div>
       </div>
@@ -115,12 +124,12 @@ function IntegrationStatus({
   ];
 
   return (
-    <Card className="mt-4 border border-[#2a2e3f] bg-[#141420] p-4">
+    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-[#f0f0f8]">Integration status</div>
+        <div className="text-sm text-text">Integration status</div>
         <Link
           href="/dashboard/settings/integrations"
-          className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#f0f0f8] hover:bg-white/5"
+          className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
         >
           Configure integrations
         </Link>
@@ -129,15 +138,19 @@ function IntegrationStatus({
         {items.map((i) => (
           <div
             key={i.label}
-            className="inline-flex items-center gap-2 rounded-full border border-[#2a2e3f] bg-black/20 px-3 py-1.5 text-xs text-[#9090b0]"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface2 px-3 py-1.5 text-xs text-text2"
           >
-            <span className={`h-2 w-2 rounded-full ${i.on ? "bg-[#b8ff6c]" : "bg-white/20"}`} />
-            <span className="text-[#f0f0f8]">{i.label}</span>
+            <span
+              className={`h-2 w-2 rounded-full ${
+                i.on ? "bg-green" : "bg-white/20"
+              }`}
+            />
+            <span className="text-text">{i.label}</span>
             <span>{i.on ? "Connected" : "Not connected"}</span>
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -145,84 +158,110 @@ function Kpi({
   title,
   value,
   delta,
-  tone = "normal"
+  tone = "up"
 }: {
   title: string;
   value: string;
   delta: string;
-  tone?: "normal" | "warn";
+  tone?: "up" | "down" | "neutral";
 }) {
   return (
-    <Card className="border border-[#2a2e3f] bg-[#141420] p-5">
-      <div className="text-xs uppercase tracking-wider text-[#9090b0]">
+    <div className="rounded-[var(--radius)] border border-border bg-surface p-[18px]">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">
         {title}
       </div>
-      <div className="mt-2 text-3xl text-[#f0f0f8]">{value}</div>
+      <div className="mt-2 font-[var(--font-heading)] text-[28px] font-extrabold leading-none text-text">
+        {value}
+      </div>
       <div
-        className={`mt-1 text-sm ${
-          tone === "warn" ? "text-[#b8ff6c]" : "text-[#9090b0]"
+        className={`mt-1 text-[12px] font-semibold ${
+          tone === "up" ? "text-green" : tone === "down" ? "text-red" : "text-text2"
         }`}
       >
         {delta}
       </div>
-    </Card>
+    </div>
   );
 }
 
 function NeedsAttention() {
   return (
-    <Card className="border border-[#2a2e3f] bg-[#141420] p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-lg text-[#f0f0f8]">Needs Attention</div>
-        <div className="text-xs text-[#9090b0]">3 flags</div>
+    <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+      <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
+        🔴 Needs Attention
       </div>
 
-      <div className="mt-4 space-y-3">
-        <FlagRow
-          title="LinkedIn fatigue"
-          detail="CTR down 22% in 10 days. Refresh creative & hooks."
-          actions={["Review creatives", "Generate new angles"]}
+      <div className="mt-3 space-y-3">
+        <AttentionRow
+          icon="⚠️"
+          iconBg="rgba(248,113,113,0.15)"
+          title="LinkedIn Ad creative fatigue detected"
+          detail='Ad set "Enterprise Q1" CTR dropped 34% over 7 days. Creative refresh recommended.'
+          actions={[
+            { label: "View Analytics", href: "/dashboard/analytics" },
+            { label: "Draft New Creative", href: "/dashboard/content-studio", primary: true }
+          ]}
         />
-        <FlagRow
-          title="Overdue brief"
-          detail="Q2 webinar landing page brief is 5 days late."
-          actions={["Assign owner", "Create brief"]}
+        <AttentionRow
+          icon="📅"
+          iconBg="rgba(251,191,36,0.15)"
+          title="SaaStr booth brief overdue by 2 days"
+          detail="Event is in 18 days. Assign owner and brief the design team."
+          actions={[{ label: "Open Events", href: "/dashboard/events", primary: true }]}
         />
-        <FlagRow
-          title="Stale pages"
-          detail="3 high-traffic pages haven’t been updated in 90+ days."
-          actions={["Audit pages", "Draft updates"]}
+        <AttentionRow
+          icon="🌐"
+          iconBg="rgba(248,113,113,0.15)"
+          title="3 website pages are 90+ days stale"
+          detail="Pricing, Integrations, and Enterprise pages need content refresh after Q4 product updates."
+          actions={[{ label: "Review Pages", href: "/dashboard/website-pages" }]}
         />
       </div>
-    </Card>
+    </div>
   );
 }
 
-function FlagRow({
+function AttentionRow({
+  icon,
+  iconBg,
   title,
   detail,
   actions
 }: {
+  icon: string;
+  iconBg: string;
   title: string;
   detail: string;
-  actions: [string, string];
+  actions: Array<{ label: string; href: string; primary?: boolean }>;
 }) {
   return (
-    <div className="rounded-2xl border border-[#2a2e3f] bg-black/20 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-sm text-[#f0f0f8]">{title}</div>
-          <div className="mt-1 text-sm text-[#9090b0]">{detail}</div>
-        </div>
-        <div className="h-2 w-2 shrink-0 rounded-full bg-[#7c6cff]" />
+    <div className="flex gap-3 rounded-[var(--radius)] border border-border bg-surface2 p-4">
+      <div
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[16px]"
+        style={{ background: iconBg }}
+      >
+        {icon}
       </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <button className="rounded-xl bg-[#b8ff6c] px-3 py-2 text-xs font-medium text-black">
-          {actions[0]}
-        </button>
-        <button className="rounded-xl border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-xs font-medium text-[#f0f0f8] hover:bg-white/5">
-          {actions[1]}
-        </button>
+      <div className="flex-1">
+        <div className="text-[13px] font-semibold text-text">{title}</div>
+        <div className="mt-1 text-[12px] leading-5 text-text2">{detail}</div>
+        {actions.length ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {actions.map((a) => (
+              <Link
+                key={a.label}
+                href={a.href}
+                className={`inline-flex items-center gap-2 rounded-[var(--radius2)] px-4 py-2 text-[12px] font-semibold transition ${
+                  a.primary
+                    ? "bg-accent text-white hover:bg-[#5b52ee]"
+                    : "border border-border bg-surface text-text hover:bg-surface3 hover:border-border2"
+                }`}
+              >
+                {a.label}
+              </Link>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -230,50 +269,57 @@ function FlagRow({
 
 function ThisWeek() {
   return (
-    <Card className="border border-[#2a2e3f] bg-[#141420] p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-lg text-[#f0f0f8]">This Week</div>
-        <div className="text-xs text-[#9090b0]">Upcoming</div>
+    <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+      <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
+        📅 This Week
       </div>
 
-      <div className="mt-4 space-y-3">
-        <WeekItem
-          when="Tue"
-          title="Launch: Retargeting refresh"
-          detail="Swap hooks + 3 new creatives across Meta."
+      <div className="mt-3 space-y-3">
+        <ThisWeekRow
+          icon="✅"
+          iconBg="rgba(52,211,153,0.15)"
+          title="Q1 Campaign Report — Due today"
+          detail="Slide deck & exec summary for leadership sync at 4pm"
         />
-        <WeekItem
-          when="Thu"
-          title="Publish: ICP segmentation v2"
-          detail="Roll out to messaging + ads audiences."
+        <ThisWeekRow
+          icon="🎯"
+          iconBg="rgba(108,99,255,0.15)"
+          title="ICP Review Workshop — Wednesday"
+          detail="With Product & Sales. Update segment scoring based on win/loss data."
         />
-        <WeekItem
-          when="Fri"
-          title="Report: Weekly performance snapshot"
-          detail="ROAS + pipeline influence + key learnings."
+        <ThisWeekRow
+          icon="✍️"
+          iconBg="rgba(56,189,248,0.15)"
+          title='Blog: "State of PMM 2025" — Friday deadline'
+          detail="1,800 words. In review with SEO team."
         />
       </div>
-    </Card>
+    </div>
   );
 }
 
-function WeekItem({
-  when,
+function ThisWeekRow({
+  icon,
+  iconBg,
   title,
   detail
 }: {
-  when: string;
+  icon: string;
+  iconBg: string;
   title: string;
   detail: string;
 }) {
   return (
-    <div className="flex gap-3 rounded-2xl border border-[#2a2e3f] bg-black/20 p-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1e1e2e] text-sm text-[#f0f0f8]">
-        {when}
+    <div className="flex gap-3 rounded-[var(--radius)] border border-border bg-surface2 p-4">
+      <div
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[16px]"
+        style={{ background: iconBg }}
+      >
+        {icon}
       </div>
-      <div>
-        <div className="text-sm text-[#f0f0f8]">{title}</div>
-        <div className="mt-1 text-sm text-[#9090b0]">{detail}</div>
+      <div className="flex-1">
+        <div className="text-[13px] font-semibold text-text">{title}</div>
+        <div className="mt-1 text-[12px] leading-5 text-text2">{detail}</div>
       </div>
     </div>
   );
@@ -281,23 +327,69 @@ function WeekItem({
 
 function QuickMetrics() {
   return (
-    <Card className="border border-[#2a2e3f] bg-[#141420] p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-lg text-[#f0f0f8]">Quick Metrics</div>
-        <div className="text-xs text-[#9090b0]">Last 7 days</div>
+    <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+      <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
+        📊 Quick Metrics
       </div>
 
-      <div className="mt-4">
-        <ChannelBars
-          items={[
-            { label: "Google Ads", value: 78, color: "#7c6cff" },
-            { label: "LinkedIn", value: 54, color: "#b8ff6c" },
-            { label: "Meta", value: 61, color: "#7c6cff" },
-            { label: "Email", value: 42, color: "#b8ff6c" }
-          ]}
+      <div className="mt-3 space-y-3">
+        <MetricBar
+          label="LinkedIn ROAS"
+          valueLabel="3.4×"
+          pct={68}
+          fill="bg-accent2"
+          valueTone="text-green"
+        />
+        <MetricBar
+          label="Meta ROAS"
+          valueLabel="4.2×"
+          pct={84}
+          fill="bg-green"
+          valueTone="text-green"
+        />
+        <MetricBar
+          label="GA4 Organic Traffic"
+          valueLabel="↑ 23%"
+          pct={76}
+          fill="bg-accent3"
+          valueTone="text-accent3"
+        />
+        <MetricBar
+          label="GTM Launch Readiness"
+          valueLabel="72%"
+          pct={72}
+          fill="bg-yellow"
+          valueTone="text-yellow"
         />
       </div>
-    </Card>
+    </div>
+  );
+}
+
+function MetricBar({
+  label,
+  valueLabel,
+  pct,
+  fill,
+  valueTone
+}: {
+  label: string;
+  valueLabel: string;
+  pct: number;
+  fill: string;
+  valueTone: string;
+}) {
+  const width = Math.max(0, Math.min(100, pct));
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[12px] text-text2">{label}</span>
+        <span className={`text-[12px] font-semibold ${valueTone}`}>{valueLabel}</span>
+      </div>
+      <div className="h-[6px] overflow-hidden rounded bg-surface3">
+        <div className={`h-full ${fill}`} style={{ width: `${width}%` }} />
+      </div>
+    </div>
   );
 }
 
