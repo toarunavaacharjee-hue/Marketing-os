@@ -7,6 +7,27 @@ type AnthropicMessageResponse = {
   error?: { message?: string };
 };
 
+type ScanResult = {
+  signals: Array<{
+    title: string;
+    description: string;
+    source: string;
+    recency: string;
+    severity: "info" | "opportunity" | "risk";
+  }>;
+  opportunity_map: Array<{
+    segment: string;
+    opportunity_score: number; // 0-100
+    tam_signal: "Low" | "Medium" | "High" | "Very High" | "Growing";
+    competition: "Low" | "Medium" | "High";
+  }>;
+  monitoring_sources: Array<{
+    label: string;
+    status: "ok" | "warn" | "err";
+    note?: string;
+  }>;
+};
+
 function normalizeAnthropicError(message: string | undefined) {
   const m = (message ?? "").trim();
   const lower = m.toLowerCase();
@@ -22,6 +43,17 @@ function normalizeAnthropicError(message: string | undefined) {
     };
   }
   return { status: 502, error: m || "Anthropic request failed." };
+}
+
+function extractJsonObject(text: string) {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+  try {
+    return JSON.parse(text.slice(start, end + 1)) as any;
+  } catch {
+    return null;
+  }
 }
 
 function stripHtmlToText(html: string) {
@@ -193,22 +225,59 @@ export async function POST(req: Request) {
 
   // Generate summary + comparison
   let summary = "";
+  let resultJson: ScanResult | null = null;
   if (!anthropicKey) {
     summary =
       "Demo summary (no Anthropic key provided):\n" +
       "- Your positioning appears focused on speed/time-to-value.\n" +
       "- Competitors emphasize either breadth (integrations) or enterprise credibility.\n" +
       "- Next: tighten your headline, add proof points, and create a battlecard per competitor.\n";
+    resultJson = {
+      signals: [
+        {
+          title: "Competitor messaging shift detected",
+          description:
+            "One competitor is leaning harder into automation + AI claims. Consider refreshing your hero and proof points.",
+          source: "Competitor homepage (demo)",
+          recency: "This week",
+          severity: "risk"
+        }
+      ],
+      opportunity_map: [
+        {
+          segment: "Mid-Market SaaS",
+          opportunity_score: 92,
+          tam_signal: "High",
+          competition: "Medium"
+        }
+      ],
+      monitoring_sources: [
+        { label: "Competitor Sites", status: "ok" },
+        { label: "Industry News", status: "warn", note: "Not connected (demo)" },
+        { label: "Reviews", status: "warn", note: "Not connected (demo)" }
+      ]
+    };
   } else {
     const system = `You are Market Research inside Marketing OS.
-Use the provided website snapshots to summarize competitor positioning and compare against the base product.
-Return concise, actionable output.
+You will be given snapshots of the base product website and competitor websites.
 
-Output format:
-- 3 key market signals
-- Competitor positioning bullets (per competitor)
-- How we differ (3 bullets)
-- Recommendations (5 bullets)`;
+Return TWO things:
+1) A concise markdown report (headings + bullets) for the founder to read.
+2) A JSON object for the UI widgets.
+
+The JSON MUST match exactly this schema:
+{
+  "signals": [{"title":"...", "description":"...", "source":"...", "recency":"...", "severity":"info|opportunity|risk"}],
+  "opportunity_map": [{"segment":"...", "opportunity_score": 0-100, "tam_signal":"Low|Medium|High|Very High|Growing", "competition":"Low|Medium|High"}],
+  "monitoring_sources": [{"label":"...", "status":"ok|warn|err", "note":"optional"}]
+}
+
+Rules:
+- Use only what is supported by the snapshots; if uncertain, mark status warn and explain in note.
+- Keep signals to 4-6 items.
+- opportunity_map: 5 rows.
+- monitoring_sources: 6-10 items.
+- Output the markdown report first, then a blank line, then the JSON object.`;
 
     const snapshotBlobs = results
       .filter((r) => r.ok && r.text)
@@ -254,18 +323,29 @@ ${snapshotBlobs}`;
       return NextResponse.json({ error: normalized.error }, { status: normalized.status });
     }
 
-    summary = data.content?.find((c) => c.type === "text")?.text ?? "No summary returned.";
+    const text = data.content?.find((c) => c.type === "text")?.text ?? "";
+    const parsed = extractJsonObject(text);
+    // Everything before the JSON blob is the human report.
+    const jsonStart = text.indexOf("{");
+    summary = (jsonStart > 0 ? text.slice(0, jsonStart).trim() : text.trim()) || "No summary returned.";
+
+    if (parsed?.signals && parsed?.opportunity_map && parsed?.monitoring_sources) {
+      resultJson = parsed as ScanResult;
+    } else {
+      resultJson = null;
+    }
   }
 
   await supabase
     .from("research_scans")
-    .update({ status: "completed", summary })
+    .update({ status: "completed", summary, result_json: resultJson })
     .eq("id", scanId);
 
   return NextResponse.json({
     scan_id: scanId,
     status: "completed",
     summary,
+    result_json: resultJson,
     fetched: results.map((r) => ({
       url: r.url,
       ok: r.ok,

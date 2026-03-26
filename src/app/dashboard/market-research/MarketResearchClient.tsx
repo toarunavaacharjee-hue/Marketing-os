@@ -18,6 +18,27 @@ type ProfilePayload = {
   competitors: Array<{ id?: string; name: string; website_url: string }>;
 };
 
+type ScanResult = {
+  signals?: Array<{
+    title: string;
+    description: string;
+    source: string;
+    recency: string;
+    severity: "info" | "opportunity" | "risk";
+  }>;
+  opportunity_map?: Array<{
+    segment: string;
+    opportunity_score: number;
+    tam_signal: "Low" | "Medium" | "High" | "Very High" | "Growing";
+    competition: "Low" | "Medium" | "High";
+  }>;
+  monitoring_sources?: Array<{
+    label: string;
+    status: "ok" | "warn" | "err";
+    note?: string;
+  }>;
+};
+
 export default function MarketResearchClient() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
@@ -25,6 +46,7 @@ export default function MarketResearchClient() {
 
   const [profile, setProfile] = useState<ProfilePayload | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
+  const [resultJson, setResultJson] = useState<ScanResult | null>(null);
 
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -73,13 +95,15 @@ export default function MarketResearchClient() {
       const contentType = res.headers.get("content-type") ?? "";
       const raw = await res.text();
       const data = (contentType.includes("application/json")
-        ? (JSON.parse(raw) as { summary?: string; error?: string })
+        ? (JSON.parse(raw) as { summary?: string; result_json?: ScanResult | null; error?: string })
         : ({ error: raw || "Server error" } as any)) as {
         summary?: string;
+        result_json?: ScanResult | null;
         error?: string;
       };
       if (!res.ok) throw new Error(data.error ?? "Scan failed.");
       setSummary(data.summary ?? null);
+      setResultJson(data.result_json ?? null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Scan failed.");
     } finally {
@@ -121,6 +145,24 @@ export default function MarketResearchClient() {
 
   useEffect(() => {
     load();
+    (async () => {
+      try {
+        const res = await fetch("/api/research/latest");
+        const contentType = res.headers.get("content-type") ?? "";
+        const raw = await res.text();
+        const data = (contentType.includes("application/json")
+          ? (JSON.parse(raw) as { scan?: { summary?: string | null; result_json?: ScanResult | null } | null; error?: string })
+          : ({ error: raw || "Server error" } as any)) as {
+          scan?: { summary?: string | null; result_json?: ScanResult | null } | null;
+          error?: string;
+        };
+        if (!res.ok) return;
+        if (data.scan?.summary) setSummary(data.scan.summary);
+        if (data.scan?.result_json) setResultJson(data.scan.result_json);
+      } catch {
+        // ignore
+      }
+    })();
   }, []);
 
   const baseUrl = profile?.product.website_url ?? "";
@@ -181,34 +223,28 @@ export default function MarketResearchClient() {
           </div>
 
           <div className="space-y-3">
-            <SignalRow
-              icon="⚔️"
-              iconBg="rgba(248,113,113,0.15)"
-              title="Acme Corp relaunched with “AI-first” positioning"
-              desc="New homepage hero, new messaging on automation. Directly overlaps with your differentiation on “intelligent workflows”."
-              meta="Source: Competitor site scan · 1 day ago"
-            />
-            <SignalRow
-              icon="📈"
-              iconBg="rgba(251,191,36,0.15)"
-              title='Search: “product analytics for SaaS” up 18%'
-              desc="Monthly search volume jumped from 4.4K to 5.2K in 30 days. SEO opportunity if your content is current."
-              meta="Source: Trends (demo) · 2 days ago"
-            />
-            <SignalRow
-              icon="💼"
-              iconBg="rgba(52,211,153,0.15)"
-              title="RivalSoft hiring 4 PMMs — signals expansion"
-              desc="Job postings mention “enterprise segment” and “EMEA launch.” Likely entering your key expansion markets."
-              meta="Source: LinkedIn Jobs (demo) · 3 days ago"
-            />
-            <SignalRow
-              icon="⭐"
-              iconBg="rgba(56,189,248,0.15)"
-              title='G2 review spike: “ease of setup” mentioned 34×'
-              desc="Fast time-to-value themes are growing in your category. Consider adding this explicitly to your homepage hero."
-              meta="Source: Reviews (demo) · 5 days ago"
-            />
+            {resultJson?.signals?.length ? (
+              resultJson.signals.slice(0, 6).map((s, idx) => (
+                <SignalRow
+                  key={`${s.title}-${idx}`}
+                  icon={s.severity === "risk" ? "⚠️" : s.severity === "opportunity" ? "📈" : "💡"}
+                  iconBg={
+                    s.severity === "risk"
+                      ? "rgba(248,113,113,0.15)"
+                      : s.severity === "opportunity"
+                        ? "rgba(52,211,153,0.15)"
+                        : "rgba(167,139,250,0.15)"
+                  }
+                  title={s.title}
+                  desc={s.description}
+                  meta={`Source: ${s.source} · ${s.recency}`}
+                />
+              ))
+            ) : (
+              <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-4 text-sm text-text2">
+                Run an AI scan to generate signals.
+              </div>
+            )}
           </div>
 
           <div className="mt-4 rounded-[var(--radius2)] border border-border bg-surface2 p-3 text-sm text-text2">
@@ -315,13 +351,17 @@ export default function MarketResearchClient() {
               📡 Active Monitoring Sources
             </div>
             <div className="space-y-2 text-sm text-text2">
-              <SourceRow label="Google Trends" status="ok" />
-              <SourceRow label="G2 Category" status="ok" />
-              <SourceRow label="LinkedIn Activity" status="ok" />
-              <SourceRow label="Industry News" status="ok" />
-              <SourceRow label="Competitor Sites" status="warn" />
-              <SourceRow label="Reddit / Community" status="ok" />
-              <SourceRow label="Gong Call Themes" status="ok" />
+              {resultJson?.monitoring_sources?.length ? (
+                resultJson.monitoring_sources.slice(0, 10).map((s, idx) => (
+                  <SourceRow
+                    key={`${s.label}-${idx}`}
+                    label={s.note ? `${s.label} — ${s.note}` : s.label}
+                    status={s.status}
+                  />
+                ))
+              ) : (
+                <div className="text-sm text-text2">Run an AI scan to generate sources.</div>
+              )}
             </div>
           </div>
         </div>
@@ -343,11 +383,23 @@ export default function MarketResearchClient() {
               </tr>
             </thead>
             <tbody className="text-text">
-              <OpportunityRow segment="Mid-Market SaaS" score="92/100" tam="High" comp="Medium" />
-              <OpportunityRow segment="Enterprise FinTech" score="78/100" tam="Very High" comp="High" />
-              <OpportunityRow segment="SMB e-Commerce" score="61/100" tam="Medium" comp="High" />
-              <OpportunityRow segment="Healthcare SaaS" score="74/100" tam="High" comp="Low" />
-              <OpportunityRow segment="EdTech Platforms" score="43/100" tam="Growing" comp="Medium" />
+              {resultJson?.opportunity_map?.length ? (
+                resultJson.opportunity_map.slice(0, 6).map((r, idx) => (
+                  <OpportunityRow
+                    key={`${r.segment}-${idx}`}
+                    segment={r.segment}
+                    score={`${Math.round(r.opportunity_score)}/100`}
+                    tam={r.tam_signal}
+                    comp={r.competition}
+                  />
+                ))
+              ) : (
+                <tr>
+                  <td className="px-4 py-4 text-sm text-text2" colSpan={4}>
+                    Run an AI scan to generate an opportunity map.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

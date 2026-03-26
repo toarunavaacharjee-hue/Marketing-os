@@ -84,6 +84,7 @@ create table if not exists public.research_scans (
   product_id uuid not null references public.products(id) on delete cascade,
   status text not null default 'completed', -- completed | running | failed
   summary text,
+  result_json jsonb,
   created_at timestamptz not null default now()
 );
 
