@@ -14,27 +14,60 @@ type Profile = {
 type ModuleLink = {
   label: string;
   slug: string;
+  icon?: string;
+  badge?: string;
 };
 
-const MODULES: ModuleLink[] = [
-  { label: "Command Centre", slug: "" },
-  { label: "Market Research", slug: "market-research" },
-  { label: "ICP Segmentation", slug: "icp-segmentation" },
-  { label: "Positioning Studio", slug: "positioning-studio" },
-  { label: "Messaging & Artifacts", slug: "messaging-artifacts" },
-  { label: "Campaigns", slug: "campaigns" },
-  { label: "GTM Planner", slug: "gtm-planner" },
-  { label: "Events", slug: "events" },
-  { label: "Content Studio", slug: "content-studio" },
-  { label: "Social Media", slug: "social-media" },
-  { label: "Design & Assets", slug: "design-assets" },
-  { label: "Presentations", slug: "presentations" },
-  { label: "Website & Pages", slug: "website-pages" },
-  { label: "Analytics", slug: "analytics" },
-  { label: "Battlecards", slug: "battlecards" },
-  { label: "Sales Intelligence", slug: "sales-intelligence" },
-  { label: "Customer Insights", slug: "customer-insights" },
-  { label: "AI Copilot", slug: "ai-copilot" }
+type NavSection = {
+  label: string;
+  items: ModuleLink[];
+};
+
+const NAV: NavSection[] = [
+  {
+    label: "Home",
+    items: [{ label: "Command Centre", slug: "", icon: "⚡" }]
+  },
+  {
+    label: "Strategy",
+    items: [
+      { label: "Market Research", slug: "market-research", icon: "🔭", badge: "NEW" },
+      { label: "ICP Segmentation", slug: "icp-segmentation", icon: "🎯", badge: "NEW" },
+      { label: "Positioning Studio", slug: "positioning-studio", icon: "💎", badge: "NEW" },
+      { label: "Messaging & Artifacts", slug: "messaging-artifacts", icon: "✨", badge: "NEW" }
+    ]
+  },
+  {
+    label: "Planning",
+    items: [
+      { label: "Campaigns", slug: "campaigns", icon: "📋" },
+      { label: "GTM Planner", slug: "gtm-planner", icon: "🚀" },
+      { label: "Events", slug: "events", icon: "📅" }
+    ]
+  },
+  {
+    label: "Creation",
+    items: [
+      { label: "Content Studio", slug: "content-studio", icon: "✍️" },
+      { label: "Social Media", slug: "social-media", icon: "📱" },
+      { label: "Design & Assets", slug: "design-assets", icon: "🎨" },
+      { label: "Presentations", slug: "presentations", icon: "📊" },
+      { label: "Website & Pages", slug: "website-pages", icon: "🌐" }
+    ]
+  },
+  {
+    label: "Intelligence",
+    items: [
+      { label: "Analytics", slug: "analytics", icon: "📈" },
+      { label: "Battlecards", slug: "battlecards", icon: "⚔️" },
+      { label: "Sales Intelligence", slug: "sales-intelligence", icon: "🎤" },
+      { label: "Customer Insights", slug: "customer-insights", icon: "💬" }
+    ]
+  },
+  {
+    label: "AI",
+    items: [{ label: "AI Copilot", slug: "ai-copilot", icon: "🤖" }]
+  }
 ];
 
 const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
@@ -121,15 +154,34 @@ export function DashboardShell({
     };
   }, [keyEntered, anthropicKey]);
 
-  const links = useMemo(() => {
-    return MODULES.map((m) => {
+  const activeMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    NAV.flatMap((s) => s.items).forEach((m) => {
       const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
-      const active = href === "/dashboard"
-        ? pathname === "/dashboard"
-        : pathname === href || (pathname?.startsWith(href + "/") ?? false);
-      return { ...m, href, active };
+      const active =
+        href === "/dashboard"
+          ? pathname === "/dashboard"
+          : pathname === href || (pathname?.startsWith(href + "/") ?? false);
+      map.set(href, active);
     });
+    return map;
   }, [pathname]);
+
+  function SectionLabel({ children }: { children: React.ReactNode }) {
+    return (
+      <div className="px-[18px] pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[1.5px] text-text3">
+        {children}
+      </div>
+    );
+  }
+
+  function NavBadge({ children }: { children: string }) {
+    return (
+      <span className="ml-auto rounded bg-accent px-1.5 py-0.5 text-[9px] font-bold tracking-[0.5px] text-white">
+        {children}
+      </span>
+    );
+  }
 
   function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     return (
@@ -162,24 +214,37 @@ export function DashboardShell({
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto py-2">
-          <div className="space-y-1">
-            {links.map((m) => (
-              <Link
-                key={m.slug}
-                href={m.href}
-                onClick={onNavigate}
-                className={`relative flex items-center gap-2 px-[18px] py-2 text-[13px] font-medium transition ${
-                  m.active
-                    ? "bg-surface2 text-accent2"
-                    : "text-text2 hover:bg-surface2 hover:text-text"
-                }`}
-              >
-                {m.active ? <PurpleBar /> : null}
-                <span className="truncate">{m.label}</span>
-              </Link>
-            ))}
-          </div>
+        <div className="flex-1 overflow-y-auto py-1">
+          {NAV.map((section) => (
+            <div key={section.label}>
+              <SectionLabel>{section.label}</SectionLabel>
+              <div className="space-y-1">
+                {section.items.map((m) => {
+                  const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
+                  const active = activeMap.get(href) ?? false;
+                  return (
+                    <Link
+                      key={m.slug || "home"}
+                      href={href}
+                      onClick={onNavigate}
+                      className={`relative flex items-center gap-2 px-[18px] py-2 text-[13px] font-medium transition ${
+                        active
+                          ? "bg-surface2 text-accent2"
+                          : "text-text2 hover:bg-surface2 hover:text-text"
+                      }`}
+                    >
+                      {active ? <PurpleBar /> : null}
+                      <span className="w-[18px] text-center text-[15px]">
+                        {m.icon ?? "•"}
+                      </span>
+                      <span className="truncate">{m.label}</span>
+                      {m.badge ? <NavBadge>{m.badge}</NavBadge> : null}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="border-t border-border p-3">
@@ -193,6 +258,7 @@ export function DashboardShell({
             }`}
           >
             {pathname === "/dashboard/settings" ? <PurpleBar /> : null}
+            <span className="w-[18px] text-center text-[15px]">⚙️</span>
             <span className="pl-1">Settings</span>
           </Link>
         </div>
