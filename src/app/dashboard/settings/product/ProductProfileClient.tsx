@@ -44,7 +44,13 @@ export default function ProductProfileClient() {
     setSaved(null);
     try {
       const res = await fetch("/api/product/profile");
-      const data = (await res.json()) as Payload & { error?: string };
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      const data = (contentType.includes("application/json")
+        ? (JSON.parse(raw) as Payload & { error?: string })
+        : ({ error: raw || "Server error" } as any)) as Payload & {
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Failed to load product profile.");
 
       setName(data.product.name ?? "");
@@ -82,7 +88,14 @@ export default function ProductProfileClient() {
           competitors
         })
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      const data = (contentType.includes("application/json")
+        ? (JSON.parse(raw) as { ok?: boolean; error?: string })
+        : ({ error: raw || "Server error" } as any)) as {
+        ok?: boolean;
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Failed to save.");
       setSaved("Saved.");
     } catch (e) {

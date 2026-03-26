@@ -39,7 +39,13 @@ export default function MarketResearchClient() {
     setError(null);
     try {
       const res = await fetch("/api/product/profile");
-      const data = (await res.json()) as ProfilePayload & { error?: string };
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      const data = (contentType.includes("application/json")
+        ? (JSON.parse(raw) as ProfilePayload & { error?: string })
+        : ({ error: raw || "Server error" } as any)) as ProfilePayload & {
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Failed to load product profile.");
       setProfile(data);
     } catch (e) {
@@ -62,7 +68,14 @@ export default function MarketResearchClient() {
           ...(key ? { "x-anthropic-key": key } : {})
         }
       });
-      const data = (await res.json()) as { summary?: string; error?: string };
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      const data = (contentType.includes("application/json")
+        ? (JSON.parse(raw) as { summary?: string; error?: string })
+        : ({ error: raw || "Server error" } as any)) as {
+        summary?: string;
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Scan failed.");
       setSummary(data.summary ?? null);
     } catch (e) {
@@ -87,7 +100,14 @@ export default function MarketResearchClient() {
         },
         body: JSON.stringify({ question: q })
       });
-      const data = (await res.json()) as { answer?: string; error?: string };
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      const data = (contentType.includes("application/json")
+        ? (JSON.parse(raw) as { answer?: string; error?: string })
+        : ({ error: raw || "Server error" } as any)) as {
+        answer?: string;
+        error?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Failed to answer.");
       setAnswer(data.answer ?? null);
     } catch (e) {
