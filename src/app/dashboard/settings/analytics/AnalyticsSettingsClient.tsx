@@ -24,6 +24,9 @@ export default function AnalyticsSettingsClient({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [testStatus, setTestStatus] = useState<"idle" | "ok" | "err">("idle");
+  const [testMsg, setTestMsg] = useState<string | null>(null);
 
   const [form, setForm] = useState<Settings>({
     ga4_property_id: "",
@@ -68,6 +71,25 @@ export default function AnalyticsSettingsClient({
     setSaving(false);
     if (error) setError(error.message);
     else setSaved("Saved.");
+  }
+
+  async function testGa() {
+    setTesting(true);
+    setTestStatus("idle");
+    setTestMsg(null);
+    setError(null);
+    try {
+      const res = await fetch("/api/analytics/ga4/test", { method: "POST" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error ?? "GA test failed.");
+      setTestStatus("ok");
+      setTestMsg("Connected. GA4 API access is working for this property.");
+    } catch (e) {
+      setTestStatus("err");
+      setTestMsg(e instanceof Error ? e.message : "GA test failed.");
+    } finally {
+      setTesting(false);
+    }
   }
 
   return (
@@ -136,6 +158,28 @@ export default function AnalyticsSettingsClient({
       >
         {saving ? "Saving…" : "Save analytics settings"}
       </button>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={testGa}
+          disabled={testing}
+          className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm font-medium text-[#f0f0f8] transition hover:bg-white/5 disabled:opacity-60"
+        >
+          {testing ? "Testing..." : "Test GA connection"}
+        </button>
+        {testMsg ? (
+          <div
+            className={`rounded-xl border px-3 py-2 text-sm ${
+              testStatus === "ok"
+                ? "border-[#b8ff6c]/30 bg-[#b8ff6c]/10 text-[#b8ff6c]"
+                : "border-red-500/30 bg-red-500/10 text-red-200"
+            }`}
+          >
+            {testMsg}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
