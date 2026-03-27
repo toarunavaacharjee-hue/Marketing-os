@@ -9,6 +9,7 @@ create table if not exists public.segments (
   pnf_score integer not null default 0,
   pain_points text[] not null default '{}',
   notes text,
+  details jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
 
