@@ -191,3 +191,128 @@ create policy research_snapshots_delete on public.research_snapshots
 for delete
 using (public.can_access_research_scan(scan_id));
 
+-- 6) Battlecards (per product + Default environment)
+create table if not exists public.battlecards (
+  id uuid primary key default gen_random_uuid(),
+  environment_id uuid not null references public.product_environments(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  competitor_id uuid not null references public.product_competitors(id) on delete cascade,
+  strengths text,
+  weaknesses text,
+  why_we_win text,
+  objection_handling text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (environment_id, competitor_id)
+);
+
+create index if not exists battlecards_env_idx
+  on public.battlecards(environment_id, updated_at desc);
+
+alter table public.battlecards enable row level security;
+
+drop policy if exists battlecards_select on public.battlecards;
+create policy battlecards_select on public.battlecards
+for select
+using (public.is_environment_member(environment_id));
+
+drop policy if exists battlecards_insert on public.battlecards;
+create policy battlecards_insert on public.battlecards
+for insert
+with check (public.is_environment_member(environment_id));
+
+drop policy if exists battlecards_update on public.battlecards;
+create policy battlecards_update on public.battlecards
+for update
+using (public.is_environment_member(environment_id))
+with check (public.is_environment_member(environment_id));
+
+drop policy if exists battlecards_delete on public.battlecards;
+create policy battlecards_delete on public.battlecards
+for delete
+using (public.is_environment_member(environment_id));
+
+-- 7) Customer personas + pitch battlecards (per environment)
+create table if not exists public.customer_personas (
+  id uuid primary key default gen_random_uuid(),
+  environment_id uuid not null references public.product_environments(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  name text not null,
+  website_url text,
+  industry text,
+  segment text,
+  company_size text,
+  buyer_roles text,
+  pains text,
+  current_stack text,
+  decision_criteria text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists customer_personas_env_idx
+  on public.customer_personas(environment_id, updated_at desc);
+
+alter table public.customer_personas enable row level security;
+
+drop policy if exists customer_personas_select on public.customer_personas;
+create policy customer_personas_select on public.customer_personas
+for select
+using (public.is_environment_member(environment_id));
+
+drop policy if exists customer_personas_insert on public.customer_personas;
+create policy customer_personas_insert on public.customer_personas
+for insert
+with check (public.is_environment_member(environment_id));
+
+drop policy if exists customer_personas_update on public.customer_personas;
+create policy customer_personas_update on public.customer_personas
+for update
+using (public.is_environment_member(environment_id))
+with check (public.is_environment_member(environment_id));
+
+drop policy if exists customer_personas_delete on public.customer_personas;
+create policy customer_personas_delete on public.customer_personas
+for delete
+using (public.is_environment_member(environment_id));
+
+create table if not exists public.battlecard_pitches (
+  id uuid primary key default gen_random_uuid(),
+  environment_id uuid not null references public.product_environments(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  competitor_id uuid not null references public.product_competitors(id) on delete cascade,
+  persona_id uuid not null references public.customer_personas(id) on delete cascade,
+  pitch_markdown text not null,
+  pitch_json jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (environment_id, competitor_id, persona_id)
+);
+
+create index if not exists battlecard_pitches_env_idx
+  on public.battlecard_pitches(environment_id, updated_at desc);
+
+alter table public.battlecard_pitches enable row level security;
+
+drop policy if exists battlecard_pitches_select on public.battlecard_pitches;
+create policy battlecard_pitches_select on public.battlecard_pitches
+for select
+using (public.is_environment_member(environment_id));
+
+drop policy if exists battlecard_pitches_insert on public.battlecard_pitches;
+create policy battlecard_pitches_insert on public.battlecard_pitches
+for insert
+with check (public.is_environment_member(environment_id));
+
+drop policy if exists battlecard_pitches_update on public.battlecard_pitches;
+create policy battlecard_pitches_update on public.battlecard_pitches
+for update
+using (public.is_environment_member(environment_id))
+with check (public.is_environment_member(environment_id));
+
+drop policy if exists battlecard_pitches_delete on public.battlecard_pitches;
+create policy battlecard_pitches_delete on public.battlecard_pitches
+for delete
+using (public.is_environment_member(environment_id));
+
