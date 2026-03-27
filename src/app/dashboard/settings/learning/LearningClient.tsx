@@ -85,46 +85,7 @@ export default function LearningClient({ environmentId }: { environmentId: strin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environmentId]);
 
-  async function seedDemo() {
-    setError(null);
-
-    const now = new Date().toISOString();
-    const demoSync = [
-      { connector: "ga4", status: "success", assets_ingested: 18, is_demo: true, message: "Pulled events + top pages", started_at: now, finished_at: now },
-      { connector: "hubspot", status: "warning", assets_ingested: 6, is_demo: true, message: "Rate limit hit; partial import", started_at: now, finished_at: now },
-      { connector: "linkedin_ads", status: "success", assets_ingested: 12, is_demo: true, message: "Imported campaigns + creatives", started_at: now, finished_at: now },
-      { connector: "meta_ads", status: "error", assets_ingested: 0, is_demo: true, message: "Credentials missing", started_at: now, finished_at: now }
-    ];
-
-    const demoAssets = [
-      { source: "website", asset_type: "page", title: "/pricing", status: "indexed", is_demo: true },
-      { source: "website", asset_type: "page", title: "/compare/acme", status: "stale", is_demo: true },
-      { source: "hubspot", asset_type: "deal", title: "Enterprise expansion — Q2", status: "indexed", is_demo: true },
-      { source: "hubspot", asset_type: "call_note", title: "Discovery call: RevOps lead", status: "indexed", is_demo: true },
-      { source: "linkedin_ads", asset_type: "creative", title: "Carousel: 'Stop guessing ROAS'", status: "indexed", is_demo: true },
-      { source: "meta_ads", asset_type: "creative", title: "Retargeting static v2", status: "failed", is_demo: true }
-    ].map((a) => ({ ...a, last_seen_at: now }));
-
-    const ins1 = await supabase.from("sync_runs").insert(
-      demoSync.map((s) => ({ environment_id: environmentId, ...s }))
-    );
-    if (ins1.error) {
-      setError(ins1.error.message);
-      return;
-    }
-
-    const ins2 = await supabase.from("assets").insert(
-      demoAssets.map((a) => ({ environment_id: environmentId, url: null, ...a }))
-    );
-    if (ins2.error) {
-      setError(ins2.error.message);
-      return;
-    }
-
-    await load();
-  }
-
-  async function clearDemo() {
+  async function clearLegacyDemoData() {
     setError(null);
     const del1 = await supabase
       .from("assets")
@@ -178,16 +139,10 @@ export default function LearningClient({ environmentId }: { environmentId: strin
           </div>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={seedDemo}
-              className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] hover:bg-white/5"
-            >
-              Seed demo sync + assets
-            </button>
-            <button
-              onClick={clearDemo}
+              onClick={clearLegacyDemoData}
               className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200 hover:bg-red-500/15"
             >
-              Clear demo data
+              Clear legacy demo data
             </button>
           </div>
         </div>
@@ -253,7 +208,9 @@ export default function LearningClient({ environmentId }: { environmentId: strin
               ))}
           </div>
           {assets.length === 0 ? (
-            <div className="mt-3 text-sm text-[#9090b0]">No assets indexed yet. Seed demo data to preview.</div>
+            <div className="mt-3 text-sm text-[#9090b0]">
+              No assets indexed yet. Connect integrations and run sync to ingest real data.
+            </div>
           ) : null}
         </div>
       </div>

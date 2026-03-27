@@ -125,61 +125,6 @@ function buildWebsiteRowsFromResults(results: CrawlRow[], baseName: string): Sca
   return rows;
 }
 
-function buildFallbackResult(args: {
-  summary: string;
-  baseName: string;
-  results: CrawlRow[];
-}): ScanResult {
-  const { summary, baseName, results } = args;
-  const lines = summary
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
-  const bullets = lines
-    .filter((l) => l.startsWith("-") || /^\d+[\).\s]/.test(l))
-    .map((l) => l.replace(/^[-\d\).\s]+/, "").trim())
-    .filter(Boolean);
-
-  const signals = (bullets.slice(0, 4).length ? bullets.slice(0, 4) : lines.slice(0, 4))
-    .map((t, i) => ({
-      title: t.slice(0, 90),
-      description: t,
-      source: i === 0 ? "Website scan" : "AI scan synthesis",
-      recency: "Latest scan",
-      severity: (i === 0 ? "risk" : i === 1 ? "opportunity" : "info") as
-        | "risk"
-        | "opportunity"
-        | "info"
-    }));
-
-  const defaultSegments = [
-    "Mid-Market SaaS",
-    "Enterprise FinTech",
-    "SMB e-Commerce",
-    "Healthcare SaaS",
-    "Agency Teams"
-  ];
-  const opportunity_map = defaultSegments.map((segment, idx) => ({
-    segment,
-    opportunity_score: Math.max(40, 90 - idx * 10),
-    tam_signal: (idx === 1
-      ? "Very High"
-      : idx < 3
-        ? "High"
-        : idx === 3
-          ? "Medium"
-          : "Growing") as "Low" | "Medium" | "High" | "Very High" | "Growing",
-    competition: (idx === 0 ? "Medium" : idx === 1 ? "High" : idx === 2 ? "High" : "Low") as
-      | "Low"
-      | "Medium"
-      | "High"
-  }));
-
-  const monitoring_sources = buildWebsiteRowsFromResults(results, baseName);
-
-  return { signals, opportunity_map, monitoring_sources };
-}
-
 function normalizeAnthropicError(message: string | undefined) {
   const m = (message ?? "").trim();
   const lower = m.toLowerCase();
@@ -335,6 +280,15 @@ export async function POST(req: Request) {
 
     const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
     const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
+    if (!anthropicKey) {
+      return NextResponse.json(
+        {
+          error:
+            "Missing Anthropic API key. Add your key in the sidebar or Settings before running a scan."
+        },
+        { status: 400 }
+      );
+    }
 
     const { data: product, error: pErr } = await supabase
       .from("products")
@@ -381,6 +335,32 @@ export async function POST(req: Request) {
       Boolean(g2Url) ||
       Boolean(capterraUrl) ||
       Boolean(rssUrl);
+
+    const missingInputs: string[] = [];
+    if (!(product.name as string | null)?.trim()) missingInputs.push("product name");
+    if (!baseUrl) missingInputs.push("website URL");
+    if (!((product.category as string | null) ?? "").trim()) missingInputs.push("category");
+    if (!((product.icp_summary as string | null) ?? "").trim()) missingInputs.push("ICP summary");
+    if (!((product.positioning_summary as string | null) ?? "").trim()) {
+      missingInputs.push("positioning summary");
+    }
+    if (competitorUrls.length === 0) missingInputs.push("at least one competitor URL");
+    if (!rssUrl) missingInputs.push("industry news RSS URL");
+    if (!g2Url && !capterraUrl) {
+      missingInputs.push("at least one review URL (G2 or Capterra)");
+    }
+
+    if (missingInputs.length) {
+      return NextResponse.json(
+        {
+          error:
+            "Complete Product settings before scanning. Missing: " +
+            missingInputs.join(", ") +
+            "."
+        },
+        { status: 400 }
+      );
+    }
 
     if (!hasAnySource) {
       return NextResponse.json(
@@ -513,39 +493,19 @@ export async function POST(req: Request) {
       capRow
     );
 
-    const baseName = (product.name as string) || "Base product";
-
     let summary = "";
     let resultJson: ScanResult | null = null;
+    if (!snapshotsToInsert.length) {
+      await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
+      return NextResponse.json(
+        {
+          error:
+            "No source content could be fetched. Update website/news/review URLs in Product settings and try again."
+        },
+        { status: 400 }
+      );
+    }
 
-    if (!anthropicKey) {
-      summary =
-        "Demo summary (no Anthropic key provided):\n" +
-        "- Your positioning appears focused on speed/time-to-value.\n" +
-        "- Competitors emphasize either breadth (integrations) or enterprise credibility.\n" +
-        "- Next: tighten your headline, add proof points, and create a battlecard per competitor.\n";
-      resultJson = {
-        signals: [
-          {
-            title: "Competitor messaging shift detected",
-            description:
-              "One competitor is leaning harder into automation + AI claims. Consider refreshing your hero and proof points.",
-            source: "Competitor homepage (demo)",
-            recency: "This week",
-            severity: "risk"
-          }
-        ],
-        opportunity_map: [
-          {
-            segment: "Mid-Market SaaS",
-            opportunity_score: 92,
-            tam_signal: "High",
-            competition: "Medium"
-          }
-        ],
-        monitoring_sources: buildWebsiteRowsFromResults(results, baseName)
-      };
-    } else {
       const system = `You are Market Research inside Marketing OS.
 You will be given snapshots of the base product website, competitor websites, optional G2/Capterra review pages, and/or an industry news RSS digest.
 
@@ -629,20 +589,21 @@ ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
       if (parsed?.signals && parsed?.opportunity_map && parsed?.monitoring_sources) {
         resultJson = parsed as ScanResult;
       } else {
-        resultJson = buildFallbackResult({
-          summary,
-          baseName,
-          results
-        });
+        await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
+        return NextResponse.json(
+          {
+            error:
+              "AI returned an incomplete scan structure. Please run scan again after refining product inputs."
+          },
+          { status: 502 }
+        );
       }
-    }
-
     if (!resultJson) {
-      resultJson = buildFallbackResult({
-        summary: summary || "No summary.",
-        baseName,
-        results
-      });
+      await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
+      return NextResponse.json(
+        { error: "Scan failed to produce structured output. Please retry." },
+        { status: 502 }
+      );
     }
 
     resultJson = applyMonitoringFacts(resultJson, industryRow, reviewRow);

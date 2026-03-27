@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }
 
     const prompt = `Write a concise daily marketing performance digest for a SaaS called Marketing OS.
-Use demo data. Keep it action-oriented and specific.
+Use realistic operational assumptions only (no demo/fake labels). Keep it action-oriented and specific.
 
 Include:
 - What changed in the last 24h

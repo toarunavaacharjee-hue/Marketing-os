@@ -72,12 +72,13 @@ export async function POST(req: Request) {
   if (snapsErr) return NextResponse.json({ error: snapsErr.message }, { status: 500 });
 
   if (!anthropicKey) {
-    return NextResponse.json({
-      answer:
-        "Demo answer (no Anthropic key provided). Run a scan with your key for a real answer.\n\n" +
-        `Question: ${question}\n` +
-        "Suggestion: add competitors + re-run scan, then ask again."
-    });
+    return NextResponse.json(
+      {
+        error:
+          "Missing Anthropic API key. Add your key in the sidebar or Settings, then ask again."
+      },
+      { status: 400 }
+    );
   }
 
   const snapshotContext = (snaps ?? [])

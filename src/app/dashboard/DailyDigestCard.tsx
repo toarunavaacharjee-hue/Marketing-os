@@ -32,12 +32,7 @@ export function DailyDigestCard() {
         headers: {
           "content-type": "application/json",
           ...(storedKey ? { "x-anthropic-key": storedKey } : {})
-        },
-        body: JSON.stringify({
-          context: {
-            demo: true
-          }
-        })
+        }
       });
 
       const data = (await res.json()) as DailyBriefResponse;

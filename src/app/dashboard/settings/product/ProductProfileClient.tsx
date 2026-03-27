@@ -182,6 +182,7 @@ export default function ProductProfileClient() {
       <div className="text-sm text-text">Base product</div>
       <div className="mt-1 text-sm text-text2">
         This is what the system will treat as “you” during scans and comparisons.
+        Fields marked Required must be filled before AI scan will run.
       </div>
 
       {loading ? (
@@ -201,7 +202,7 @@ export default function ProductProfileClient() {
       ) : null}
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
-        <Field label="Product name">
+        <Field label="Product name (Required)">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -209,7 +210,7 @@ export default function ProductProfileClient() {
             placeholder="Marketing OS"
           />
         </Field>
-        <Field label="Website URL (optional)">
+        <Field label="Website URL (Required)">
           <input
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
@@ -220,7 +221,7 @@ export default function ProductProfileClient() {
       </div>
 
       <div className="mt-3 grid gap-3 md:grid-cols-2">
-        <Field label="Category (optional)">
+        <Field label="Category (Required)">
           <input
             value={category}
             onChange={(e) => setCategory(e.target.value)}
@@ -228,7 +229,7 @@ export default function ProductProfileClient() {
             placeholder="B2B SaaS Marketing Platform"
           />
         </Field>
-        <Field label="ICP summary (optional)">
+        <Field label="ICP summary (Required)">
           <textarea
             value={icp}
             onChange={(e) => setIcp(e.target.value)}
@@ -240,7 +241,7 @@ export default function ProductProfileClient() {
       </div>
 
       <div className="mt-3">
-        <Field label="Positioning summary (optional)">
+        <Field label="Positioning summary (Required)">
           <textarea
             value={positioning}
             onChange={(e) => setPositioning(e.target.value)}
@@ -251,7 +252,7 @@ export default function ProductProfileClient() {
         </Field>
       </div>
 
-      <div className="mt-8 text-sm font-semibold text-text">Market research sources (optional)</div>
+      <div className="mt-8 text-sm font-semibold text-text">Market research sources</div>
       <div className="mt-1 text-sm text-text2">
         On each scan, we fetch these pages and your RSS feed, store snapshots in Supabase, and pass them to the AI.
         Industry news uses an RSS URL (for example Google News RSS for your category). Review sites use your public G2
@@ -259,7 +260,7 @@ export default function ProductProfileClient() {
       </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <Field label="G2 product page URL">
+        <Field label="G2 product page URL (Required: G2 or Capterra)">
           <input
             value={g2Url}
             onChange={(e) => setG2Url(e.target.value)}
@@ -267,7 +268,7 @@ export default function ProductProfileClient() {
             placeholder="https://www.g2.com/products/..."
           />
         </Field>
-        <Field label="Capterra product page URL">
+        <Field label="Capterra product page URL (Required: G2 or Capterra)">
           <input
             value={capterraUrl}
             onChange={(e) => setCapterraUrl(e.target.value)}
@@ -278,7 +279,7 @@ export default function ProductProfileClient() {
       </div>
 
       <div className="mt-3 grid gap-3 md:grid-cols-2">
-        <Field label="Industry news RSS feed URL">
+        <Field label="Industry news RSS feed URL (Required)">
           <input
             value={newsRssUrl}
             onChange={(e) => setNewsRssUrl(e.target.value)}
@@ -300,7 +301,7 @@ export default function ProductProfileClient() {
         items from the feed are used).
       </div>
 
-      <div className="mt-8 text-sm font-semibold text-text">Top competitors</div>
+      <div className="mt-8 text-sm font-semibold text-text">Top competitors (Required: at least one URL)</div>
       <div className="mt-1 text-sm text-text2">
         Add competitor name + URL. Market Research will scan these sites and compare messaging.
       </div>
