@@ -38,6 +38,9 @@ export default function ProductProfileClient() {
   const [capterraUrl, setCapterraUrl] = useState("");
   const [newsRssUrl, setNewsRssUrl] = useState("");
   const [newsKeywords, setNewsKeywords] = useState("");
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductWebsite, setNewProductWebsite] = useState("");
+  const [creatingProduct, setCreatingProduct] = useState(false);
   const [competitors, setCompetitors] = useState<Competitor[]>([
     { name: "", website_url: "" }
   ]);
@@ -118,6 +121,55 @@ export default function ProductProfileClient() {
       setError(e instanceof Error ? e.message : "Failed to save.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function createProductInWorkspace() {
+    if (!newProductName.trim()) return;
+    setCreatingProduct(true);
+    setError(null);
+    setSaved(null);
+    try {
+      const res = await fetch("/api/product/create", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          name: newProductName.trim(),
+          website_url: newProductWebsite.trim()
+        })
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      const data = (contentType.includes("application/json")
+        ? (JSON.parse(raw) as {
+            ok?: boolean;
+            product?: { id?: string; company_id?: string };
+            error?: string;
+          })
+        : ({ error: raw || "Server error" } as any)) as {
+        ok?: boolean;
+        product?: { id?: string; company_id?: string };
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data.error ?? "Failed to create product.");
+
+      const productId = data.product?.id;
+      const companyId = data.product?.company_id;
+      if (!productId || !companyId) {
+        throw new Error("Product created but context switch failed.");
+      }
+
+      await fetch("/api/context/select", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ companyId, productId })
+      });
+
+      window.location.href = "/dashboard/settings/product";
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create product.");
+    } finally {
+      setCreatingProduct(false);
     }
   }
 
@@ -314,6 +366,41 @@ export default function ProductProfileClient() {
         >
           Reload
         </button>
+      </div>
+
+      <div className="mt-8 border-t border-border pt-6">
+        <div className="text-sm font-semibold text-text">Add new product (same workspace)</div>
+        <div className="mt-1 text-sm text-text2">
+          Creates a new product under the current company and switches you to it.
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <Field label="New product name">
+            <input
+              value={newProductName}
+              onChange={(e) => setNewProductName(e.target.value)}
+              className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+              placeholder="Marketing OS - Insurance"
+            />
+          </Field>
+          <Field label="Website URL (optional)">
+            <input
+              value={newProductWebsite}
+              onChange={(e) => setNewProductWebsite(e.target.value)}
+              className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+              placeholder="https://example.com"
+            />
+          </Field>
+        </div>
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={createProductInWorkspace}
+            disabled={creatingProduct || !newProductName.trim()}
+            className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+          >
+            {creatingProduct ? "Creating…" : "Add product"}
+          </button>
+        </div>
       </div>
     </div>
   );
