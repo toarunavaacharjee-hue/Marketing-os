@@ -74,7 +74,11 @@ export default function AnalyticsSettingsClient({
     <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
       <div className="text-lg text-[#f0f0f8]">Analytics connections</div>
       <div className="mt-1 text-sm text-[#9090b0]">
-        Store per-product analytics configuration for your modules. (We’ll connect real APIs later.)
+        Connect real GA4 data for this selected product.
+      </div>
+      <div className="mt-2 rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#9090b0]">
+        Required for GA4: set `GA4_SERVICE_ACCOUNT_EMAIL` and `GA4_SERVICE_ACCOUNT_PRIVATE_KEY` in your environment,
+        share GA4 property access with that service account in Google Analytics, then save the Property ID here.
       </div>
 
       {loading ? (
@@ -94,7 +98,7 @@ export default function AnalyticsSettingsClient({
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <Field
-          label="GA4 property ID"
+          label="GA4 property ID (Required for GA)"
           value={form.ga4_property_id}
           onChange={(v) => setForm({ ...form, ga4_property_id: v })}
           placeholder="123456789"
