@@ -81,6 +81,12 @@ export default async function WebsitePagesPage() {
       {/* Page Tracker — full width */}
       <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
         <div className="text-sm font-semibold text-text">Page Tracker</div>
+        <p className="mt-2 text-[13px] leading-relaxed text-text2">
+          URLs come from your <strong className="text-text">live website crawl</strong> (not Google Analytics). We
+          discover paths from links on your homepage. A nav link to <span className="font-mono">/pricing</span> or an
+          SPA that returns the same HTML for several routes can still produce a row; new scans skip pages whose text is
+          almost identical to the homepage.
+        </p>
         {!withAges.length ? (
           <div className="mt-4 rounded-[var(--radius2)] border border-dashed border-border bg-surface2/50 p-6 text-center">
             <div className="text-sm text-text2">

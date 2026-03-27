@@ -54,6 +54,31 @@ export function extractSameOriginLinks(html: string, baseUrl: string, max: numbe
 }
 
 /**
+ * Extra URLs from the homepage often hit SPAs that return 200 with the same HTML shell as `/`
+ * (or nav links to routes that don’t really exist). Drop those so `/pricing` etc. don’t appear
+ * when the body is effectively the same as the homepage.
+ */
+export function isLikelyDistinctPage(
+  homePageText: string,
+  candidateText: string,
+  fetchOk: boolean
+): boolean {
+  if (!fetchOk) return false;
+  const t = candidateText.trim();
+  if (t.length < 120) return false;
+  const h = homePageText.trim();
+  if (h.length < 200) return true;
+  const n = Math.min(1400, h.length, t.length);
+  if (n < 200) return t.length >= 120;
+  let same = 0;
+  for (let i = 0; i < n; i++) {
+    if (h[i] === t[i]) same++;
+  }
+  const ratio = same / n;
+  return ratio < 0.985;
+}
+
+/**
  * Upsert `assets` rows for successfully crawled product + competitor HTML pages.
  * - Product pages → source `website`
  * - Competitor pages → source `competitor_site`

@@ -9,7 +9,8 @@ import {
 import { parseJsonObject } from "@/lib/extractJsonObject";
 import {
   extractSameOriginLinks,
-  ingestPageAssetsFromCrawl
+  ingestPageAssetsFromCrawl,
+  isLikelyDistinctPage
 } from "@/lib/websiteAssetIngest";
 
 type AnthropicMessageResponse = {
@@ -463,10 +464,12 @@ export async function POST(req: Request) {
           : productHome.html;
       const links = extractSameOriginLinks(htmlForLinks, productHome.url, MAX_EXTRA_PRODUCT_PAGES);
       const extra: CrawlRow[] = [];
+      const homeText = productHome.text ?? "";
       for (const link of links) {
         if (link.split("#")[0] === homeNorm) continue;
         try {
           const page = await fetchPage(link);
+          if (!isLikelyDistinctPage(homeText, page.text, page.ok)) continue;
           extra.push({
             url: page.url,
             source_type: "product",
