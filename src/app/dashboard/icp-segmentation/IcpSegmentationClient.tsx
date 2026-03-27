@@ -61,6 +61,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
   const [replaceAll, setReplaceAll] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [positioningNote, setPositioningNote] = useState<string | null>(null);
 
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -147,6 +148,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
     if (!draft?.length) return;
     setSaving(true);
     setError(null);
+    setPositioningNote(null);
     try {
       const res = await fetch("/api/segments/confirm", {
         method: "POST",
@@ -163,6 +165,19 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
       }
       setDraft(null);
       await load();
+
+      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
+      const posRes = await fetch("/api/positioning/generate-from-segments", {
+        method: "POST",
+        headers: key ? { "x-anthropic-key": key } : {}
+      });
+      const posData = (await posRes.json()) as { ok?: boolean; error?: string };
+      if (!posRes.ok) {
+        setPositioningNote(
+          posData.error ??
+            "Positioning Studio was not updated. Open Positioning Studio and tap Regenerate from ICP segments."
+        );
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed.");
     } finally {
@@ -210,6 +225,11 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {error}
+        </div>
+      ) : null}
+      {positioningNote ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          {positioningNote}
         </div>
       ) : null}
 
