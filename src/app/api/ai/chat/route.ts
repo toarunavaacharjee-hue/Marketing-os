@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { parseJsonObject } from "@/lib/extractJsonObject";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -13,21 +14,6 @@ type ProfileRow = {
   name?: string | null;
   anthropic_api_key?: string | null;
 };
-
-function extractJsonObject(text: string) {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
-  try {
-    return JSON.parse(text.slice(start, end + 1)) as {
-      response?: string;
-      metrics?: Array<{ label?: string; value?: string }>;
-      suggestions?: string[];
-    };
-  } catch {
-    return null;
-  }
-}
 
 export async function POST(req: Request) {
   const supabase = createSupabaseServerClient();
@@ -89,12 +75,6 @@ export async function POST(req: Request) {
     );
   }
 
-  let payload: {
-    response: string;
-    metrics: Array<{ label: string; value: string }>;
-    suggestions: string[];
-  };
-
   if (!anthropicKey) {
     return NextResponse.json(
       {
@@ -105,24 +85,24 @@ export async function POST(req: Request) {
     );
   }
 
-  const systemPrompt = `You are the AI Copilot for Marketing OS.
-Context:
-- User plan: ${plan}
-- Company: ${company}
-- User name: ${profile?.name ?? "Unknown"}
+  const systemPrompt = `You are the AI Copilot for Marketing OS. Output ONLY valid JSON. Minimize tokens — short strings, no prose outside JSON.
 
-Return JSON only with this shape:
+Context: plan=${plan}, company=${company}, user=${profile?.name ?? "Unknown"}
+
+Schema:
 {
-  "response": "short practical answer",
-  "metrics": [{"label":"...", "value":"..."}],
-  "suggestions": ["...", "...", "..."]
+  "status": "ok" | "needs_input",
+  "message": "optional; one short line when needs_input",
+  "questions": ["max 3; only if needs_input"],
+  "response": "only if status ok; tactical answer, max ~350 chars",
+  "metrics": [{"label":"","value":""}],
+  "suggestions": ["max 3 follow-up prompts"]
 }
 
 Rules:
-- Keep response concrete and tactical.
-- metrics array should contain 2-4 cards.
-- suggestions should contain 3 clickable follow-ups.
-- No markdown code fences.`;
+- If the ask is too vague to act on, use status needs_input with questions only (no long response).
+- If status ok: metrics 2–3 items, suggestions 3 items.
+- No markdown fences, no keys outside the schema.`;
 
   const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -133,8 +113,8 @@ Rules:
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 400,
-      temperature: 0.35,
+      max_tokens: 320,
+      temperature: 0.3,
       system: systemPrompt,
       messages: [{ role: "user", content: message }]
     })
@@ -149,18 +129,44 @@ Rules:
   }
 
   const text = anthropicData.content?.find((x) => x.type === "text")?.text ?? "";
-  const parsed = extractJsonObject(text);
+  const parsed = parseJsonObject(text) as {
+    status?: string;
+    message?: string;
+    questions?: string[];
+    response?: string;
+    metrics?: Array<{ label?: string; value?: string }>;
+    suggestions?: string[];
+  } | null;
 
-  payload = {
-    response:
-      parsed?.response ??
-      text ??
-      "I analyzed your request and can help draft a focused action plan.",
+  const needsInput = String(parsed?.status ?? "ok").toLowerCase() === "needs_input";
+  const qs = (parsed?.questions ?? []).filter(Boolean).slice(0, 4);
+  let responseText =
+    parsed?.response?.trim() ||
+    (needsInput
+      ? ""
+      : text.trim() || "Ask a specific question (channel, metric, or asset) and I will give concrete next steps.");
+
+  if (needsInput && qs.length) {
+    const parts = [parsed?.message?.trim(), ...qs.map((q) => `• ${q}`)].filter(Boolean);
+    responseText = parts.join("\n");
+  } else if (needsInput && !responseText) {
+    responseText =
+      parsed?.message?.trim() ||
+      "Add a bit more context (goal, channel, or timeframe), then send again.";
+  }
+
+  const sugg = (parsed?.suggestions ?? []).filter(Boolean).slice(0, 4);
+  const payload = {
+    needs_input: needsInput && qs.length > 0,
+    message: parsed?.message ?? null,
+    questions: qs,
+    response: responseText,
     metrics:
       parsed?.metrics
         ?.filter((m) => m.label && m.value)
-        .map((m) => ({ label: m.label!, value: m.value! })) ?? [],
-    suggestions: parsed?.suggestions?.slice(0, 5) ?? []
+        .map((m) => ({ label: String(m.label), value: String(m.value) }))
+        .slice(0, 4) ?? [],
+    suggestions: sugg.length ? sugg : needsInput ? qs.slice(0, 3) : []
   };
 
   // Increment usage after each successful response.
@@ -171,4 +177,5 @@ Rules:
 
   return NextResponse.json(payload);
 }
+
 

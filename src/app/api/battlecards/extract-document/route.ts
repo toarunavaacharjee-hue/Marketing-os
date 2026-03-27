@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { extractTextFromBuffer } from "@/lib/extractDocumentText";
+import { parseJsonObject } from "@/lib/extractJsonObject";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
@@ -9,17 +10,6 @@ type AnthropicMessageResponse = {
 };
 
 const MAX_BYTES = 8 * 1024 * 1024;
-
-function extractJsonObject(text: string) {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
-  try {
-    return JSON.parse(text.slice(start, end + 1)) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
 
 function asStr(v: unknown): string {
   if (v === null || v === undefined) return "";
@@ -128,7 +118,7 @@ ${text}`;
     }
 
     const out = data.content?.find((c) => c.type === "text")?.text ?? "";
-    const parsed = extractJsonObject(out);
+    const parsed = parseJsonObject(out);
     if (!parsed) {
       return NextResponse.json({ error: "AI could not extract structured fields. Try a clearer document." }, { status: 502 });
     }

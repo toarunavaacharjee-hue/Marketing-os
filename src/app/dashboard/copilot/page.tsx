@@ -81,6 +81,9 @@ export default function CopilotPage() {
         response?: string;
         metrics?: Metric[];
         suggestions?: string[];
+        needs_input?: boolean;
+        questions?: string[];
+        message?: string | null;
         error?: string;
         code?: string;
       };

@@ -8,6 +8,8 @@ const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
 
 type DailyBriefResponse = {
   summary?: string;
+  needs_input?: boolean;
+  questions?: string[];
   error?: string;
   code?: string;
 };

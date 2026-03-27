@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseJsonObject } from "@/lib/extractJsonObject";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -34,17 +35,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const prompt = `Write a concise daily marketing performance digest for a SaaS called Marketing OS.
-Use realistic operational assumptions only (no demo/fake labels). Keep it action-oriented and specific.
+    const system = `You write a tiny daily marketing digest for a SaaS dashboard. Output ONLY valid JSON. No markdown, no extra text.
 
-Include:
-- What changed in the last 24h
-- 3 priority actions (bullets)
-- 1 experiment to run
-- 1 risk to watch
+Schema:
+{
+  "status": "ok" | "needs_input",
+  "lines": ["max 8 lines; each under 90 chars; only if status ok"],
+  "questions": ["max 3; only if needs_input — what data would you need to be specific?"],
+  "message": "optional one line when needs_input"
+}
 
-Tone: confident, crisp, not salesy.
-Length: 8-12 lines.`;
+Rules:
+- Without real metrics from the user, use needs_input + short questions — do not invent numbers.
+- If ok: lines cover 24h focus, 2–3 actions, 1 experiment, 1 risk — all brief.`;
+
+    const prompt = `Task: JSON digest for "Marketing OS" operator view. No fake KPIs.`;
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -55,8 +60,9 @@ Length: 8-12 lines.`;
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 320,
-        temperature: 0.4,
+        max_tokens: 220,
+        temperature: 0.35,
+        system,
         messages: [{ role: "user", content: prompt }]
       })
     });
@@ -70,11 +76,29 @@ Length: 8-12 lines.`;
       );
     }
 
-    const text =
-      data.content?.find((c) => c.type === "text")?.text ??
-      "No summary returned.";
+    const text = data.content?.find((c) => c.type === "text")?.text ?? "";
+    const raw = parseJsonObject(text);
+    const st = String(raw?.status ?? "ok").toLowerCase();
 
-    return NextResponse.json({ summary: text });
+    if (st === "needs_input") {
+      const questions = Array.isArray(raw?.questions)
+        ? (raw.questions as unknown[]).map((q) => String(q).trim()).filter(Boolean).slice(0, 4)
+        : [];
+      const message = typeof raw?.message === "string" ? raw.message.trim() : "";
+      const hint = [message, ...questions.map((q) => `• ${q}`)].filter(Boolean).join("\n");
+      return NextResponse.json({
+        summary: hint || "Connect analytics or describe your top goal — then refresh.",
+        needs_input: true,
+        questions
+      });
+    }
+
+    const lines = Array.isArray(raw?.lines)
+      ? (raw.lines as unknown[]).map((l) => String(l).trim()).filter(Boolean).slice(0, 10)
+      : [];
+    const summary = lines.length ? lines.join("\n") : text.trim() || "No summary returned.";
+
+    return NextResponse.json({ summary, needs_input: false });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Unknown error" },

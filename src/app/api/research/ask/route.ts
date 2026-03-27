@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
+import { parseJsonObject } from "@/lib/extractJsonObject";
+
+function sliceText(s: string | null | undefined, max: number) {
+  const t = (s ?? "").trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max)}…`;
+}
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -68,7 +75,7 @@ export async function POST(req: Request) {
     .select("url,source_type,title,text_content")
     .eq("scan_id", scan.id)
     .order("fetched_at", { ascending: true })
-    .limit(25);
+    .limit(12);
   if (snapsErr) return NextResponse.json({ error: snapsErr.message }, { status: 500 });
 
   if (!anthropicKey) {
@@ -83,17 +90,26 @@ export async function POST(req: Request) {
 
   const snapshotContext = (snaps ?? [])
     .map((s, idx) => {
-      const title = s.title ? `Title: ${s.title}\n` : "";
-      return `#${idx + 1} ${s.source_type.toUpperCase()}\nURL: ${s.url}\n${title}${(s.text_content as string).slice(0, 2500)}\n`;
+      const title = s.title ? `${s.title} ` : "";
+      return `[${idx + 1}:${s.source_type}] ${title}${sliceText(s.text_content as string, 500)}`;
     })
-    .join("\n---\n");
+    .join("\n");
 
-  const system = `You answer questions for the Market Research module in Marketing OS.
-Use the scan summary and website snapshots as your only sources.
-Be concise, structured, and actionable.
-If the answer is not supported by the snapshots, say what’s missing and what to scan next.`;
+  const system = `You answer Market Research questions using ONLY the provided summary + snapshot excerpts. Output ONLY valid JSON. Minimize tokens.
 
-  const prompt = `Latest scan summary:\n${scan.summary ?? "(none)"}\n\nSnapshots:\n${snapshotContext}\n\nQuestion:\n${question}`;
+Schema:
+{
+  "status": "ok" | "needs_input",
+  "answer": "short; only if ok; max ~500 chars; bullets use \\n",
+  "questions": ["max 3; only if needs_input — what to clarify or re-scan"],
+  "message": "optional one line when needs_input"
+}
+
+Rules:
+- If snapshots don't support a solid answer, use needs_input with questions — do not invent facts.
+- No markdown fences, no text outside JSON.`;
+
+  const prompt = `Summary:\n${sliceText(scan.summary as string, 900)}\n\nSnaps:\n${snapshotContext || "(none)"}\n\nQ:\n${sliceText(question, 500)}`;
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -104,8 +120,8 @@ If the answer is not supported by the snapshots, say what’s missing and what t
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 600,
-      temperature: 0.35,
+      max_tokens: 380,
+      temperature: 0.3,
       system,
       messages: [{ role: "user", content: prompt }]
     })
@@ -117,8 +133,28 @@ If the answer is not supported by the snapshots, say what’s missing and what t
     return NextResponse.json({ error: normalized.error }, { status: normalized.status });
   }
 
-  const answer = data.content?.find((c) => c.type === "text")?.text ?? "No answer returned.";
-  return NextResponse.json({ answer });
+  const text = data.content?.find((c) => c.type === "text")?.text ?? "";
+  const raw = parseJsonObject(text);
+  const st = String(raw?.status ?? "ok").toLowerCase();
+
+  if (st === "needs_input") {
+    const questions = Array.isArray(raw?.questions)
+      ? (raw.questions as unknown[]).map((q) => String(q).trim()).filter(Boolean).slice(0, 4)
+      : [];
+    const message = typeof raw?.message === "string" ? raw.message.trim() : "";
+    const answer = [message, ...questions.map((q) => `• ${q}`)].filter(Boolean).join("\n");
+    return NextResponse.json({
+      answer: answer || "Re-run a scan or narrow your question.",
+      needs_input: true,
+      questions
+    });
+  }
+
+  const answer =
+    typeof raw?.answer === "string" && raw.answer.trim()
+      ? raw.answer.trim()
+      : text.trim() || "No answer returned.";
+  return NextResponse.json({ answer, needs_input: false });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Unknown error" },

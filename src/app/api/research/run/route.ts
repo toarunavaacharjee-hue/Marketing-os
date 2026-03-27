@@ -6,6 +6,7 @@ import {
   parseFeedItems,
   rssItemsToSnapshotText
 } from "@/lib/rss";
+import { parseJsonObject } from "@/lib/extractJsonObject";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -140,17 +141,6 @@ function normalizeAnthropicError(message: string | undefined) {
     };
   }
   return { status: 502, error: m || "Anthropic request failed." };
-}
-
-function extractJsonObject(text: string) {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
-  try {
-    return JSON.parse(text.slice(start, end + 1)) as any;
-  } catch {
-    return null;
-  }
 }
 
 function stripHtmlToText(html: string) {
@@ -506,35 +496,26 @@ export async function POST(req: Request) {
       );
     }
 
-      const system = `You are Market Research inside Marketing OS.
-You will be given snapshots of the base product website, competitor websites, optional G2/Capterra review pages, and/or an industry news RSS digest.
+      const system = `You are Market Research inside Marketing OS. Output ONLY valid JSON. No prose outside JSON. Minimize tokens — short strings.
 
-Return TWO things:
-1) A concise markdown report (headings + bullets) for the founder to read.
-2) A JSON object for the UI widgets.
-
-The JSON MUST match exactly this schema:
+Schema:
 {
-  "signals": [{"title":"...", "description":"...", "source":"...", "recency":"...", "severity":"info|opportunity|risk"}],
-  "opportunity_map": [{"segment":"...", "opportunity_score": 0-100, "tam_signal":"Low|Medium|High|Very High|Growing", "competition":"Low|Medium|High"}],
-  "monitoring_sources": [{"label":"...", "status":"ok|warn|err", "note":"optional"}]
+  "report_lines": ["# Title", "- bullet", ...],
+  "signals": [{"title":"...","description":"...","source":"...","recency":"...","severity":"info|opportunity|risk"}],
+  "opportunity_map": [{"segment":"...","opportunity_score":0-100,"tam_signal":"Low|Medium|High|Very High|Growing","competition":"Low|Medium|High"}],
+  "monitoring_sources": [{"label":"...","status":"ok|warn|err","note":"optional"}]
 }
 
 Rules:
-- Use only what is supported by the snapshots; if uncertain, mark status warn and explain in note.
-- When RSS or review pages are present, cite them in signals where relevant.
-- Do not use markdown tables in the report. Use headings + bullet points only.
-- Ensure the report is complete and avoid cut-off lines.
-- Keep signals to 4-6 items.
-- opportunity_map: 5 rows.
-- monitoring_sources: list scanned websites plus Industry News and Review Sites rows consistent with what was actually fetched (the server will reconcile the last two).
-- Output the markdown report first, then a blank line, then the JSON object.`;
+- report_lines: 8–12 lines max; use # headings and - bullets; ground claims in snapshots only.
+- signals: 4–6 items. opportunity_map: 5 rows. monitoring_sources: scanned sources; server merges Industry News and Review Sites rows.
+- If data is thin, say so in descriptions — do not invent metrics.`;
 
       const snapshotBlobs = results
         .filter((r) => r.ok && r.text)
         .map((r) => {
           const title = r.title ? `Title: ${r.title}\n` : "";
-          return `SOURCE: ${r.label}\nTYPE: ${r.source_type}\nURL: ${r.url}\n${title}TEXT:\n${r.text.slice(0, 6000)}\n`;
+          return `SOURCE: ${r.label}\nTYPE: ${r.source_type}\nURL: ${r.url}\n${title}TEXT:\n${r.text.slice(0, 3500)}\n`;
         })
         .join("\n---\n");
 
@@ -566,8 +547,8 @@ ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 1400,
-          temperature: 0.35,
+          max_tokens: 2000,
+          temperature: 0.3,
           system,
           messages: [{ role: "user", content: prompt }]
         })
@@ -581,30 +562,35 @@ ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
       }
 
       const text = data.content?.find((c) => c.type === "text")?.text ?? "";
-      const parsed = extractJsonObject(text);
-      const jsonStart = text.indexOf("{");
+      const parsed = parseJsonObject(text);
+      const lines = Array.isArray(parsed?.report_lines)
+        ? (parsed!.report_lines as unknown[]).map(String).filter(Boolean)
+        : [];
       summary =
-        (jsonStart > 0 ? text.slice(0, jsonStart).trim() : text.trim()) || "No summary returned.";
+        lines.join("\n").trim() ||
+        "## Market scan\n\nReview structured signals and opportunity map below.";
 
-      if (parsed?.signals && parsed?.opportunity_map && parsed?.monitoring_sources) {
-        resultJson = parsed as ScanResult;
+      if (
+        parsed &&
+        Array.isArray(parsed.signals) &&
+        Array.isArray(parsed.opportunity_map) &&
+        Array.isArray(parsed.monitoring_sources)
+      ) {
+        resultJson = {
+          signals: parsed.signals,
+          opportunity_map: parsed.opportunity_map,
+          monitoring_sources: parsed.monitoring_sources
+        } as ScanResult;
       } else {
         await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
         return NextResponse.json(
           {
             error:
-              "AI returned an incomplete scan structure. Please run scan again after refining product inputs."
+              "AI returned an incomplete scan structure. Run scan again after refining product inputs."
           },
           { status: 502 }
         );
       }
-    if (!resultJson) {
-      await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
-      return NextResponse.json(
-        { error: "Scan failed to produce structured output. Please retry." },
-        { status: 502 }
-      );
-    }
 
     resultJson = applyMonitoringFacts(resultJson, industryRow, reviewRow);
 
