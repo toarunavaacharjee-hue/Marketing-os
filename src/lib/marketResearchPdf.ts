@@ -46,10 +46,10 @@ export function downloadMarketResearchPdf(opts: {
 
   const palette = {
     bg: [12, 14, 20] as const,
-    surface: [25, 30, 44] as const,
-    border: [58, 66, 92] as const,
-    text: [230, 234, 245] as const,
-    muted: [155, 164, 188] as const,
+    surface: [245, 247, 252] as const,
+    border: [210, 217, 232] as const,
+    text: [20, 24, 38] as const,
+    muted: [88, 97, 122] as const,
     accent: [124, 108, 255] as const,
     green: [52, 211, 153] as const,
     yellow: [251, 191, 36] as const,
@@ -79,6 +79,8 @@ export function downloadMarketResearchPdf(opts: {
   };
 
   const drawHeader = () => {
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, pageW, pageH, "F");
     doc.setFillColor(palette.bg[0], palette.bg[1], palette.bg[2]);
     doc.rect(0, 0, pageW, 34, "F");
     doc.setFillColor(palette.accent[0], palette.accent[1], palette.accent[2]);
@@ -142,7 +144,7 @@ export function downloadMarketResearchPdf(opts: {
     section("Top Market Signals");
     for (const s of opts.resultJson.signals.slice(0, 8)) {
       ensureSpace(17);
-      doc.setFillColor(18, 22, 32);
+      doc.setFillColor(250, 251, 255);
       doc.setDrawColor(palette.border[0], palette.border[1], palette.border[2]);
       doc.roundedRect(margin, y - 4, maxW, 13, 1.5, 1.5, "FD");
       doc.setFont("helvetica", "bold");
@@ -158,7 +160,7 @@ export function downloadMarketResearchPdf(opts: {
   if (opts.resultJson?.opportunity_map?.length) {
     section("Market Opportunity Map");
     ensureSpace(12);
-    doc.setFillColor(32, 38, 54);
+    doc.setFillColor(236, 240, 250);
     doc.rect(margin, y - 4, maxW, 8, "F");
     doc.setFont("helvetica", "bold");
     addLine("Segment", 9, 0, palette.text);
