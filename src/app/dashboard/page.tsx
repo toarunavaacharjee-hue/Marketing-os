@@ -48,6 +48,37 @@ async function CommandCentrePage() {
     connectors = (data?.value_json ?? null) as typeof connectors;
   }
 
+  let productProfile: {
+    name: string | null;
+    website_url: string | null;
+    category: string | null;
+    icp_summary: string | null;
+    positioning_summary: string | null;
+    g2_review_url: string | null;
+    capterra_review_url: string | null;
+    news_rss_url: string | null;
+    news_keywords: string | null;
+  } | null = null;
+  let competitorCount = 0;
+
+  if (ctx?.productId) {
+    const { data: p } = await supabase
+      .from("products")
+      .select(
+        "name,website_url,category,icp_summary,positioning_summary,g2_review_url,capterra_review_url,news_rss_url,news_keywords"
+      )
+      .eq("id", ctx.productId)
+      .maybeSingle();
+
+    productProfile = (p ?? null) as typeof productProfile;
+
+    const { count } = await supabase
+      .from("product_competitors")
+      .select("id", { count: "exact", head: true })
+      .eq("product_id", ctx.productId);
+    competitorCount = count ?? 0;
+  }
+
   return (
     <div className="pb-2">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -88,6 +119,10 @@ async function CommandCentrePage() {
       </div>
 
       <IntegrationStatus connectors={connectors} />
+      <ProductOverview
+        product={productProfile}
+        competitorCount={competitorCount}
+      />
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
@@ -103,6 +138,169 @@ async function CommandCentrePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ProductOverview({
+  product,
+  competitorCount
+}: {
+  product: {
+    name: string | null;
+    website_url: string | null;
+    category: string | null;
+    icp_summary: string | null;
+    positioning_summary: string | null;
+    g2_review_url: string | null;
+    capterra_review_url: string | null;
+    news_rss_url: string | null;
+    news_keywords: string | null;
+  } | null;
+  competitorCount: number;
+}) {
+  return (
+    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="text-sm text-text">Product and Web Presence</div>
+          <div className="mt-1 text-xs text-text2">
+            Categorized details used by Market Research and internet monitoring.
+          </div>
+        </div>
+        <Link
+          href="/dashboard/settings/product"
+          className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+        >
+          Edit product details
+        </Link>
+      </div>
+
+      <div className="mt-3 grid gap-3 md:grid-cols-3">
+        <InfoBlock title="Product">
+          <InfoRow
+            label="Name"
+            value={product?.name || "Not set"}
+            status={product?.name ? "ok" : "missing"}
+          />
+          <InfoRow
+            label="Category"
+            value={product?.category || "Not set"}
+            status={product?.category ? "ok" : "missing"}
+          />
+          <InfoRow
+            label="Competitors"
+            value={`${competitorCount}`}
+            status={competitorCount > 0 ? "ok" : "missing"}
+          />
+        </InfoBlock>
+
+        <InfoBlock title="Website and Positioning">
+          <InfoRow
+            label="Website"
+            value={product?.website_url || "Not set"}
+            status={product?.website_url ? "ok" : "missing"}
+          />
+          <InfoRow
+            label="ICP summary"
+            value={product?.icp_summary || "Not set"}
+            clamp
+            status={product?.icp_summary ? "ok" : "missing"}
+          />
+          <InfoRow
+            label="Positioning"
+            value={product?.positioning_summary || "Not set"}
+            clamp
+            status={product?.positioning_summary ? "ok" : "missing"}
+          />
+        </InfoBlock>
+
+        <InfoBlock title="Internet Sources">
+          <InfoRow
+            label="Industry news (RSS)"
+            value={product?.news_rss_url || "Not configured"}
+            status={product?.news_rss_url ? "ok" : "missing"}
+          />
+          <InfoRow
+            label="News keywords"
+            value={product?.news_keywords || "All feed items"}
+            status="ok"
+          />
+          <InfoRow
+            label="Review sites"
+            value={
+              product?.g2_review_url || product?.capterra_review_url
+                ? [product?.g2_review_url, product?.capterra_review_url]
+                    .filter(Boolean)
+                    .join(" | ")
+                : "Not configured"
+            }
+            clamp
+            status={
+              product?.g2_review_url || product?.capterra_review_url
+                ? "ok"
+                : "missing"
+            }
+          />
+        </InfoBlock>
+      </div>
+    </div>
+  );
+}
+
+function InfoBlock({
+  title,
+  children
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-3">
+      <div className="text-xs font-semibold uppercase tracking-[0.5px] text-text3">
+        {title}
+      </div>
+      <div className="mt-2 space-y-2">{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  clamp = false,
+  status = "ok"
+}: {
+  label: string;
+  value: string;
+  clamp?: boolean;
+  status?: "ok" | "missing";
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[11px] text-text3">{label}</div>
+        <StatusChip status={status} />
+      </div>
+      <div
+        className={`text-[12px] text-text break-all ${clamp ? "max-h-[3rem] overflow-hidden" : ""}`}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function StatusChip({ status }: { status: "ok" | "missing" }) {
+  return status === "ok" ? (
+    <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(52,211,153,0.35)] bg-[rgba(52,211,153,0.12)] px-2 py-0.5 text-[10px] font-semibold text-green">
+      <span className="h-1.5 w-1.5 rounded-full bg-green" />
+      Configured
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(248,113,113,0.35)] bg-[rgba(248,113,113,0.12)] px-2 py-0.5 text-[10px] font-semibold text-red">
+      <span className="h-1.5 w-1.5 rounded-full bg-red" />
+      Missing
+    </span>
   );
 }
 
