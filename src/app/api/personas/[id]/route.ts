@@ -24,7 +24,11 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     if (!personaId) return NextResponse.json({ error: "Invalid persona id." }, { status: 400 });
 
     const body = (await req.json()) as Record<string, unknown>;
+    const kindRaw = typeof body.kind === "string" ? body.kind.toLowerCase().trim() : "";
+    const kind = kindRaw === "account" ? "account" : kindRaw === "icp" ? "icp" : undefined;
+
     const update = {
+      ...(kind ? { kind } : {}),
       name: asText(body.name) ?? undefined,
       website_url: asText(body.website_url),
       industry: asText(body.industry),

@@ -67,7 +67,7 @@ export async function POST(req: Request) {
     const { data: persona, error: perr } = await supabase
       .from("customer_personas")
       .select(
-        "id,name,website_url,industry,segment,company_size,buyer_roles,pains,current_stack,decision_criteria,notes"
+        "id,kind,name,website_url,industry,segment,company_size,buyer_roles,pains,current_stack,decision_criteria,notes"
       )
       .eq("id", personaId)
       .eq("environment_id", ctx.environmentId)
@@ -150,7 +150,14 @@ export async function POST(req: Request) {
       })
       .join("\n---\n");
 
+    const targetKind = (persona as { kind?: string }).kind === "account" ? "account" : "icp";
+    const targetLabel =
+      targetKind === "account"
+        ? "NAMED ACCOUNT / PROSPECT (company-specific talk track, stakeholders, and proof)."
+        : "ICP / SEGMENT PERSONA (repeatable positioning for this buyer segment).";
+
     const system = `You generate sales battlecards for a specific target customer.
+The target type is provided (ICP vs named account). Match the depth: account-level specifics vs segment-level patterns.
 Return TWO things:
 1) A markdown pitch battlecard (well-formatted, headings + bullets). No tables.
 2) A JSON object with this schema:
@@ -179,6 +186,8 @@ Strengths: ${baseCard?.strengths ?? "(none)"}
 Weaknesses: ${baseCard?.weaknesses ?? "(none)"}
 Why we win: ${baseCard?.why_we_win ?? "(none)"}
 Objections: ${baseCard?.objection_handling ?? "(none)"}
+
+Target type: ${targetLabel}
 
 Target customer (persona):
 Name: ${persona.name}

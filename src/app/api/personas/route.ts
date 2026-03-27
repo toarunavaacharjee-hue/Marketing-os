@@ -22,7 +22,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from("customer_personas")
       .select(
-        "id,name,website_url,industry,segment,company_size,buyer_roles,pains,current_stack,decision_criteria,notes,updated_at"
+        "id,kind,name,website_url,industry,segment,company_size,buyer_roles,pains,current_stack,decision_criteria,notes,updated_at"
       )
       .eq("environment_id", ctx.environmentId)
       .order("updated_at", { ascending: false });
@@ -52,9 +52,13 @@ export async function POST(req: Request) {
     const name = asText(body.name);
     if (!name) return NextResponse.json({ error: "Name is required." }, { status: 400 });
 
+    const kindRaw = typeof body.kind === "string" ? body.kind.toLowerCase().trim() : "icp";
+    const kind = kindRaw === "account" ? "account" : "icp";
+
     const row = {
       environment_id: ctx.environmentId,
       product_id: ctx.productId,
+      kind,
       name,
       website_url: asText(body.website_url),
       industry: asText(body.industry),

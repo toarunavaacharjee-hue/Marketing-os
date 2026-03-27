@@ -316,3 +316,11 @@ create policy battlecard_pitches_delete on public.battlecard_pitches
 for delete
 using (public.is_environment_member(environment_id));
 
+-- 8) Persona kind: ICP (segment) vs account (named prospect)
+alter table public.customer_personas add column if not exists kind text default 'icp';
+update public.customer_personas set kind = 'icp' where kind is null or kind = '';
+alter table public.customer_personas alter column kind set default 'icp';
+alter table public.customer_personas alter column kind set not null;
+alter table public.customer_personas drop constraint if exists customer_personas_kind_check;
+alter table public.customer_personas add constraint customer_personas_kind_check check (kind in ('icp', 'account'));
+

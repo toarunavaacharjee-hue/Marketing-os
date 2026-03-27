@@ -15,6 +15,7 @@ type Battlecard = {
 };
 type Persona = {
   id: string;
+  kind?: string | null;
   name: string;
   website_url: string | null;
   industry: string | null;
@@ -28,6 +29,36 @@ type Persona = {
   updated_at: string;
 };
 
+type PersonaForm = {
+  name: string;
+  website_url: string;
+  industry: string;
+  segment: string;
+  company_size: string;
+  buyer_roles: string;
+  pains: string;
+  current_stack: string;
+  decision_criteria: string;
+  notes: string;
+};
+
+const emptyForm = (): PersonaForm => ({
+  name: "",
+  website_url: "",
+  industry: "",
+  segment: "",
+  company_size: "",
+  buyer_roles: "",
+  pains: "",
+  current_stack: "",
+  decision_criteria: "",
+  notes: ""
+});
+
+function normalizeKind(k: string | null | undefined): "icp" | "account" {
+  return k === "account" ? "account" : "icp";
+}
+
 export default function BattlecardsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -40,33 +71,39 @@ export default function BattlecardsPage() {
 
   const [mode, setMode] = useState<"competitor" | "pitch">("pitch");
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [personaId, setPersonaId] = useState<string | null>(null);
-  const [creatingPersona, setCreatingPersona] = useState(false);
-  const [personaForm, setPersonaForm] = useState({
-    name: "",
-    website_url: "",
-    industry: "",
-    segment: "",
-    company_size: "",
-    buyer_roles: "",
-    pains: "",
-    current_stack: "",
-    decision_criteria: "",
-    notes: ""
-  });
+  const [icpPersonaId, setIcpPersonaId] = useState<string | null>(null);
+  const [accountPersonaId, setAccountPersonaId] = useState<string | null>(null);
+  const [icpForm, setIcpForm] = useState<PersonaForm>(() => emptyForm());
+  const [accountForm, setAccountForm] = useState<PersonaForm>(() => emptyForm());
+  const [creatingIcp, setCreatingIcp] = useState(false);
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [uploadingIcp, setUploadingIcp] = useState(false);
+  const [uploadingAccount, setUploadingAccount] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
   const [pitchLoading, setPitchLoading] = useState(false);
   const [pitchError, setPitchError] = useState<string | null>(null);
   const [pitchQuestions, setPitchQuestions] = useState<string[] | null>(null);
-  const [pitchMarkdown, setPitchMarkdown] = useState<string | null>(null);
-  const [personaEdit, setPersonaEdit] = useState({
+  const [pitchMarkdownIcp, setPitchMarkdownIcp] = useState<string | null>(null);
+  const [pitchMarkdownAccount, setPitchMarkdownAccount] = useState<string | null>(null);
+  const [editIcp, setEditIcp] = useState({
     industry: "",
     buyer_roles: "",
     pains: "",
     decision_criteria: "",
     notes: ""
   });
-  const [personaSaving, setPersonaSaving] = useState(false);
-  const [personaSaved, setPersonaSaved] = useState<string | null>(null);
+  const [editAccount, setEditAccount] = useState({
+    industry: "",
+    buyer_roles: "",
+    pains: "",
+    decision_criteria: "",
+    notes: ""
+  });
+  const [personaSavingIcp, setPersonaSavingIcp] = useState(false);
+  const [personaSavingAccount, setPersonaSavingAccount] = useState(false);
+  const [personaSavedIcp, setPersonaSavedIcp] = useState<string | null>(null);
+  const [personaSavedAccount, setPersonaSavedAccount] = useState<string | null>(null);
 
   const activeCompetitor = useMemo(
     () => competitors.find((c) => c.id === activeId) ?? null,
@@ -86,6 +123,24 @@ export default function BattlecardsPage() {
       }
     );
   }, [cards, activeId]);
+
+  const icpList = useMemo(
+    () => personas.filter((p) => normalizeKind(p.kind) === "icp"),
+    [personas]
+  );
+  const accountList = useMemo(
+    () => personas.filter((p) => normalizeKind(p.kind) === "account"),
+    [personas]
+  );
+
+  const selectedIcp = useMemo(
+    () => personas.find((p) => p.id === icpPersonaId) ?? null,
+    [personas, icpPersonaId]
+  );
+  const selectedAccount = useMemo(
+    () => personas.find((p) => p.id === accountPersonaId) ?? null,
+    [personas, accountPersonaId]
+  );
 
   async function load() {
     setLoading(true);
@@ -121,110 +176,216 @@ export default function BattlecardsPage() {
       if (!res.ok) throw new Error(data.error ?? "Failed to load personas.");
       const list = data.personas ?? [];
       setPersonas(list);
-      setPersonaId((prev) => prev ?? list[0]?.id ?? null);
-    } catch (e) {
-      // keep pitch UI usable; show errors on generate
+      setIcpPersonaId((prev) => {
+        if (prev && list.some((p) => p.id === prev && normalizeKind(p.kind) === "icp")) return prev;
+        return list.find((p) => normalizeKind(p.kind) === "icp")?.id ?? null;
+      });
+      setAccountPersonaId((prev) => {
+        if (prev && list.some((p) => p.id === prev && normalizeKind(p.kind) === "account")) return prev;
+        return list.find((p) => normalizeKind(p.kind) === "account")?.id ?? null;
+      });
+    } catch {
+      // keep pitch UI usable
     }
   }
 
-  const selectedPersona = useMemo(
-    () => personas.find((p) => p.id === personaId) ?? null,
-    [personas, personaId]
-  );
+  useEffect(() => {
+    const p = selectedIcp;
+    setEditIcp({
+      industry: p?.industry ?? "",
+      buyer_roles: p?.buyer_roles ?? "",
+      pains: p?.pains ?? "",
+      decision_criteria: p?.decision_criteria ?? "",
+      notes: p?.notes ?? ""
+    });
+  }, [selectedIcp]);
 
-  async function createPersona() {
-    if (!personaForm.name.trim()) return;
-    setCreatingPersona(true);
+  useEffect(() => {
+    const p = selectedAccount;
+    setEditAccount({
+      industry: p?.industry ?? "",
+      buyer_roles: p?.buyer_roles ?? "",
+      pains: p?.pains ?? "",
+      decision_criteria: p?.decision_criteria ?? "",
+      notes: p?.notes ?? ""
+    });
+  }, [selectedAccount]);
+
+  async function createPersona(kind: "icp" | "account") {
+    const form = kind === "icp" ? icpForm : accountForm;
+    if (!form.name.trim()) return;
+    const setCreating = kind === "icp" ? setCreatingIcp : setCreatingAccount;
+    setCreating(true);
     setPitchError(null);
     try {
       const res = await fetch("/api/personas", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(personaForm)
+        body: JSON.stringify({ ...form, kind })
       });
       const data = (await res.json()) as { ok?: boolean; id?: string | null; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Failed to create persona.");
+      if (!res.ok) throw new Error(data.error ?? "Failed to create record.");
       await loadPersonas();
-      if (data.id) setPersonaId(data.id);
-      setPersonaForm({
-        name: "",
-        website_url: "",
-        industry: "",
-        segment: "",
-        company_size: "",
-        buyer_roles: "",
-        pains: "",
-        current_stack: "",
-        decision_criteria: "",
-        notes: ""
-      });
+      if (data.id) {
+        if (kind === "icp") setIcpPersonaId(data.id);
+        else setAccountPersonaId(data.id);
+      }
+      if (kind === "icp") setIcpForm(emptyForm());
+      else setAccountForm(emptyForm());
     } catch (e) {
-      setPitchError(e instanceof Error ? e.message : "Failed to create persona.");
+      setPitchError(e instanceof Error ? e.message : "Failed to create record.");
     } finally {
-      setCreatingPersona(false);
+      setCreating(false);
     }
   }
 
-  async function savePersonaImprovements() {
-    if (!personaId) return;
-    setPersonaSaving(true);
-    setPersonaSaved(null);
-    setPitchError(null);
-    try {
-      const res = await fetch(`/api/personas/${personaId}`, {
-        method: "PATCH",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          industry: personaEdit.industry,
-          buyer_roles: personaEdit.buyer_roles,
-          pains: personaEdit.pains,
-          decision_criteria: personaEdit.decision_criteria,
-          notes: personaEdit.notes
-        })
-      });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Failed to update persona.");
-      setPersonaSaved("Persona updated.");
-      await loadPersonas();
-    } catch (e) {
-      setPitchError(e instanceof Error ? e.message : "Failed to update persona.");
-    } finally {
-      setPersonaSaving(false);
-    }
-  }
-
-  async function generatePitch() {
-    if (!activeId || !personaId) return;
-    setPitchLoading(true);
-    setPitchError(null);
-    setPitchQuestions(null);
-    setPitchMarkdown(null);
+  async function uploadDocument(kind: "icp" | "account", file: File | null) {
+    if (!file) return;
+    setUploadError(null);
+    const setBusy = kind === "icp" ? setUploadingIcp : setUploadingAccount;
+    setBusy(true);
     try {
       const key =
         typeof window === "undefined"
           ? ""
           : (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
-      const res = await fetch("/api/battlecards/pitch", {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("kind", kind);
+      const res = await fetch("/api/battlecards/extract-document", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
-        },
-        body: JSON.stringify({ competitor_id: activeId, persona_id: personaId })
+        headers: key ? { "x-anthropic-key": key } : {},
+        body: fd
       });
       const data = (await res.json()) as {
         ok?: boolean;
-        markdown?: string;
-        pitch_json?: any;
-        questions?: string[];
-        missing_fields?: string[];
+        fields?: Record<string, string> & { kind?: string };
         error?: string;
       };
-      if (!res.ok) {
-        if (data.questions?.length) setPitchQuestions(data.questions);
-        throw new Error(data.error ?? "Failed to generate pitch battlecard.");
-      }
-      setPitchMarkdown(data.markdown ?? null);
+      if (!res.ok) throw new Error(data.error ?? "Upload failed.");
+      const f = data.fields;
+      if (!f) throw new Error("No fields returned.");
+      const next = {
+        name: f.name ?? "",
+        website_url: f.website_url ?? "",
+        industry: f.industry ?? "",
+        segment: f.segment ?? "",
+        company_size: f.company_size ?? "",
+        buyer_roles: f.buyer_roles ?? "",
+        pains: f.pains ?? "",
+        current_stack: f.current_stack ?? "",
+        decision_criteria: f.decision_criteria ?? "",
+        notes: f.notes ?? ""
+      };
+      if (kind === "icp") setIcpForm((prev) => ({ ...prev, ...next }));
+      else setAccountForm((prev) => ({ ...prev, ...next }));
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Upload failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function savePersonaImprovements(kind: "icp" | "account") {
+    const id = kind === "icp" ? icpPersonaId : accountPersonaId;
+    if (!id) return;
+    const setSaving = kind === "icp" ? setPersonaSavingIcp : setPersonaSavingAccount;
+    const setSaved = kind === "icp" ? setPersonaSavedIcp : setPersonaSavedAccount;
+    const payload =
+      kind === "icp"
+        ? {
+            industry: editIcp.industry,
+            buyer_roles: editIcp.buyer_roles,
+            pains: editIcp.pains,
+            decision_criteria: editIcp.decision_criteria,
+            notes: editIcp.notes
+          }
+        : {
+            industry: editAccount.industry,
+            buyer_roles: editAccount.buyer_roles,
+            pains: editAccount.pains,
+            decision_criteria: editAccount.decision_criteria,
+            notes: editAccount.notes
+          };
+    setSaving(true);
+    setSaved(null);
+    setPitchError(null);
+    try {
+      const res = await fetch(`/api/personas/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Failed to update.");
+      setSaved("Saved.");
+      await loadPersonas();
+    } catch (e) {
+      setPitchError(e instanceof Error ? e.message : "Failed to update.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function fetchPitchMarkdown(kind: "icp" | "account"): Promise<string | null> {
+    const personaId = kind === "icp" ? icpPersonaId : accountPersonaId;
+    if (!activeId || !personaId) return null;
+    const key =
+      typeof window === "undefined"
+        ? ""
+        : (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
+    const res = await fetch("/api/battlecards/pitch", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...(key ? { "x-anthropic-key": key } : {})
+      },
+      body: JSON.stringify({ competitor_id: activeId, persona_id: personaId })
+    });
+    const data = (await res.json()) as {
+      ok?: boolean;
+      markdown?: string;
+      questions?: string[];
+      error?: string;
+    };
+    if (!res.ok) {
+      if (data.questions?.length) setPitchQuestions(data.questions);
+      throw new Error(data.error ?? "Failed to generate pitch battlecard.");
+    }
+    return data.markdown ?? null;
+  }
+
+  async function generatePitch(kind: "icp" | "account") {
+    const personaId = kind === "icp" ? icpPersonaId : accountPersonaId;
+    if (!activeId || !personaId) return;
+    setPitchLoading(true);
+    setPitchError(null);
+    setPitchQuestions(null);
+    if (kind === "icp") setPitchMarkdownIcp(null);
+    else setPitchMarkdownAccount(null);
+    try {
+      const md = await fetchPitchMarkdown(kind);
+      if (kind === "icp") setPitchMarkdownIcp(md);
+      else setPitchMarkdownAccount(md);
+    } catch (e) {
+      setPitchError(e instanceof Error ? e.message : "Failed to generate pitch battlecard.");
+    } finally {
+      setPitchLoading(false);
+    }
+  }
+
+  async function generateBothPitches() {
+    if (!activeId || !icpPersonaId || !accountPersonaId) return;
+    setPitchLoading(true);
+    setPitchError(null);
+    setPitchQuestions(null);
+    setPitchMarkdownIcp(null);
+    setPitchMarkdownAccount(null);
+    try {
+      const icpMd = await fetchPitchMarkdown("icp");
+      const accMd = await fetchPitchMarkdown("account");
+      setPitchMarkdownIcp(icpMd);
+      setPitchMarkdownAccount(accMd);
     } catch (e) {
       setPitchError(e instanceof Error ? e.message : "Failed to generate pitch battlecard.");
     } finally {
@@ -278,7 +439,7 @@ export default function BattlecardsPage() {
             Battlecards
           </h1>
           <div className="mt-2 text-sm text-text2">
-            Create competitor battlecards tied to your real Product Profile competitors.
+            Competitor notes, ICP-level positioning, and named-account pitches — tied to your Product Profile.
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -349,7 +510,7 @@ export default function BattlecardsPage() {
                       : "border border-border bg-surface2 text-text hover:bg-surface3 hover:border-border2"
                   }`}
                 >
-                  Pitch to customer
+                  ICP & account pitches
                 </button>
                 <button
                   type="button"
@@ -365,8 +526,8 @@ export default function BattlecardsPage() {
               </div>
             </div>
             <div className="mt-2 text-sm text-text2">
-              Pitch mode generates what to say to a specific customer. Competitor notes stores your general view of the
-              competitor.
+              Upload a brief (PDF / Word / Excel) to auto-fill fields. ICP captures your segment; Accounts are named
+              prospects. Generate ICP and Account battlecards against the selected competitor.
             </div>
           </div>
 
@@ -394,128 +555,279 @@ export default function BattlecardsPage() {
           </div>
 
           {mode === "pitch" ? (
-            <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <div className="text-sm font-semibold text-text">Target customer</div>
+            <div className="space-y-4">
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Upload → ICP profile</div>
                   <div className="mt-1 text-sm text-text2">
-                    Add/select a customer persona. We’ll tailor the pitch vs {activeCompetitor?.name ?? "the competitor"}.
+                    PDF, Word (.docx), or Excel (.xlsx). Uses your Anthropic key to extract segment-level fields.
+                  </div>
+                  <div className="mt-3">
+                    <input
+                      type="file"
+                      accept=".pdf,.docx,.xlsx,.xls,.csv"
+                      disabled={uploadingIcp}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        e.target.value = "";
+                        void uploadDocument("icp", f);
+                      }}
+                      className="block w-full text-sm text-text2 file:mr-3 file:rounded-[var(--radius2)] file:border file:border-border file:bg-surface2 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-text"
+                    />
+                    {uploadingIcp ? (
+                      <div className="mt-2 text-xs text-text2">Reading document…</div>
+                    ) : null}
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Upload → Account prospect</div>
+                  <div className="mt-1 text-sm text-text2">
+                    Use RFPs, account plans, or CRM exports. We map them to a named account record (not your broad ICP).
+                  </div>
+                  <div className="mt-3">
+                    <input
+                      type="file"
+                      accept=".pdf,.docx,.xlsx,.xls,.csv"
+                      disabled={uploadingAccount}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] ?? null;
+                        e.target.value = "";
+                        void uploadDocument("account", f);
+                      }}
+                      className="block w-full text-sm text-text2 file:mr-3 file:rounded-[var(--radius2)] file:border file:border-border file:bg-surface2 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-text"
+                    />
+                    {uploadingAccount ? (
+                      <div className="mt-2 text-xs text-text2">Reading document…</div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              {uploadError ? (
+                <div className="rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
+                  {uploadError}
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">ICP (segment)</div>
+                  <div className="mt-1 text-sm text-text2">
+                    {icpList.length} profile{icpList.length === 1 ? "" : "s"} · create or refine after upload.
+                  </div>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {(
+                      [
+                        ["name", "ICP label (e.g. Mid-market SaaS RevOps)"],
+                        ["website_url", "Example site (optional)"],
+                        ["industry", "Industry"],
+                        ["segment", "Segment (optional)"],
+                        ["company_size", "Company size (optional)"],
+                        ["buyer_roles", "Buyer roles"],
+                        ["pains", "Pains / JTBD"],
+                        ["current_stack", "Typical stack (optional)"],
+                        ["decision_criteria", "Decision criteria"],
+                        ["notes", "Notes (optional)"]
+                      ] as const
+                    ).map(([k, ph]) => (
+                      <input
+                        key={k}
+                        value={icpForm[k]}
+                        onChange={(e) => setIcpForm((prev) => ({ ...prev, [k]: e.target.value }))}
+                        placeholder={ph}
+                        className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => createPersona("icp")}
+                      disabled={creatingIcp || !icpForm.name.trim()}
+                      className="rounded-[var(--radius2)] bg-[rgba(52,211,153,0.15)] px-4 py-2 text-xs font-semibold text-green border border-[rgba(52,211,153,0.3)] transition hover:bg-[rgba(52,211,153,0.25)] disabled:opacity-60"
+                    >
+                      {creatingIcp ? "Saving..." : "Save ICP profile"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+                  <div className="text-sm font-semibold text-text">Account prospects</div>
+                  <div className="mt-1 text-sm text-text2">
+                    {accountList.length} account{accountList.length === 1 ? "" : "s"} · named companies you are
+                    pursuing.
+                  </div>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    {(
+                      [
+                        ["name", "Account / company name"],
+                        ["website_url", "Website (optional)"],
+                        ["industry", "Industry"],
+                        ["segment", "Segment (optional)"],
+                        ["company_size", "Company size (optional)"],
+                        ["buyer_roles", "Buyer roles"],
+                        ["pains", "Pains / priorities"],
+                        ["current_stack", "Current stack (optional)"],
+                        ["decision_criteria", "Decision criteria"],
+                        ["notes", "Notes (optional)"]
+                      ] as const
+                    ).map(([k, ph]) => (
+                      <input
+                        key={k}
+                        value={accountForm[k]}
+                        onChange={(e) => setAccountForm((prev) => ({ ...prev, [k]: e.target.value }))}
+                        placeholder={ph}
+                        className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+                      />
+                    ))}
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => createPersona("account")}
+                      disabled={creatingAccount || !accountForm.name.trim()}
+                      className="rounded-[var(--radius2)] bg-[rgba(52,211,153,0.15)] px-4 py-2 text-xs font-semibold text-green border border-[rgba(52,211,153,0.3)] transition hover:bg-[rgba(52,211,153,0.25)] disabled:opacity-60"
+                    >
+                      {creatingAccount ? "Saving..." : "Save account prospect"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-text">Generate vs {activeCompetitor?.name ?? "competitor"}</div>
+                    <div className="mt-1 text-sm text-text2">
+                      Pick an ICP profile and/or a named account, then generate one or both battlecards.
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPitchMarkdownIcp(null);
+                        setPitchMarkdownAccount(null);
+                      }}
+                      className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+                    >
+                      Clear outputs
+                    </button>
+                    <Link
+                      href="/dashboard/settings/product"
+                      className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+                    >
+                      Product settings
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <div>
+                    <div className="mb-1 text-xs font-semibold tracking-[0.3px] text-text2">ICP profile</div>
+                    <select
+                      value={icpPersonaId ?? ""}
+                      onChange={(e) => {
+                        const next = e.target.value || null;
+                        setIcpPersonaId(next);
+                        setPersonaSavedIcp(null);
+                      }}
+                      className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                    >
+                      <option value="">Choose ICP…</option>
+                      {icpList.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <div className="mb-1 text-xs font-semibold tracking-[0.3px] text-text2">Account prospect</div>
+                    <select
+                      value={accountPersonaId ?? ""}
+                      onChange={(e) => {
+                        const next = e.target.value || null;
+                        setAccountPersonaId(next);
+                        setPersonaSavedAccount(null);
+                      }}
+                      className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                    >
+                      <option value="">Choose account…</option>
+                      {accountList.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => generatePitch("icp")}
+                    disabled={pitchLoading || !icpPersonaId || !activeId}
+                    className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                  >
+                    {pitchLoading ? "Working…" : "Generate ICP battlecard"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => generatePitch("account")}
+                    disabled={pitchLoading || !accountPersonaId || !activeId}
+                    className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                  >
+                    {pitchLoading ? "Working…" : "Generate account battlecard"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void generateBothPitches()}
+                    disabled={pitchLoading || !icpPersonaId || !accountPersonaId || !activeId}
+                    className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-60"
+                  >
+                    Generate both
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
-                      if (!pitchMarkdown) return;
-                      downloadPitchPdf({
-                        productName: "Marketing OS",
-                        personaName: selectedPersona?.name ?? "Customer",
-                        competitorName: activeCompetitor?.name ?? "Competitor",
-                        pitchMarkdown
-                      });
+                      if (pitchMarkdownIcp) {
+                        downloadPitchPdf({
+                          productName: "Marketing OS",
+                          personaName: selectedIcp?.name ?? "ICP",
+                          competitorName: activeCompetitor?.name ?? "Competitor",
+                          pitchMarkdown: pitchMarkdownIcp
+                        });
+                      }
                     }}
-                    disabled={!pitchMarkdown}
+                    disabled={!pitchMarkdownIcp}
                     className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-50"
                   >
-                    Download PDF
+                    PDF · ICP
                   </button>
                   <button
                     type="button"
-                    onClick={generatePitch}
-                    disabled={pitchLoading || !personaId || !activeId}
-                    className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
-                  >
-                    {pitchLoading ? "Generating..." : "Generate pitch battlecard"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div>
-                  <div className="mb-1 text-xs font-semibold tracking-[0.3px] text-text2">
-                    Select persona
-                  </div>
-                  <select
-                    value={personaId ?? ""}
-                    onChange={(e) => {
-                      const next = e.target.value || null;
-                      setPersonaId(next);
-                      setPersonaSaved(null);
-                      const p = personas.find((x) => x.id === next) ?? null;
-                      setPersonaEdit({
-                        industry: p?.industry ?? "",
-                        buyer_roles: p?.buyer_roles ?? "",
-                        pains: p?.pains ?? "",
-                        decision_criteria: p?.decision_criteria ?? "",
-                        notes: p?.notes ?? ""
-                      });
+                    onClick={() => {
+                      if (pitchMarkdownAccount) {
+                        downloadPitchPdf({
+                          productName: "Marketing OS",
+                          personaName: selectedAccount?.name ?? "Account",
+                          competitorName: activeCompetitor?.name ?? "Competitor",
+                          pitchMarkdown: pitchMarkdownAccount
+                        });
+                      }
                     }}
-                    className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                    disabled={!pitchMarkdownAccount}
+                    className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-50"
                   >
-                    <option value="">Choose…</option>
-                    {personas.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPitchMarkdown(null)}
-                    className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
-                  >
-                    Clear output
-                  </button>
-                  <Link
-                    href="/dashboard/settings/product"
-                    className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
-                  >
-                    Product settings
-                  </Link>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-[var(--radius2)] border border-border bg-surface2 p-4">
-                <div className="text-sm font-semibold text-text">Add a new persona</div>
-                <div className="mt-3 grid gap-3 md:grid-cols-2">
-                  {[
-                    ["name", "Customer name (e.g. Acme Health)"],
-                    ["website_url", "Website (optional)"],
-                    ["industry", "Industry (Required)"],
-                    ["segment", "Segment (optional)"],
-                    ["company_size", "Company size (optional)"],
-                    ["buyer_roles", "Buyer roles (Required)"],
-                    ["pains", "Top pains / jobs-to-be-done (Required)"],
-                    ["current_stack", "Current stack (optional)"],
-                    ["decision_criteria", "Decision criteria (Required)"],
-                    ["notes", "Notes (optional)"]
-                  ].map(([k, placeholder]) => (
-                    <input
-                      key={k}
-                      value={(personaForm as any)[k] ?? ""}
-                      onChange={(e) => setPersonaForm((prev) => ({ ...prev, [k]: e.target.value }))}
-                      placeholder={placeholder}
-                      className="w-full rounded-[var(--radius2)] border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text3"
-                    />
-                  ))}
-                </div>
-                <div className="mt-3">
-                  <button
-                    type="button"
-                    onClick={createPersona}
-                    disabled={creatingPersona || !personaForm.name.trim()}
-                    className="rounded-[var(--radius2)] bg-[rgba(52,211,153,0.15)] px-4 py-2 text-xs font-semibold text-green border border-[rgba(52,211,153,0.3)] transition hover:bg-[rgba(52,211,153,0.25)] disabled:opacity-60"
-                  >
-                    {creatingPersona ? "Creating..." : "Create persona"}
+                    PDF · Account
                   </button>
                 </div>
               </div>
 
               {pitchQuestions?.length ? (
-                <div className="mt-4 rounded-[var(--radius)] border border-yellow bg-[rgba(251,191,36,0.12)] p-4 text-sm text-yellow">
-                  <div className="font-semibold text-text">To make this pitch better, answer these:</div>
+                <div className="rounded-[var(--radius)] border border-yellow bg-[rgba(251,191,36,0.12)] p-4 text-sm text-yellow">
+                  <div className="font-semibold text-text">To make the next pitch stronger, answer these:</div>
                   <ul className="mt-2 list-disc pl-5 text-text2">
                     {pitchQuestions.map((q, i) => (
                       <li key={i}>{q}</li>
@@ -524,75 +836,141 @@ export default function BattlecardsPage() {
                 </div>
               ) : null}
 
-              {personaId ? (
-                <div className="mt-4 rounded-[var(--radius2)] border border-border bg-surface2 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold text-text">Improve persona (Q&A wizard)</div>
-                      <div className="mt-1 text-sm text-text2">
-                        Fill the key fields below, save, then generate again for a stronger pitch.
+              <div className="grid gap-4 lg:grid-cols-2">
+                {icpPersonaId ? (
+                  <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-text">Refine ICP (Q&A)</div>
+                        <div className="mt-1 text-sm text-text2">Save, then regenerate the ICP battlecard.</div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => savePersonaImprovements("icp")}
+                        disabled={personaSavingIcp}
+                        className="rounded-[var(--radius2)] bg-[rgba(52,211,153,0.15)] px-4 py-2 text-xs font-semibold text-green border border-[rgba(52,211,153,0.3)] transition hover:bg-[rgba(52,211,153,0.25)] disabled:opacity-60"
+                      >
+                        {personaSavingIcp ? "Saving..." : "Save ICP answers"}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={savePersonaImprovements}
-                      disabled={personaSaving}
-                      className="rounded-[var(--radius2)] bg-[rgba(52,211,153,0.15)] px-4 py-2 text-xs font-semibold text-green border border-[rgba(52,211,153,0.3)] transition hover:bg-[rgba(52,211,153,0.25)] disabled:opacity-60"
-                    >
-                      {personaSaving ? "Saving..." : "Save persona answers"}
-                    </button>
-                  </div>
-
-                  {personaSaved ? (
-                    <div className="mt-3 rounded-[var(--radius2)] border border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.12)] px-3 py-2 text-sm text-green">
-                      {personaSaved}
+                    {personaSavedIcp ? (
+                      <div className="mt-3 rounded-[var(--radius2)] border border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.12)] px-3 py-2 text-sm text-green">
+                        {personaSavedIcp}
+                      </div>
+                    ) : null}
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      <TextArea
+                        label="Industry"
+                        value={editIcp.industry}
+                        onChange={(v) => setEditIcp((p) => ({ ...p, industry: v }))}
+                      />
+                      <TextArea
+                        label="Buyer roles"
+                        value={editIcp.buyer_roles}
+                        onChange={(v) => setEditIcp((p) => ({ ...p, buyer_roles: v }))}
+                      />
+                      <TextArea
+                        label="Pains / JTBD"
+                        value={editIcp.pains}
+                        onChange={(v) => setEditIcp((p) => ({ ...p, pains: v }))}
+                      />
+                      <TextArea
+                        label="Decision criteria"
+                        value={editIcp.decision_criteria}
+                        onChange={(v) => setEditIcp((p) => ({ ...p, decision_criteria: v }))}
+                      />
+                      <TextArea
+                        label="Notes"
+                        value={editIcp.notes}
+                        onChange={(v) => setEditIcp((p) => ({ ...p, notes: v }))}
+                      />
                     </div>
-                  ) : null}
-
-                  <div className="mt-4 grid gap-3 md:grid-cols-2">
-                    <TextArea
-                      label="Industry (Required)"
-                      value={personaEdit.industry}
-                      onChange={(v) => setPersonaEdit((p) => ({ ...p, industry: v }))}
-                    />
-                    <TextArea
-                      label="Buyer roles (Required)"
-                      value={personaEdit.buyer_roles}
-                      onChange={(v) => setPersonaEdit((p) => ({ ...p, buyer_roles: v }))}
-                    />
-                    <TextArea
-                      label="Top pains / jobs-to-be-done (Required)"
-                      value={personaEdit.pains}
-                      onChange={(v) => setPersonaEdit((p) => ({ ...p, pains: v }))}
-                    />
-                    <TextArea
-                      label="Decision criteria (Required)"
-                      value={personaEdit.decision_criteria}
-                      onChange={(v) => setPersonaEdit((p) => ({ ...p, decision_criteria: v }))}
-                    />
-                    <TextArea
-                      label="Notes (Optional)"
-                      value={personaEdit.notes}
-                      onChange={(v) => setPersonaEdit((p) => ({ ...p, notes: v }))}
-                    />
                   </div>
-                </div>
-              ) : null}
+                ) : (
+                  <div className="rounded-[var(--radius2)] border border-dashed border-border bg-surface2/40 p-4 text-sm text-text2">
+                    Select or create an ICP profile to refine fields.
+                  </div>
+                )}
+
+                {accountPersonaId ? (
+                  <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-text">Refine account (Q&A)</div>
+                        <div className="mt-1 text-sm text-text2">Save, then regenerate the account battlecard.</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => savePersonaImprovements("account")}
+                        disabled={personaSavingAccount}
+                        className="rounded-[var(--radius2)] bg-[rgba(52,211,153,0.15)] px-4 py-2 text-xs font-semibold text-green border border-[rgba(52,211,153,0.3)] transition hover:bg-[rgba(52,211,153,0.25)] disabled:opacity-60"
+                      >
+                        {personaSavingAccount ? "Saving..." : "Save account answers"}
+                      </button>
+                    </div>
+                    {personaSavedAccount ? (
+                      <div className="mt-3 rounded-[var(--radius2)] border border-[rgba(52,211,153,0.3)] bg-[rgba(52,211,153,0.12)] px-3 py-2 text-sm text-green">
+                        {personaSavedAccount}
+                      </div>
+                    ) : null}
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
+                      <TextArea
+                        label="Industry"
+                        value={editAccount.industry}
+                        onChange={(v) => setEditAccount((p) => ({ ...p, industry: v }))}
+                      />
+                      <TextArea
+                        label="Buyer roles"
+                        value={editAccount.buyer_roles}
+                        onChange={(v) => setEditAccount((p) => ({ ...p, buyer_roles: v }))}
+                      />
+                      <TextArea
+                        label="Pains / priorities"
+                        value={editAccount.pains}
+                        onChange={(v) => setEditAccount((p) => ({ ...p, pains: v }))}
+                      />
+                      <TextArea
+                        label="Decision criteria"
+                        value={editAccount.decision_criteria}
+                        onChange={(v) => setEditAccount((p) => ({ ...p, decision_criteria: v }))}
+                      />
+                      <TextArea
+                        label="Notes"
+                        value={editAccount.notes}
+                        onChange={(v) => setEditAccount((p) => ({ ...p, notes: v }))}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-[var(--radius2)] border border-dashed border-border bg-surface2/40 p-4 text-sm text-text2">
+                    Select or create an account prospect to refine fields.
+                  </div>
+                )}
+              </div>
 
               {pitchError ? (
-                <div className="mt-4 rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
+                <div className="rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
                   {pitchError}
                 </div>
               ) : null}
 
-              <div className="mt-4 rounded-[var(--radius2)] border border-border bg-surface2 p-4">
-                {pitchMarkdown ? (
-                  <Markdown content={pitchMarkdown} />
-                ) : (
-                  <div className="text-sm text-text2">
-                    Generate a pitch battlecard to see the tailored talk track and objections.
-                  </div>
-                )}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-4">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text2">ICP battlecard</div>
+                  {pitchMarkdownIcp ? (
+                    <Markdown content={pitchMarkdownIcp} />
+                  ) : (
+                    <div className="text-sm text-text2">Generate an ICP battlecard to see segment-level positioning.</div>
+                  )}
+                </div>
+                <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-4">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text2">Account battlecard</div>
+                  {pitchMarkdownAccount ? (
+                    <Markdown content={pitchMarkdownAccount} />
+                  ) : (
+                    <div className="text-sm text-text2">Generate an account battlecard for stakeholder-specific talk tracks.</div>
+                  )}
+                </div>
               </div>
             </div>
           ) : null}
@@ -663,4 +1041,3 @@ function TextArea({
     </div>
   );
 }
-
