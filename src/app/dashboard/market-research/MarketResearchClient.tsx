@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Markdown } from "@/lib/Markdown";
+import { readMrCache, writeMrCache } from "@/lib/marketResearchCache";
+import { loadLatestScanOnce } from "@/lib/marketResearchRemote";
+import type { MarketResearchScanResult } from "@/lib/marketResearchTypes";
+import { downloadMarketResearchPdf } from "@/lib/marketResearchPdf";
 
 const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
 
@@ -18,27 +22,6 @@ type ProfilePayload = {
   competitors: Array<{ id?: string; name: string; website_url: string }>;
 };
 
-type ScanResult = {
-  signals?: Array<{
-    title: string;
-    description: string;
-    source: string;
-    recency: string;
-    severity: "info" | "opportunity" | "risk";
-  }>;
-  opportunity_map?: Array<{
-    segment: string;
-    opportunity_score: number;
-    tam_signal: "Low" | "Medium" | "High" | "Very High" | "Growing";
-    competition: "Low" | "Medium" | "High";
-  }>;
-  monitoring_sources?: Array<{
-    label: string;
-    status: "ok" | "warn" | "err";
-    note?: string;
-  }>;
-};
-
 export default function MarketResearchClient() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
@@ -46,7 +29,7 @@ export default function MarketResearchClient() {
 
   const [profile, setProfile] = useState<ProfilePayload | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
-  const [resultJson, setResultJson] = useState<ScanResult | null>(null);
+  const [resultJson, setResultJson] = useState<MarketResearchScanResult | null>(null);
 
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -72,6 +55,20 @@ export default function MarketResearchClient() {
       };
       if (!res.ok) throw new Error(data.error ?? "Failed to load product profile.");
       setProfile(data);
+
+      const pid = data.product.id;
+      const cached = readMrCache(pid);
+      if (cached && (cached.summary || cached.resultJson)) {
+        setSummary(cached.summary);
+        setResultJson(cached.resultJson);
+        return;
+      }
+
+      const latest = await loadLatestScanOnce(pid);
+      if (latest) {
+        setSummary(latest.summary);
+        setResultJson(latest.resultJson);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load.");
     } finally {
@@ -83,6 +80,7 @@ export default function MarketResearchClient() {
     setRunning(true);
     setError(null);
     setSummary(null);
+    setResultJson(null);
     setAnswer(null);
     try {
       const res = await fetch("/api/research/run", {
@@ -95,15 +93,25 @@ export default function MarketResearchClient() {
       const contentType = res.headers.get("content-type") ?? "";
       const raw = await res.text();
       const data = (contentType.includes("application/json")
-        ? (JSON.parse(raw) as { summary?: string; result_json?: ScanResult | null; error?: string })
+        ? (JSON.parse(raw) as {
+            summary?: string;
+            result_json?: MarketResearchScanResult | null;
+            error?: string;
+          })
         : ({ error: raw || "Server error" } as any)) as {
         summary?: string;
-        result_json?: ScanResult | null;
+        result_json?: MarketResearchScanResult | null;
         error?: string;
       };
       if (!res.ok) throw new Error(data.error ?? "Scan failed.");
       setSummary(data.summary ?? null);
       setResultJson(data.result_json ?? null);
+      if (profile?.product.id) {
+        writeMrCache(profile.product.id, {
+          summary: data.summary ?? null,
+          resultJson: data.result_json ?? null
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Scan failed.");
     } finally {
@@ -145,24 +153,6 @@ export default function MarketResearchClient() {
 
   useEffect(() => {
     load();
-    (async () => {
-      try {
-        const res = await fetch("/api/research/latest");
-        const contentType = res.headers.get("content-type") ?? "";
-        const raw = await res.text();
-        const data = (contentType.includes("application/json")
-          ? (JSON.parse(raw) as { scan?: { summary?: string | null; result_json?: ScanResult | null } | null; error?: string })
-          : ({ error: raw || "Server error" } as any)) as {
-          scan?: { summary?: string | null; result_json?: ScanResult | null } | null;
-          error?: string;
-        };
-        if (!res.ok) return;
-        if (data.scan?.summary) setSummary(data.scan.summary);
-        if (data.scan?.result_json) setResultJson(data.scan.result_json);
-      } catch {
-        // ignore
-      }
-    })();
   }, []);
 
   const baseUrl = profile?.product.website_url ?? "";
@@ -419,16 +409,33 @@ export default function MarketResearchClient() {
                   Market Research Report
                 </div>
                 <div className="mt-1 text-sm text-text2">
-                  Latest scan summary and comparison output
+                  Latest scan summary. Kept as-is in this browser until you run a new AI scan.
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowReport(false)}
-                className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2"
-              >
-                Close
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!summary) return;
+                    downloadMarketResearchPdf({
+                      productName: profile?.product.name ?? "Product",
+                      summary,
+                      resultJson
+                    });
+                  }}
+                  disabled={!summary}
+                  className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-50"
+                >
+                  Download PDF
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowReport(false)}
+                  className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
             <div className="mt-4 max-h-[70vh] overflow-auto rounded-[var(--radius2)] border border-border bg-surface2 p-4">
