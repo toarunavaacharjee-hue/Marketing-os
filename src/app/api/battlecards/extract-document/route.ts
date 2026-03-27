@@ -82,10 +82,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const system = `You extract structured customer profile fields from business documents.
-Return ONLY valid JSON (no markdown fences). Keys must be exactly:
-name, website_url, industry, segment, company_size, buyer_roles, pains, current_stack, decision_criteria, notes
-All values must be strings. Use empty string "" when unknown. No nulls.`;
+    const system = `Extract profile fields from the document. Output ONLY one JSON object (no prose, no markdown fences).
+Keys exactly: name, website_url, industry, segment, company_size, buyer_roles, pains, current_stack, decision_criteria, notes
+Values: strings only; "" if unknown. Keep each value concise (no long paragraphs).`;
 
     const userPrompt =
       kind === "account"
@@ -113,7 +112,7 @@ ${text}`;
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 1200,
+        max_tokens: 900,
         temperature: 0.2,
         system,
         messages: [{ role: "user", content: userPrompt }]

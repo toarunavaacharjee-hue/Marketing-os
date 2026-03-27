@@ -93,7 +93,7 @@ function asObjectionArray(v: unknown): Array<{ objection: string; response: stri
   return out;
 }
 
-/** Accepts snake_case or camelCase from the model; fills gaps so DB/UI never see empty structure. */
+/** Accepts compact or legacy shapes; fills gaps so DB/UI always get a consistent structure. */
 function normalizePitchJson(raw: Record<string, unknown> | null, markdownFallback: string) {
   const r = raw ?? {};
   const positioning = asStringArray(
@@ -135,17 +135,86 @@ function normalizePitchJson(raw: Record<string, unknown> | null, markdownFallbac
   };
 }
 
-function extractMarkdownBody(full: string, jsonBlob: string | null) {
-  const t = full.trim();
-  const fenceIdx = t.search(/```(?:json)?/i);
-  if (fenceIdx > 0) return t.slice(0, fenceIdx).trim();
-  if (jsonBlob) {
-    const i = t.indexOf(jsonBlob);
-    if (i > 0) return t.slice(0, i).trim();
+function asQuestions(v: unknown): string[] {
+  const arr = asStringArray(v);
+  return arr.slice(0, 6).map((q) => q.replace(/\s+/g, " ").trim()).filter(Boolean);
+}
+
+/** Build markdown from structured fields only (no model prose) — minimal display tokens. */
+function structuredPitchToMarkdown(pitch: {
+  title?: unknown;
+  positioning?: unknown;
+  talk_track?: unknown;
+  landmines?: unknown;
+  objections?: unknown;
+  next_steps?: unknown;
+}): string {
+  const title = String(pitch.title ?? "Pitch battlecard").trim() || "Pitch battlecard";
+  const lines: string[] = [`# ${title}`, ""];
+  const pos = asStringArray(pitch.positioning);
+  const tt = asStringArray(pitch.talk_track);
+  const lm = asStringArray(pitch.landmines);
+  const obj = asObjectionArray(pitch.objections);
+  const ns = asStringArray(pitch.next_steps);
+
+  if (pos.length) {
+    lines.push("## Positioning", ...pos.map((x) => `- ${x}`), "");
   }
-  const brace = t.indexOf("{");
-  if (brace > 0) return t.slice(0, brace).trim();
-  return t;
+  if (tt.length) {
+    lines.push("## Talk track", ...tt.map((x) => `- ${x}`), "");
+  }
+  if (lm.length) {
+    lines.push("## Landmines", ...lm.map((x) => `- ${x}`), "");
+  }
+  if (obj.length) {
+    lines.push("## Objections");
+    for (const o of obj) {
+      lines.push(`- **${o.objection}** — ${o.response}`);
+    }
+    lines.push("");
+  }
+  if (ns.length) {
+    lines.push("## Next steps", ...ns.map((x) => `- ${x}`), "");
+  }
+  return lines.join("\n").trim();
+}
+
+function sliceText(s: string | null | undefined, max: number) {
+  const t = (s ?? "").trim();
+  if (!t) return "";
+  if (t.length <= max) return t;
+  return `${t.slice(0, max)}…`;
+}
+
+/** Map compact API JSON (optional nested pitch) into stored pitch_json + display markdown. */
+function pitchEnvelopeToStored(env: Record<string, unknown>): {
+  stored: ReturnType<typeof normalizePitchJson>;
+  markdownFromStructure: string;
+} {
+  const pitch =
+    env.pitch && typeof env.pitch === "object"
+      ? (env.pitch as Record<string, unknown>)
+      : env;
+  const title = pitch.title ?? pitch.headline ?? env.title;
+  const stored = normalizePitchJson(
+    {
+      positioning: pitch.positioning,
+      talk_track: pitch.talk_track ?? pitch.talkTrack,
+      landmines: pitch.landmines,
+      objections: pitch.objections,
+      next_steps: pitch.next_steps ?? pitch.nextSteps
+    },
+    ""
+  );
+  const markdownFromStructure = structuredPitchToMarkdown({
+    title,
+    positioning: stored.positioning,
+    talk_track: stored.talk_track,
+    landmines: stored.landmines,
+    objections: stored.objections,
+    next_steps: stored.next_steps
+  });
+  return { stored, markdownFromStructure };
 }
 
 export async function POST(req: Request) {
@@ -196,19 +265,19 @@ export async function POST(req: Request) {
     if (!persona.buyer_roles) missing.push("buyer roles");
     if (!persona.decision_criteria) missing.push("decision criteria");
     if (missing.length) {
-      return NextResponse.json(
-        {
-          error: "Missing persona details: " + missing.join(", ") + ".",
-          missing_fields: missing,
-          questions: [
-            "What is the buyer’s #1 business outcome they care about?",
-            "What’s the current solution and why are they unhappy?",
-            "Who are the decision makers and influencers?",
-            "What are the top 3 objections we must overcome?"
-          ]
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        ok: true,
+        needs_input: true,
+        missing_fields: missing,
+        message: `Add: ${missing.join(", ")} — then generate again.`,
+        questions: [
+          "What is the buyer’s #1 measurable outcome in the next 90 days?",
+          "What do they use today and what fails?",
+          "Who owns budget vs. who blocks deals?"
+        ],
+        markdown: null,
+        pitch_json: null
+      });
     }
 
     const { data: competitor, error: cerr } = await supabase
@@ -252,78 +321,55 @@ export async function POST(req: Request) {
           .select("source_type,url,title,text_content,competitor_id")
           .eq("scan_id", scan.id)
           .order("fetched_at", { ascending: true })
-          .limit(12)
+          .limit(6)
       : { data: [] as any[] };
 
     const snapshotContext = (snaps ?? [])
       .map((s, idx) => {
-        const title = s.title ? `Title: ${s.title}\n` : "";
-        return `#${idx + 1} ${String(s.source_type).toUpperCase()}\nURL: ${s.url}\n${title}${String(
-          s.text_content ?? ""
-        ).slice(0, 2200)}\n`;
+        const title = s.title ? `${s.title} ` : "";
+        return `[${idx + 1}:${String(s.source_type)}] ${title}${sliceText(String(s.text_content ?? ""), 500)}`;
       })
-      .join("\n---\n");
+      .join("\n");
 
     const targetKind = (persona as { kind?: string }).kind === "account" ? "account" : "icp";
     const targetLabel =
-      targetKind === "account"
-        ? "NAMED ACCOUNT / PROSPECT (company-specific talk track, stakeholders, and proof)."
-        : "ICP / SEGMENT PERSONA (repeatable positioning for this buyer segment).";
+      targetKind === "account" ? "named account" : "ICP segment";
 
-    const system = `You generate sales battlecards for a specific target customer.
-The target type is provided (ICP vs named account). Match the depth: account-level specifics vs segment-level patterns.
-Return TWO things:
-1) A markdown pitch battlecard (well-formatted, headings + bullets). No tables.
-2) A JSON object with this schema:
+    const system = `You output ONLY valid JSON. No markdown, no commentary outside the JSON object. Minimize tokens: short phrases, no filler.
+
+Schema:
 {
-  "positioning": ["...","...","..."],
-  "talk_track": ["...","...","...","..."],
-  "landmines": ["...","...","..."],
-  "objections": [{"objection":"...","response":"..."}],
-  "next_steps": ["...","...","..."]
+  "status": "ok" | "needs_input",
+  "questions": ["optional; only if status is needs_input; max 4 items; under 90 chars each"],
+  "pitch": {
+    "title": "short headline",
+    "positioning": ["max 3 bullets"],
+    "talk_track": ["max 4 bullets"],
+    "landmines": ["max 2"],
+    "objections": [{"objection":"short","response":"short"}],
+    "next_steps": ["max 3"]
+  }
 }
-Output markdown first, blank line, then the JSON object.
-The JSON must be valid, include "positioning" and "talk_track" as arrays of strings, and must not be truncated.`;
 
-    const prompt = `Base product:
-Name: ${(product?.name as string) ?? "(unknown)"}
-Website: ${(product?.website_url as string) ?? "(unknown)"}
-Category: ${(product?.category as string) ?? "(unknown)"}
-ICP: ${(product?.icp_summary as string) ?? "(unknown)"}
-Positioning: ${(product?.positioning_summary as string) ?? "(unknown)"}
+Rules:
+- If the brief is too thin to produce a credible, specific battlecard vs this competitor, set "status":"needs_input" and put 2–4 concrete questions in "questions". Omit "pitch" or use empty object.
+- If "status":"ok", fill "pitch" compactly. Every string must be short.
+- Do not repeat the prompt. Do not add keys outside the schema.`;
 
-Competitor:
-Name: ${competitor.name}
-Website: ${competitor.website_url}
+    const prompt = `Product: ${sliceText(product?.name as string, 80)} | ${sliceText(product?.website_url as string, 60)} | cat:${sliceText(product?.category as string, 40)}
+ICP:${sliceText(product?.icp_summary as string, 350)} Pos:${sliceText(product?.positioning_summary as string, 250)}
+Competitor: ${competitor.name} ${competitor.website_url}
+Our card: S:${sliceText(baseCard?.strengths, 200)} W:${sliceText(baseCard?.weaknesses, 120)} Win:${sliceText(baseCard?.why_we_win, 200)} Obj:${sliceText(baseCard?.objection_handling, 200)}
 
-Existing battlecard notes (if any):
-Strengths: ${baseCard?.strengths ?? "(none)"}
-Weaknesses: ${baseCard?.weaknesses ?? "(none)"}
-Why we win: ${baseCard?.why_we_win ?? "(none)"}
-Objections: ${baseCard?.objection_handling ?? "(none)"}
+Persona (${targetLabel}): ${sliceText(persona.name, 80)}
+Ind:${sliceText(persona.industry, 80)} Roles:${sliceText(persona.buyer_roles, 200)}
+Pains:${sliceText(persona.pains, 350)} Crit:${sliceText(persona.decision_criteria, 250)}
+Stack:${sliceText(persona.current_stack, 120)} Notes:${sliceText(persona.notes, 200)}
 
-Target type: ${targetLabel}
+Research:${sliceText(scan?.summary as string, 900)}
+Snaps:${snapshotContext || "none"}
 
-Target customer (persona):
-Name: ${persona.name}
-Website: ${persona.website_url ?? "(none)"}
-Industry: ${persona.industry}
-Segment: ${persona.segment ?? "(none)"}
-Company size: ${persona.company_size ?? "(none)"}
-Buyer roles: ${persona.buyer_roles}
-Pains: ${persona.pains}
-Current stack: ${persona.current_stack ?? "(unknown)"}
-Decision criteria: ${persona.decision_criteria}
-Notes: ${persona.notes ?? "(none)"}
-
-Latest research scan summary (if available):
-${scan?.summary ?? "(none)"}
-
-Snapshots (if available):
-${snapshotContext || "(none)"}
-
-Now write a pitch battlecard vs this competitor tailored to this persona.
-Be specific and actionable; include value props, proof placeholders, talk track, and objection handling.`;
+Task: JSON only — battlecard vs competitor for this persona, or needs_input + questions.`;
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -334,8 +380,8 @@ Be specific and actionable; include value props, proof placeholders, talk track,
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 4096,
-        temperature: 0.3,
+        max_tokens: 1800,
+        temperature: 0.25,
         system,
         messages: [{ role: "user", content: prompt }]
       })
@@ -348,16 +394,65 @@ Be specific and actionable; include value props, proof placeholders, talk track,
     }
 
     const text = data.content?.find((c) => c.type === "text")?.text ?? "";
-    const rawParsed = extractJsonObject(text);
+    const raw = extractJsonObject(text);
+    if (!raw) {
+      return NextResponse.json(
+        { error: "AI did not return valid JSON. Try again.", pitch_json: null },
+        { status: 502 }
+      );
+    }
+
+    const st = String(raw.status ?? "ok").toLowerCase();
+    if (st === "needs_input") {
+      let questions = asQuestions(raw.questions);
+      if (!questions.length) {
+        questions = [
+          "What single metric does this buyer need to move in 90 days?",
+          "What do they use today and what breaks?",
+          "Who signs budget and who blocks deals?"
+        ];
+      }
+      return NextResponse.json({
+        ok: true,
+        needs_input: true,
+        questions,
+        message: "Add these details to the persona (or ask in chat), then generate again.",
+        markdown: null,
+        pitch_json: null
+      });
+    }
+
     const jsonBlob =
       extractFirstJsonObjectString(stripCodeFences(text)) ?? extractFirstJsonObjectString(text);
-    let markdown = extractMarkdownBody(text, jsonBlob).trim();
-    if (!markdown) {
-      let t2 = text.trim().replace(/```json[\s\S]*?```/gi, "").trim();
-      if (jsonBlob) t2 = t2.replace(jsonBlob, "").trim();
-      markdown = t2 || "No narrative output — see structured fields below.";
+    let markdown: string;
+    let parsed: ReturnType<typeof normalizePitchJson>;
+
+    if (raw.pitch && typeof raw.pitch === "object") {
+      const { stored, markdownFromStructure } = pitchEnvelopeToStored(raw);
+      parsed = stored;
+      markdown = markdownFromStructure;
+    } else if (asStringArray(raw.positioning).length || asStringArray(raw.talk_track).length) {
+      const jb =
+        extractFirstJsonObjectString(stripCodeFences(text)) ?? extractFirstJsonObjectString(text);
+      const mdBody = jb && text.indexOf(jb) > 0 ? text.slice(0, text.indexOf(jb)).trim() : "";
+      parsed = normalizePitchJson(raw, mdBody);
+      markdown = structuredPitchToMarkdown({
+        title: raw.title ?? raw.headline,
+        positioning: parsed.positioning,
+        talk_track: parsed.talk_track,
+        landmines: parsed.landmines,
+        objections: parsed.objections,
+        next_steps: parsed.next_steps
+      });
+    } else {
+      return NextResponse.json(
+        {
+          error: "AI response missing pitch data. Try again or add persona details.",
+          pitch_json: null
+        },
+        { status: 502 }
+      );
     }
-    const parsed = normalizePitchJson(rawParsed, markdown);
 
     const upsert = {
       environment_id: ctx.environmentId,
@@ -373,7 +468,7 @@ Be specific and actionable; include value props, proof placeholders, talk track,
       onConflict: "environment_id,competitor_id,persona_id"
     });
 
-    return NextResponse.json({ ok: true, markdown, pitch_json: parsed });
+    return NextResponse.json({ ok: true, needs_input: false, markdown, pitch_json: parsed });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Unknown error" },

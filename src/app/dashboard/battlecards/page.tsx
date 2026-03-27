@@ -84,6 +84,7 @@ export default function BattlecardsPage() {
   const [pitchLoading, setPitchLoading] = useState(false);
   const [pitchError, setPitchError] = useState<string | null>(null);
   const [pitchQuestions, setPitchQuestions] = useState<string[] | null>(null);
+  const [pitchInfo, setPitchInfo] = useState<string | null>(null);
   const [pitchMarkdownIcp, setPitchMarkdownIcp] = useState<string | null>(null);
   const [pitchMarkdownAccount, setPitchMarkdownAccount] = useState<string | null>(null);
   const [editIcp, setEditIcp] = useState({
@@ -327,9 +328,11 @@ export default function BattlecardsPage() {
     }
   }
 
-  async function fetchPitchMarkdown(kind: "icp" | "account"): Promise<string | null> {
+  async function fetchPitchMarkdown(
+    kind: "icp" | "account"
+  ): Promise<{ markdown: string | null; needsMore: boolean }> {
     const personaId = kind === "icp" ? icpPersonaId : accountPersonaId;
-    if (!activeId || !personaId) return null;
+    if (!activeId || !personaId) return { markdown: null, needsMore: false };
     const key =
       typeof window === "undefined"
         ? ""
@@ -344,15 +347,23 @@ export default function BattlecardsPage() {
     });
     const data = (await res.json()) as {
       ok?: boolean;
-      markdown?: string;
+      needs_input?: boolean;
+      markdown?: string | null;
       questions?: string[];
+      message?: string;
       error?: string;
     };
+    if (data.needs_input) {
+      setPitchQuestions(data.questions ?? []);
+      setPitchInfo(data.message ?? null);
+      return { markdown: null, needsMore: true };
+    }
+    setPitchInfo(null);
     if (!res.ok) {
       if (data.questions?.length) setPitchQuestions(data.questions);
       throw new Error(data.error ?? "Failed to generate pitch battlecard.");
     }
-    return data.markdown ?? null;
+    return { markdown: data.markdown ?? null, needsMore: false };
   }
 
   async function generatePitch(kind: "icp" | "account") {
@@ -361,10 +372,12 @@ export default function BattlecardsPage() {
     setPitchLoading(true);
     setPitchError(null);
     setPitchQuestions(null);
+    setPitchInfo(null);
     if (kind === "icp") setPitchMarkdownIcp(null);
     else setPitchMarkdownAccount(null);
     try {
-      const md = await fetchPitchMarkdown(kind);
+      const { markdown: md, needsMore } = await fetchPitchMarkdown(kind);
+      if (needsMore) return;
       if (kind === "icp") setPitchMarkdownIcp(md);
       else setPitchMarkdownAccount(md);
     } catch (e) {
@@ -379,13 +392,16 @@ export default function BattlecardsPage() {
     setPitchLoading(true);
     setPitchError(null);
     setPitchQuestions(null);
+    setPitchInfo(null);
     setPitchMarkdownIcp(null);
     setPitchMarkdownAccount(null);
     try {
-      const icpMd = await fetchPitchMarkdown("icp");
-      const accMd = await fetchPitchMarkdown("account");
-      setPitchMarkdownIcp(icpMd);
-      setPitchMarkdownAccount(accMd);
+      const icp = await fetchPitchMarkdown("icp");
+      if (icp.needsMore) return;
+      setPitchMarkdownIcp(icp.markdown);
+      const acc = await fetchPitchMarkdown("account");
+      if (acc.needsMore) return;
+      setPitchMarkdownAccount(acc.markdown);
     } catch (e) {
       setPitchError(e instanceof Error ? e.message : "Failed to generate pitch battlecard.");
     } finally {
@@ -827,7 +843,11 @@ export default function BattlecardsPage() {
 
               {pitchQuestions?.length ? (
                 <div className="rounded-[var(--radius)] border border-yellow bg-[rgba(251,191,36,0.12)] p-4 text-sm text-yellow">
-                  <div className="font-semibold text-text">To make the next pitch stronger, answer these:</div>
+                  <div className="font-semibold text-text">More detail needed</div>
+                  {pitchInfo ? (
+                    <div className="mt-2 text-sm text-text2">{pitchInfo}</div>
+                  ) : null}
+                  <div className="mt-2 font-semibold text-text">Answer or add to the persona, then generate again:</div>
                   <ul className="mt-2 list-disc pl-5 text-text2">
                     {pitchQuestions.map((q, i) => (
                       <li key={i}>{q}</li>
