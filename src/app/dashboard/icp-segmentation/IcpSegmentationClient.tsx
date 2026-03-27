@@ -33,6 +33,24 @@ type DraftSegment = {
   notes: string | null;
 };
 
+type ProductProfileDraft = {
+  name: string;
+  website_url: string;
+  category: string;
+  icp_summary: string;
+  positioning_summary: string;
+};
+
+function emptyProductProfile(): ProductProfileDraft {
+  return {
+    name: "",
+    website_url: "",
+    category: "",
+    icp_summary: "",
+    positioning_summary: ""
+  };
+}
+
 function num(n: unknown, fallback: number): number {
   if (typeof n === "number" && !Number.isNaN(n)) return Math.max(0, Math.min(100, Math.round(n)));
   return fallback;
@@ -58,10 +76,12 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
   const [error, setError] = useState<string | null>(null);
 
   const [draft, setDraft] = useState<DraftSegment[] | null>(null);
+  const [productProfileDraft, setProductProfileDraft] = useState<ProductProfileDraft | null>(null);
   const [replaceAll, setReplaceAll] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [positioningNote, setPositioningNote] = useState<string | null>(null);
+  const [profileNote, setProfileNote] = useState<string | null>(null);
 
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -126,13 +146,27 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
         body: fd,
         headers: key ? { "x-anthropic-key": key } : {}
       });
-      const data = (await res.json()) as { ok?: boolean; draft?: { segments: DraftSegment[] }; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        draft?: { segments: DraftSegment[]; productProfile?: Partial<ProductProfileDraft> };
+        error?: string;
+      };
       if (!res.ok) {
         setError(data.error ?? "Extraction failed.");
         return;
       }
       if (data.draft?.segments?.length) {
         setDraft(data.draft.segments);
+        const pp = data.draft.productProfile ?? {};
+        setProductProfileDraft({
+          ...emptyProductProfile(),
+          ...pp,
+          name: typeof pp.name === "string" ? pp.name : "",
+          website_url: typeof pp.website_url === "string" ? pp.website_url : "",
+          category: typeof pp.category === "string" ? pp.category : "",
+          icp_summary: typeof pp.icp_summary === "string" ? pp.icp_summary : "",
+          positioning_summary: typeof pp.positioning_summary === "string" ? pp.positioning_summary : ""
+        });
         setReplaceAll(false);
       } else {
         setError("No draft segments returned.");
@@ -149,6 +183,8 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
     setSaving(true);
     setError(null);
     setPositioningNote(null);
+    setProfileNote(null);
+    const profilePayload = productProfileDraft;
     try {
       const res = await fetch("/api/segments/confirm", {
         method: "POST",
@@ -164,7 +200,23 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
         return;
       }
       setDraft(null);
+      setProductProfileDraft(null);
       await load();
+
+      if (profilePayload) {
+        const pr = await fetch("/api/product/profile/apply-from-icp", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(profilePayload)
+        });
+        const prData = (await pr.json()) as { ok?: boolean; error?: string };
+        if (!pr.ok) {
+          setProfileNote(
+            prData.error ??
+              "Product profile was not updated. Edit fields under Settings → Product profile."
+          );
+        }
+      }
 
       const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
       const posRes = await fetch("/api/positioning/generate-from-segments", {
@@ -196,12 +248,16 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
             ICP Segmentation
           </h1>
           <p className="mt-1 text-sm text-[#9090b0]">
-            Upload an ICP document to propose segments; confirm to save. Segments are stored per product
-            environment (same list as{" "}
+            Upload an ICP document to propose segments and a draft product profile; confirm to save segments and merge
+            profile fields into{" "}
+            <Link href="/dashboard/settings/product" className="text-[#7c6cff] hover:underline">
+              Settings → Product profile
+            </Link>{" "}
+            (empty extracted fields keep your current values). Segments match{" "}
             <Link href="/dashboard/settings/segments" className="text-[#7c6cff] hover:underline">
               Settings → Segments
             </Link>
-            ).
+            .
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -230,6 +286,11 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
       {positioningNote ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
           {positioningNote}
+        </div>
+      ) : null}
+      {profileNote ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          {profileNote}
         </div>
       ) : null}
 
@@ -278,7 +339,10 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
             </button>
             <button
               type="button"
-              onClick={() => setDraft(null)}
+              onClick={() => {
+                setDraft(null);
+                setProductProfileDraft(null);
+              }}
               disabled={saving}
               className="rounded-xl border border-[#2a2e3f] bg-[#141420] px-4 py-2 text-sm text-[#f0f0f8] hover:bg-white/5"
             >

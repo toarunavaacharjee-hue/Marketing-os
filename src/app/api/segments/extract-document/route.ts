@@ -80,27 +80,44 @@ export async function POST(req: Request) {
       );
     }
 
-    const system = `You extract ICP (ideal customer profile) segments from a document for a B2B marketing product.
+    const system = `You extract ICP (ideal customer profile) segments AND a product profile from a document for a B2B marketing product.
 Output ONLY one JSON object (no prose, no markdown fences).
 
 Schema exactly:
-{ "segments": [ {
-  "name": string,
-  "pnf_score": number (0-100 product-needs fit for this segment),
-  "pain_points": string[] (2-6 short bullets),
-  "urgency": number (0-100),
-  "budget_fit": number (0-100),
-  "acv_potential": number (0-100),
-  "retention_potential": number (0-100),
-  "icp_profile": string (one paragraph, 2-5 sentences describing firmographics, motion, budget signals),
-  "notes": string (optional, one line)
-} ] }
+{
+  "segments": [ {
+    "name": string,
+    "pnf_score": number (0-100 product-needs fit for this segment),
+    "pain_points": string[] (2-6 short bullets),
+    "urgency": number (0-100),
+    "budget_fit": number (0-100),
+    "acv_potential": number (0-100),
+    "retention_potential": number (0-100),
+    "icp_profile": string (one paragraph, 2-5 sentences describing firmographics, motion, budget signals),
+    "notes": string (optional, one line)
+  } ],
+  "product_profile": {
+    "name": string,
+    "website_url": string,
+    "category": string,
+    "icp_summary": string,
+    "positioning_summary": string
+  }
+}
 
-Rules:
+Rules for "segments":
 - If the document describes one ICP, return one object in "segments".
 - If it clearly lists multiple distinct segments, return multiple.
 - Infer scores from context; use mid values when unknown.
-- pain_points must be specific phrases, not paragraphs.`;
+- pain_points must be specific phrases, not paragraphs.
+
+Rules for "product_profile" (the vendor / offering being sold to those ICPs):
+- "name": product or company name if clearly stated; else "".
+- "website_url": domain or URL if stated (e.g. app.example.com or https://...); else "".
+- "category": short market category (e.g. "Data integration for insurers"); infer from context if implied; else "".
+- "icp_summary": one paragraph synthesizing WHO you sell to across segments (size, roles, pains, buying motion).
+- "positioning_summary": one paragraph on how the product positions and the core value vs alternatives; use doc language when possible.
+- Use "" for any field with no basis in the document (do not invent URLs).`;
 
     const userPrompt = `Filename: ${name}
 
@@ -172,10 +189,22 @@ ${text}`;
       );
     }
 
+    const ppRaw =
+      parsed.product_profile && typeof parsed.product_profile === "object"
+        ? (parsed.product_profile as Record<string, unknown>)
+        : {};
+    const productProfile = {
+      name: asStr(ppRaw.name),
+      website_url: asStr(ppRaw.website_url),
+      category: asStr(ppRaw.category),
+      icp_summary: asStr(ppRaw.icp_summary),
+      positioning_summary: asStr(ppRaw.positioning_summary)
+    };
+
     return NextResponse.json({
       ok: true,
       environmentId: ctx.environmentId,
-      draft: { segments: valid }
+      draft: { segments: valid, productProfile }
     });
   } catch (e) {
     return NextResponse.json(
