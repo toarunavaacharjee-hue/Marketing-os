@@ -7,6 +7,10 @@ import {
   rssItemsToSnapshotText
 } from "@/lib/rss";
 import { parseJsonObject } from "@/lib/extractJsonObject";
+import {
+  extractSameOriginLinks,
+  ingestPageAssetsFromCrawl
+} from "@/lib/websiteAssetIngest";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -43,7 +47,11 @@ type CrawlRow = {
   status: number;
   title: string | null;
   text: string;
+  /** Raw HTML for same-origin link discovery (product homepage only; not persisted). */
+  html?: string;
 };
+
+const MAX_EXTRA_PRODUCT_PAGES = 12;
 
 function buildNewsMonitoringRow(
   rssUrl: string,
@@ -184,7 +192,7 @@ async function fetchPage(url: string) {
   const html = await res.text();
   const title = titleFromHtml(html);
   const text = stripHtmlToText(html);
-  return { ok: res.ok, status: res.status, url: res.url, title, text };
+  return { ok: res.ok, status: res.status, url: res.url, title, text, html };
 }
 
 async function fetchRssSnapshot(
@@ -416,7 +424,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const htmlResults: CrawlRow[] = await Promise.all(
+    let htmlResults: CrawlRow[] = await Promise.all(
       htmlTargets.map(async (t) => {
         try {
           const page = await fetchPage(t.url);
@@ -428,7 +436,8 @@ export async function POST(req: Request) {
             ok: page.ok,
             status: page.status,
             title: page.title,
-            text: page.text
+            text: page.text,
+            html: t.source_type === "product" && page.html ? page.html : undefined
           };
         } catch {
           return {
@@ -444,6 +453,36 @@ export async function POST(req: Request) {
         }
       })
     );
+
+    const productHome = htmlResults.find((r) => r.source_type === "product" && r.ok && r.html);
+    if (productHome?.html) {
+      const homeNorm = productHome.url.split("#")[0];
+      const htmlForLinks =
+        productHome.html.length > 400_000
+          ? productHome.html.slice(0, 400_000)
+          : productHome.html;
+      const links = extractSameOriginLinks(htmlForLinks, productHome.url, MAX_EXTRA_PRODUCT_PAGES);
+      const extra: CrawlRow[] = [];
+      for (const link of links) {
+        if (link.split("#")[0] === homeNorm) continue;
+        try {
+          const page = await fetchPage(link);
+          extra.push({
+            url: page.url,
+            source_type: "product",
+            competitor_id: null,
+            label: "Your site",
+            ok: page.ok,
+            status: page.status,
+            title: page.title,
+            text: page.text
+          });
+        } catch {
+          /* skip broken link */
+        }
+      }
+      htmlResults = [...htmlResults, ...extra];
+    }
 
     const rssRow: CrawlRow[] = [];
     if (rssUrl) {
@@ -469,6 +508,11 @@ export async function POST(req: Request) {
         await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
         return NextResponse.json({ error: ins.error.message }, { status: 500 });
       }
+    }
+
+    const ingest = await ingestPageAssetsFromCrawl(supabase, environmentId, results);
+    if (ingest.error) {
+      console.warn("[research/run] asset ingest:", ingest.error);
     }
 
     const g2Row = results.find((r) => r.source_type === "review_g2");
