@@ -563,6 +563,8 @@ The JSON MUST match exactly this schema:
 Rules:
 - Use only what is supported by the snapshots; if uncertain, mark status warn and explain in note.
 - When RSS or review pages are present, cite them in signals where relevant.
+- Do not use markdown tables in the report. Use headings + bullet points only.
+- Ensure the report is complete and avoid cut-off lines.
 - Keep signals to 4-6 items.
 - opportunity_map: 5 rows.
 - monitoring_sources: list scanned websites plus Industry News and Review Sites rows consistent with what was actually fetched (the server will reconcile the last two).
@@ -604,7 +606,7 @@ ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 900,
+          max_tokens: 1400,
           temperature: 0.35,
           system,
           messages: [{ role: "user", content: prompt }]
