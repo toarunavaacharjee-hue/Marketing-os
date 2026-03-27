@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     .select("url,source_type,title,text_content")
     .eq("scan_id", scan.id)
     .order("fetched_at", { ascending: true })
-    .limit(10);
+    .limit(25);
   if (snapsErr) return NextResponse.json({ error: snapsErr.message }, { status: 500 });
 
   if (!anthropicKey) {

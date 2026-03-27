@@ -7,6 +7,13 @@ alter table public.products
   add column if not exists icp_summary text,
   add column if not exists positioning_summary text;
 
+-- Optional Market Research sources (G2/Capterra pages + industry RSS)
+alter table public.products
+  add column if not exists g2_review_url text,
+  add column if not exists capterra_review_url text,
+  add column if not exists news_rss_url text,
+  add column if not exists news_keywords text;
+
 -- 2) Competitors per product
 create table if not exists public.product_competitors (
   id uuid primary key default gen_random_uuid(),

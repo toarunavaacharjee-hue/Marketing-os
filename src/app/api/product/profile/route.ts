@@ -23,7 +23,9 @@ export async function GET() {
 
     const { data: product, error: pErr } = await supabase
       .from("products")
-      .select("id,name,website_url,category,icp_summary,positioning_summary")
+      .select(
+        "id,name,website_url,category,icp_summary,positioning_summary,g2_review_url,capterra_review_url,news_rss_url,news_keywords"
+      )
       .eq("id", productId)
       .maybeSingle();
 
@@ -44,14 +46,19 @@ export async function GET() {
       return NextResponse.json({ error: cErr.message }, { status: 500 });
     }
 
+    const p = product as Record<string, unknown>;
     return NextResponse.json({
       product: {
         id: product.id,
         name: product.name,
         website_url: product.website_url,
-        category: (product as any).category ?? null,
-        icp_summary: (product as any).icp_summary ?? null,
-        positioning_summary: (product as any).positioning_summary ?? null
+        category: p.category ?? null,
+        icp_summary: p.icp_summary ?? null,
+        positioning_summary: p.positioning_summary ?? null,
+        g2_review_url: p.g2_review_url ?? null,
+        capterra_review_url: p.capterra_review_url ?? null,
+        news_rss_url: p.news_rss_url ?? null,
+        news_keywords: p.news_keywords ?? null
       },
       competitors: competitors ?? []
     });
@@ -82,6 +89,10 @@ export async function POST(req: Request) {
       category?: string;
       icp_summary?: string;
       positioning_summary?: string;
+      g2_review_url?: string;
+      capterra_review_url?: string;
+      news_rss_url?: string;
+      news_keywords?: string;
       competitors?: CompetitorInput[];
     };
 
@@ -90,7 +101,11 @@ export async function POST(req: Request) {
       website_url: asText(body.website_url) || null,
       category: asText(body.category) || null,
       icp_summary: asText(body.icp_summary) || null,
-      positioning_summary: asText(body.positioning_summary) || null
+      positioning_summary: asText(body.positioning_summary) || null,
+      g2_review_url: asText(body.g2_review_url) || null,
+      capterra_review_url: asText(body.capterra_review_url) || null,
+      news_rss_url: asText(body.news_rss_url) || null,
+      news_keywords: asText(body.news_keywords) || null
     };
 
     const upd = await supabase.from("products").update(update).eq("id", productId);

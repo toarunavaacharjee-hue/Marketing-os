@@ -15,6 +15,10 @@ type Payload = {
     category: string | null;
     icp_summary: string | null;
     positioning_summary: string | null;
+    g2_review_url: string | null;
+    capterra_review_url: string | null;
+    news_rss_url: string | null;
+    news_keywords: string | null;
   };
   competitors: Array<{ name: string; website_url: string }>;
 };
@@ -30,6 +34,10 @@ export default function ProductProfileClient() {
   const [category, setCategory] = useState("");
   const [icp, setIcp] = useState("");
   const [positioning, setPositioning] = useState("");
+  const [g2Url, setG2Url] = useState("");
+  const [capterraUrl, setCapterraUrl] = useState("");
+  const [newsRssUrl, setNewsRssUrl] = useState("");
+  const [newsKeywords, setNewsKeywords] = useState("");
   const [competitors, setCompetitors] = useState<Competitor[]>([
     { name: "", website_url: "" }
   ]);
@@ -58,6 +66,10 @@ export default function ProductProfileClient() {
       setCategory(data.product.category ?? "");
       setIcp(data.product.icp_summary ?? "");
       setPositioning(data.product.positioning_summary ?? "");
+      setG2Url(data.product.g2_review_url ?? "");
+      setCapterraUrl(data.product.capterra_review_url ?? "");
+      setNewsRssUrl(data.product.news_rss_url ?? "");
+      setNewsKeywords(data.product.news_keywords ?? "");
       setCompetitors(
         data.competitors?.length
           ? data.competitors.map((c) => ({ name: c.name ?? "", website_url: c.website_url ?? "" }))
@@ -85,6 +97,10 @@ export default function ProductProfileClient() {
           category,
           icp_summary: icp,
           positioning_summary: positioning,
+          g2_review_url: g2Url,
+          capterra_review_url: capterraUrl,
+          news_rss_url: newsRssUrl,
+          news_keywords: newsKeywords,
           competitors
         })
       });
@@ -183,7 +199,56 @@ export default function ProductProfileClient() {
         </Field>
       </div>
 
-      <div className="mt-6 text-sm text-text">Top competitors</div>
+      <div className="mt-8 text-sm font-semibold text-text">Market research sources (optional)</div>
+      <div className="mt-1 text-sm text-text2">
+        On each scan, we fetch these pages and your RSS feed, store snapshots in Supabase, and pass them to the AI.
+        Industry news uses an RSS URL (for example Google News RSS for your category). Review sites use your public G2
+        and Capterra product pages.
+      </div>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <Field label="G2 product page URL">
+          <input
+            value={g2Url}
+            onChange={(e) => setG2Url(e.target.value)}
+            className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+            placeholder="https://www.g2.com/products/..."
+          />
+        </Field>
+        <Field label="Capterra product page URL">
+          <input
+            value={capterraUrl}
+            onChange={(e) => setCapterraUrl(e.target.value)}
+            className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+            placeholder="https://www.capterra.com/p/..."
+          />
+        </Field>
+      </div>
+
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <Field label="Industry news RSS feed URL">
+          <input
+            value={newsRssUrl}
+            onChange={(e) => setNewsRssUrl(e.target.value)}
+            className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+            placeholder="https://news.google.com/rss/search?q=..."
+          />
+        </Field>
+        <Field label="News keyword filter (optional)">
+          <input
+            value={newsKeywords}
+            onChange={(e) => setNewsKeywords(e.target.value)}
+            className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+            placeholder="e.g. SaaS, marketing automation"
+          />
+        </Field>
+      </div>
+      <div className="mt-2 text-xs text-text3">
+        Comma-separated keywords: only RSS items whose title or summary contain a keyword are kept (if empty, the latest
+        items from the feed are used).
+      </div>
+
+      <div className="mt-8 text-sm font-semibold text-text">Top competitors</div>
       <div className="mt-1 text-sm text-text2">
         Add competitor name + URL. Market Research will scan these sites and compare messaging.
       </div>
