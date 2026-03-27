@@ -23,15 +23,129 @@ function normalizeAnthropicError(message: string | undefined) {
   return { status: 502, error: m || "Anthropic request failed." };
 }
 
-function extractJsonObject(text: string) {
+/** First balanced `{ ... }` outside of JSON strings (handles nested objects/arrays). */
+function extractFirstJsonObjectString(text: string): string | null {
   const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (c === "\\" && inString) {
+      escape = true;
+      continue;
+    }
+    if (c === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (c === "{") depth++;
+    else if (c === "}") {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null;
+}
+
+function stripCodeFences(raw: string) {
+  const mJson = raw.match(/```json\s*([\s\S]*?)```/i);
+  if (mJson?.[1]) return mJson[1].trim();
+  const m = raw.match(/```\s*([\s\S]*?)```/);
+  return m?.[1]?.trim() ?? raw;
+}
+
+function extractJsonObject(text: string) {
+  const cleaned = stripCodeFences(text);
+  const blob = extractFirstJsonObjectString(cleaned) ?? extractFirstJsonObjectString(text);
+  if (!blob) return null;
   try {
-    return JSON.parse(text.slice(start, end + 1)) as any;
+    return JSON.parse(blob) as Record<string, unknown>;
   } catch {
     return null;
   }
+}
+
+function asStringArray(v: unknown): string[] {
+  if (v === null || v === undefined) return [];
+  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
+  if (typeof v === "string" && v.trim()) return [v.trim()];
+  return [];
+}
+
+function asObjectionArray(v: unknown): Array<{ objection: string; response: string }> {
+  if (!Array.isArray(v)) return [];
+  const out: Array<{ objection: string; response: string }> = [];
+  for (const item of v) {
+    if (item && typeof item === "object" && "objection" in item && "response" in item) {
+      out.push({
+        objection: String((item as { objection: unknown }).objection ?? ""),
+        response: String((item as { response: unknown }).response ?? "")
+      });
+    }
+  }
+  return out;
+}
+
+/** Accepts snake_case or camelCase from the model; fills gaps so DB/UI never see empty structure. */
+function normalizePitchJson(raw: Record<string, unknown> | null, markdownFallback: string) {
+  const r = raw ?? {};
+  const positioning = asStringArray(
+    r.positioning ?? (r as { positioningLines?: unknown }).positioningLines
+  );
+  let talkTrack = asStringArray(
+    r.talk_track ?? (r as { talkTrack?: unknown }).talkTrack ?? (r as { talktrack?: unknown }).talktrack
+  );
+  const landmines = asStringArray(r.landmines);
+  let objections = asObjectionArray(r.objections);
+  const nextSteps = asStringArray(r.next_steps ?? (r as { nextSteps?: unknown }).nextSteps);
+
+  const md = markdownFallback.trim();
+  if (talkTrack.length === 0 && md.length > 0) {
+    const bullets = md
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => /^[-*•]/.test(l) || /^\d+\./.test(l))
+      .map((l) => l.replace(/^[-*•]\s*/, "").replace(/^\d+\.\s*/, ""))
+      .filter(Boolean)
+      .slice(0, 12);
+    if (bullets.length) talkTrack = bullets;
+  }
+  if (positioning.length === 0 && md.length > 0) {
+    const heading = md.match(/^#\s+(.+)$/m);
+    if (heading?.[1]) positioning.push(heading[1].trim());
+    else positioning.push("Positioning (see markdown battlecard)");
+  }
+  if (talkTrack.length === 0 && md.length > 80) {
+    talkTrack = ["Use the sections in the markdown battlecard as your talk track."];
+  }
+
+  return {
+    positioning,
+    talk_track: talkTrack,
+    landmines: landmines.length ? landmines : ["Confirm stakeholder map before claiming ROI."],
+    objections,
+    next_steps: nextSteps.length ? nextSteps : ["Schedule discovery", "Send relevant proof", "Align on success criteria"]
+  };
+}
+
+function extractMarkdownBody(full: string, jsonBlob: string | null) {
+  const t = full.trim();
+  const fenceIdx = t.search(/```(?:json)?/i);
+  if (fenceIdx > 0) return t.slice(0, fenceIdx).trim();
+  if (jsonBlob) {
+    const i = t.indexOf(jsonBlob);
+    if (i > 0) return t.slice(0, i).trim();
+  }
+  const brace = t.indexOf("{");
+  if (brace > 0) return t.slice(0, brace).trim();
+  return t;
 }
 
 export async function POST(req: Request) {
@@ -168,7 +282,8 @@ Return TWO things:
   "objections": [{"objection":"...","response":"..."}],
   "next_steps": ["...","...","..."]
 }
-Output markdown first, blank line, then the JSON object.`;
+Output markdown first, blank line, then the JSON object.
+The JSON must be valid, include "positioning" and "talk_track" as arrays of strings, and must not be truncated.`;
 
     const prompt = `Base product:
 Name: ${(product?.name as string) ?? "(unknown)"}
@@ -219,7 +334,7 @@ Be specific and actionable; include value props, proof placeholders, talk track,
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 1200,
+        max_tokens: 4096,
         temperature: 0.3,
         system,
         messages: [{ role: "user", content: prompt }]
@@ -233,16 +348,16 @@ Be specific and actionable; include value props, proof placeholders, talk track,
     }
 
     const text = data.content?.find((c) => c.type === "text")?.text ?? "";
-    const parsed = extractJsonObject(text);
-    const jsonStart = text.indexOf("{");
-    const markdown = (jsonStart > 0 ? text.slice(0, jsonStart).trim() : text.trim()) || "No output.";
-
-    if (!parsed?.positioning || !parsed?.talk_track) {
-      return NextResponse.json(
-        { error: "AI returned incomplete pitch structure. Try again." },
-        { status: 502 }
-      );
+    const rawParsed = extractJsonObject(text);
+    const jsonBlob =
+      extractFirstJsonObjectString(stripCodeFences(text)) ?? extractFirstJsonObjectString(text);
+    let markdown = extractMarkdownBody(text, jsonBlob).trim();
+    if (!markdown) {
+      let t2 = text.trim().replace(/```json[\s\S]*?```/gi, "").trim();
+      if (jsonBlob) t2 = t2.replace(jsonBlob, "").trim();
+      markdown = t2 || "No narrative output — see structured fields below.";
     }
+    const parsed = normalizePitchJson(rawParsed, markdown);
 
     const upsert = {
       environment_id: ctx.environmentId,
