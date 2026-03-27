@@ -79,6 +79,42 @@ async function CommandCentrePage() {
     competitorCount = count ?? 0;
   }
 
+  let segmentCount = 0;
+  let campaignCardCount = 0;
+  let contentQueueCount = 0;
+
+  if (ctx?.environmentId) {
+    const { count: segN } = await supabase
+      .from("segments")
+      .select("id", { count: "exact", head: true })
+      .eq("environment_id", ctx.environmentId);
+    segmentCount = segN ?? 0;
+
+    const { data: kanRow } = await supabase
+      .from("module_settings")
+      .select("value_json")
+      .eq("environment_id", ctx.environmentId)
+      .eq("module", "campaigns")
+      .eq("key", "kanban")
+      .maybeSingle();
+    const cols = (kanRow?.value_json as { columns?: Record<string, unknown[]> } | null)?.columns;
+    if (cols && typeof cols === "object") {
+      for (const arr of Object.values(cols)) {
+        if (Array.isArray(arr)) campaignCardCount += arr.length;
+      }
+    }
+
+    const { data: contentRow } = await supabase
+      .from("module_settings")
+      .select("value_json")
+      .eq("environment_id", ctx.environmentId)
+      .eq("module", "content_studio")
+      .eq("key", "workspace")
+      .maybeSingle();
+    const queue = (contentRow?.value_json as { queue?: unknown[] } | null)?.queue;
+    contentQueueCount = Array.isArray(queue) ? queue.length : 0;
+  }
+
   return (
     <div className="pb-2">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -90,8 +126,8 @@ async function CommandCentrePage() {
             Good morning, {name} <span className="text-accent2">⚡</span>
           </div>
           <div className="mt-2 text-[13px] text-text2">
-            {dateLabel}, {monthDayLabel} · 14 active campaigns · 3 items need
-            attention
+            {dateLabel}, {monthDayLabel} · {campaignCardCount} campaign cards · {segmentCount} ICP segments ·{" "}
+            {contentQueueCount} queued content pieces
           </div>
         </div>
 
@@ -112,10 +148,10 @@ async function CommandCentrePage() {
       </div>
 
       <div className="grid gap-[14px] md:grid-cols-4">
-        <Kpi title="Active Campaigns" value="14" delta="↑ 3 this week" tone="up" />
-        <Kpi title="Content Pieces Due" value="7" delta="↓ 2 overdue" tone="down" />
-        <Kpi title="Blended ROAS" value="3.8×" delta="↑ 0.4 vs last week" tone="up" />
-        <Kpi title="Pipeline Influence" value="$2.1M" delta="↑ 12% MTD" tone="up" />
+        <Kpi title="Campaigns (kanban)" value={String(campaignCardCount)} delta="All columns" tone="neutral" />
+        <Kpi title="Content queue" value={String(contentQueueCount)} delta="Content Studio" tone="neutral" />
+        <Kpi title="ICP segments" value={String(segmentCount)} delta="ICP Segmentation" tone="neutral" />
+        <Kpi title="Competitors" value={String(competitorCount)} delta="Product profile" tone="neutral" />
       </div>
 
       <IntegrationStatus connectors={connectors} />

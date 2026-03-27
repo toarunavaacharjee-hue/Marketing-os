@@ -1,54 +1,26 @@
-import { notFound } from "next/navigation";
+import Link from "next/link";
 
-const MODULES: Record<string, string> = {
-  "command-centre": "Command Centre",
-  "market-research": "Market Research",
-  "icp-segmentation": "ICP Segmentation",
-  "positioning-studio": "Positioning Studio",
-  "messaging-artifacts": "Messaging & Artifacts",
-  campaigns: "Campaigns",
-  "gtm-planner": "GTM Planner",
-  events: "Events",
-  "content-studio": "Content Studio",
-  "social-media": "Social Media",
-  "design-assets": "Design & Assets",
-  presentations: "Presentations",
-  "website-pages": "Website & Pages",
-  analytics: "Analytics",
-  battlecards: "Battlecards",
-  "sales-intelligence": "Sales Intelligence",
-  "customer-insights": "Customer Insights",
-  "ai-copilot": "AI Copilot"
-};
-
-export default function ModulePage({
+/**
+ * Fallback for /dashboard/:slug when no more-specific route exists.
+ * Real modules live in their own route folders (e.g. /dashboard/campaigns).
+ */
+export default function UnknownDashboardModule({
   params
 }: {
   params: { "module-name": string };
 }) {
   const slug = params["module-name"];
-  const title = MODULES[slug];
-  if (!title) return notFound();
-
   return (
-    <div>
-      <div
-        className="text-4xl"
-        style={{ fontFamily: "var(--font-heading)" }}
-      >
-        {title}
-      </div>
-      <div className="mt-2 text-sm text-[#9090b0]">
-        This module page is live at <span className="text-[#f0f0f8]">/dashboard/{slug}</span>.
-      </div>
-
-      <div className="mt-8 rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-sm text-[#f0f0f8]">Coming next</div>
-        <div className="mt-2 text-sm text-[#9090b0]">
-          We’ll build out the full UI + data flows for this module.
-        </div>
-      </div>
+    <div className="space-y-4">
+      <h1 className="text-3xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+        Unknown route
+      </h1>
+      <p className="text-sm text-[#9090b0]">
+        There is no page at <span className="text-[#f0f0f8]">/dashboard/{slug}</span>. Use the sidebar to open a module.
+      </p>
+      <Link href="/dashboard" className="text-[#7c6cff] hover:underline">
+        ← Command Centre
+      </Link>
     </div>
   );
 }
-
