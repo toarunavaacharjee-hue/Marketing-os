@@ -3,10 +3,23 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DailyDigestCard } from "@/app/dashboard/DailyDigestCard";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { PMM_JOURNEY, type JourneyPhase } from "@/lib/pmmModuleFlow";
+import { POSITIONING_KEY, POSITIONING_MODULE } from "@/lib/positioningStudio";
 
 export default function DashboardIndex() {
   return <CommandCentrePage />;
 }
+
+type ProductProfileRow = {
+  name: string | null;
+  website_url: string | null;
+  category: string | null;
+  icp_summary: string | null;
+  positioning_summary: string | null;
+  g2_review_url: string | null;
+  capterra_review_url: string | null;
+  news_rss_url: string | null;
+  news_keywords: string | null;
+};
 
 async function CommandCentrePage() {
   const supabase = createSupabaseServerClient();
@@ -49,21 +62,11 @@ async function CommandCentrePage() {
     connectors = (data?.value_json ?? null) as typeof connectors;
   }
 
-  let productProfile: {
-    name: string | null;
-    website_url: string | null;
-    category: string | null;
-    icp_summary: string | null;
-    positioning_summary: string | null;
-    g2_review_url: string | null;
-    capterra_review_url: string | null;
-    news_rss_url: string | null;
-    news_keywords: string | null;
-  } | null = null;
+  let productProfile: ProductProfileRow | null = null;
   let competitorCount = 0;
 
   if (ctx?.productId) {
-    const { data: p } = await supabase
+    const { data: prodRow } = await supabase
       .from("products")
       .select(
         "name,website_url,category,icp_summary,positioning_summary,g2_review_url,capterra_review_url,news_rss_url,news_keywords"
@@ -71,7 +74,7 @@ async function CommandCentrePage() {
       .eq("id", ctx.productId)
       .maybeSingle();
 
-    productProfile = (p ?? null) as typeof productProfile;
+    productProfile = (prodRow ?? null) as ProductProfileRow | null;
 
     const { count } = await supabase
       .from("product_competitors")
@@ -116,6 +119,129 @@ async function CommandCentrePage() {
     contentQueueCount = Array.isArray(queue) ? queue.length : 0;
   }
 
+  const t = (s: string | null | undefined) => (s ?? "").trim();
+  const p = productProfile;
+
+  const productNarrativeOk =
+    !!t(p?.name) &&
+    !!t(p?.website_url) &&
+    !!t(p?.category) &&
+    !!t(p?.icp_summary) &&
+    !!t(p?.positioning_summary);
+  const competitorsOk = competitorCount > 0;
+  const newsRssOk = !!t(p?.news_rss_url);
+  const reviewUrlsOk = !!(t(p?.g2_review_url) || t(p?.capterra_review_url));
+  const scanPrereqsOk =
+    productNarrativeOk && competitorsOk && newsRssOk && reviewUrlsOk;
+  const segmentsOk = segmentCount > 0;
+
+  let positioningCanvasOk = false;
+  let completedScanCount = 0;
+  let ga4Configured = false;
+
+  if (ctx?.environmentId && ctx.productId) {
+    const [posRes, scanRes, analyticsRes] = await Promise.all([
+      supabase
+        .from("module_settings")
+        .select("value_json")
+        .eq("environment_id", ctx.environmentId)
+        .eq("module", POSITIONING_MODULE)
+        .eq("key", POSITIONING_KEY)
+        .maybeSingle(),
+      supabase
+        .from("research_scans")
+        .select("id", { count: "exact", head: true })
+        .eq("environment_id", ctx.environmentId)
+        .eq("product_id", ctx.productId)
+        .eq("status", "completed"),
+      supabase
+        .from("module_settings")
+        .select("value_json")
+        .eq("environment_id", ctx.environmentId)
+        .eq("module", "analytics")
+        .eq("key", "connections")
+        .maybeSingle()
+    ]);
+
+    const doc = (posRes.data?.value_json as { doc?: Record<string, string> } | null)?.doc;
+    positioningCanvasOk = Boolean(t(doc?.category) || t(doc?.target) || t(doc?.problem));
+    completedScanCount = scanRes.count ?? 0;
+    const ga4 = (analyticsRes.data?.value_json as { ga4_property_id?: string } | null)?.ga4_property_id;
+    ga4Configured = Boolean(t(ga4));
+  }
+
+  const scanCompletedOk = completedScanCount > 0;
+
+  const healthItems: HealthCheckItem[] = [
+    {
+      id: "narrative",
+      label: "Product narrative",
+      detail: "Name, website, category, ICP summary, positioning summary",
+      ok: productNarrativeOk,
+      fixHref: "/dashboard/settings/product",
+      fixLabel: "Product profile"
+    },
+    {
+      id: "competitors",
+      label: "Competitors",
+      detail: "At least one competitor URL (required for Market Research scan)",
+      ok: competitorsOk,
+      fixHref: "/dashboard/settings/product",
+      fixLabel: "Add competitors"
+    },
+    {
+      id: "rss",
+      label: "Industry news RSS",
+      detail: "Feed URL for scan + news context",
+      ok: newsRssOk,
+      fixHref: "/dashboard/settings/product",
+      fixLabel: "Product profile"
+    },
+    {
+      id: "reviews",
+      label: "G2 or Capterra",
+      detail: "At least one review page URL",
+      ok: reviewUrlsOk,
+      fixHref: "/dashboard/settings/product",
+      fixLabel: "Product profile"
+    },
+    {
+      id: "segments",
+      label: "ICP segments",
+      detail: "At least one segment for this product environment",
+      ok: segmentsOk,
+      fixHref: "/dashboard/icp-segmentation",
+      fixLabel: "ICP Segmentation"
+    },
+    {
+      id: "positioning",
+      label: "Positioning Studio",
+      detail: "Canvas saved (category / target / problem filled)",
+      ok: positioningCanvasOk,
+      fixHref: "/dashboard/positioning-studio",
+      fixLabel: "Positioning Studio"
+    },
+    {
+      id: "scan",
+      label: "Market Research scan",
+      detail: "At least one completed AI scan",
+      ok: scanCompletedOk,
+      fixHref: "/dashboard/market-research",
+      fixLabel: "Market Research"
+    },
+    {
+      id: "ga4",
+      label: "Analytics (GA4)",
+      detail: "GA4 property ID in module settings",
+      ok: ga4Configured,
+      fixHref: "/dashboard/settings/analytics",
+      fixLabel: "Analytics settings"
+    }
+  ];
+
+  const healthDone = healthItems.filter((x) => x.ok).length;
+  const healthTotal = healthItems.length;
+
   return (
     <div className="pb-2">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -153,6 +279,16 @@ async function CommandCentrePage() {
         <Kpi title="Content queue" value={String(contentQueueCount)} delta="Content Studio" tone="neutral" />
         <Kpi title="ICP segments" value={String(segmentCount)} delta="ICP Segmentation" tone="neutral" />
         <Kpi title="Competitors" value={String(competitorCount)} delta="Product profile" tone="neutral" />
+      </div>
+
+      <div id="workspace-health">
+        <WorkspaceHealthChecklist
+          done={healthDone}
+          total={healthTotal}
+          items={healthItems}
+          scanPrereqsOk={scanPrereqsOk}
+          scanCompletedOk={scanCompletedOk}
+        />
       </div>
 
       <IntegrationStatus connectors={connectors} />
@@ -339,6 +475,116 @@ function StatusChip({ status }: { status: "ok" | "missing" }) {
       <span className="h-1.5 w-1.5 rounded-full bg-red" />
       Missing
     </span>
+  );
+}
+
+type HealthCheckItem = {
+  id: string;
+  label: string;
+  detail: string;
+  ok: boolean;
+  fixHref: string;
+  fixLabel: string;
+};
+
+function WorkspaceHealthChecklist({
+  done,
+  total,
+  items,
+  scanPrereqsOk,
+  scanCompletedOk
+}: {
+  done: number;
+  total: number;
+  items: HealthCheckItem[];
+  scanPrereqsOk: boolean;
+  scanCompletedOk: boolean;
+}) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const allGreen = done === total;
+
+  return (
+    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="font-[var(--font-heading)] text-[15px] font-bold text-text">
+            Workspace health
+          </div>
+          <div className="mt-1 max-w-2xl text-[12px] leading-5 text-text2">
+            Live checks for the <span className="text-text">selected product</span>. Matches what{" "}
+            <Link href="/dashboard/market-research" className="text-accent hover:underline">
+              Market Research → Run AI Scan
+            </Link>{" "}
+            requires, plus segments, positioning canvas, and GA4 for reporting.
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="font-[var(--font-heading)] text-[28px] font-extrabold tabular-nums text-text">
+            {done}/{total}
+          </div>
+          <div className="text-[11px] font-semibold text-text2">{pct}% complete</div>
+        </div>
+      </div>
+
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface2">
+        <div
+          className={`h-full rounded-full transition-all ${allGreen ? "bg-green" : "bg-accent2"}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      {scanPrereqsOk && !scanCompletedOk ? (
+        <div className="mt-4 rounded-[var(--radius2)] border border-[rgba(251,191,36,0.35)] bg-[rgba(251,191,36,0.1)] px-4 py-3 text-[12px] text-text">
+          <span className="font-semibold text-yellow">Ready to scan.</span> Product profile meets run requirements.{" "}
+          <Link href="/dashboard/market-research" className="font-semibold text-accent hover:underline">
+            Run your first AI scan →
+          </Link>
+        </div>
+      ) : null}
+
+      {allGreen ? (
+        <div className="mt-4 rounded-[var(--radius2)] border border-[rgba(52,211,153,0.35)] bg-[rgba(52,211,153,0.1)] px-4 py-3 text-[12px] text-green">
+          All checks passed for this product. You have a connected narrative from profile → segments → positioning →
+          research → analytics.
+        </div>
+      ) : null}
+
+      <ul className="mt-4 space-y-2">
+        {items.map((item) => (
+          <li
+            key={item.id}
+            className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-3"
+          >
+            <div className="flex min-w-0 flex-1 gap-3">
+              <span
+                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  item.ok
+                    ? "bg-[rgba(52,211,153,0.2)] text-green"
+                    : "bg-[rgba(248,113,113,0.15)] text-red"
+                }`}
+                aria-hidden
+              >
+                {item.ok ? "✓" : "!"}
+              </span>
+              <div className="min-w-0">
+                <div className="text-[13px] font-semibold text-text">{item.label}</div>
+                <div className="mt-0.5 text-[11px] leading-4 text-text2">{item.detail}</div>
+              </div>
+            </div>
+            {!item.ok ? (
+              <Link
+                href={item.fixHref}
+                className="shrink-0 rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#5b52ee]"
+              >
+                {item.fixLabel}
+              </Link>
+            ) : (
+              <span className="shrink-0 text-[11px] font-semibold text-text3">Done</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

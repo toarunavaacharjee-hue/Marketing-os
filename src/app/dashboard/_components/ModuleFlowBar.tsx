@@ -100,6 +100,12 @@ export function ModuleFlowBar() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
+              href="/dashboard#workspace-health"
+              className="rounded-[var(--radius2)] border border-accent2/40 bg-accent2/10 px-3 py-1.5 text-[11px] font-semibold text-accent2 hover:bg-accent2/15"
+            >
+              Workspace health
+            </Link>
+            <Link
               href="/dashboard/settings/product"
               className="rounded-[var(--radius2)] border border-border bg-surface px-3 py-1.5 text-[11px] font-semibold text-text hover:bg-surface3"
             >
