@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ProductProfileClient from "@/app/dashboard/settings/product/ProductProfileClient";
@@ -18,6 +19,15 @@ export default async function ProductProfilePage() {
         </div>
         <div className="mt-2 text-sm text-text2">
           Set your base product and competitors so Market Research can scan and compare automatically.
+        </div>
+        <div className="mt-3 flex flex-wrap gap-3 text-sm">
+          <Link href="/dashboard" className="text-accent hover:underline">
+            ← Command Centre
+          </Link>
+          <span className="text-text3">|</span>
+          <Link href="/dashboard/market-research" className="font-semibold text-accent hover:underline">
+            Next: run Market Research →
+          </Link>
         </div>
       </div>
 

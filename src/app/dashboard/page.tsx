@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DailyDigestCard } from "@/app/dashboard/DailyDigestCard";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
+import { PMM_JOURNEY, type JourneyPhase } from "@/lib/pmmModuleFlow";
 
 export default function DashboardIndex() {
   return <CommandCentrePage />;
@@ -155,6 +156,7 @@ async function CommandCentrePage() {
       </div>
 
       <IntegrationStatus connectors={connectors} />
+      <PmmJourneyMap />
       <ProductOverview
         product={productProfile}
         competitorCount={competitorCount}
@@ -418,11 +420,71 @@ function Kpi({
   );
 }
 
+function PmmJourneyMap() {
+  const order: JourneyPhase[] = ["Strategy", "Planning", "Creation", "Intelligence", "AI"];
+  const blurb: Record<JourneyPhase, string> = {
+    Strategy: "Truth about market & buyer — feeds everything downstream.",
+    Planning: "What ships, when, and with which stakeholders.",
+    Creation: "Assets and surfaces your team publishes.",
+    Intelligence: "Performance, competitors, voice of customer, sales.",
+    AI: "Ask across context; does not replace the spine above."
+  };
+
+  return (
+    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="font-[var(--font-heading)] text-[15px] font-bold text-text">
+            PMM workspace — single spine per product
+          </div>
+          <div className="mt-1 max-w-3xl text-[12px] leading-5 text-text2">
+            Each module reads or writes the same product context (profile, segments, scans, assets). Follow the row
+            left-to-right for strategy → launch → measurement. Settings hold foundations; Copilot sits on top for
+            questions.
+          </div>
+        </div>
+        <Link
+          href="/dashboard/settings/product"
+          className="shrink-0 rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-[11px] font-semibold text-text hover:bg-surface3"
+        >
+          Edit product context
+        </Link>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        {order.map((phase) => (
+          <div
+            key={phase}
+            className="rounded-[var(--radius2)] border border-border bg-surface2 p-3"
+          >
+            <div className="text-[10px] font-bold uppercase tracking-wide text-accent2">{phase}</div>
+            <div className="mt-1 text-[11px] leading-4 text-text3">{blurb[phase]}</div>
+            <ul className="mt-2 space-y-1.5">
+              {PMM_JOURNEY.filter((s) => s.phase === phase).map((s) => (
+                <li key={s.href}>
+                  <Link
+                    href={s.href}
+                    className="text-[12px] font-medium text-text hover:text-accent2 hover:underline"
+                  >
+                    {s.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function NeedsAttention() {
   return (
     <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
       <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-        🔴 Needs Attention
+        🔴 Example alerts
+      </div>
+      <div className="mt-1 text-[11px] text-text2">
+        Illustrative PMM actions. Wire Analytics + product data to replace with live signals.
       </div>
 
       <div className="mt-3 space-y-3">
@@ -505,7 +567,13 @@ function ThisWeek() {
   return (
     <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
       <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-        📅 This Week
+        📅 This week (templates)
+      </div>
+      <div className="mt-1 text-[11px] text-text2">
+        Track real work in <Link href="/dashboard/gtm-planner" className="text-accent hover:underline">GTM Planner</Link>
+        ,{" "}
+        <Link href="/dashboard/campaigns" className="text-accent hover:underline">Campaigns</Link>, and{" "}
+        <Link href="/dashboard/content-studio" className="text-accent hover:underline">Content Studio</Link>.
       </div>
 
       <div className="mt-3 space-y-3">
@@ -514,18 +582,21 @@ function ThisWeek() {
           iconBg="rgba(52,211,153,0.15)"
           title="Q1 Campaign Report — Due today"
           detail="Slide deck & exec summary for leadership sync at 4pm"
+          href="/dashboard/presentations"
         />
         <ThisWeekRow
           icon="🎯"
           iconBg="rgba(108,99,255,0.15)"
           title="ICP Review Workshop — Wednesday"
           detail="With Product & Sales. Update segment scoring based on win/loss data."
+          href="/dashboard/icp-segmentation"
         />
         <ThisWeekRow
           icon="✍️"
           iconBg="rgba(56,189,248,0.15)"
           title='Blog: "State of PMM 2025" — Friday deadline'
           detail="1,800 words. In review with SEO team."
+          href="/dashboard/content-studio"
         />
       </div>
     </div>
@@ -536,12 +607,14 @@ function ThisWeekRow({
   icon,
   iconBg,
   title,
-  detail
+  detail,
+  href
 }: {
   icon: string;
   iconBg: string;
   title: string;
   detail: string;
+  href: string;
 }) {
   return (
     <div className="flex gap-3 rounded-[var(--radius)] border border-border bg-surface2 p-4">
@@ -554,6 +627,12 @@ function ThisWeekRow({
       <div className="flex-1">
         <div className="text-[13px] font-semibold text-text">{title}</div>
         <div className="mt-1 text-[12px] leading-5 text-text2">{detail}</div>
+        <Link
+          href={href}
+          className="mt-2 inline-block text-[11px] font-semibold text-accent hover:underline"
+        >
+          Open related module →
+        </Link>
       </div>
     </div>
   );
@@ -563,7 +642,18 @@ function QuickMetrics() {
   return (
     <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
       <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-        📊 Quick Metrics
+        📊 Quick metrics (demo bars)
+      </div>
+      <div className="mt-1 text-[11px] text-text2">
+        Connect GA4 / ad accounts under{" "}
+        <Link href="/dashboard/settings/analytics" className="text-accent hover:underline">
+          Settings → Analytics
+        </Link>{" "}
+        and open{" "}
+        <Link href="/dashboard/analytics" className="text-accent hover:underline">
+          Analytics
+        </Link>{" "}
+        for module-level summaries.
       </div>
 
       <div className="mt-3 space-y-3">

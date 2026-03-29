@@ -33,7 +33,17 @@ export default async function SettingsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-[#9090b0]">
+            <Link href="/dashboard" className="text-[#7c6cff] hover:underline">
+              ← Command Centre
+            </Link>
+            <span className="text-[#2a2e3f]">|</span>
+            <span>
+              Workspace setup for the <span className="text-[#f0f0f8]">selected product</span> in the header
+              switcher
+            </span>
+          </div>
+          <div className="mt-2 text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Settings
           </div>
           <div className="mt-2 text-sm text-[#9090b0]">

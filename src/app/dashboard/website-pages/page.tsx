@@ -205,6 +205,22 @@ export default async function WebsitePagesPage() {
           />
         </div>
       </div>
+
+      <div className="rounded-[var(--radius)] border border-border bg-surface2/60 p-4 text-[13px] text-text2">
+        <span className="font-semibold text-text">In the PMM spine:</span> pages here are fed by{" "}
+        <Link href="/dashboard/market-research" className="text-accent hover:underline">
+          Market Research
+        </Link>
+        . After refresh, use{" "}
+        <Link href="/dashboard/content-studio" className="text-accent hover:underline">
+          Content Studio
+        </Link>{" "}
+        for rewrites and{" "}
+        <Link href="/dashboard/analytics" className="text-accent hover:underline">
+          Analytics
+        </Link>{" "}
+        for traffic proof.
+      </div>
     </div>
   );
 }

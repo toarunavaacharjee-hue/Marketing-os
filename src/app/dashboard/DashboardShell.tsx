@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
+import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
 
 type Profile = {
   name: string | null;
@@ -66,7 +67,7 @@ const NAV: NavSection[] = [
   },
   {
     label: "AI",
-    items: [{ label: "AI Copilot", slug: "ai-copilot", icon: "🤖" }]
+    items: [{ label: "AI Copilot", slug: "copilot", icon: "🤖" }]
   }
 ];
 
@@ -367,6 +368,7 @@ export function DashboardShell({
         ) : null}
 
         <main className="min-h-[calc(100vh-56px)] flex-1 px-4 py-6 md:min-h-screen md:px-8 md:py-10">
+          <ModuleFlowBar />
           {children}
         </main>
       </div>
