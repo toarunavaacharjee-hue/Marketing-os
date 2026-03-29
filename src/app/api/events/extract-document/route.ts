@@ -72,9 +72,19 @@ Schema:
   "events": [
     {
       "name": string (official event title),
+      "event_url": string (full https URL to official event or registration page only if explicitly printed in the document — otherwise ""),
       "event_date": string (dates or timeframe as written, e.g. "February 19-20, 2025" — use "" if unknown),
       "location": string (city, venue, or virtual — "" if unknown),
       "booth_or_track": string (booth #, track name, pavilion — "" if unknown),
+      "attendees_suggested": string (comma- or newline-separated names/roles only if the document lists speakers, panelists, or company attendees — otherwise ""),
+      "timeline_notes": string (short bullet-style lines: registration deadlines, setup/teardown, session blocks, show hours — infer from agenda if possible, else ""),
+      "logistics_notes": string (short lines for hotel, parking, badge pickup, dress code, shipping address — only if stated, else ""),
+      "commercial_notes": string (sponsor level, package, pricing, PO — only if stated, else ""),
+      "lead_capture_notes": string (scanner vendor, app name, lead retrieval process — only if stated, else ""),
+      "speaking_notes": string (session title, time, stage — only if stated, else ""),
+      "meetings_notes": string (sponsor meeting allotments, VIP programs — only if in document, else ""),
+      "competitor_notes": string (named competing exhibitors/sponsors only if listed, else ""),
+      "follow_up_notes": string (organizer post-event process only if described, else ""),
       "goals": string (2-4 sentences: why marketing/sales attends, pipeline, awareness, meetings — infer if needed),
       "tasks": string[] (8-14 concrete prep tasks: travel, booth, collateral, meetings booked, lead capture, follow-up)
     }
@@ -85,7 +95,8 @@ Rules:
 - If the document describes one conference, return exactly one object in "events".
 - If multiple distinct events appear, return up to 3.
 - Tasks must be short imperative lines (e.g. "Book booth electricity order").
-- Do not invent a specific booth number unless stated.`;
+- Do not invent a specific booth number unless stated.
+- Do not invent URLs, attendee names, competitor names, or commercial figures; use "" when not in the document.`;
 
     const userPrompt = `Filename: ${fname}
 
@@ -135,9 +146,19 @@ ${text}`;
         : [];
       return {
         name: asStr(row.name),
+        eventUrl: asStr(row.event_url),
         eventDate: asStr(row.event_date),
         location: asStr(row.location),
         boothOrTrack: asStr(row.booth_or_track),
+        attendees: asStr(row.attendees_suggested),
+        timeline: asStr(row.timeline_notes),
+        logistics: asStr(row.logistics_notes),
+        commercialNotes: asStr(row.commercial_notes),
+        leadCaptureNotes: asStr(row.lead_capture_notes),
+        speakingNotes: asStr(row.speaking_notes),
+        meetingsNotes: asStr(row.meetings_notes),
+        competitorNotes: asStr(row.competitor_notes),
+        followUpNotes: asStr(row.follow_up_notes),
         goals: asStr(row.goals),
         taskLabels
       };

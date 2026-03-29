@@ -11,9 +11,19 @@ type EventRow = {
   id: string;
   name: string;
   prepPct: number;
+  eventUrl: string;
   eventDate: string;
   location: string;
   boothOrTrack: string;
+  attendees: string;
+  timeline: string;
+  logistics: string;
+  commercialNotes: string;
+  leadCaptureNotes: string;
+  speakingNotes: string;
+  meetingsNotes: string;
+  competitorNotes: string;
+  followUpNotes: string;
   goals: string;
   tasks: EventTask[];
 };
@@ -52,9 +62,19 @@ function migrateEventRow(raw: unknown, idx: number): EventRow {
       id: crypto.randomUUID(),
       name: `Event ${idx + 1}`,
       prepPct: 0,
+      eventUrl: "",
       eventDate: "",
       location: "",
       boothOrTrack: "",
+      attendees: "",
+      timeline: "",
+      logistics: "",
+      commercialNotes: "",
+      leadCaptureNotes: "",
+      speakingNotes: "",
+      meetingsNotes: "",
+      competitorNotes: "",
+      followUpNotes: "",
       goals: "",
       tasks: []
     };
@@ -80,9 +100,19 @@ function migrateEventRow(raw: unknown, idx: number): EventRow {
     id: String(o.id || crypto.randomUUID()),
     name: String(o.name || "Untitled event"),
     prepPct: clampPct(o.prepPct, 0),
+    eventUrl: String(o.eventUrl ?? ""),
     eventDate: String(o.eventDate ?? ""),
     location: String(o.location ?? ""),
     boothOrTrack: String(o.boothOrTrack ?? ""),
+    attendees: String(o.attendees ?? ""),
+    timeline: String(o.timeline ?? ""),
+    logistics: String(o.logistics ?? ""),
+    commercialNotes: String(o.commercialNotes ?? ""),
+    leadCaptureNotes: String(o.leadCaptureNotes ?? ""),
+    speakingNotes: String(o.speakingNotes ?? ""),
+    meetingsNotes: String(o.meetingsNotes ?? ""),
+    competitorNotes: String(o.competitorNotes ?? ""),
+    followUpNotes: String(o.followUpNotes ?? ""),
     goals: String(o.goals ?? ""),
     tasks
   };
@@ -114,12 +144,30 @@ function newBlankEvent(): EventRow {
     id: crypto.randomUUID(),
     name: "",
     prepPct: 0,
+    eventUrl: "",
     eventDate: "",
     location: "",
     boothOrTrack: "",
+    attendees: "",
+    timeline: "",
+    logistics: "",
+    commercialNotes: "",
+    leadCaptureNotes: "",
+    speakingNotes: "",
+    meetingsNotes: "",
+    competitorNotes: "",
+    followUpNotes: "",
     goals: "",
     tasks: []
   };
+}
+
+function hrefForUserUrl(raw: string): string | null {
+  const t = raw.trim();
+  if (!t) return null;
+  if (/^https?:\/\//i.test(t)) return t;
+  if (/^[\w.-]+\.[a-z]{2,}/i.test(t)) return `https://${t}`;
+  return null;
 }
 
 function prepFromTasks(ev: EventRow): number {
@@ -240,6 +288,10 @@ export function InsightWorkbench({
     schedule(v);
   }
 
+  function patchEventRow(index: number, patch: Partial<EventRow>) {
+    replaceEventsList(events.events.map((x, j) => (j === index ? { ...x, ...patch } : x)));
+  }
+
   async function importEventsFromPdf(file: File) {
     setImporting(true);
     setError(null);
@@ -256,9 +308,19 @@ export function InsightWorkbench({
         ok?: boolean;
         events?: Array<{
           name: string;
+          eventUrl?: string;
           eventDate: string;
           location: string;
           boothOrTrack: string;
+          attendees?: string;
+          timeline?: string;
+          logistics?: string;
+          commercialNotes?: string;
+          leadCaptureNotes?: string;
+          speakingNotes?: string;
+          meetingsNotes?: string;
+          competitorNotes?: string;
+          followUpNotes?: string;
           goals: string;
           taskLabels: string[];
         }>;
@@ -271,9 +333,19 @@ export function InsightWorkbench({
         id: crypto.randomUUID(),
         name: ex.name,
         prepPct: 0,
+        eventUrl: ex.eventUrl ?? "",
         eventDate: ex.eventDate,
         location: ex.location,
         boothOrTrack: ex.boothOrTrack,
+        attendees: ex.attendees ?? "",
+        timeline: ex.timeline ?? "",
+        logistics: ex.logistics ?? "",
+        commercialNotes: ex.commercialNotes ?? "",
+        leadCaptureNotes: ex.leadCaptureNotes ?? "",
+        speakingNotes: ex.speakingNotes ?? "",
+        meetingsNotes: ex.meetingsNotes ?? "",
+        competitorNotes: ex.competitorNotes ?? "",
+        followUpNotes: ex.followUpNotes ?? "",
         goals: ex.goals,
         tasks: (ex.taskLabels ?? []).map((label) => ({
           id: crypto.randomUUID(),
@@ -353,9 +425,11 @@ export function InsightWorkbench({
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           <p className="text-xs text-[#9090b0]">
-            Add conferences or field events manually, or <strong className="text-[#f0f0f8]">Import PDF</strong> (agenda,
-            exhibitor guide, registration) to draft goals and tasks. Edit anything before relying on it — then use{" "}
-            <strong className="text-[#f0f0f8]">Match prep to tasks</strong> to align the slider with checklist progress.
+            Capture the official site, who is going, logistics, and a prep timeline alongside goals and tasks. Use{" "}
+            <strong className="text-[#f0f0f8]">Import PDF</strong> to draft from an agenda or exhibitor pack — then edit.{" "}
+            <strong className="text-[#f0f0f8]">Match prep to tasks</strong> syncs the slider with your checklist. Expand{" "}
+            <strong className="text-[#f0f0f8]">Program &amp; commercial</strong> for sponsor/budget, lead capture, speaking,
+            meetings, competitors, and follow-up.
           </p>
 
           {events.events.length === 0 ? (
@@ -388,6 +462,33 @@ export function InsightWorkbench({
                 >
                   Remove
                 </button>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-end gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Event website</div>
+                  <input
+                    value={ev.eventUrl}
+                    onChange={(e) => {
+                      const next = events.events.map((x, j) =>
+                        j === i ? { ...x, eventUrl: e.target.value } : x
+                      );
+                      replaceEventsList(next);
+                    }}
+                    placeholder="https://conference.example.com"
+                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                  />
+                </div>
+                {hrefForUserUrl(ev.eventUrl) ? (
+                  <a
+                    href={hrefForUserUrl(ev.eventUrl)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1.5 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                  >
+                    Open site
+                  </a>
+                ) : null}
               </div>
 
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -435,6 +536,55 @@ export function InsightWorkbench({
                 </div>
               </div>
 
+              <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                <div>
+                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Team attending</div>
+                  <textarea
+                    value={ev.attendees}
+                    onChange={(e) => {
+                      const next = events.events.map((x, j) =>
+                        j === i ? { ...x, attendees: e.target.value } : x
+                      );
+                      replaceEventsList(next);
+                    }}
+                    rows={4}
+                    placeholder="One per line: name, role (e.g. Alex Chen — PMM; Jordan — AE)"
+                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                  />
+                </div>
+                <div>
+                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Timeline &amp; milestones</div>
+                  <textarea
+                    value={ev.timeline}
+                    onChange={(e) => {
+                      const next = events.events.map((x, j) =>
+                        j === i ? { ...x, timeline: e.target.value } : x
+                      );
+                      replaceEventsList(next);
+                    }}
+                    rows={4}
+                    placeholder="Reg deadline, booth setup, ship collateral, travel days, show floor hours…"
+                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Logistics &amp; on-site details</div>
+                <textarea
+                  value={ev.logistics}
+                  onChange={(e) => {
+                    const next = events.events.map((x, j) =>
+                      j === i ? { ...x, logistics: e.target.value } : x
+                    );
+                    replaceEventsList(next);
+                  }}
+                  rows={4}
+                  placeholder="Hotel & confirmation, flights, badge pickup, parking, dress code, budget code, internal briefing doc link, emergency contact…"
+                  className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                />
+              </div>
+
               <div className="mt-3">
                 <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Goals</div>
                 <textarea
@@ -450,6 +600,77 @@ export function InsightWorkbench({
                   className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
                 />
               </div>
+
+              <details className="group mt-3 rounded-xl border border-[#2a2e3f] bg-black/10 px-3 py-2 [&_summary]:list-none [&_summary::-webkit-details-marker]:hidden">
+                <summary className="cursor-pointer text-xs font-medium text-[#c4b8ff] hover:text-[#ddd6ff]">
+                  <span className="mr-1 text-[#9090b0] group-open:rotate-90 inline-block transition-transform">
+                    ▸
+                  </span>
+                  Program &amp; commercial (sponsor, lead capture, speaking, pipeline, follow-up)
+                </summary>
+                <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Commercial &amp; budget</div>
+                    <textarea
+                      value={ev.commercialNotes}
+                      onChange={(e) => patchEventRow(i, { commercialNotes: e.target.value })}
+                      rows={3}
+                      placeholder="Sponsor tier, booth package, PO / budget owner, cancellation terms…"
+                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    />
+                  </div>
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Lead capture</div>
+                    <textarea
+                      value={ev.leadCaptureNotes}
+                      onChange={(e) => patchEventRow(i, { leadCaptureNotes: e.target.value })}
+                      rows={3}
+                      placeholder="Scanner app, login, badge rules, data export owner…"
+                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    />
+                  </div>
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Speaking / sponsored session</div>
+                    <textarea
+                      value={ev.speakingNotes}
+                      onChange={(e) => patchEventRow(i, { speakingNotes: e.target.value })}
+                      rows={3}
+                      placeholder="Session title, slot time, AV contact, sponsor deliverables…"
+                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    />
+                  </div>
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Meetings &amp; booth duty</div>
+                    <textarea
+                      value={ev.meetingsNotes}
+                      onChange={(e) => patchEventRow(i, { meetingsNotes: e.target.value })}
+                      rows={3}
+                      placeholder="Target accounts, pre-booked meetings, booth schedule, battlecard link…"
+                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    />
+                  </div>
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Competitors on the floor</div>
+                    <textarea
+                      value={ev.competitorNotes}
+                      onChange={(e) => patchEventRow(i, { competitorNotes: e.target.value })}
+                      rows={3}
+                      placeholder="Who else is exhibiting; notes for reps…"
+                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    />
+                  </div>
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Post-event follow-up</div>
+                    <textarea
+                      value={ev.followUpNotes}
+                      onChange={(e) => patchEventRow(i, { followUpNotes: e.target.value })}
+                      rows={3}
+                      placeholder="Owner, SLA for leads, nurture track, CRM campaign…"
+                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    />
+                  </div>
+                </div>
+              </details>
 
               <div className="mt-3">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
