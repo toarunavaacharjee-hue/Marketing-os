@@ -24,6 +24,8 @@ export async function middleware(request: NextRequest) {
   const host = (request.headers.get("host") ?? "").toLowerCase();
   const isAppHost = host.startsWith("app.");
   const path = request.nextUrl.pathname;
+  const rootHost = host.replace(/^www\./, "").replace(/^app\./, "");
+  const appHost = `app.${rootHost}`;
 
   // 1) app.<domain> should always land in /dashboard
   if (isAppHost && path === "/") {
@@ -32,11 +34,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Ensure product always lives on app.<domain>.
-  // If someone hits /dashboard on the marketing domain, bounce to the app subdomain.
-  if (!isAppHost && path.startsWith("/dashboard")) {
+  // Ensure the product/auth/operator routes never live on the marketing domain.
+  // If someone hits these paths on the root domain, bounce to app.<domain>.
+  if (
+    !isAppHost &&
+    (path.startsWith("/dashboard") ||
+      path.startsWith("/operator") ||
+      path.startsWith("/login") ||
+      path.startsWith("/signup") ||
+      path.startsWith("/auth") ||
+      path.startsWith("/invite"))
+  ) {
     const url = request.nextUrl.clone();
-    url.hostname = `app.${host.replace(/^www\./, "")}`;
+    url.hostname = appHost;
     // keep pathname + query
     return NextResponse.redirect(url);
   }
@@ -54,7 +64,7 @@ export async function middleware(request: NextRequest) {
     !path.startsWith("/api")
   ) {
     const url = request.nextUrl.clone();
-    url.hostname = host.replace(/^app\./, "");
+    url.hostname = rootHost;
     return NextResponse.redirect(url);
   }
 
