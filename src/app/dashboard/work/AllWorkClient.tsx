@@ -555,7 +555,129 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-[#2a2e3f] bg-[#141420]">
+      {/* Mobile list */}
+      <div className="space-y-3 md:hidden">
+        {filtered.map((it) => (
+          <div key={it.id} className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium text-[#f0f0f8]">{it.title}</div>
+                {it.subtitle ? <div className="mt-0.5 text-xs text-[#9090b0]">{it.subtitle}</div> : null}
+                <div className="mt-1 text-xs text-[#c4b8ff]">{it.sourceLabel}</div>
+              </div>
+              <div className="shrink-0 text-right text-xs">
+                <div
+                  className={
+                    it.done
+                      ? "text-emerald-300/90"
+                      : it.status === "Reference"
+                        ? "text-[#9090b0]"
+                        : "text-[#f0f0f8]"
+                  }
+                >
+                  {it.status ?? "—"}
+                </div>
+                <div className="mt-1 text-[11px] text-[#707090]">{it.due ?? "—"}</div>
+              </div>
+            </div>
+
+            {it.timeline ? <div className="mt-2 line-clamp-3 text-xs text-[#707090]">{it.timeline}</div> : null}
+            {outcomes[it.id]?.notes ? (
+              <div className="mt-2 line-clamp-2 text-[11px] text-[#c4b8ff]">Update: {outcomes[it.id]!.notes}</div>
+            ) : null}
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {it.source === "segments" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void (async () => {
+                      try {
+                        await seedMessagingFromSegment(it.title);
+                      } catch (e) {
+                        setError(e instanceof Error ? e.message : "Failed to seed messaging.");
+                      }
+                    })();
+                  }}
+                  className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                >
+                  Seed messaging
+                </button>
+              ) : null}
+              {it.source === "segments" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void aiGenerateMessagingFromSegment(it.title, it.id);
+                  }}
+                  disabled={isBusy(it.id)}
+                  className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
+                >
+                  {isBusy(it.id) ? "Generating…" : "AI draft"}
+                </button>
+              ) : null}
+              {it.source === "positioning_studio" ? (
+                <button
+                  type="button"
+                  onClick={() => void openPitchModal(it.id)}
+                  disabled={isBusy(it.id)}
+                  className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
+                >
+                  {isBusy(it.id) ? "Generating…" : "AI pitch"}
+                </button>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingOutcomeId(it.id);
+                  setEditingOutcomeNotes(outcomes[it.id]?.notes ?? "");
+                }}
+                className="rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-1 text-xs font-medium text-[#9090b0] hover:bg-white/5"
+              >
+                Update
+              </button>
+              <Link href={it.href} className="text-xs font-medium text-[#7c6cff] hover:text-[#a39cff] hover:underline">
+                Open
+              </Link>
+            </div>
+
+            {editingOutcomeId === it.id ? (
+              <div className="mt-3">
+                <textarea
+                  value={editingOutcomeNotes}
+                  onChange={(e) => setEditingOutcomeNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Update / outcome notes (what changed, numbers, wins, next step)…"
+                  className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-2 text-sm text-[#f0f0f8]"
+                />
+                <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void saveOutcomeFor(it.id)}
+                    className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingOutcomeId(null);
+                      setEditingOutcomeNotes("");
+                    }}
+                    className="rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-1 text-xs font-medium text-[#9090b0] hover:bg-white/5"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-x-auto rounded-2xl border border-[#2a2e3f] bg-[#141420] md:block">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="border-b border-[#2a2e3f] text-[10px] font-medium uppercase text-[#9090b0]">
             <tr>
