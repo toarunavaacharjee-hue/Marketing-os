@@ -19,7 +19,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState<string>("all");
   const [hideDone, setHideDone] = useState(false);
-  const [workGenerating, setWorkGenerating] = useState(false);
+  const [workBusyId, setWorkBusyId] = useState<string | null>(null);
   const [outcomes, setOutcomes] = useState<Record<string, { notes: string; updatedAt: string }>>({});
   const [editingOutcomeId, setEditingOutcomeId] = useState<string | null>(null);
   const [editingOutcomeNotes, setEditingOutcomeNotes] = useState<string>("");
@@ -208,8 +208,8 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     router.push("/dashboard/messaging-artifacts");
   }
 
-  async function aiGenerateMessagingFromSegment(segmentName: string) {
-    setWorkGenerating(true);
+  async function aiGenerateMessagingFromSegment(segmentName: string, workId: string) {
+    setWorkBusyId(workId);
     setError(null);
     try {
       const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
@@ -285,12 +285,12 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate messaging.");
     } finally {
-      setWorkGenerating(false);
+      setWorkBusyId(null);
     }
   }
 
-  async function aiGeneratePitchBattlecardFromPositioning() {
-    setWorkGenerating(true);
+  async function aiGeneratePitchBattlecardFromPositioning(workId: string) {
+    setWorkBusyId(workId);
     setError(null);
     try {
       const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
@@ -361,7 +361,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate pitch battlecard.");
     } finally {
-      setWorkGenerating(false);
+      setWorkBusyId(null);
     }
   }
 
@@ -560,22 +560,22 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                           <button
                             type="button"
                             onClick={() => {
-                              void aiGenerateMessagingFromSegment(it.title);
+                              void aiGenerateMessagingFromSegment(it.title, it.id);
                             }}
-                            disabled={workGenerating}
+                            disabled={workBusyId !== null}
                             className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
                           >
-                            {workGenerating ? "Generating…" : "AI generate draft"}
+                            {workBusyId === it.id ? "Generating…" : "AI generate draft"}
                           </button>
                         ) : null}
                         {it.source === "positioning_studio" ? (
                           <button
                             type="button"
-                            onClick={() => void aiGeneratePitchBattlecardFromPositioning()}
-                            disabled={workGenerating}
+                            onClick={() => void aiGeneratePitchBattlecardFromPositioning(it.id)}
+                            disabled={workBusyId !== null}
                             className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
                           >
-                            {workGenerating ? "Generating…" : "AI generate pitch"}
+                            {workBusyId === it.id ? "Generating…" : "AI generate pitch"}
                           </button>
                         ) : null}
                         <button
