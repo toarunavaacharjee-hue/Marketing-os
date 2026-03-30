@@ -837,7 +837,7 @@ function ThisWeek() {
       <div className="mt-1 text-[11px] text-text2">
         See everything in one place:{" "}
         <Link href="/dashboard/work" className="text-accent hover:underline">
-          All work
+          Marketing Workbench
         </Link>
         . Or track in{" "}
         <Link href="/dashboard/gtm-planner" className="text-accent hover:underline">GTM Planner</Link>,{" "}

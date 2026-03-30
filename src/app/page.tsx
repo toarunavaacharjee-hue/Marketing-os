@@ -60,7 +60,7 @@ export default function HomePage() {
         name: "Starter",
         m: 49,
         a: 39,
-        bullets: ["100 AI workflow runs / month", "Core PMM spine", "All work workbench"]
+        bullets: ["100 AI workflow runs / month", "Core PMM spine", "Marketing Workbench"]
       },
       { name: "Growth", m: 99, a: 79, bullets: ["Unlimited AI workflow runs", "All modules", "Priority support"] },
       {
@@ -160,7 +160,7 @@ export default function HomePage() {
               <div className="mt-3 grid gap-2 text-sm text-[#9090b0]">
                 {[
                   "Templates to seed launch plans and event playbooks",
-                  "All work: a unified workbench across modules",
+                  "Marketing Workbench: your unified cross-module view",
                   "AI actions: Segment → Messaging draft, Positioning → Pitch battlecard",
                   "Workflow run logs + updates so teams stay aligned"
                 ].map((x) => (
@@ -171,7 +171,7 @@ export default function HomePage() {
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link href="/dashboard/work" className="rounded-xl bg-[#7c6cff] px-4 py-2 text-sm font-medium text-white">
-                  Explore All work
+                  Open Marketing Workbench
                 </Link>
                 <Link
                   href="/dashboard/getting-started"

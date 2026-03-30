@@ -20,7 +20,7 @@ const PLANS: Array<{
     bullets: [
       "100 AI workflow runs / month",
       "All core workbenches (ICP → Positioning → Messaging)",
-      "All work (unified workbench)",
+      "Marketing Workbench (unified workbench)",
       "Email support"
     ],
     cta: "Start with Starter"
@@ -56,7 +56,7 @@ const PLANS: Array<{
 ];
 
 const MATRIX = [
-  { group: "Core workflow", rows: [["All work (unified workbench)", true, true, true]] },
+  { group: "Core workflow", rows: [["Marketing Workbench (unified workbench)", true, true, true]] },
   {
     group: "AI",
     rows: [

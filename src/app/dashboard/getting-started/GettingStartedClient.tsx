@@ -147,9 +147,9 @@ export function GettingStartedClient({ environmentId }: { environmentId: string 
     },
     {
       id: "work",
-      title: "Track everything in All work",
+      title: "Track everything in the Marketing Workbench",
       desc: "Your unified workbench. Run AI actions and add updates.",
-      ctaLabel: "Open All work",
+      ctaLabel: "Open Marketing Workbench",
       href: "/dashboard/work"
     }
   ];
@@ -254,7 +254,11 @@ export function GettingStartedClient({ environmentId }: { environmentId: string 
         </div>
 
         <div className="mt-5 text-xs text-[#707090]">
-          Tip: After applying templates, open <Link href="/dashboard/work" className="text-[#c4b8ff] hover:underline">All work</Link> and run AI actions from ICP Segments and Positioning.
+          Tip: After applying templates, open{" "}
+          <Link href="/dashboard/work" className="text-[#c4b8ff] hover:underline">
+            Marketing Workbench
+          </Link>{" "}
+          and run AI actions from ICP Segments and Positioning.
         </div>
       </div>
     </div>

@@ -472,7 +472,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     <div className="space-y-4">
       <div>
         <h1 className="text-3xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
-          All work
+          Marketing Workbench
         </h1>
         <p className="mt-1 text-sm text-[#9090b0]">
           One view of tasks, queues, campaigns, and milestones from across modules for this product. Edit in each module
