@@ -19,10 +19,40 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState<string>("all");
   const [hideDone, setHideDone] = useState(false);
-  const [workBusyId, setWorkBusyId] = useState<string | null>(null);
+  const [busyIds, setBusyIds] = useState<Record<string, true>>({});
   const [outcomes, setOutcomes] = useState<Record<string, { notes: string; updatedAt: string }>>({});
   const [editingOutcomeId, setEditingOutcomeId] = useState<string | null>(null);
   const [editingOutcomeNotes, setEditingOutcomeNotes] = useState<string>("");
+  const [runLogs, setRunLogs] = useState<
+    Array<{
+      id: string;
+      at: string;
+      action: string;
+      targetId: string;
+      targetLabel: string;
+      status: "running" | "ok" | "error";
+      message?: string;
+    }>
+  >([]);
+
+  const [pitchModalOpen, setPitchModalOpen] = useState(false);
+  const [pitchTargetId, setPitchTargetId] = useState<string | null>(null);
+  const [pitchCompetitors, setPitchCompetitors] = useState<Array<{ id: string; name: string }>>([]);
+  const [pitchCompetitorId, setPitchCompetitorId] = useState<string>("");
+  const [pitchError, setPitchError] = useState<string | null>(null);
+
+  function isBusy(id: string) {
+    return Boolean(busyIds[id]);
+  }
+
+  function setBusy(id: string, on: boolean) {
+    setBusyIds((prev) => {
+      const next = { ...prev };
+      if (on) next[id] = true;
+      else delete next[id];
+      return next;
+    });
+  }
 
   function sortWork(a: WorkItem, b: WorkItem) {
     if (a.done !== b.done) return a.done ? 1 : -1;
@@ -90,21 +120,41 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       };
     });
 
-    // Outcome notes (measurement layer: human-updated updates + KPI snapshot text)
-    const { data: outRow } = await supabase
+    // Work meta: outcomes + workflow run logs
+    const { data: workRows } = await supabase
       .from("module_settings")
-      .select("value_json")
+      .select("key,value_json")
       .eq("environment_id", environmentId)
       .eq("module", "work")
-      .eq("key", "outcomes")
-      .maybeSingle();
+      .in("key", ["outcomes", "workflow_runs"]);
 
-    const value = (outRow?.value_json ?? null) as any;
-    const rawItems = value?.items;
+    const outcomesRow = (workRows ?? []).find((r: any) => r.key === "outcomes");
+    const runsRow = (workRows ?? []).find((r: any) => r.key === "workflow_runs");
+
+    const outcomesVal = (outcomesRow?.value_json ?? null) as any;
+    const rawItems = outcomesVal?.items;
     const loadedOutcomes: Record<string, { notes: string; updatedAt: string }> =
       rawItems && typeof rawItems === "object" ? rawItems : {};
-
     setOutcomes(loadedOutcomes);
+
+    const runsVal = (runsRow?.value_json ?? null) as any;
+    const rawRuns = runsVal?.runs;
+    const loadedRuns =
+      Array.isArray(rawRuns)
+        ? rawRuns
+            .filter((x) => x && typeof x === "object" && "id" in x && "action" in x)
+            .slice(0, 100)
+            .map((x) => ({
+              id: String((x as any).id),
+              at: String((x as any).at ?? new Date().toISOString()),
+              action: String((x as any).action ?? ""),
+              targetId: String((x as any).targetId ?? ""),
+              targetLabel: String((x as any).targetLabel ?? ""),
+              status: ((x as any).status as any) || "ok",
+              message: typeof (x as any).message === "string" ? (x as any).message : undefined
+            }))
+        : [];
+    setRunLogs(loadedRuns);
     setItems([...fromModules, ...segmentItems].sort(sortWork));
     setLoading(false);
   }, [environmentId, supabase]);
@@ -165,6 +215,39 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     }
   }
 
+  async function persistRunLogs(next: typeof runLogs) {
+    const payload = { runs: next.slice(0, 100) };
+    const { error: upErr } = await supabase.from("module_settings").upsert({
+      environment_id: environmentId,
+      module: "work",
+      key: "workflow_runs",
+      value_json: payload
+    });
+    if (upErr) throw new Error(upErr.message);
+  }
+
+  function startRun(action: string, targetId: string, targetLabel: string) {
+    const id = crypto.randomUUID();
+    const entry = {
+      id,
+      at: new Date().toISOString(),
+      action,
+      targetId,
+      targetLabel,
+      status: "running" as const
+    };
+    const next = [entry, ...runLogs].slice(0, 100);
+    setRunLogs(next);
+    void persistRunLogs(next);
+    return id;
+  }
+
+  function finishRun(runId: string, status: "ok" | "error", message?: string) {
+    const next = runLogs.map((r) => (r.id === runId ? { ...r, status, message } : r));
+    setRunLogs(next);
+    void persistRunLogs(next);
+  }
+
   async function seedMessagingFromSegment(segmentName: string) {
     const MOD = "messaging_artifacts";
     const KEY = "artifacts";
@@ -208,8 +291,41 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     router.push("/dashboard/messaging-artifacts");
   }
 
+  async function openPitchModal(workId: string) {
+    setPitchError(null);
+    setPitchTargetId(workId);
+    setPitchCompetitors([]);
+    setPitchCompetitorId("");
+    setPitchModalOpen(true);
+    try {
+      const res = await fetch("/api/battlecards");
+      const data = (await res.json()) as { competitors?: Array<{ id: string; name: string }>; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Failed to load competitors.");
+      const comps = data.competitors ?? [];
+      setPitchCompetitors(comps);
+      setPitchCompetitorId(comps[0]?.id ?? "");
+      if (!comps.length) {
+        setPitchError("No competitors found. Add competitors in Battlecards first.");
+      }
+    } catch (e) {
+      setPitchError(e instanceof Error ? e.message : "Failed to load competitors.");
+    }
+  }
+
+  async function confirmPitchModal() {
+    if (!pitchTargetId) return;
+    if (!pitchCompetitorId) {
+      setPitchError("Pick a competitor.");
+      return;
+    }
+    setPitchModalOpen(false);
+    await runPitchBattlecardFromPositioning(pitchTargetId, pitchCompetitorId);
+  }
+
   async function aiGenerateMessagingFromSegment(segmentName: string, workId: string) {
-    setWorkBusyId(workId);
+    if (isBusy(workId)) return;
+    setBusy(workId, true);
+    const runId = startRun("ai_generate_messaging_draft", workId, segmentName);
     setError(null);
     try {
       const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
@@ -282,15 +398,19 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       if (upErr) throw new Error(upErr.message);
 
       await load();
+      finishRun(runId, "ok");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate messaging.");
+      finishRun(runId, "error", e instanceof Error ? e.message : "Failed to generate messaging.");
     } finally {
-      setWorkBusyId(null);
+      setBusy(workId, false);
     }
   }
 
-  async function aiGeneratePitchBattlecardFromPositioning(workId: string) {
-    setWorkBusyId(workId);
+  async function runPitchBattlecardFromPositioning(workId: string, competitorId: string) {
+    if (isBusy(workId)) return;
+    setBusy(workId, true);
+    const runId = startRun("ai_generate_pitch_battlecard", workId, "Positioning canvas");
     setError(null);
     try {
       const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
@@ -314,25 +434,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       }
       const personaId = personaData.persona_id;
       if (!personaId) throw new Error("Could not create persona.");
-
-      // 2) Choose a competitor and generate the pitch battlecard
-      const compsRes = await fetch("/api/battlecards");
-      const compsData = (await compsRes.json()) as { competitors?: Array<{ id: string; name: string }>; error?: string };
-      if (!compsRes.ok) throw new Error(compsData.error ?? "Failed to load competitors.");
-
-      const comps = compsData.competitors ?? [];
-      if (!comps.length) throw new Error("No competitors found. Add competitors in Battlecards first.");
-
-      let competitorId = comps[0]?.id ?? "";
-      if (comps.length > 1) {
-        const raw = window.prompt(
-          "Select competitor by id:\n" +
-            comps.map((c) => `${c.id} - ${c.name}`).join("\n"),
-          comps[0]?.id ?? ""
-        );
-        competitorId = (raw ?? "").trim();
-      }
-      if (!competitorId) throw new Error("Competitor id is required.");
 
       const pitchRes = await fetch("/api/battlecards/pitch", {
         method: "POST",
@@ -358,10 +459,12 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       await load();
       router.push("/dashboard/battlecards");
+      finishRun(runId, "ok");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate pitch battlecard.");
+      finishRun(runId, "error", e instanceof Error ? e.message : "Failed to generate pitch battlecard.");
     } finally {
-      setWorkBusyId(null);
+      setBusy(workId, false);
     }
   }
 
@@ -562,20 +665,20 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                             onClick={() => {
                               void aiGenerateMessagingFromSegment(it.title, it.id);
                             }}
-                            disabled={workBusyId !== null}
+                            disabled={isBusy(it.id)}
                             className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
                           >
-                            {workBusyId === it.id ? "Generating…" : "AI generate draft"}
+                            {isBusy(it.id) ? "Generating…" : "AI generate draft"}
                           </button>
                         ) : null}
                         {it.source === "positioning_studio" ? (
                           <button
                             type="button"
-                            onClick={() => void aiGeneratePitchBattlecardFromPositioning(it.id)}
-                            disabled={workBusyId !== null}
+                            onClick={() => void openPitchModal(it.id)}
+                            disabled={isBusy(it.id)}
                             className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
                           >
-                            {workBusyId === it.id ? "Generating…" : "AI generate pitch"}
+                            {isBusy(it.id) ? "Generating…" : "AI generate pitch"}
                           </button>
                         ) : null}
                         <button
@@ -603,6 +706,114 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
           </tbody>
         </table>
       </div>
+
+      <details className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
+        <summary className="cursor-pointer text-sm font-medium text-[#f0f0f8]">
+          Workflow runs <span className="text-xs text-[#9090b0]">({runLogs.length})</span>
+        </summary>
+        <div className="mt-3 space-y-2">
+          {runLogs.length === 0 ? (
+            <div className="text-sm text-[#9090b0]">No workflow runs yet.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead className="border-b border-[#2a2e3f] text-[10px] font-medium uppercase text-[#9090b0]">
+                  <tr>
+                    <th className="py-2 pr-4">When</th>
+                    <th className="py-2 pr-4">Action</th>
+                    <th className="py-2 pr-4">Target</th>
+                    <th className="py-2 pr-4">Status</th>
+                    <th className="py-2">Message</th>
+                  </tr>
+                </thead>
+                <tbody className="text-[#f0f0f8]">
+                  {runLogs.slice(0, 30).map((r) => (
+                    <tr key={r.id} className="border-t border-[#2a2e3f] align-top">
+                      <td className="py-2 pr-4 text-xs text-[#9090b0]">
+                        {r.at ? new Date(r.at).toLocaleString() : "—"}
+                      </td>
+                      <td className="py-2 pr-4 text-xs text-[#c4b8ff]">{r.action}</td>
+                      <td className="py-2 pr-4 text-xs text-[#9090b0]">
+                        {r.targetLabel || r.targetId}
+                      </td>
+                      <td className="py-2 pr-4 text-xs">
+                        <span
+                          className={
+                            r.status === "ok"
+                              ? "text-emerald-300/90"
+                              : r.status === "error"
+                                ? "text-red-300/90"
+                                : "text-[#fbbf24]"
+                          }
+                        >
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="py-2 text-xs text-[#9090b0]">{r.message ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-2 text-[11px] text-[#707090]">
+                Showing the most recent 30 runs. Stored per product in <span className="font-mono">module_settings</span>{" "}
+                (<span className="font-mono">work/workflow_runs</span>).
+              </div>
+            </div>
+          )}
+        </div>
+      </details>
+
+      {pitchModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-[#2a2e3f] bg-[#141420] p-5">
+            <div className="text-lg font-medium text-[#f0f0f8]">Generate pitch battlecard</div>
+            <div className="mt-1 text-sm text-[#9090b0]">
+              Pick a competitor. We’ll generate an ICP persona from your Positioning canvas, then create a pitch
+              battlecard.
+            </div>
+
+            {pitchError ? (
+              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                {pitchError}
+              </div>
+            ) : null}
+
+            <div className="mt-4">
+              <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Competitor</div>
+              <select
+                value={pitchCompetitorId}
+                onChange={(e) => setPitchCompetitorId(e.target.value)}
+                className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                disabled={!pitchCompetitors.length}
+              >
+                {pitchCompetitors.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPitchModalOpen(false)}
+                className="rounded-lg border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm font-medium text-[#9090b0] hover:bg-white/5"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void confirmPitchModal()}
+                disabled={!pitchCompetitorId || !pitchCompetitors.length}
+                className="rounded-lg bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
