@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
+import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
 
 type Profile = {
   name: string | null;
@@ -95,6 +96,7 @@ export function DashboardShell({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const ent = useMemo(() => getEntitlements(profile?.plan ?? "starter"), [profile?.plan]);
 
   const [anthropicKey, setAnthropicKey] = useState("");
   useEffect(() => {
@@ -224,15 +226,18 @@ export function DashboardShell({
                 {section.items.map((m) => {
                   const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
                   const active = activeMap.get(href) ?? false;
+                  const allowed = isSlugAllowed(ent, m.slug);
                   return (
                     <Link
                       key={m.slug || "home"}
-                      href={href}
+                      href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
                       onClick={onNavigate}
                       className={`relative flex items-center gap-2 px-[18px] py-2 text-[13px] font-medium transition ${
                         active
                           ? "bg-surface2 text-accent2"
-                          : "text-text2 hover:bg-surface2 hover:text-text"
+                          : allowed
+                            ? "text-text2 hover:bg-surface2 hover:text-text"
+                            : "text-[#5c6278] hover:bg-surface2"
                       }`}
                     >
                       {active ? <PurpleBar /> : null}
@@ -240,7 +245,7 @@ export function DashboardShell({
                         {m.icon ?? "•"}
                       </span>
                       <span className="truncate">{m.label}</span>
-                      {m.badge ? <NavBadge>{m.badge}</NavBadge> : null}
+                      {!allowed ? <NavBadge>UPGRADE</NavBadge> : m.badge ? <NavBadge>{m.badge}</NavBadge> : null}
                     </Link>
                   );
                 })}

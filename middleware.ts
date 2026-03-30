@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { CookieSerializeOptions } from "cookie";
+import { getEntitlements, normalizePlan } from "@/lib/planEntitlements";
 
 type CookieToSet = {
   name: string;
@@ -56,6 +57,29 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/login";
     url.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Plan gating (hard): restrict Starter/Free from paid modules.
+  if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
+    const { data: profileRow } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const plan = normalizePlan((profileRow as { plan?: string | null } | null)?.plan ?? null);
+    const ent = getEntitlements(plan);
+
+    // /dashboard -> slug ""
+    const path = request.nextUrl.pathname.replace(/^\/dashboard\/?/, "");
+    const slug = path.split("/").filter(Boolean)[0] ?? "";
+
+    if (!ent.allowedDashboardSlugs.has("*") && !ent.allowedDashboardSlugs.has(slug)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard/upgrade";
+      url.searchParams.set("next", request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;

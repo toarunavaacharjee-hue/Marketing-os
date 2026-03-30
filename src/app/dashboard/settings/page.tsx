@@ -85,6 +85,18 @@ export default async function SettingsPage() {
         <div className="text-sm text-[#f0f0f8]">Module settings</div>
         <div className="mt-2 grid gap-2 md:grid-cols-2">
           <Link
+            href="/dashboard/settings/team"
+            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] hover:bg-white/5"
+          >
+            Team & roles → members, permissions, governance
+          </Link>
+          <Link
+            href="/dashboard/support"
+            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] hover:bg-white/5"
+          >
+            Support → submit tickets (tier-aware)
+          </Link>
+          <Link
             href="/dashboard/settings/product"
             className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] hover:bg-white/5"
           >
