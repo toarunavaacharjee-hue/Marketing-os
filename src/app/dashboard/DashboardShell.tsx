@@ -334,7 +334,7 @@ export function DashboardShell({
 
   return (
     <div
-      className="min-h-screen bg-bg text-text"
+      className="h-dvh bg-bg text-text overflow-hidden"
       style={{ fontFamily: "var(--font-body)" }}
     >
       {/* Mobile top bar */}
@@ -358,10 +358,12 @@ export function DashboardShell({
         <div className="w-[44px]" />
       </div>
 
-      <div className="flex">
+      <div className="flex h-[calc(100dvh-56px)] md:h-dvh">
         {/* Desktop sidebar */}
-        <div className="hidden h-screen w-[228px] border-r border-white/[0.06] bg-[linear-gradient(180deg,var(--surface)_0%,#101018_100%)] shadow-[4px_0_24px_rgba(0,0,0,0.35)] md:block">
-          <Sidebar />
+        <div className="hidden w-[228px] shrink-0 border-r border-white/[0.06] bg-[linear-gradient(180deg,var(--surface)_0%,#101018_100%)] shadow-[4px_0_24px_rgba(0,0,0,0.35)] md:block">
+          <div className="h-dvh overflow-y-auto">
+            <Sidebar />
+          </div>
         </div>
 
         {/* Mobile sidebar overlay */}
@@ -372,12 +374,14 @@ export function DashboardShell({
               onClick={() => setMobileOpen(false)}
             />
             <div className="absolute left-0 top-0 h-full w-[228px] border-r border-white/[0.06] bg-[linear-gradient(180deg,var(--surface)_0%,#101018_100%)] shadow-2xl">
-              <Sidebar onNavigate={() => setMobileOpen(false)} />
+              <div className="h-full overflow-y-auto">
+                <Sidebar onNavigate={() => setMobileOpen(false)} />
+              </div>
             </div>
           </div>
         ) : null}
 
-        <main className="relative min-h-[calc(100vh-56px)] flex-1 px-4 py-6 md:min-h-screen md:px-8 md:py-10">
+        <main className="relative min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-10">
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.4] md:opacity-50"
             aria-hidden

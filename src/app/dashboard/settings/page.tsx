@@ -44,7 +44,7 @@ export default async function SettingsPage() {
               switcher
             </span>
           </div>
-          <div className="mt-2 text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="mt-2 text-3xl sm:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Settings
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#9090b0]">
