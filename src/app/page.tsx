@@ -97,6 +97,7 @@ export default function HomePage() {
             <a href="#features">Features</a>
             <a href="#how-it-works">How it works</a>
             <a href="#modules">Modules</a>
+            <Link href="/creative-marketing-agency">Creative agency</Link>
             <Link href="/pricing">Pricing</Link>
             <a href="#faq">FAQ</a>
           </nav>
@@ -336,9 +337,22 @@ export default function HomePage() {
             <div className="font-semibold">AI Marketing Workbench</div>
             <p className="mt-2 text-sm text-[#9090b0]">The PMM + GTM operating layer (not a CRM).</p>
           </div>
-          <div className="text-sm text-[#9090b0]"><div className="mb-2 text-[#f0f0f8]">Product</div><div>Features</div><div>Modules</div><div>Pricing</div></div>
+          <div className="text-sm text-[#9090b0]">
+            <div className="mb-2 text-[#f0f0f8]">Product</div>
+            <div>Features</div>
+            <div>Modules</div>
+            <div>Pricing</div>
+          </div>
           <div className="text-sm text-[#9090b0]"><div className="mb-2 text-[#f0f0f8]">Company</div><div>About</div><div>Careers</div><div>Contact</div></div>
-          <div className="text-sm text-[#9090b0]"><div className="mb-2 text-[#f0f0f8]">Resources</div><div>Docs</div><div>FAQ</div><div>Status</div></div>
+          <div className="text-sm text-[#9090b0]">
+            <div className="mb-2 text-[#f0f0f8]">Resources</div>
+            <Link className="block" href="/creative-marketing-agency">
+              Creative agency
+            </Link>
+            <div>Docs</div>
+            <div>FAQ</div>
+            <div>Status</div>
+          </div>
         </div>
       </footer>
     </div>
