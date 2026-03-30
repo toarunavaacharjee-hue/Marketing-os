@@ -196,7 +196,7 @@ export function DashboardShell({
             className="font-[var(--font-heading)] text-[16px] font-extrabold tracking-[-0.5px]"
             onClick={onNavigate}
           >
-            Marketing <span className="text-accent2">OS</span>
+            AI Marketing <span className="text-accent2">Workbench</span>
           </Link>
 
           <button
@@ -349,7 +349,7 @@ export function DashboardShell({
         <div
           className="font-[var(--font-heading)] text-sm font-extrabold tracking-[-0.5px]"
         >
-          Marketing <span className="text-accent2">OS</span>
+          AI Marketing <span className="text-accent2">Workbench</span>
         </div>
         <div className="w-[44px]" />
       </div>
