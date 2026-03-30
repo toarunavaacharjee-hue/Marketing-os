@@ -41,6 +41,7 @@ const NAV: NavSection[] = [
   {
     label: "Planning",
     items: [
+      { label: "All work", slug: "work", icon: "🗂️" },
       { label: "Campaigns", slug: "campaigns", icon: "📋" },
       { label: "GTM Planner", slug: "gtm-planner", icon: "🚀" },
       { label: "Events", slug: "events", icon: "📅" }

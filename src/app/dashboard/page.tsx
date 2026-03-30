@@ -816,8 +816,12 @@ function ThisWeek() {
         📅 This week (templates)
       </div>
       <div className="mt-1 text-[11px] text-text2">
-        Track real work in <Link href="/dashboard/gtm-planner" className="text-accent hover:underline">GTM Planner</Link>
-        ,{" "}
+        See everything in one place:{" "}
+        <Link href="/dashboard/work" className="text-accent hover:underline">
+          All work
+        </Link>
+        . Or track in{" "}
+        <Link href="/dashboard/gtm-planner" className="text-accent hover:underline">GTM Planner</Link>,{" "}
         <Link href="/dashboard/campaigns" className="text-accent hover:underline">Campaigns</Link>, and{" "}
         <Link href="/dashboard/content-studio" className="text-accent hover:underline">Content Studio</Link>.
       </div>
