@@ -19,6 +19,45 @@ function isProtectedAppPath(pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
+  // Subdomain behavior:
+  // - app.<domain> root should land inside the product.
+  const host = (request.headers.get("host") ?? "").toLowerCase();
+  const isAppHost = host.startsWith("app.");
+  const path = request.nextUrl.pathname;
+
+  // 1) app.<domain> should always land in /dashboard
+  if (isAppHost && path === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  // Ensure product always lives on app.<domain>.
+  // If someone hits /dashboard on the marketing domain, bounce to the app subdomain.
+  if (!isAppHost && path.startsWith("/dashboard")) {
+    const url = request.nextUrl.clone();
+    url.hostname = `app.${host.replace(/^www\./, "")}`;
+    // keep pathname + query
+    return NextResponse.redirect(url);
+  }
+
+  // 2) marketing routes should NOT be served from app.<domain>
+  // If someone browses app.<domain>/<anything-not-dashboard>, send them to the marketing domain.
+  if (
+    isAppHost &&
+    !path.startsWith("/dashboard") &&
+    !path.startsWith("/auth") &&
+    !path.startsWith("/login") &&
+    !path.startsWith("/signup") &&
+    !path.startsWith("/invite") &&
+    !path.startsWith("/operator") &&
+    !path.startsWith("/api")
+  ) {
+    const url = request.nextUrl.clone();
+    url.hostname = host.replace(/^app\./, "");
+    return NextResponse.redirect(url);
+  }
+
   // Avoid redirect loops: onboarding lives at /onboarding now.
   if (request.nextUrl.pathname === "/dashboard/onboarding") {
     const url = request.nextUrl.clone();
@@ -86,6 +125,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/operator", "/operator/:path*"]
+  // Run on all paths so we can enforce host-based routing
+  matcher: ["/:path*"]
 };
 
