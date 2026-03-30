@@ -1,4 +1,5 @@
 import { loadOperatorData } from "@/app/operator/loadOperatorData";
+import OperatorSubscribersClient from "@/app/operator/OperatorSubscribersClient";
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
@@ -78,40 +79,7 @@ export default async function OperatorPage() {
         <p className="mt-1 text-xs text-[var(--text2)]">
           From Auth users, merged with public.profiles. Sort: newest registration first.
         </p>
-        <div className="mt-3 overflow-x-auto rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]">
-          <table className="w-full min-w-[900px] text-left text-sm">
-            <thead className="border-b border-[var(--border)] text-[10px] font-semibold uppercase text-[var(--text3)]">
-              <tr>
-                <th className="px-3 py-2">Email</th>
-                <th className="px-3 py-2">Name</th>
-                <th className="px-3 py-2">Company</th>
-                <th className="px-3 py-2">Plan</th>
-                <th className="px-3 py-2">AI used</th>
-                <th className="px-3 py-2">Operator</th>
-                <th className="px-3 py-2">Signed up</th>
-                <th className="px-3 py-2">Last sign-in</th>
-              </tr>
-            </thead>
-            <tbody className="text-[var(--text2)]">
-              {subscribers.map((s) => (
-                <tr key={s.id} className="border-t border-[var(--border)]">
-                  <td className="px-3 py-2 font-mono text-[12px] text-[var(--text)]">{s.email ?? "—"}</td>
-                  <td className="px-3 py-2">{s.name ?? "—"}</td>
-                  <td className="px-3 py-2">{s.company ?? "—"}</td>
-                  <td className="px-3 py-2">{s.plan ?? "—"}</td>
-                  <td className="px-3 py-2">{s.ai_queries_used}</td>
-                  <td className="px-3 py-2">{s.is_platform_admin ? "Yes" : "—"}</td>
-                  <td className="px-3 py-2 text-xs">
-                    {s.auth_created_at ? new Date(s.auth_created_at).toLocaleString() : "—"}
-                  </td>
-                  <td className="px-3 py-2 text-xs">
-                    {s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString() : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <OperatorSubscribersClient initialSubscribers={subscribers} />
       </div>
     </div>
   );
