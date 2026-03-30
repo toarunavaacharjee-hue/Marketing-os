@@ -56,9 +56,19 @@ export default function HomePage() {
 
   const pricing = useMemo(
     () => [
-      { name: "Starter", m: 49, a: 39, bullets: ["100 AI queries/month", "Core modules", "Email support"] },
-      { name: "Growth", m: 99, a: 79, bullets: ["Unlimited AI queries", "All modules", "Priority support"] },
-      { name: "Enterprise", m: 299, a: 249, bullets: ["Unlimited AI + governance", "Advanced controls", "Dedicated success"] }
+      {
+        name: "Starter",
+        m: 49,
+        a: 39,
+        bullets: ["100 AI workflow runs / month", "Core PMM spine", "All work workbench"]
+      },
+      { name: "Growth", m: 99, a: 79, bullets: ["Unlimited AI workflow runs", "All modules", "Priority support"] },
+      {
+        name: "Enterprise",
+        m: 299,
+        a: 249,
+        bullets: ["Unlimited AI + governance patterns", "Operator-friendly controls", "Dedicated success"]
+      }
     ],
     []
   );
@@ -85,13 +95,21 @@ export default function HomePage() {
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-[#9090b0] md:flex">
             <a href="#features">Features</a>
+            <a href="#how-it-works">How it works</a>
             <a href="#modules">Modules</a>
-            <a href="#pricing">Pricing</a>
+            <Link href="/pricing">Pricing</Link>
             <a href="#faq">FAQ</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="rounded-xl border border-[#2a2e3f] bg-transparent px-3 py-2 text-sm hover:bg-white/5">View demo</Link>
-            <Link href="/signup?plan=starter" className="rounded-xl bg-[#b8ff6c] px-3 py-2 text-sm font-medium text-black">Start free trial</Link>
+            <Link
+              href="/dashboard"
+              className="rounded-xl border border-[#2a2e3f] bg-transparent px-3 py-2 text-sm hover:bg-white/5"
+            >
+              View demo
+            </Link>
+            <Link href="/signup?plan=starter" className="rounded-xl bg-[#b8ff6c] px-3 py-2 text-sm font-medium text-black">
+              Start free
+            </Link>
           </div>
         </div>
       </header>
@@ -100,14 +118,25 @@ export default function HomePage() {
         <section data-reveal className="grid gap-8 pt-10 lg:grid-cols-2 lg:items-center">
           <div>
             <h1 className="text-5xl leading-tight md:text-6xl" style={{ fontFamily: "var(--font-heading)" }}>
-              Run your entire GTM in one place, <em className="text-[#7c6cff] italic">faster</em>.
+              The PMM + GTM operating layer for teams that ship.
             </h1>
             <p className="mt-4 max-w-xl text-lg text-[#9090b0]">
-              Marketing OS unifies strategy, campaigns, content, analytics, and AI Copilot so your team always knows what to do next.
+              Marketing OS connects ICP, positioning, messaging, campaigns, and measurement loops — then turns them into
+              repeatable workflows. It’s not a CRM replacement; it’s the system that keeps your go-to-market coherent.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/signup?plan=starter" className="rounded-xl bg-[#b8ff6c] px-5 py-3 font-medium text-black">Start free trial</Link>
-              <Link href="/dashboard" className="rounded-xl border border-[#2a2e3f] px-5 py-3 font-medium hover:bg-white/5">View live demo</Link>
+              <Link href="/signup?plan=starter" className="rounded-xl bg-[#b8ff6c] px-5 py-3 font-medium text-black">
+                Start free
+              </Link>
+              <Link href="/pricing" className="rounded-xl border border-[#2a2e3f] px-5 py-3 font-medium hover:bg-white/5">
+                See pricing
+              </Link>
+              <Link
+                href="/dashboard/getting-started"
+                className="rounded-xl border border-[#2a2e3f] px-5 py-3 font-medium hover:bg-white/5"
+              >
+                Getting started
+              </Link>
             </div>
             <div className="mt-7 flex flex-wrap items-center gap-4 rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm">
               <div className="flex -space-x-2">
@@ -119,15 +148,38 @@ export default function HomePage() {
               <div className="text-[#9090b0]">Avg setup <span className="text-[#f0f0f8]">1.8 hours</span></div>
             </div>
           </div>
-          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-3">
+          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
             <div className="mb-3 flex items-center gap-2 text-xs text-[#9090b0]">
               <span className="h-2 w-2 rounded-full bg-[#7c6cff]" />
               <span className="h-2 w-2 rounded-full bg-[#b8ff6c]" />
               <span className="h-2 w-2 rounded-full bg-[#2a2e3f]" />
-              app.marketingos.ai/dashboard
+              pm.mktos.app — workbench preview
             </div>
-            <div className="overflow-hidden rounded-xl border border-[#2a2e3f] bg-[#08080c]">
-              <iframe src="/dashboard" className="h-[420px] w-full" title="Dashboard preview" />
+            <div className="rounded-xl border border-[#2a2e3f] bg-black/20 p-4">
+              <div className="text-sm text-[#f0f0f8]">What you get on day 1</div>
+              <div className="mt-3 grid gap-2 text-sm text-[#9090b0]">
+                {[
+                  "Templates to seed launch plans and event playbooks",
+                  "All work: a unified workbench across modules",
+                  "AI actions: Segment → Messaging draft, Positioning → Pitch battlecard",
+                  "Workflow run logs + updates so teams stay aligned"
+                ].map((x) => (
+                  <div key={x} className="rounded-lg border border-[#2a2e3f] bg-[#141420]/60 px-3 py-2">
+                    {x}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link href="/dashboard/work" className="rounded-xl bg-[#7c6cff] px-4 py-2 text-sm font-medium text-white">
+                  Explore All work
+                </Link>
+                <Link
+                  href="/dashboard/getting-started"
+                  className="rounded-xl border border-[#2a2e3f] px-4 py-2 text-sm font-medium text-[#f0f0f8] hover:bg-white/5"
+                >
+                  Apply templates
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -178,14 +230,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section data-reveal className="mt-20">
+        <section id="how-it-works" data-reveal className="mt-20">
           <h2 className="text-3xl" style={{ fontFamily: "var(--font-heading)" }}>How It Works</h2>
           <div className="mt-5 grid gap-3 md:grid-cols-4">
             {[
-              "Connect your channels and set goals",
-              "Prioritize segments and positioning",
-              "Launch campaigns and content workflows",
-              "Use Copilot to optimize weekly"
+              "Define ICP segments and priorities",
+              "Generate and refine positioning + messaging",
+              "Seed plans using templates + workflows",
+              "Track work + outcomes weekly"
             ].map((s, i) => (
               <div key={s} className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
                 <div className="mb-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#7c6cff] text-xs font-semibold">{i + 1}</div>
@@ -216,9 +268,20 @@ export default function HomePage() {
                 <ul className="mt-3 space-y-1 text-sm text-[#9090b0]">
                   {p.bullets.map((b) => <li key={b}>- {b}</li>)}
                 </ul>
-                <Link href={`/signup?plan=${p.name.toLowerCase()}`} className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#b8ff6c] px-4 py-3 text-sm font-medium text-black">
-                  Choose {p.name}
-                </Link>
+                <div className="mt-4 grid gap-2">
+                  <Link
+                    href={`/signup?plan=${p.name.toLowerCase()}`}
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-[#b8ff6c] px-4 py-3 text-sm font-medium text-black"
+                  >
+                    Choose {p.name}
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="inline-flex w-full items-center justify-center rounded-xl border border-[#2a2e3f] px-4 py-3 text-sm font-medium text-[#f0f0f8] hover:bg-white/5"
+                  >
+                    Compare plans
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
