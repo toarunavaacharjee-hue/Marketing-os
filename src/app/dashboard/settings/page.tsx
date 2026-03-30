@@ -10,6 +10,7 @@ type Profile = {
   company: string | null;
   plan: string | null;
   ai_queries_used: number | null;
+  is_platform_admin?: boolean | null;
 };
 
 export default async function SettingsPage() {
@@ -22,7 +23,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id,name,company,plan,ai_queries_used")
+    .select("id,name,company,plan,ai_queries_used,is_platform_admin")
     .eq("id", user.id)
     .single();
 
@@ -46,8 +47,18 @@ export default async function SettingsPage() {
           <div className="mt-2 text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Settings
           </div>
-          <div className="mt-2 text-sm text-[#9090b0]">
-            Signed in as <span className="text-[#f0f0f8]">{user.email}</span>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[#9090b0]">
+            <span>
+              Signed in as <span className="text-[#f0f0f8]">{user.email}</span>
+            </span>
+            {p?.is_platform_admin ? (
+              <Link
+                href="/operator"
+                className="text-xs font-medium text-[#7c6cff] hover:text-[#a39cff] hover:underline"
+              >
+                Operator console
+              </Link>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
