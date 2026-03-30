@@ -33,14 +33,34 @@ export async function POST(req: Request) {
   const body = (await req.json()) as {
     prompt?: string;
     system?: string;
+    tone?: string;
+    length?: string;
   };
 
-  const prompt = (body.prompt ?? "").trim();
-  if (!prompt) {
+  const promptRaw = (body.prompt ?? "").trim();
+  if (!promptRaw) {
     return NextResponse.json({ error: "prompt is required." }, { status: 400 });
   }
 
+  const tone = (body.tone ?? "").trim();
+  const length = (body.length ?? "").trim();
+  const hints: string[] = [];
+  if (tone) hints.push(`Requested tone: ${tone}.`);
+  if (length) {
+    const depth =
+      length === "short"
+        ? "Keep the draft brief: tight sections, minimal elaboration."
+        : length === "long"
+          ? "Develop the draft fully: multiple sections, examples, and actionable detail as appropriate."
+          : "Use a balanced depth: clear sections with enough detail to be useful.";
+    hints.push(`Requested length: ${length}. ${depth}`);
+  }
+  const prompt = hints.length ? `${hints.join(" ")}\n\n---\n\n${promptRaw}` : promptRaw;
+
   const systemCustom = (body.system ?? "").trim();
+
+  const maxTokens =
+    length === "long" ? 4096 : length === "short" ? 1200 : 2048;
 
   const profileSelect = await supabase
     .from("profiles")
@@ -126,7 +146,7 @@ Output plain text only (no JSON, no markdown code fences unless formatting helps
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 2048,
+      max_tokens: maxTokens,
       temperature: 0.35,
       system,
       messages: [{ role: "user", content: prompt }]
