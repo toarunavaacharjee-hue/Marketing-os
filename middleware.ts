@@ -9,6 +9,20 @@ type CookieToSet = {
   options?: CookieSerializeOptions;
 };
 
+/** Reliable hostname on Vercel (x-forwarded-host) vs local dev. */
+function getRequestHostname(request: NextRequest) {
+  const xf = request.headers.get("x-forwarded-host");
+  if (xf) {
+    const first = xf.split(",")[0]?.trim() ?? "";
+    return first.split(":")[0]?.toLowerCase() ?? "";
+  }
+  return request.nextUrl.hostname.toLowerCase();
+}
+
+function isAppHostname(hostname: string) {
+  return hostname.startsWith("app.");
+}
+
 function isProtectedAppPath(pathname: string) {
   return (
     pathname === "/dashboard" ||
@@ -21,10 +35,10 @@ function isProtectedAppPath(pathname: string) {
 export async function middleware(request: NextRequest) {
   // Subdomain behavior:
   // - app.<domain> root should land inside the product.
-  const host = (request.headers.get("host") ?? "").toLowerCase();
-  const isAppHost = host.startsWith("app.");
+  const hostname = getRequestHostname(request);
+  const isAppHost = isAppHostname(hostname);
   const path = request.nextUrl.pathname;
-  const rootHost = host.replace(/^www\./, "").replace(/^app\./, "");
+  const rootHost = hostname.replace(/^www\./, "").replace(/^app\./, "");
   const appHost = `app.${rootHost}`;
 
   // 1) app.<domain> should always land in /dashboard
