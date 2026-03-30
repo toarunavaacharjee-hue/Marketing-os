@@ -100,7 +100,7 @@ export default function OnboardingPage() {
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
               className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
-              placeholder="Marketing OS"
+              placeholder="AI Marketing Workbench"
             />
           </div>
 

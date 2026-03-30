@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Marketing OS",
-  description: "Marketing OS"
+  title: "AI Marketing Workbench",
+  description: "The PMM + GTM operating layer (not a CRM)."
 };
 
 export default function RootLayout({

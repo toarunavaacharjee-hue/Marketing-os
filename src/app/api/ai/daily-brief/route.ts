@@ -49,7 +49,7 @@ Rules:
 - Without real metrics from the user, use needs_input + short questions — do not invent numbers.
 - If ok: lines cover 24h focus, 2–3 actions, 1 experiment, 1 risk — all brief.`;
 
-    const prompt = `Task: JSON digest for "Marketing OS" operator view. No fake KPIs.`;
+    const prompt = `Task: JSON digest for "AI Marketing Workbench" operator view. No fake KPIs.`;
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",

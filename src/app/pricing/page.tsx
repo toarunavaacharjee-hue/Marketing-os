@@ -93,7 +93,7 @@ export default function PricingPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold">
             <span className="h-7 w-7 rounded-lg bg-[#7c6cff]/25 ring-1 ring-[#7c6cff]/40" />
-            Marketing OS
+            AI Marketing Workbench
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-[#9090b0] md:flex">
             <Link href="/#features">Features</Link>
@@ -127,8 +127,8 @@ export default function PricingPage() {
               Pricing built for GTM teams that ship.
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-[#9090b0]">
-              Marketing OS is a PMM + GTM operating layer: ICP, positioning, messaging, campaigns, and measurement loops
-              — without trying to replace your CRM.
+              The PMM + GTM operating layer (not a CRM). ICP, positioning, messaging, campaigns, and measurement loops —
+              connected and actionable.
             </p>
           </div>
           <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
@@ -232,8 +232,8 @@ export default function PricingPage() {
               <div>
                 <div className="text-[#f0f0f8]">Is this a CRM replacement?</div>
                 <div className="mt-1">
-                  No. Marketing OS is a PMM/GTM operating layer. It connects to systems like GA4 and can integrate with
-                  CRMs, but it doesn’t try to own your pipeline.
+                  No. AI Marketing Workbench is the PMM + GTM operating layer (not a CRM). It connects to systems like
+                  GA4 and can integrate with CRMs, but it doesn’t try to own your pipeline.
                 </div>
               </div>
               <div>

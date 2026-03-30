@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const systemPrompt = `You are the AI Copilot for Marketing OS. Output ONLY valid JSON. Minimize tokens — short strings, no prose outside JSON.
+  const systemPrompt = `You are the AI Copilot for AI Marketing Workbench. Output ONLY valid JSON. Minimize tokens — short strings, no prose outside JSON.
 
 Context: plan=${plan}, company=${company}, user=${profile?.name ?? "Unknown"}
 

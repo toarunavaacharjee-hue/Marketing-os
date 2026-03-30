@@ -543,7 +543,7 @@ export async function POST(req: Request) {
       );
     }
 
-      const system = `You are Market Research inside Marketing OS. Output ONLY valid JSON. No prose outside JSON. Minimize tokens — short strings.
+      const system = `You are Market Research inside AI Marketing Workbench. Output ONLY valid JSON. No prose outside JSON. Minimize tokens — short strings.
 
 Schema:
 {

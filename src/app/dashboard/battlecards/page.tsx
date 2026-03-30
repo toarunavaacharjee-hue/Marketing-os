@@ -809,7 +809,7 @@ export default function BattlecardsPage() {
                     onClick={() => {
                       if (pitchMarkdownIcp) {
                         downloadPitchPdf({
-                          productName: "Marketing OS",
+                          productName: "AI Marketing Workbench",
                           personaName: selectedIcp?.name ?? "ICP",
                           competitorName: activeCompetitor?.name ?? "Competitor",
                           pitchMarkdown: pitchMarkdownIcp
@@ -826,7 +826,7 @@ export default function BattlecardsPage() {
                     onClick={() => {
                       if (pitchMarkdownAccount) {
                         downloadPitchPdf({
-                          productName: "Marketing OS",
+                          productName: "AI Marketing Workbench",
                           personaName: selectedAccount?.name ?? "Account",
                           competitorName: activeCompetitor?.name ?? "Competitor",
                           pitchMarkdown: pitchMarkdownAccount

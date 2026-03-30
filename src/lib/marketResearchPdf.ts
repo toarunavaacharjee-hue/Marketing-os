@@ -128,7 +128,7 @@ export function downloadMarketResearchPdf(opts: {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(palette.muted[0], palette.muted[1], palette.muted[2]);
-      doc.text("Marketing OS", margin, pageH - 5.2);
+      doc.text("AI Marketing Workbench", margin, pageH - 5.2);
       doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pageH - 5.2, { align: "right" });
     }
   };

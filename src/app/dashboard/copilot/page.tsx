@@ -29,7 +29,7 @@ const HINTS = [
 const OPENING_MESSAGE: ChatMessage = {
   id: "opening",
   role: "assistant",
-  text: "I am your AI Copilot for Marketing OS. I can help with campaign diagnostics, positioning, content ideas, pipeline influence analysis, and action plans by channel. Ask me anything in plain language, and I will return concrete next steps.",
+  text: "I am your AI Copilot for AI Marketing Workbench. I can help with campaign diagnostics, positioning, content ideas, pipeline influence analysis, and action plans by channel. Ask me anything in plain language, and I will return concrete next steps.",
   metrics: [
     { label: "Focus", value: "Pipeline + ROAS" },
     { label: "Speed", value: "< 60 sec plan" },

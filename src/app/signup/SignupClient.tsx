@@ -95,7 +95,7 @@ export default function SignupClient() {
               <Input
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                placeholder="Marketing OS Inc."
+                placeholder="AI Marketing Workbench Inc."
                 required
               />
             </div>

@@ -26,7 +26,7 @@ const modules = [
 
 const faq = [
   ["How long does setup take?", "Most teams are live in under 2 hours with demo data, then connect real channels module by module."],
-  ["Do I need a technical team?", "No. Marketing OS is designed for operators and founders first. A developer helps only for deeper integrations."],
+  ["Do I need a technical team?", "No. AI Marketing Workbench is designed for operators and founders first. A developer helps only for deeper integrations."],
   ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
   ["Does AI usage have limits?", "Starter includes 100 AI queries/month. Growth and Enterprise include unlimited queries."],
   ["Can we use our own Anthropic key?", "Yes. Each user can store their API key and run AI features in Copilot and module generators."],
@@ -91,7 +91,7 @@ export default function HomePage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold">
             <span className="h-7 w-7 rounded-lg bg-[#7c6cff]/25 ring-1 ring-[#7c6cff]/40" />
-            Marketing OS
+            AI Marketing Workbench
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-[#9090b0] md:flex">
             <a href="#features">Features</a>
@@ -118,11 +118,11 @@ export default function HomePage() {
         <section data-reveal className="grid gap-8 pt-10 lg:grid-cols-2 lg:items-center">
           <div>
             <h1 className="text-5xl leading-tight md:text-6xl" style={{ fontFamily: "var(--font-heading)" }}>
-              The PMM + GTM operating layer for teams that ship.
+              AI Marketing Workbench
             </h1>
             <p className="mt-4 max-w-xl text-lg text-[#9090b0]">
-              Marketing OS connects ICP, positioning, messaging, campaigns, and measurement loops — then turns them into
-              repeatable workflows. It’s not a CRM replacement; it’s the system that keeps your go-to-market coherent.
+              The PMM + GTM operating layer (not a CRM). Connect ICP, positioning, messaging, campaigns, and measurement
+              loops — then turn them into repeatable workflows.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link href="/signup?plan=starter" className="rounded-xl bg-[#b8ff6c] px-5 py-3 font-medium text-black">
@@ -332,7 +332,10 @@ export default function HomePage() {
 
       <footer className="border-t border-[#2a2e3f]">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-4">
-          <div><div className="font-semibold">Marketing OS</div><p className="mt-2 text-sm text-[#9090b0]">The operating system for modern GTM teams.</p></div>
+          <div>
+            <div className="font-semibold">AI Marketing Workbench</div>
+            <p className="mt-2 text-sm text-[#9090b0]">The PMM + GTM operating layer (not a CRM).</p>
+          </div>
           <div className="text-sm text-[#9090b0]"><div className="mb-2 text-[#f0f0f8]">Product</div><div>Features</div><div>Modules</div><div>Pricing</div></div>
           <div className="text-sm text-[#9090b0]"><div className="mb-2 text-[#f0f0f8]">Company</div><div>About</div><div>Careers</div><div>Contact</div></div>
           <div className="text-sm text-[#9090b0]"><div className="mb-2 text-[#f0f0f8]">Resources</div><div>Docs</div><div>FAQ</div><div>Status</div></div>

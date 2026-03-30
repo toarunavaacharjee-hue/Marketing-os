@@ -207,7 +207,7 @@ export default function ProductProfileClient() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
-            placeholder="Marketing OS"
+            placeholder="AI Marketing Workbench"
           />
         </Field>
         <Field label="Website URL (Required)">
@@ -380,7 +380,7 @@ export default function ProductProfileClient() {
               value={newProductName}
               onChange={(e) => setNewProductName(e.target.value)}
               className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
-              placeholder="Marketing OS - Insurance"
+              placeholder="AI Marketing Workbench - Insurance"
             />
           </Field>
           <Field label="Website URL (optional)">

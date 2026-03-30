@@ -13,7 +13,7 @@ export default async function OperatorLayout({ children }: { children: React.Rea
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-4 sm:px-6">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text3)]">
-            Marketing OS
+            AI Marketing Workbench
           </div>
           <div className="font-[var(--font-heading)] text-lg font-semibold">Operator console</div>
           <p className="mt-1 max-w-xl text-xs text-[var(--text2)]">
