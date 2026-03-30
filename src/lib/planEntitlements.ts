@@ -11,6 +11,7 @@ export type Entitlements = {
   plan: Plan;
   allowedDashboardSlugs: Set<string>; // "" means /dashboard home
   supportTier: "standard" | "priority" | "dedicated";
+  seatsMax: number | null; // null = unlimited
 };
 
 // Slugs correspond to /dashboard/<slug>
@@ -33,20 +34,23 @@ export function getEntitlements(rawPlan: string | null | undefined): Entitlement
     return {
       plan,
       allowedDashboardSlugs: STARTER_ALLOWED,
-      supportTier: "standard"
+      supportTier: "standard",
+      seatsMax: 1
     };
   }
   if (plan === "growth") {
     return {
       plan,
       allowedDashboardSlugs: new Set<string>(["*"]),
-      supportTier: "priority"
+      supportTier: "priority",
+      seatsMax: 5
     };
   }
   return {
     plan: "enterprise",
     allowedDashboardSlugs: new Set<string>(["*"]),
-    supportTier: "dedicated"
+    supportTier: "dedicated",
+    seatsMax: null
   };
 }
 

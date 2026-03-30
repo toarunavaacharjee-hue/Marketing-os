@@ -14,6 +14,11 @@ type QueueRow = {
   audience: string;
   owner: string;
   reviewer: string;
+  reviewState: string; // none | requested | approved | changes_requested
+  reviewNotes: string;
+  reviewRequestedAt: string;
+  reviewedAt: string;
+  approvedBy: string;
   draftUrl: string;
   publishedUrl: string;
   dueDate: string;
@@ -99,6 +104,11 @@ function migrateQueueRow(raw: unknown): QueueRow {
       audience: "",
       owner: "",
       reviewer: "",
+      reviewState: "none",
+      reviewNotes: "",
+      reviewRequestedAt: "",
+      reviewedAt: "",
+      approvedBy: "",
       draftUrl: "",
       publishedUrl: "",
       dueDate: ""
@@ -116,6 +126,11 @@ function migrateQueueRow(raw: unknown): QueueRow {
     audience: String(o.audience ?? ""),
     owner: String(o.owner ?? ""),
     reviewer: String(o.reviewer ?? ""),
+    reviewState: String(o.reviewState ?? "none"),
+    reviewNotes: String(o.reviewNotes ?? ""),
+    reviewRequestedAt: String(o.reviewRequestedAt ?? ""),
+    reviewedAt: String(o.reviewedAt ?? ""),
+    approvedBy: String(o.approvedBy ?? ""),
     draftUrl: String(o.draftUrl ?? ""),
     publishedUrl: String(o.publishedUrl ?? ""),
     dueDate: String(o.dueDate ?? "")
@@ -186,6 +201,9 @@ export function CreationWorkbench({
   contentStudio?: boolean;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const [me, setMe] = useState<{ id: string; email: string } | null>(null);
+  const [team, setTeam] = useState<Array<{ userId: string; name: string | null; role: string }>>([]);
+  const [myTeamRole, setMyTeamRole] = useState<string>("member");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -211,6 +229,68 @@ export function CreationWorkbench({
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function run() {
+      const { data } = await supabase.auth.getUser();
+      const u = data.user;
+      if (!u || cancelled) return;
+      setMe({ id: u.id, email: (u.email ?? "").toLowerCase() });
+    }
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (!contentStudio) return;
+    let cancelled = false;
+
+    async function loadTeam() {
+      try {
+        const { data } = await supabase.auth.getUser();
+        const u = data.user;
+        if (!u) return;
+
+        // Resolve company from environment: env -> product -> company
+        const envRes = await supabase
+          .from("product_environments")
+          .select("id, product_id, products(company_id)")
+          .eq("id", environmentId)
+          .maybeSingle();
+        const companyId = (envRes.data as any)?.products?.company_id as string | undefined;
+        if (!companyId) return;
+
+        const membersRes = await supabase
+          .from("company_members")
+          .select("user_id, role, profiles(name)")
+          .eq("company_id", companyId);
+        if (membersRes.error) return;
+
+        const rows = (membersRes.data ?? []) as any[];
+        const next = rows.map((r) => ({
+          userId: String(r.user_id),
+          role: String(r.role ?? "member"),
+          name: (r.profiles?.name ?? null) as string | null
+        }));
+
+        const mine = next.find((m) => m.userId === u.id);
+        if (!cancelled) {
+          setTeam(next);
+          setMyTeamRole(mine?.role ?? "member");
+        }
+      } catch {
+        // non-fatal
+      }
+    }
+
+    void loadTeam();
+    return () => {
+      cancelled = true;
+    };
+  }, [contentStudio, environmentId, supabase]);
 
   const persist = useCallback(
     async (next: Workspace) => {
@@ -295,6 +375,11 @@ export function CreationWorkbench({
           audience: "",
           owner: "",
           reviewer: "",
+          reviewState: "none",
+          reviewNotes: "",
+          reviewRequestedAt: "",
+          reviewedAt: "",
+          approvedBy: "",
           draftUrl: "",
           publishedUrl: "",
           dueDate: ""
@@ -310,6 +395,11 @@ export function CreationWorkbench({
           audience: "",
           owner: "",
           reviewer: "",
+          reviewState: "none",
+          reviewNotes: "",
+          reviewRequestedAt: "",
+          reviewedAt: "",
+          approvedBy: "",
           draftUrl: "",
           publishedUrl: "",
           dueDate: ""
@@ -342,6 +432,11 @@ export function CreationWorkbench({
       audience: "",
       owner: "",
       reviewer: "",
+      reviewState: "none",
+      reviewNotes: "",
+      reviewRequestedAt: "",
+      reviewedAt: "",
+      approvedBy: "",
       draftUrl: "",
       publishedUrl: "",
       dueDate: ""
@@ -481,6 +576,27 @@ export function CreationWorkbench({
                         placeholder="Working title"
                         className="min-w-0 flex-1 rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 font-medium"
                       />
+                      {contentStudio ? (
+                        <span
+                          className={`shrink-0 rounded-full border px-2 py-1 text-[10px] uppercase tracking-wide ${
+                            r.reviewState === "approved"
+                              ? "border-[#b8ff6c]/40 bg-[#b8ff6c]/10 text-[#b8ff6c]"
+                              : r.reviewState === "requested"
+                                ? "border-[#7c6cff]/40 bg-[#7c6cff]/10 text-[#c4b8ff]"
+                                : r.reviewState === "changes_requested"
+                                  ? "border-yellow-500/40 bg-yellow-500/10 text-yellow-200"
+                                  : "border-[#2a2e3f] bg-black/20 text-[#9090b0]"
+                          }`}
+                        >
+                          {r.reviewState === "approved"
+                            ? "Approved"
+                            : r.reviewState === "requested"
+                              ? "In review"
+                              : r.reviewState === "changes_requested"
+                                ? "Changes"
+                                : "No review"}
+                        </span>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => removeQueue(r.id)}
@@ -545,23 +661,145 @@ export function CreationWorkbench({
                       </div>
                       <div>
                         <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Owner</div>
-                        <input
-                          value={r.owner}
-                          onChange={(e) => updateQueue(r.id, { owner: e.target.value })}
-                          placeholder="Writer"
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
-                        />
+                        {contentStudio && team.length ? (
+                          <select
+                            value={r.owner}
+                            onChange={(e) => updateQueue(r.id, { owner: e.target.value })}
+                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                          >
+                            <option value="">Unassigned</option>
+                            {team.map((m) => (
+                              <option key={m.userId} value={m.userId}>
+                                {(m.name ? m.name : m.userId.slice(0, 8) + "…") + ` (${m.role})`}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            value={r.owner}
+                            onChange={(e) => updateQueue(r.id, { owner: e.target.value })}
+                            placeholder="Writer"
+                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
+                          />
+                        )}
                       </div>
                       <div>
                         <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Reviewer</div>
-                        <input
-                          value={r.reviewer}
-                          onChange={(e) => updateQueue(r.id, { reviewer: e.target.value })}
-                          placeholder="Approver"
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
-                        />
+                        {contentStudio && team.length ? (
+                          <select
+                            value={r.reviewer}
+                            onChange={(e) => updateQueue(r.id, { reviewer: e.target.value })}
+                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                          >
+                            <option value="">None</option>
+                            {team.map((m) => (
+                              <option key={m.userId} value={m.userId}>
+                                {(m.name ? m.name : m.userId.slice(0, 8) + "…") + ` (${m.role})`}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            value={r.reviewer}
+                            onChange={(e) => updateQueue(r.id, { reviewer: e.target.value })}
+                            placeholder="Approver email or user id"
+                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
+                          />
+                        )}
                       </div>
                     </div>
+
+                    {contentStudio ? (
+                      <div className="mt-2 rounded-lg border border-[#2a2e3f] bg-black/10 p-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="text-[10px] uppercase text-[#9090b0]">Approval workflow</div>
+                          <div className="flex flex-wrap gap-1">
+                            {(() => {
+                              const reviewerKey = (r.reviewer ?? "").trim().toLowerCase();
+                              const canReview =
+                                reviewerKey.length > 0 &&
+                                !!me &&
+                                (reviewerKey === me.email || reviewerKey === me.id.toLowerCase());
+                              const isAdmin = myTeamRole === "owner" || myTeamRole === "admin";
+                              const canApprove = canReview || isAdmin;
+
+                              const requestReview = () => {
+                                updateQueue(r.id, {
+                                  status: "In review",
+                                  reviewState: "requested",
+                                  reviewRequestedAt: new Date().toISOString()
+                                });
+                              };
+                              const approve = () => {
+                                if (!me) return;
+                                updateQueue(r.id, {
+                                  status: r.status === "Published" ? "Published" : "Scheduled",
+                                  reviewState: "approved",
+                                  reviewedAt: new Date().toISOString(),
+                                  approvedBy: me.id
+                                });
+                              };
+                              const requestChanges = () => {
+                                if (!me) return;
+                                updateQueue(r.id, {
+                                  status: "In draft",
+                                  reviewState: "changes_requested",
+                                  reviewedAt: new Date().toISOString()
+                                });
+                              };
+
+                              return (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={requestReview}
+                                    disabled={!r.reviewer.trim()}
+                                    className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-2 py-1 text-xs text-[#c4b8ff] disabled:opacity-50"
+                                  >
+                                    Request review
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={approve}
+                                    disabled={!canApprove}
+                                    className="rounded-lg border border-[#b8ff6c]/40 bg-[#b8ff6c]/10 px-2 py-1 text-xs text-[#b8ff6c] disabled:opacity-50"
+                                    title={!canApprove ? "Only the assigned reviewer or an admin/owner can approve." : ""}
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={requestChanges}
+                                    disabled={!canApprove}
+                                    className="rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-2 py-1 text-xs text-yellow-200 disabled:opacity-50"
+                                    title={!canApprove ? "Only the assigned reviewer or an admin/owner can request changes." : ""}
+                                  >
+                                    Request changes
+                                  </button>
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Review notes</div>
+                          <textarea
+                            value={r.reviewNotes}
+                            onChange={(e) => updateQueue(r.id, { reviewNotes: e.target.value })}
+                            rows={2}
+                            placeholder="Feedback for the writer…"
+                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                          />
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#9090b0]">
+                          {r.reviewRequestedAt ? (
+                            <span>Requested: {new Date(r.reviewRequestedAt).toLocaleString()}</span>
+                          ) : null}
+                          {r.reviewedAt ? <span>Reviewed: {new Date(r.reviewedAt).toLocaleString()}</span> : null}
+                        </div>
+                      </div>
+                    ) : null}
+
                     <div className="mt-2">
                       <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Audience / segment</div>
                       <input
