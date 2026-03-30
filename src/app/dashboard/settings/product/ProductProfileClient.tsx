@@ -215,7 +215,7 @@ export default function ProductProfileClient() {
             value={websiteUrl}
             onChange={(e) => setWebsiteUrl(e.target.value)}
             className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
-            placeholder="https://orahtechandmarketing.com"
+            placeholder="https://aimarketingworkbench.com"
           />
         </Field>
       </div>

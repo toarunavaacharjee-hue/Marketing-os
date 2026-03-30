@@ -13,70 +13,71 @@ const PLANS: Array<{
 }> = [
   {
     plan: "starter",
-    name: "Starter Sprint",
-    monthly: 499,
-    annual: 399,
-    blurb: "A focused 2‑week sprint to ship clarity + assets.",
+    name: "Starter",
+    monthly: 49,
+    annual: 39,
+    blurb: "For solo operators and early PMM foundations.",
     bullets: [
-      "Positioning + messaging refresh",
-      "1 landing page (copy + structure)",
-      "4–6 content pieces (edits + templates)",
-      "Weekly review + next steps"
+      "100 AI workflow runs / month",
+      "All core workbenches (ICP → Positioning → Messaging)",
+      "Marketing Workbench (unified workbench)",
+      "Email support"
     ],
-    cta: "Request Starter Sprint"
+    cta: "Start with Starter"
   },
   {
     plan: "growth",
-    name: "Growth Retainer",
-    monthly: 1499,
-    annual: 1299,
-    blurb: "Ongoing weekly creative shipping for consistent momentum.",
+    name: "Growth",
+    monthly: 99,
+    annual: 79,
+    blurb: "For teams shipping campaigns weekly.",
     bullets: [
-      "Weekly creative batch (ads + content)",
-      "Landing page iteration",
-      "Messaging & offer refinement",
-      "Reporting + testing plan"
+      "Unlimited AI workflow runs",
+      "All modules (Events, Content Studio, Battlecards, etc.)",
+      "Priority support",
+      "Team-ready workflows + templates"
     ],
-    cta: "Request Growth Retainer"
+    cta: "Start with Growth"
   },
   {
     plan: "enterprise",
     name: "Enterprise",
-    monthly: 2999,
-    annual: 2699,
-    blurb: "For multi-channel execution with deeper strategy + volume.",
+    monthly: 299,
+    annual: 249,
+    blurb: "For multi-team GTM governance and scale.",
     bullets: [
-      "Multi-channel creative pipeline",
-      "Website + funnel optimization",
-      "Higher output volume + variants",
-      "Priority turnaround"
+      "Unlimited AI + governance patterns",
+      "Advanced controls (SSO later), audit-friendly workflows",
+      "Dedicated success + onboarding",
+      "Custom security review"
     ],
-    cta: "Contact us"
+    cta: "Talk to sales"
   }
 ];
 
 const MATRIX = [
-  { group: "Core", rows: [["Strategy-led creative", true, true, true]] },
+  { group: "Core workflow", rows: [["Marketing Workbench (unified workbench)", true, true, true]] },
   {
-    group: "Delivery",
+    group: "AI",
     rows: [
-      ["Weekly cadence", true, true, true],
-      ["Performance creative variants", false, true, true]
+      ["AI workflow runs", "100/mo", "Unlimited", "Unlimited"],
+      ["Use your own Anthropic key", true, true, true]
     ]
   },
   {
-    group: "Web",
+    group: "Templates & workflows",
     rows: [
-      ["Landing pages", true, true, true],
-      ["Website optimization", false, true, true]
+      ["Getting started + template library", true, true, true],
+      ["Workflow run logs", true, true, true],
+      ["Team governance patterns", false, true, true]
     ]
   },
   {
     group: "Support",
     rows: [
       ["Email support", true, true, true],
-      ["Priority turnaround", false, true, true],
-      ["Dedicated planning", false, false, true]
+      ["Priority support", false, true, true],
+      ["Dedicated onboarding", false, false, true]
     ]
   }
 ] as const;
@@ -92,23 +93,28 @@ export default function PricingPage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold">
             <span className="h-7 w-7 rounded-lg bg-[#7c6cff]/25 ring-1 ring-[#7c6cff]/40" />
-            Orah Tech & Marketing
+            AI Marketing Workbench
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-[#9090b0] md:flex">
-            <Link href="/services">Services</Link>
-            <Link href="/work">Work</Link>
-            <Link href="/about">About</Link>
+            <Link href="/#features">Features</Link>
+            <Link href="/#how-it-works">How it works</Link>
+            <Link href="/#modules">Modules</Link>
             <Link href="/pricing" className="text-[#f0f0f8]">
               Pricing
             </Link>
-            <Link href="/contact">Contact</Link>
           </nav>
           <div className="flex items-center gap-2">
             <Link
-              href="/contact"
+              href="/dashboard"
+              className="rounded-xl border border-[#2a2e3f] bg-transparent px-3 py-2 text-sm hover:bg-white/5"
+            >
+              View demo
+            </Link>
+            <Link
+              href="/signup?plan=starter"
               className="rounded-xl bg-[#b8ff6c] px-3 py-2 text-sm font-medium text-black"
             >
-              Get a proposal
+              Start free
             </Link>
           </div>
         </div>
@@ -118,19 +124,19 @@ export default function PricingPage() {
         <div className="grid gap-6 lg:grid-cols-2 lg:items-end">
           <div>
             <h1 className="text-5xl leading-tight md:text-6xl" style={{ fontFamily: "var(--font-heading)" }}>
-              Simple packages for teams that want to ship.
+              Pricing built for GTM teams that ship.
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-[#9090b0]">
-              Clear scope, weekly cadence, and creative aligned to your funnel. Start with a sprint, then retain for
-              consistent output.
+              The PMM + GTM operating layer (not a CRM). ICP, positioning, messaging, campaigns, and measurement loops —
+              connected and actionable.
             </p>
           </div>
           <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
             <div className="text-sm text-[#f0f0f8]">Plan notes</div>
             <ul className="mt-2 space-y-1">
-              <li>- Starter Sprint is best for fast clarity + initial assets.</li>
-              <li>- Growth Retainer is for consistent weekly shipping.</li>
-              <li>- Enterprise adds volume + deeper funnel optimization.</li>
+              <li>- Starter is perfect for proving value fast.</li>
+              <li>- Growth removes AI limits for workflow velocity.</li>
+              <li>- Enterprise is for governance + onboarding at scale.</li>
             </ul>
           </div>
         </div>
@@ -162,7 +168,7 @@ export default function PricingPage() {
               </ul>
               <div className="mt-6">
                 <Link
-                  href="/contact"
+                  href={p.plan === "enterprise" ? "/signup?plan=enterprise" : `/signup?plan=${p.plan}`}
                   className={`inline-flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-medium ${
                     p.plan === "growth"
                       ? "bg-[#b8ff6c] text-black"
@@ -224,21 +230,21 @@ export default function PricingPage() {
             <div className="text-lg text-[#f0f0f8]">FAQ</div>
             <div className="mt-3 space-y-3 text-sm text-[#9090b0]">
               <div>
-                <div className="text-[#f0f0f8]">Do you work in sprints or retainers?</div>
+                <div className="text-[#f0f0f8]">Is this a CRM replacement?</div>
                 <div className="mt-1">
-                  Both. Many clients start with a 2‑week sprint, then move to a retainer for ongoing weekly shipping and
-                  iteration.
+                  No. AI Marketing Workbench is the PMM + GTM operating layer (not a CRM). It connects to systems like
+                  GA4 and can integrate with CRMs, but it doesn’t try to own your pipeline.
                 </div>
               </div>
               <div>
-                <div className="text-[#f0f0f8]">What do you need from us?</div>
-                <div className="mt-1">Access to current assets, a point-of-contact, and clear goals for the next 30 days.</div>
+                <div className="text-[#f0f0f8]">Can I upgrade later?</div>
+                <div className="mt-1">Yes — upgrade any time from Settings.</div>
               </div>
               <div>
-                <div className="text-[#f0f0f8]">Can you work with our existing brand?</div>
+                <div className="text-[#f0f0f8]">Do I need to add an Anthropic key?</div>
                 <div className="mt-1">
-                  Yes. We can refine and extend what you have, or create a lightweight system that’s easier to apply across
-                  content and ads.
+                  You can bring your own key. Starter includes limited workflow runs; Growth and Enterprise are
+                  unlimited.
                 </div>
               </div>
             </div>
@@ -246,14 +252,14 @@ export default function PricingPage() {
           <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
             <div className="text-lg text-[#f0f0f8]">Ready to see it in action?</div>
             <div className="mt-2 text-sm text-[#9090b0]">
-              Tell us what you’re selling and who it’s for. We’ll reply with a recommended first sprint.
+              Apply templates, run workflows, and ship your first GTM plan in one session.
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
-              <Link href="/contact" className="rounded-xl bg-[#b8ff6c] px-5 py-3 font-medium text-black">
-                Get a proposal
+              <Link href="/signup?plan=growth" className="rounded-xl bg-[#b8ff6c] px-5 py-3 font-medium text-black">
+                Start free
               </Link>
-              <Link href="/services" className="rounded-xl border border-[#2a2e3f] px-5 py-3 font-medium hover:bg-white/5">
-                View services
+              <Link href="/dashboard" className="rounded-xl border border-[#2a2e3f] px-5 py-3 font-medium hover:bg-white/5">
+                View demo
               </Link>
             </div>
           </div>

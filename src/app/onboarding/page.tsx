@@ -93,7 +93,7 @@ export default function OnboardingPage() {
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
-                placeholder="Orah Tech & Marketing"
+                placeholder="AI Marketing Workbench"
               />
             </div>
 
@@ -115,7 +115,7 @@ export default function OnboardingPage() {
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
                 className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
-                placeholder="https://orahtechandmarketing.com"
+                placeholder="https://aimarketingworkbench.com"
               />
             </div>
 

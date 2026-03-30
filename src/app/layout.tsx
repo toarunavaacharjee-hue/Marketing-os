@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Orah Tech & Marketing",
-  description:
-    "Creative marketing agency for brand, content, performance creative, and websites. Strategy-led creative that ships fast and converts."
+  title: "AI Marketing Workbench",
+  description: "The PMM + GTM operating layer (not a CRM)."
 };
 
 export default function RootLayout({
