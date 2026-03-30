@@ -30,7 +30,8 @@ const HREF: Record<string, string> = {
   design_assets: "/dashboard/design-assets",
   presentations: "/dashboard/presentations",
   campaigns: "/dashboard/campaigns",
-  messaging_artifacts: "/dashboard/messaging-artifacts"
+  messaging_artifacts: "/dashboard/messaging-artifacts",
+  positioning_studio: "/dashboard/positioning-studio"
 };
 
 const LABEL: Record<string, string> = {
@@ -41,7 +42,8 @@ const LABEL: Record<string, string> = {
   design_assets: "Design & Assets",
   presentations: "Presentations",
   campaigns: "Campaigns",
-  messaging_artifacts: "Messaging & Artifacts"
+  messaging_artifacts: "Messaging & Artifacts",
+  positioning_studio: "Positioning Studio"
 };
 
 function dueTsFromIso(s: string): number | null {
@@ -352,6 +354,61 @@ function parseMessagingArtifacts(value: unknown): WorkItem[] {
   return out;
 }
 
+function parsePositioningCanvas(value: unknown): WorkItem[] {
+  const out: WorkItem[] = [];
+  if (!value || typeof value !== "object") return out;
+  const v = value as {
+    doc?: Record<string, unknown>;
+    health?: Record<string, unknown>;
+    revision?: number;
+  };
+
+  const doc = v.doc ?? {};
+  const target = String((doc as any).target ?? "").trim();
+  const wedge = String((doc as any).wedge ?? "").trim();
+  const category = String((doc as any).category ?? "").trim();
+
+  const health = v.health ?? {};
+  const clarity = typeof (health as any).clarity === "number" ? Math.round((health as any).clarity) : null;
+  const differentiation =
+    typeof (health as any).differentiation === "number"
+      ? Math.round((health as any).differentiation)
+      : null;
+  const credibility =
+    typeof (health as any).credibility === "number" ? Math.round((health as any).credibility) : null;
+  const mmf =
+    typeof (health as any).message_market_fit === "number"
+      ? Math.round((health as any).message_market_fit)
+      : null;
+
+  const subtitleParts = [target, category].filter(Boolean).join(" · ");
+  const statusParts = [
+    clarity != null ? `Clarity ${clarity}%` : null,
+    differentiation != null ? `Differentiation ${differentiation}%` : null,
+    credibility != null ? `Credibility ${credibility}%` : null,
+    mmf != null ? `MMF ${mmf}%` : null
+  ].filter(Boolean) as string[];
+
+  const title = wedge || target || "Positioning canvas";
+  out.push({
+    id: "positioning:canvas",
+    source: "positioning_studio",
+    sourceLabel: LABEL.positioning_studio,
+    category: "Positioning",
+    title,
+    subtitle: subtitleParts || undefined,
+    timeline: wedge ? `Wedge: ${wedge}` : undefined,
+    status: statusParts.length ? statusParts.join(" · ") : "Reference",
+    owner: "—",
+    due: undefined,
+    dueTs: null,
+    done: false,
+    href: HREF.positioning_studio
+  });
+
+  return out;
+}
+
 export function aggregateWorkFromSettings(rows: SettingRow[]): WorkItem[] {
   const items: WorkItem[] = [];
   for (const row of rows) {
@@ -361,6 +418,8 @@ export function aggregateWorkFromSettings(rows: SettingRow[]): WorkItem[] {
         items.push(...parseGtmPlan(v));
       } else if (module === "events" && key === "workspace") {
         items.push(...parseEventsWorkspace(v));
+      } else if (module === "positioning_studio" && key === "canvas") {
+        items.push(...parsePositioningCanvas(v));
       } else if (key === "workspace") {
         if (module === "content_studio") items.push(...parseCreationWorkspace(v, "content_studio"));
         else if (module === "social_media") items.push(...parseCreationWorkspace(v, "social_media"));
