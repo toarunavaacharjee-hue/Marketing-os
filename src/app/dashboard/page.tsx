@@ -298,6 +298,25 @@ async function CommandCentrePage() {
         competitorCount={competitorCount}
       />
 
+      <div className="mt-5 rounded-[var(--radius)] border border-border bg-surface p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
+              🚀 Getting started
+            </div>
+            <div className="mt-1 text-[11px] text-text2">
+              Apply playbook templates and run your first workflows (segments → positioning → artifacts).
+            </div>
+          </div>
+          <Link
+            href="/dashboard/getting-started"
+            className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee]"
+          >
+            Open Getting started
+          </Link>
+        </div>
+      </div>
+
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
           <NeedsAttention />
