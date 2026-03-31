@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const nav = [
   { href: "/#features", label: "Features" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#modules", label: "Modules" },
-  { href: "/creative-marketing-agency", label: "Creative agency" },
   { href: "/pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" }
 ] as const;
@@ -26,7 +24,7 @@ export function MarketingLogo({ className = "" }: { className?: string }) {
 
 export function MarketingHeader() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-bg/80 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-bg/70 backdrop-blur-xl">
       <div className="saas-grid pointer-events-none absolute inset-0 opacity-[0.35]" aria-hidden />
       <div className="relative mx-auto flex h-[60px] max-w-7xl items-center justify-between px-4 sm:px-6">
         <MarketingLogo />
@@ -42,7 +40,6 @@ export function MarketingHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <ThemeToggle className="hidden sm:inline-flex" />
           <Link
             href="/dashboard"
             className="hidden rounded-lg border border-border bg-surface2 px-3 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3 sm:inline-flex"
@@ -103,11 +100,6 @@ export function MarketingFooter() {
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Resources</div>
             <ul className="mt-4 space-y-2.5 text-sm text-text2">
-              <li>
-                <Link href="/creative-marketing-agency" className="transition hover:text-text">
-                  Creative agency
-                </Link>
-              </li>
               <li className="cursor-default">Docs</li>
               <li>
                 <Link href="/#faq" className="transition hover:text-text">

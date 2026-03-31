@@ -27,6 +27,9 @@
   --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
   --saas-cta: #b8ff6c;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(15, 23, 42, 0.22);
+  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.32);
 }
 
 /* Dark mode (opt-in via <html class="dark">) */
@@ -43,6 +46,9 @@ html.dark {
   --text: #f0f0f8;
   --text2: #9ca3b8;
   --text3: #5c6278;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.18);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.26);
 }
 
 /* Marketing + app: tech SaaS surface pattern */
@@ -129,5 +135,25 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--surface3);
   border-radius: 3px;
+}
+
+/* Valid scrollbar rules (override any invalid selectors above) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }
 

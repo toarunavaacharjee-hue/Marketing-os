@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 type Profile = {
   name: string | null;
@@ -270,9 +269,6 @@ export function DashboardShell({
             <span className="w-[18px] text-center text-[15px]">⚙️</span>
             <span className="pl-1">Settings</span>
           </Link>
-          <div className="mt-2 px-3">
-            <ThemeToggle variant="pill" className="w-full justify-center" />
-          </div>
         </div>
 
         <div className="border-t border-border p-[14px]">
@@ -359,12 +355,12 @@ export function DashboardShell({
             Marketing <span className="text-accent2">Workbench</span>
           </span>
         </Link>
-        <ThemeToggle />
+        <div className="w-[44px]" />
       </div>
 
       <div className="flex h-[calc(100dvh-56px)] md:h-dvh">
         {/* Desktop sidebar */}
-        <div className="hidden w-[228px] shrink-0 border-r border-white/[0.06] bg-[linear-gradient(180deg,var(--surface)_0%,#101018_100%)] shadow-[4px_0_24px_rgba(0,0,0,0.35)] md:block">
+        <div className="hidden w-[228px] shrink-0 border-r border-border bg-[linear-gradient(180deg,var(--surface)_0%,var(--surface2)_100%)] shadow-[4px_0_24px_rgba(2,6,23,0.10)] md:block">
           <div className="h-dvh overflow-y-auto">
             <Sidebar />
           </div>
@@ -377,7 +373,7 @@ export function DashboardShell({
               className="absolute inset-0 bg-black/60"
               onClick={() => setMobileOpen(false)}
             />
-            <div className="absolute left-0 top-0 h-full w-[228px] border-r border-white/[0.06] bg-[linear-gradient(180deg,var(--surface)_0%,#101018_100%)] shadow-2xl">
+            <div className="absolute left-0 top-0 h-full w-[228px] border-r border-border bg-[linear-gradient(180deg,var(--surface)_0%,var(--surface2)_100%)] shadow-2xl">
               <div className="h-full overflow-y-auto">
                 <Sidebar onNavigate={() => setMobileOpen(false)} />
               </div>

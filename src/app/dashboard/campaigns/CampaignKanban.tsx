@@ -115,13 +115,13 @@ export function CampaignKanban({ environmentId }: { environmentId: string }) {
 
   return (
     <div className="space-y-3">
-      {loading ? <div className="text-sm text-[#9090b0]">Loading board…</div> : null}
+      {loading ? <div className="text-sm text-text2">Loading board…</div> : null}
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {error}
         </div>
       ) : null}
-      <p className="text-xs text-[#9090b0]">
+      <p className="text-xs text-text2">
         Drag cards between columns. {saving ? "Saving…" : "Synced to your product environment."}
       </p>
       <div className="grid gap-4 lg:grid-cols-4">
@@ -133,17 +133,17 @@ export function CampaignKanban({ environmentId }: { environmentId: string }) {
               const id = e.dataTransfer.getData("text/plain");
               if (id) onDrop(col.key, id);
             }}
-            className="min-h-[360px] rounded-2xl border border-[#2a2e3f] bg-[#141420] p-3"
+            className="min-h-[360px] rounded-2xl border border-border bg-surface p-3 shadow-sm"
           >
             <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="text-sm text-[#f0f0f8]">
+              <div className="text-sm font-medium text-text">
                 {col.label}{" "}
-                <span className="text-[#9090b0]">({board[col.key].length})</span>
+                <span className="text-text2">({board[col.key].length})</span>
               </div>
               <button
                 type="button"
                 onClick={() => addCard(col.key)}
-                className="rounded-lg border border-[#2a2e3f] px-2 py-0.5 text-[11px] text-[#f0f0f8] hover:bg-white/5"
+                className="rounded-lg border border-border bg-surface2 px-2 py-0.5 text-[11px] font-semibold text-text hover:bg-surface3"
               >
                 + Add
               </button>
@@ -154,14 +154,14 @@ export function CampaignKanban({ environmentId }: { environmentId: string }) {
                   key={card.id}
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData("text/plain", card.id)}
-                  className="cursor-move rounded-xl border border-[#2a2e3f] bg-[#1e1e2e] p-3"
+                  className="cursor-move rounded-xl border border-border bg-surface2 p-3"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="text-sm text-[#f0f0f8]">{card.title}</div>
+                    <div className="text-sm font-medium text-text">{card.title}</div>
                     <button
                       type="button"
                       onClick={() => removeCard(card.id)}
-                      className="shrink-0 text-[11px] text-[#9090b0] hover:text-red-300"
+                      className="shrink-0 text-[11px] text-text2 hover:text-red"
                       title="Remove"
                     >
                       ✕
@@ -171,7 +171,7 @@ export function CampaignKanban({ environmentId }: { environmentId: string }) {
                     {card.tags.map((t) => (
                       <span
                         key={t}
-                        className="rounded-full border border-[#2a2e3f] px-2 py-0.5 text-[11px] text-[#9090b0]"
+                        className="rounded-full border border-border bg-bg px-2 py-0.5 text-[11px] text-text2"
                       >
                         {t}
                       </span>

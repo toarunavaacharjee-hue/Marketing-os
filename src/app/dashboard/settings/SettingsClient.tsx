@@ -99,9 +99,9 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-sm text-[#f0f0f8]">System setup</div>
-        <div className="mt-2 text-sm text-[#9090b0]">
+      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+        <div className="text-sm font-medium text-text">System setup</div>
+        <div className="mt-2 text-sm text-text2">
           This is where you configure the basics so the dashboard and AI features work.
         </div>
 
@@ -117,26 +117,26 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-          <div className="text-sm text-[#f0f0f8]">Profile</div>
-          <div className="mt-1 text-sm text-[#9090b0]">Signed in as {email}</div>
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+          <div className="text-sm font-medium text-text">Profile</div>
+          <div className="mt-1 text-sm text-text2">Signed in as {email}</div>
 
           <div className="mt-4 space-y-3">
             <div>
-              <div className="mb-1 text-xs text-[#9090b0]">Name</div>
+              <div className="mb-1 text-xs text-text2">Name</div>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0]"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                 placeholder="Your name"
               />
             </div>
             <div>
-              <div className="mb-1 text-xs text-[#9090b0]">Company</div>
+              <div className="mb-1 text-xs text-text2">Company</div>
               <input
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0]"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                 placeholder="Company"
               />
             </div>
@@ -147,7 +147,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               </div>
             ) : null}
             {saved ? (
-              <div className="rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">
+              <div className="rounded-xl border border-[rgba(184,255,108,0.35)] bg-[rgba(184,255,108,0.12)] px-3 py-2 text-sm text-[rgb(22,163,74)]">
                 {saved}
               </div>
             ) : null}
@@ -162,15 +162,15 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-          <div className="text-sm text-[#f0f0f8]">AI integration</div>
-          <div className="mt-1 text-sm text-[#9090b0]">
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+          <div className="text-sm font-medium text-text">AI integration</div>
+          <div className="mt-1 text-sm text-text2">
             Paste your Anthropic API key here. It’s saved in this browser (localStorage).
           </div>
 
           <div className="mt-4">
             <div className="mb-1 flex items-center justify-between">
-              <div className="text-xs text-[#9090b0]">Anthropic API key</div>
+              <div className="text-xs text-text2">Anthropic API key</div>
               <div
                 className={`h-2 w-2 rounded-full ${
                   keyLooksValid ? "bg-[#b8ff6c]" : "bg-white/20"
@@ -185,11 +185,11 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
                 window.localStorage.setItem(ANTHROPIC_KEY_STORAGE, v);
               }}
               placeholder="sk-ant-..."
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0] focus:border-[#7c6cff] focus:outline-none focus:ring-2 focus:ring-[#7c6cff]/30"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             />
 
             {keyLooksValid ? (
-              <div className="mt-3 rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#9090b0]">
+              <div className="mt-3 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
                 {aiStatus === "checking" ? (
                   <span>Checking connection…</span>
                 ) : aiStatus === "connected" ? (
@@ -203,13 +203,13 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
                 )}
               </div>
             ) : anthropicKey.trim().length ? (
-              <div className="mt-3 rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#9090b0]">
-                Key format looks wrong. It should start with <span className="text-[#f0f0f8]">sk-ant-</span>.
+              <div className="mt-3 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
+                Key format looks wrong. It should start with <span className="font-medium text-text">sk-ant-</span>.
               </div>
             ) : null}
 
-            <div className="mt-3 text-xs text-[#9090b0]">
-              Tip: once set, open <span className="text-[#f0f0f8]">AI Copilot</span> to start chatting.
+            <div className="mt-3 text-xs text-text2">
+              Tip: once set, open <span className="font-medium text-text">AI Copilot</span> to start chatting.
             </div>
           </div>
         </div>
@@ -228,15 +228,15 @@ function SetupItem({
   subtitle: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#2a2e3f] bg-black/20 p-4">
+    <div className="rounded-2xl border border-border bg-surface2 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm text-[#f0f0f8]">{title}</div>
-          <div className="mt-1 text-sm text-[#9090b0]">{subtitle}</div>
+          <div className="text-sm font-medium text-text">{title}</div>
+          <div className="mt-1 text-sm text-text2">{subtitle}</div>
         </div>
         <div
           className={`mt-1 h-2.5 w-2.5 rounded-full ${
-            ok ? "bg-[#b8ff6c]" : "bg-white/20"
+            ok ? "bg-[#b8ff6c]" : "bg-border"
           }`}
           aria-label={ok ? "OK" : "Not set"}
         />

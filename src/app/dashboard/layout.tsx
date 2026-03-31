@@ -4,6 +4,7 @@ import { DashboardShell } from "@/app/dashboard/DashboardShell";
 import { UserProvider } from "@/lib/user/UserProvider";
 import { cookies } from "next/headers";
 import { TENANT_COOKIE } from "@/lib/tenant";
+import { ForceDarkScript } from "@/components/theme/ForceDarkScript";
 
 export default async function DashboardLayout({
   children
@@ -71,6 +72,7 @@ export default async function DashboardLayout({
 
   return (
     <UserProvider>
+      <ForceDarkScript />
       <DashboardShell
         profile={profile ?? null}
         companies={companies}

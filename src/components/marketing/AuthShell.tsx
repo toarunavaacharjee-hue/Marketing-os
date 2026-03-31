@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MarketingLogo } from "@/components/marketing/MarketingChrome";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { ForceDarkScript } from "@/components/theme/ForceDarkScript";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
@@ -8,6 +8,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
       className="relative min-h-screen overflow-hidden bg-bg text-text antialiased"
       style={{ fontFamily: "var(--font-body)" }}
     >
+      <ForceDarkScript />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[min(55vh,480px)] saas-hero-glow" aria-hidden />
       <div className="pointer-events-none absolute inset-0 opacity-[0.35] saas-grid" aria-hidden />
 
@@ -27,7 +28,6 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             >
               Home
             </Link>
-            <ThemeToggle className="ml-1" />
           </nav>
         </div>
       </header>
