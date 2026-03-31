@@ -189,7 +189,7 @@ export function DashboardShell({
 
   function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     return (
-      <div className="flex h-full w-[228px] flex-col bg-transparent text-text">
+      <div className="flex h-full w-[228px] min-h-0 flex-col bg-transparent text-text">
         <div className="border-b border-white/[0.06] px-[18px] py-[16px]">
           <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onNavigate}>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#7c6cff] to-[#5a4fd4] text-[11px] font-bold text-white shadow-lg shadow-[#7c6cff]/20 ring-1 ring-white/10">
@@ -219,7 +219,7 @@ export function DashboardShell({
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto py-1">
+        <div className="min-h-0 flex-1 overflow-y-auto py-2">
           {NAV.map((section) => (
             <div key={section.label}>
               <SectionLabel>{section.label}</SectionLabel>
@@ -272,61 +272,70 @@ export function DashboardShell({
         </div>
 
         <div className="border-t border-border p-[14px]">
-          <div className="mb-3">
+          <div className="mb-2">
             <div className="text-sm text-text">{profile?.name ?? "—"}</div>
             <div className="text-xs text-text2">
               {profile?.company ?? "—"} • {profile?.plan ?? "free"}
             </div>
           </div>
 
-          <div className="mb-2 flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.5px] text-text3">
-              Anthropic API Key
+          <details className="group rounded-xl border border-border bg-surface2 px-3 py-2">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-[11px] font-semibold text-text2 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-2">
+                <span
+                  className={`h-2 w-2 rounded-full ${keyEntered ? "bg-green" : "bg-white/20"}`}
+                  aria-hidden
+                />
+                AI key & mode
+              </span>
+              <span className="text-text3 transition group-open:rotate-90">›</span>
+            </summary>
+
+            <div className="mt-3">
+              <div className="mb-2 flex items-center justify-between">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.5px] text-text3">
+                  Anthropic API Key
+                </div>
+                <div
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    keyEntered
+                      ? "bg-[rgba(52,211,153,0.15)] text-green"
+                      : "bg-[rgba(251,191,36,0.15)] text-yellow"
+                  }`}
+                >
+                  {keyEntered ? "LIVE" : "DEMO"}
+                </div>
+              </div>
+              <input
+                value={anthropicKey}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setAnthropicKey(v);
+                  window.localStorage.setItem(ANTHROPIC_KEY_STORAGE, v);
+                }}
+                placeholder="sk-ant-..."
+                className="w-full rounded-[6px] border border-border bg-bg px-2 py-1.5 text-[11px] text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                style={{ fontFamily: "var(--font-mono)" }}
+              />
+              {keyEntered ? (
+                <div className="mt-2 text-[11px] text-text2">
+                  {aiStatus === "checking" ? (
+                    <span>Checking connection…</span>
+                  ) : aiStatus === "connected" ? (
+                    <span className="text-green">Connected</span>
+                  ) : aiStatus === "error" ? (
+                    <span className="text-red">
+                      Not connected{aiError ? ` — ${aiError}` : ""}
+                    </span>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="mt-2 text-[11px] text-text2">
+                  Paste your key to enable Live AI.
+                </div>
+              )}
             </div>
-            <div
-              className={`h-2 w-2 rounded-full ${
-                keyEntered ? "bg-green" : "bg-white/20"
-              }`}
-              aria-label={keyEntered ? "Key saved" : "No key saved"}
-            />
-          </div>
-          <input
-            value={anthropicKey}
-            onChange={(e) => {
-              const v = e.target.value;
-              setAnthropicKey(v);
-              window.localStorage.setItem(ANTHROPIC_KEY_STORAGE, v);
-            }}
-            placeholder="sk-ant-..."
-            className="w-full rounded-[6px] border border-border bg-surface2 px-2 py-1.5 text-[11px] text-text placeholder:text-text3 focus:border-accent focus:outline-none"
-            style={{ fontFamily: "var(--font-mono)" }}
-          />
-          {keyEntered ? (
-            <div className="mt-2 text-[11px] text-text2">
-              {aiStatus === "checking" ? (
-                <span>Checking connection…</span>
-              ) : aiStatus === "connected" ? (
-                <span className="text-green">Connected</span>
-              ) : aiStatus === "error" ? (
-                <span className="text-red">
-                  Not connected{aiError ? ` — ${aiError}` : ""}
-                </span>
-              ) : null}
-            </div>
-          ) : (
-            <div className="mt-2 text-[11px] text-text2">
-              Paste your key to enable Live AI.
-            </div>
-          )}
-          <div
-            className={`mt-2 rounded-[4px] px-2 py-1 text-center text-[10px] font-semibold ${
-              keyEntered
-                ? "bg-[rgba(52,211,153,0.15)] text-green"
-                : "bg-[rgba(251,191,36,0.15)] text-yellow"
-            }`}
-          >
-            ● {keyEntered ? "LIVE AI MODE" : "DEMO MODE"}
-          </div>
+          </details>
         </div>
       </div>
     );
