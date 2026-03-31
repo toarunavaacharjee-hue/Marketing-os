@@ -89,7 +89,7 @@ function Check({ ok }: { ok: boolean }) {
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-[#08080c] text-[#f0f0f8] antialiased" style={{ fontFamily: "var(--font-body)" }}>
+    <div className="min-h-screen bg-bg text-text antialiased" style={{ fontFamily: "var(--font-body)" }}>
       <MarketingHeader />
 
       <div className="pointer-events-none absolute inset-x-0 top-[60px] h-[400px] saas-hero-glow" aria-hidden />
@@ -137,7 +137,7 @@ export default function PricingPage() {
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <div className="text-lg font-semibold text-[#f0f0f8]">{p.name}</div>
+                <div className="text-lg font-semibold text-text">{p.name}</div>
                 {p.plan === "growth" ? (
                   <span className="shrink-0 rounded-full bg-[#7c6cff]/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#c4b8ff]">
                     Popular
@@ -164,7 +164,7 @@ export default function PricingPage() {
                   className={`inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold transition ${
                     p.plan === "growth"
                       ? "bg-[#b8ff6c] text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 hover:bg-[#c8ff7c]"
-                      : "border border-white/[0.1] bg-white/[0.04] text-[#f0f0f8] hover:bg-white/[0.08]"
+                      : "border border-border bg-surface2 text-text hover:bg-surface3"
                   }`}
                 >
                   {p.cta}
@@ -176,7 +176,7 @@ export default function PricingPage() {
 
         <section className="saas-card mt-14 overflow-hidden p-0 sm:p-0">
           <div className="border-b border-white/[0.06] px-6 py-5 sm:px-8">
-            <div className="text-lg font-semibold text-[#f0f0f8]">Compare plans</div>
+            <div className="text-lg font-semibold text-text">Compare plans</div>
             <div className="mt-1 text-sm text-[#9090b0]">
               Workflow velocity + governance — not feature bloat.
             </div>
@@ -191,7 +191,7 @@ export default function PricingPage() {
                   <th className="py-4 pr-4">Enterprise</th>
                 </tr>
               </thead>
-              <tbody className="text-[#f0f0f8]">
+              <tbody className="text-text">
                 {MATRIX.flatMap((g) => [
                   <tr key={g.group} className="border-t border-white/[0.06] bg-white/[0.02]">
                     <td className="py-3 pl-4 pr-4 text-xs font-semibold uppercase tracking-wider text-[#c4b8ff]" colSpan={4}>
@@ -220,21 +220,21 @@ export default function PricingPage() {
 
         <section className="mt-14 grid gap-4 lg:grid-cols-2">
           <div className="saas-card p-6 sm:p-8">
-            <div className="text-lg font-semibold text-[#f0f0f8]">FAQ</div>
+            <div className="text-lg font-semibold text-text">FAQ</div>
             <div className="mt-4 space-y-5 text-sm leading-relaxed text-[#9090b0]">
               <div>
-                <div className="font-medium text-[#f0f0f8]">Is this a CRM replacement?</div>
+                <div className="font-medium text-text">Is this a CRM replacement?</div>
                 <div className="mt-2">
                   No. AI Marketing Workbench is the PMM + GTM operating layer (not a CRM). It connects to systems like
                   GA4 and can integrate with CRMs, but it doesn’t try to own your pipeline.
                 </div>
               </div>
               <div>
-                <div className="font-medium text-[#f0f0f8]">Can I upgrade later?</div>
+                <div className="font-medium text-text">Can I upgrade later?</div>
                 <div className="mt-2">Yes — upgrade any time from Settings.</div>
               </div>
               <div>
-                <div className="font-medium text-[#f0f0f8]">Do I need to add an Anthropic key?</div>
+                <div className="font-medium text-text">Do I need to add an Anthropic key?</div>
                 <div className="mt-2">
                   You can bring your own key. Starter includes limited workflow runs; Growth and Enterprise are
                   unlimited.
@@ -242,8 +242,8 @@ export default function PricingPage() {
               </div>
             </div>
           </div>
-          <div className="saas-card flex flex-col justify-center bg-gradient-to-br from-[#7c6cff]/10 via-[#141420] to-[#141420] p-6 sm:p-8">
-            <div className="text-lg font-semibold text-[#f0f0f8]">See it in action</div>
+          <div className="saas-card flex flex-col justify-center bg-gradient-to-br from-[#7c6cff]/10 via-[color:var(--surface)] to-[color:var(--surface)] p-6 sm:p-8">
+            <div className="text-lg font-semibold text-text">See it in action</div>
             <div className="mt-2 text-sm text-[#9090b0]">
               Apply templates, run workflows, and ship your first GTM plan in one session.
             </div>

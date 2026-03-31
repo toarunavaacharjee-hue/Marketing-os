@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeScript } from "@/components/theme/ThemeScript";
 
 export const metadata: Metadata = {
   title: "AI Marketing Workbench",
@@ -12,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -20,6 +21,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
+        <ThemeScript />
       </head>
       <body style={{ fontFamily: "var(--font-body)" }}>{children}</body>
     </html>

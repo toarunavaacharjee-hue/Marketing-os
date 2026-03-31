@@ -3,23 +3,23 @@
 @tailwind utilities;
 
 :root {
-  /* Aligned with product spec: dark #08080c, cards #141420, accent #7c6cff */
-  --bg: #08080c;
-  --surface: #141420;
-  --surface2: #1a1d26;
-  --surface3: #222533;
-  --border: #2a2e3f;
-  --border2: #353a52;
+  /* Light mode (default) */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f6f7fb;
+  --surface3: #eef0f7;
+  --border: rgba(15, 23, 42, 0.12);
+  --border2: rgba(15, 23, 42, 0.18);
   --accent: #7c6cff;
-  --accent2: #a78bfa;
-  --accent3: #38bdf8;
+  --accent2: #7c6cff;
+  --accent3: #0ea5e9;
   --green: #34d399;
   --yellow: #fbbf24;
   --red: #f87171;
   --pink: #f472b6;
-  --text: #f0f0f8;
-  --text2: #9ca3b8;
-  --text3: #5c6278;
+  --text: #0b1020;
+  --text2: rgba(15, 23, 42, 0.72);
+  --text3: rgba(15, 23, 42, 0.5);
   --radius: 12px;
   --radius2: 8px;
   --font-heading: "Syne", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
@@ -29,29 +29,45 @@
   --saas-cta: #b8ff6c;
 }
 
+/* Dark mode (opt-in via <html class="dark">) */
+html.dark {
+  --bg: #08080c;
+  --surface: #141420;
+  --surface2: #1a1d26;
+  --surface3: #222533;
+  --border: #2a2e3f;
+  --border2: #353a52;
+  --accent: #7c6cff;
+  --accent2: #a78bfa;
+  --accent3: #38bdf8;
+  --text: #f0f0f8;
+  --text2: #9ca3b8;
+  --text3: #5c6278;
+}
+
 /* Marketing + app: tech SaaS surface pattern */
 .saas-grid {
   background-image:
-    linear-gradient(rgba(124, 108, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 108, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(124, 108, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 108, 255, 0.07) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: linear-gradient(to bottom, black 0%, transparent 85%);
 }
 
 .saas-hero-glow {
   background:
-    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(124, 108, 255, 0.28), transparent 52%),
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(124, 108, 255, 0.18), transparent 52%),
     radial-gradient(ellipse 50% 35% at 95% 5%, rgba(184, 255, 108, 0.08), transparent 50%),
-    radial-gradient(ellipse 45% 30% at 5% 15%, rgba(56, 189, 248, 0.06), transparent 45%);
+    radial-gradient(ellipse 45% 30% at 5% 15%, rgba(56, 189, 248, 0.07), transparent 45%);
 }
 
 .saas-card {
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: #141420;
+  border: 1px solid var(--border);
+  background: var(--surface);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
-    0 20px 50px -15px rgba(0, 0, 0, 0.55);
+    0 0 0 1px rgba(15, 23, 42, 0.02) inset,
+    0 20px 50px -15px rgba(2, 6, 23, 0.12);
 }
 
 .saas-card-hover {
@@ -64,8 +80,8 @@
 .saas-card-hover:hover {
   border-color: rgba(124, 108, 255, 0.25);
   box-shadow:
-    0 0 0 1px rgba(124, 108, 255, 0.12) inset,
-    0 24px 56px -12px rgba(0, 0, 0, 0.6);
+    0 0 0 1px rgba(124, 108, 255, 0.10) inset,
+    0 24px 56px -12px rgba(2, 6, 23, 0.18);
 }
 
 .saas-pill {
@@ -81,6 +97,10 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #c4b8ff;
+}
+
+html:not(.dark) .saas-pill {
+  color: rgba(124, 108, 255, 0.95);
 }
 
 html,

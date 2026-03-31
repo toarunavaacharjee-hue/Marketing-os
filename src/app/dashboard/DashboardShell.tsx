@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 type Profile = {
   name: string | null;
@@ -269,6 +270,9 @@ export function DashboardShell({
             <span className="w-[18px] text-center text-[15px]">⚙️</span>
             <span className="pl-1">Settings</span>
           </Link>
+          <div className="mt-2 px-3">
+            <ThemeToggle variant="pill" className="w-full justify-center" />
+          </div>
         </div>
 
         <div className="border-t border-border p-[14px]">
@@ -355,7 +359,7 @@ export function DashboardShell({
             Marketing <span className="text-accent2">Workbench</span>
           </span>
         </Link>
-        <div className="w-[44px]" />
+        <ThemeToggle />
       </div>
 
       <div className="flex h-[calc(100dvh-56px)] md:h-dvh">

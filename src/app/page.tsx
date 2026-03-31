@@ -75,7 +75,7 @@ export default function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#08080c] text-[#f0f0f8] antialiased" style={{ fontFamily: "var(--font-body)" }}>
+    <div className="min-h-screen bg-bg text-text antialiased" style={{ fontFamily: "var(--font-body)" }}>
       <style jsx global>{`
         [data-reveal] {
           opacity: 0;
@@ -124,7 +124,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/dashboard/getting-started"
-                className="inline-flex items-center justify-center rounded-lg border border-white/[0.08] px-5 py-3 text-[15px] font-medium text-[#b8b8c8] transition hover:bg-white/[0.04] hover:text-[#f0f0f8]"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-5 py-3 text-[15px] font-medium text-text2 transition hover:bg-surface3 hover:text-text"
               >
                 Getting started
               </Link>
@@ -136,12 +136,12 @@ export default function HomePage() {
                 <div className="h-9 w-9 rounded-full border-2 border-[#141420] bg-[#2a2e3f]" />
               </div>
               <div className="h-8 w-px bg-white/[0.08]" />
-              <div className="text-[#9090b0]">
-                Trusted by <span className="font-medium text-[#f0f0f8]">120+ growth teams</span>
+              <div className="text-text2">
+                Trusted by <span className="font-medium text-text">120+ growth teams</span>
               </div>
               <div className="hidden h-8 w-px bg-white/[0.08] sm:block" />
-              <div className="text-[#9090b0]">
-                Avg setup <span className="font-mono text-[#f0f0f8]">1.8h</span>
+              <div className="text-text2">
+                Avg setup <span className="font-mono text-text">1.8h</span>
               </div>
             </div>
           </div>
@@ -154,8 +154,8 @@ export default function HomePage() {
               </span>
               <span className="ml-2 truncate">app — Marketing Workbench</span>
             </div>
-            <div className="rounded-xl border border-white/[0.06] bg-[#0c0c12] p-4 shadow-inner">
-              <div className="text-sm font-medium text-[#f0f0f8]">What you get on day 1</div>
+            <div className="rounded-xl border border-border bg-surface2 p-4 shadow-inner">
+              <div className="text-sm font-medium text-text">What you get on day 1</div>
               <div className="mt-3 grid gap-2 text-sm text-[#9090b0]">
                 {[
                   "Templates to seed launch plans and event playbooks",
@@ -163,10 +163,7 @@ export default function HomePage() {
                   "AI actions: Segment → Messaging draft, Positioning → Pitch battlecard",
                   "Workflow run logs + updates so teams stay aligned"
                 ].map((x) => (
-                  <div
-                    key={x}
-                    className="rounded-lg border border-white/[0.05] bg-[#141420]/80 px-3 py-2.5 text-[13px] leading-snug"
-                  >
+                  <div key={x} className="rounded-lg border border-border bg-surface px-3 py-2.5 text-[13px] leading-snug">
                     {x}
                   </div>
                 ))}
@@ -180,7 +177,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/dashboard/getting-started"
-                  className="rounded-lg border border-white/[0.1] px-4 py-2 text-sm font-medium text-[#f0f0f8] transition hover:bg-white/[0.06]"
+                  className="rounded-lg border border-border bg-surface2 px-4 py-2 text-sm font-medium text-text transition hover:bg-surface3"
                 >
                   Apply templates
                 </Link>
@@ -197,7 +194,7 @@ export default function HomePage() {
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="saas-card saas-card-hover p-6 md:col-span-2">
               <div className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wider text-[#7c6cff]">AI Copilot</div>
-              <div className="mt-2 text-lg font-medium text-[#f0f0f8]">Strategic answers, shipped as actions</div>
+              <div className="mt-2 text-lg font-medium text-text">Strategic answers, shipped as actions</div>
               <p className="mt-2 text-sm leading-relaxed text-[#9090b0]">
                 Ask strategic questions, get tactical action plans, and run follow-ups instantly.
               </p>
@@ -217,7 +214,7 @@ export default function HomePage() {
               "Customer insight loops"
             ].map((f) => (
               <div key={f} className="saas-card saas-card-hover p-5">
-                <div className="text-[15px] font-medium text-[#f0f0f8]">{f}</div>
+                <div className="text-[15px] font-medium text-text">{f}</div>
                 <p className="mt-2 text-sm leading-relaxed text-[#9090b0]">
                   Built for high-velocity GTM teams that need clarity and execution speed.
                 </p>
@@ -288,7 +285,7 @@ export default function HomePage() {
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {pricing.map((p) => (
               <div key={p.name} className="saas-card saas-card-hover flex flex-col p-6">
-                <div className="text-base font-semibold text-[#f0f0f8]">{p.name}</div>
+                <div className="text-base font-semibold text-text">{p.name}</div>
                 <div className="mt-3 flex items-baseline gap-1" style={{ fontFamily: "var(--font-heading)" }}>
                   <span className="text-4xl font-semibold tracking-tight text-[#fafafc]">${annual ? p.a : p.m}</span>
                   <span className="text-sm text-[#9090b0]">/mo</span>
@@ -310,7 +307,7 @@ export default function HomePage() {
                   </Link>
                   <Link
                     href="/pricing"
-                    className="inline-flex w-full items-center justify-center rounded-lg border border-white/[0.1] px-4 py-3 text-sm font-medium text-[#f0f0f8] hover:bg-white/[0.05]"
+                    className="inline-flex w-full items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-3 text-sm font-medium text-text hover:bg-surface3"
                   >
                     Compare plans
                   </Link>
@@ -349,13 +346,13 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setOpenFaq((v) => (v === idx ? -1 : idx))}
-                  className="flex w-full items-center justify-between px-4 py-4 text-left text-[15px] font-medium text-[#f0f0f8] transition hover:bg-white/[0.03]"
+                  className="flex w-full items-center justify-between px-4 py-4 text-left text-[15px] font-medium text-text transition hover:bg-surface2"
                 >
                   <span>{q}</span>
                   <span className="ml-2 font-mono text-[#9090b0]">{openFaq === idx ? "−" : "+"}</span>
                 </button>
                 {openFaq === idx ? (
-                  <div className="border-t border-white/[0.06] px-4 pb-4 pt-1 text-sm leading-relaxed text-[#9090b0]">{a}</div>
+                  <div className="border-t border-border px-4 pb-4 pt-1 text-sm leading-relaxed text-text2">{a}</div>
                 ) : null}
               </div>
             ))}
