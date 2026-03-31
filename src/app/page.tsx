@@ -229,15 +229,17 @@ export default function HomePage() {
           </h2>
           <div className="mt-5 grid gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {modules.map(([name, cat]) => (
-              <div key={name} className={`rounded-xl border p-3 text-sm ${
-                cat === "Core" ? "border-[#7c6cff]/40 bg-[#7c6cff]/10" :
-                cat === "Strategy" ? "border-[#2a2e3f] bg-[#1e1e2e]" :
-                cat === "Execution" ? "border-[#2a2e3f] bg-black/20" :
-                cat === "Content" ? "border-[#2a2e3f] bg-[#141420]" :
-                cat === "Sales" ? "border-[#b8ff6c]/30 bg-[#b8ff6c]/10" :
-                "border-[#2a2e3f] bg-[#1a1a28]"
-              }`}>
-                <div>{name}</div>
+              <div
+                key={name}
+                className={`rounded-xl border p-3 text-sm transition ${
+                  cat === "Core"
+                    ? "border-accent/25 bg-accent/10"
+                    : cat === "Sales"
+                      ? "border-[rgba(184,255,108,0.35)] bg-[rgba(184,255,108,0.10)]"
+                      : "border-border bg-surface2"
+                } hover:border-accent/25 hover:shadow-sm`}
+              >
+                <div className="font-medium text-text">{name}</div>
                 <div className="mt-1 text-xs text-text2">{cat}</div>
               </div>
             ))}

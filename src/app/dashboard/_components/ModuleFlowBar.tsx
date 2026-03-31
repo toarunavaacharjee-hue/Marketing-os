@@ -9,18 +9,18 @@ import {
 } from "@/lib/pmmModuleFlow";
 
 const bar =
-  "relative mb-6 overflow-hidden rounded-2xl border border-white/[0.08] bg-[linear-gradient(145deg,rgba(20,20,32,0.92)_0%,rgba(12,12,18,0.96)_100%)] px-4 py-3.5 text-[12px] shadow-[0_0_0_1px_rgba(255,255,255,0.04)_inset,0_16px_48px_-16px_rgba(0,0,0,0.55)] backdrop-blur-md";
+  "relative mb-6 overflow-hidden rounded-2xl border border-border bg-surface/90 px-4 py-3.5 text-[12px] shadow-sm backdrop-blur-md";
 
 const barAccent = "pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#7c6cff] to-[#5a4fd4]";
 
 const pill =
-  "inline-flex items-center rounded-md border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text3";
+  "inline-flex items-center rounded-md border border-border bg-surface2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text3";
 
 const btnGhost =
-  "inline-flex items-center rounded-lg border border-white/[0.1] bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold text-text transition hover:border-white/[0.14] hover:bg-white/[0.07]";
+  "inline-flex items-center rounded-lg border border-border bg-surface2 px-3 py-1.5 text-[11px] font-semibold text-text transition hover:bg-surface3";
 
 const btnAccentSoft =
-  "inline-flex items-center rounded-lg border border-[#7c6cff]/35 bg-[#7c6cff]/12 px-3 py-1.5 text-[11px] font-semibold text-[#c4b8ff] transition hover:border-[#7c6cff]/50 hover:bg-[#7c6cff]/18";
+  "inline-flex items-center rounded-lg border border-accent/35 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent transition hover:bg-accent/15";
 
 const btnPrimary =
   "inline-flex items-center rounded-lg bg-[#7c6cff] px-3 py-1.5 text-[11px] font-semibold text-white shadow-md shadow-[#7c6cff]/25 transition hover:bg-[#8b7cff]";
@@ -87,9 +87,9 @@ export function ModuleFlowBar() {
               ))}
             </div>
           </div>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] pt-3">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
             <span className="text-text2">Data you set here feeds Market Research, ICP, scans, and Analytics.</span>
-            <Link href="/dashboard/market-research" className="text-[11px] font-semibold text-[#7c6cff] hover:underline">
+            <Link href="/dashboard/market-research" className="text-[11px] font-semibold text-accent hover:underline">
               Start PMM workflow → Market Research
             </Link>
           </div>
@@ -143,7 +143,7 @@ export function ModuleFlowBar() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <Link href="/dashboard" className="shrink-0 text-[11px] font-semibold text-[#c4b8ff] hover:underline">
+              <Link href="/dashboard" className="shrink-0 text-[11px] font-semibold text-accent2 hover:underline">
                 Home
               </Link>
               <span className="text-text3">·</span>
@@ -174,19 +174,19 @@ export function ModuleFlowBar() {
             )}
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-white/[0.06] pt-3 text-[11px] text-text2">
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-3 text-[11px] text-text2">
           <span className="font-semibold text-text3">Foundation:</span>
           {FOUNDATION_LINKS.map((l) => (
-            <Link key={l.href} href={l.href} className="transition hover:text-[#c4b8ff] hover:underline">
+            <Link key={l.href} href={l.href} className="transition hover:text-accent2 hover:underline">
               {l.label}
             </Link>
           ))}
           <span className="text-text3">|</span>
-          <Link href="/dashboard/copilot" className="font-semibold text-text hover:text-[#c4b8ff] hover:underline">
+          <Link href="/dashboard/copilot" className="font-semibold text-text hover:text-accent2 hover:underline">
             AI Copilot
           </Link>
           <span className="text-text3">|</span>
-          <Link href="/dashboard/settings" className="font-semibold transition hover:text-[#c4b8ff] hover:underline">
+          <Link href="/dashboard/settings" className="font-semibold transition hover:text-accent2 hover:underline">
             All settings
           </Link>
         </div>
