@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseJsonObject } from "@/lib/extractJsonObject";
+import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -8,7 +9,6 @@ type AnthropicMessageResponse = {
 };
 
 type ProfileRow = {
-  plan?: string | null;
   ai_queries_used?: number | null;
   company?: string | null;
   name?: string | null;
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
   const profileSelect = await supabase
     .from("profiles")
-    .select("plan,ai_queries_used,company,name,anthropic_api_key")
+    .select("ai_queries_used,company,name,anthropic_api_key")
     .eq("id", user.id)
     .single();
 
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   if (profileSelect.error) {
     const fallback = await supabase
       .from("profiles")
-      .select("plan,ai_queries_used,company,name")
+      .select("ai_queries_used,company,name")
       .eq("id", user.id)
       .single();
     profile = (fallback.data ?? null) as ProfileRow | null;
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     profile = (profileSelect.data ?? null) as ProfileRow | null;
   }
 
-  const plan = (profile?.plan ?? "starter").toLowerCase();
+  const plan = (await getCompanyPlanForSelectedCompany()).toLowerCase();
   const used = profile?.ai_queries_used ?? 0;
   const company = profile?.company ?? "Unknown company";
   // Key priority:

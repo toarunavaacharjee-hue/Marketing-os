@@ -10,7 +10,6 @@ import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
 type Profile = {
   name: string | null;
   company: string | null;
-  plan: string | null;
 };
 
 type ModuleLink = {
@@ -82,6 +81,7 @@ function PurpleBar() {
 export function DashboardShell({
   children,
   profile,
+  companyPlan,
   companies,
   products,
   selectedCompanyId,
@@ -89,6 +89,7 @@ export function DashboardShell({
 }: {
   children: React.ReactNode;
   profile: Profile | null;
+  companyPlan: string;
   companies: CompanyOption[];
   products: ProductOption[];
   selectedCompanyId: string | null;
@@ -96,7 +97,7 @@ export function DashboardShell({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const ent = useMemo(() => getEntitlements(profile?.plan ?? "starter"), [profile?.plan]);
+  const ent = useMemo(() => getEntitlements(companyPlan ?? "starter"), [companyPlan]);
 
   const [anthropicKey, setAnthropicKey] = useState("");
   useEffect(() => {
@@ -275,7 +276,7 @@ export function DashboardShell({
           <div className="mb-2">
             <div className="text-sm text-text">{profile?.name ?? "—"}</div>
             <div className="text-xs text-text2">
-              {profile?.company ?? "—"} • {profile?.plan ?? "free"}
+              {profile?.company ?? "—"} • {companyPlan ?? "starter"}
             </div>
           </div>
 

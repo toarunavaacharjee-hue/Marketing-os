@@ -14,8 +14,18 @@ type InviteRow = {
   revoked_at: string | null;
 };
 
-async function getCompanyOwnerPlan(companyId: string) {
+async function getCompanyPlan(companyId: string) {
   const supabase = createSupabaseServerClient();
+  const { data: sub } = await supabase
+    .from("company_subscriptions")
+    .select("plan")
+    .eq("company_id", companyId)
+    .maybeSingle();
+
+  if (sub && (sub as any).plan) {
+    return normalizePlan(String((sub as any).plan));
+  }
+
   const { data: owner } = await supabase
     .from("company_members")
     .select("user_id, role, profiles(plan)")
@@ -67,7 +77,7 @@ export async function POST(req: Request) {
   }
 
   // Seat limit enforcement: based on owner plan.
-  const plan = await getCompanyOwnerPlan(companyId);
+  const plan = await getCompanyPlan(companyId);
   const ent = getEntitlements(plan);
   if (ent.seatsMax !== null) {
     const { count: memberCount } = await supabase
@@ -157,7 +167,7 @@ export async function PUT(req: Request) {
   // If RLS blocks this select (user isn't a member yet), skip precheck and let RPC return the real error.
   const companyId = (invMeta as any)?.company_id as string | undefined;
   if (companyId) {
-    const plan = await getCompanyOwnerPlan(companyId);
+    const plan = await getCompanyPlan(companyId);
     const ent = getEntitlements(plan);
     if (ent.seatsMax !== null) {
       const { count: memberCount } = await supabase

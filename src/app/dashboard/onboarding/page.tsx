@@ -41,6 +41,15 @@ export default function OnboardingPage() {
       role: "owner"
     });
 
+    // Create default subscription (per company)
+    await supabase.from("company_subscriptions").insert({
+      company_id: company.id,
+      plan: "starter",
+      status: "active",
+      seats_included: 1,
+      seats_addon: 0
+    });
+
     const { data: product, error: productErr } = await supabase
       .from("products")
       .insert({

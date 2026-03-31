@@ -4,6 +4,7 @@ import {
   getDefaultEnvironmentIdForSelectedProduct,
   getSelectedProductId
 } from "@/lib/productContext";
+import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
@@ -11,7 +12,6 @@ type AnthropicMessageResponse = {
 };
 
 type ProfileRow = {
-  plan?: string | null;
   ai_queries_used?: number | null;
   anthropic_api_key?: string | null;
 };
@@ -64,12 +64,12 @@ export async function POST(req: Request) {
 
   const profileSelect = await supabase
     .from("profiles")
-    .select("plan,ai_queries_used,anthropic_api_key")
+    .select("ai_queries_used,anthropic_api_key")
     .eq("id", user.id)
     .maybeSingle();
 
   const profile = (profileSelect.data ?? null) as ProfileRow | null;
-  const plan = (profile?.plan ?? "starter").toLowerCase();
+  const plan = (await getCompanyPlanForSelectedCompany()).toLowerCase();
   const used = profile?.ai_queries_used ?? 0;
 
   const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";

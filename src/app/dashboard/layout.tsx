@@ -4,6 +4,7 @@ import { DashboardShell } from "@/app/dashboard/DashboardShell";
 import { UserProvider } from "@/lib/user/UserProvider";
 import { cookies } from "next/headers";
 import { TENANT_COOKIE } from "@/lib/tenant";
+import { getCompanyPlan } from "@/lib/companyContext";
 import { ForceDarkScript } from "@/components/theme/ForceDarkScript";
 
 export default async function DashboardLayout({
@@ -20,7 +21,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name,company,plan")
+    .select("name,company")
     .eq("id", user.id)
     .single();
 
@@ -45,6 +46,7 @@ export default async function DashboardLayout({
   }
 
   const selectedCompanyId = companyIdCookie ?? companies[0].id;
+  const companyPlan = await getCompanyPlan(selectedCompanyId);
 
   const { data: products } = await supabase
     .from("products")
@@ -75,6 +77,7 @@ export default async function DashboardLayout({
       <ForceDarkScript />
       <DashboardShell
         profile={profile ?? null}
+        companyPlan={companyPlan}
         companies={companies}
         products={allProducts}
         selectedCompanyId={selectedCompanyId}

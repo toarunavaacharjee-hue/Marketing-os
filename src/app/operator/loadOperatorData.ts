@@ -23,7 +23,18 @@ export type OperatorStats = {
   researchScanCount: number;
   syncRunCount: number | null;
   totalAiQueries: number;
-  planBreakdown: Record<string, number>;
+  legacyUserPlanBreakdown: Record<string, number>;
+  companyPlanBreakdown: Record<string, number>;
+};
+
+export type OperatorCompanyRow = {
+  id: string;
+  name: string | null;
+  members_count: number;
+  plan: string | null;
+  status: string | null;
+  seats_included: number | null;
+  seats_addon: number | null;
 };
 
 type ProfileRow = {
@@ -40,6 +51,7 @@ export type OperatorData =
   | {
       serviceRole: true;
       stats: OperatorStats;
+      companies: OperatorCompanyRow[];
       subscribers: OperatorSubscriberRow[];
     }
   | { serviceRole: false; message: string };
@@ -100,10 +112,10 @@ export async function loadOperatorData(): Promise<OperatorData> {
     });
 
   const totalAiQueries = profiles.reduce((s, p) => s + (p.ai_queries_used ?? 0), 0);
-  const planBreakdown: Record<string, number> = {};
+  const legacyUserPlanBreakdown: Record<string, number> = {};
   for (const p of profiles) {
     const key = (p.plan ?? "unknown").toLowerCase() || "unknown";
-    planBreakdown[key] = (planBreakdown[key] ?? 0) + 1;
+    legacyUserPlanBreakdown[key] = (legacyUserPlanBreakdown[key] ?? 0) + 1;
   }
 
   const [cRes, pRes, eRes, rRes, sRes] = await Promise.all([
@@ -129,8 +141,57 @@ export async function loadOperatorData(): Promise<OperatorData> {
     researchScanCount: researchScanCount ?? 0,
     syncRunCount: syncRunCount === null ? null : syncRunCount,
     totalAiQueries,
-    planBreakdown
+    legacyUserPlanBreakdown,
+    companyPlanBreakdown: {}
   };
 
-  return { serviceRole: true, stats, subscribers };
+  // Companies + subscriptions + member counts (best-effort; table may not exist yet)
+  let companies: OperatorCompanyRow[] = [];
+  try {
+    const { data: cRows, error: cErr } = await admin.from("companies").select("id,name");
+    if (!cErr) {
+      const companyIds = (cRows ?? []).map((c: any) => String(c.id));
+
+      const { data: subs, error: sErr } = await admin
+        .from("company_subscriptions")
+        .select("company_id,plan,status,seats_included,seats_addon")
+        .in("company_id", companyIds);
+
+      const subList = (sErr ? [] : subs ?? []) as any[];
+      const subMap = new Map(subList.map((s: any) => [String(s.company_id), s]));
+
+      // Company plan breakdown from subscriptions
+      const companyPlanBreakdown: Record<string, number> = {};
+      subList.forEach((s: any) => {
+        const key = String(s?.plan ?? "unknown").toLowerCase() || "unknown";
+        companyPlanBreakdown[key] = (companyPlanBreakdown[key] ?? 0) + 1;
+      });
+      stats.companyPlanBreakdown = companyPlanBreakdown;
+
+      const { data: members } = await admin.from("company_members").select("company_id");
+      const countMap = new Map<string, number>();
+      (members ?? []).forEach((r: any) => {
+        const cid = String(r.company_id);
+        countMap.set(cid, (countMap.get(cid) ?? 0) + 1);
+      });
+
+      companies = (cRows ?? []).map((c: any) => {
+        const cid = String(c.id);
+        const sub = subMap.get(cid) as any;
+        return {
+          id: cid,
+          name: typeof c.name === "string" ? c.name : null,
+          members_count: countMap.get(cid) ?? 0,
+          plan: sub?.plan ?? null,
+          status: sub?.status ?? null,
+          seats_included: typeof sub?.seats_included === "number" ? sub.seats_included : null,
+          seats_addon: typeof sub?.seats_addon === "number" ? sub.seats_addon : null
+        };
+      });
+    }
+  } catch {
+    companies = [];
+  }
+
+  return { serviceRole: true, stats, companies, subscribers };
 }
