@@ -47,6 +47,12 @@ export default async function DashboardLayout({
   const selectedCompanyId = companyIdCookie ?? companies[0].id;
   const companyPlan = await getCompanyPlan(selectedCompanyId);
 
+  // Backfill product_members for accounts created before product-level membership (idempotent).
+  const { error: syncErr } = await supabase.rpc("sync_my_product_memberships");
+  if (syncErr) {
+    console.error("sync_my_product_memberships:", syncErr.message);
+  }
+
   const { data: productMemberships } = await supabase
     .from("product_members")
     .select("product_id, role, products(id,name,company_id)")
@@ -62,10 +68,16 @@ export default async function DashboardLayout({
         company_id: p.company_id as string
       })) ?? [];
 
-  const selectedProductId =
+  const validIds = new Set(allProducts.map((p) => p.id));
+  let selectedProductId =
     productIdCookie ??
     allProducts.find((p) => p.company_id === selectedCompanyId)?.id ??
     null;
+
+  if (selectedProductId && !validIds.has(selectedProductId)) {
+    selectedProductId =
+      allProducts.find((p) => p.company_id === selectedCompanyId)?.id ?? allProducts[0]?.id ?? null;
+  }
 
   if (!selectedProductId) {
     redirect("/onboarding");

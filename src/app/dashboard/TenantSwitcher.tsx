@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type CompanyOption = { id: string; name: string };
 export type ProductOption = { id: string; name: string; company_id: string };
@@ -17,11 +17,31 @@ export function TenantSwitcher({
   selectedProductId: string | null;
 }) {
   const [loading, setLoading] = useState(false);
+  const syncFixRef = useRef(false);
 
   const companyProducts = useMemo(() => {
     if (!selectedCompanyId) return [];
     return products.filter((p) => p.company_id === selectedCompanyId);
   }, [products, selectedCompanyId]);
+
+  const selectedIsValid = useMemo(() => {
+    if (!selectedProductId) return false;
+    return companyProducts.some((p) => p.id === selectedProductId);
+  }, [companyProducts, selectedProductId]);
+
+  useEffect(() => {
+    syncFixRef.current = false;
+  }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (syncFixRef.current) return;
+    if (!selectedCompanyId || companyProducts.length === 0) return;
+    if (selectedIsValid) return;
+    const first = companyProducts[0];
+    if (!first) return;
+    syncFixRef.current = true;
+    void setContext(selectedCompanyId, first.id);
+  }, [selectedCompanyId, companyProducts, selectedIsValid, selectedProductId]);
 
   async function setContext(nextCompanyId: string, nextProductId: string | null) {
     setLoading(true);
@@ -64,11 +84,16 @@ export function TenantSwitcher({
         Product
       </div>
       <select
-        value={selectedProductId ?? ""}
+        value={selectedIsValid ? (selectedProductId ?? "") : ""}
         disabled={loading || companyProducts.length === 0}
         onChange={(e) => setContext(selectedCompanyId ?? "", e.target.value)}
         className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text shadow-sm focus:border-accent focus:outline-none"
       >
+        {!selectedIsValid && companyProducts.length > 0 ? (
+          <option value="" disabled>
+            Select product…
+          </option>
+        ) : null}
         {companyProducts.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name}

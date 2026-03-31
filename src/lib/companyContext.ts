@@ -20,6 +20,17 @@ export async function getCompanyPlan(companyId: string): Promise<Plan> {
   return normalizePlan(String(planRaw));
 }
 
+export async function getCompanySubscriptionStatus(companyId: string): Promise<string> {
+  const supabase = createSupabaseServerClient();
+  const { data } = await supabase
+    .from("company_subscriptions")
+    .select("status")
+    .eq("company_id", companyId)
+    .maybeSingle();
+
+  return String((data as any)?.status ?? "active").toLowerCase();
+}
+
 export async function getCompanyPlanForSelectedCompany(): Promise<Plan> {
   const companyId = await getSelectedCompanyId();
   if (!companyId) return "starter";
