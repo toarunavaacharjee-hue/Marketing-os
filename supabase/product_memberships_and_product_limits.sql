@@ -56,38 +56,39 @@ as $$
 $$;
 
 -- 3) RLS policies
-drop policy if exists product_members_select_product_member on public.product_members;
-create policy product_members_select_product_member
+-- IMPORTANT: product_members policies must NOT call is_product_member/is_product_admin,
+-- otherwise they recurse on product_members and can overflow the stack.
+
+drop policy if exists product_members_select_self on public.product_members;
+create policy product_members_select_self
 on public.product_members
 for select
 to authenticated
-using (public.is_product_member(product_id));
+using (user_id = auth.uid());
 
--- Admins can manage membership; members can always see themselves.
-drop policy if exists product_members_insert_admin on public.product_members;
-create policy product_members_insert_admin
+drop policy if exists product_members_insert_self on public.product_members;
+create policy product_members_insert_self
 on public.product_members
 for insert
 to authenticated
-with check (
-  public.is_product_admin(product_id)
-  or user_id = auth.uid()
-);
+with check (user_id = auth.uid());
 
-drop policy if exists product_members_update_admin on public.product_members;
-create policy product_members_update_admin
+-- No updates from clients (prevents users changing their own role).
+drop policy if exists product_members_update_none on public.product_members;
+create policy product_members_update_none
 on public.product_members
 for update
 to authenticated
-using (public.is_product_admin(product_id) or user_id = auth.uid())
-with check (public.is_product_admin(product_id) or user_id = auth.uid());
+using (false)
+with check (false);
 
-drop policy if exists product_members_delete_admin on public.product_members;
-create policy product_members_delete_admin
+-- Allow users to remove their own membership (optional; keeps things simple).
+drop policy if exists product_members_delete_self on public.product_members;
+create policy product_members_delete_self
 on public.product_members
 for delete
 to authenticated
-using (public.is_product_admin(product_id));
+using (user_id = auth.uid());
 
 -- 4) Optional backfill: give every company owner/admin access to all products in their company.
 -- Uncomment if you already have data and want safe defaults.
