@@ -23,6 +23,12 @@ function isAppHostname(hostname: string) {
   return hostname.startsWith("app.");
 }
 
+/** Do not bounce apex → app.localhost (breaks dev). Production domains only. */
+function isLocalDevHostname(hostname: string) {
+  const h = hostname.toLowerCase();
+  return h === "localhost" || h === "127.0.0.1";
+}
+
 function isProtectedAppPath(pathname: string) {
   return (
     pathname === "/dashboard" ||
@@ -52,7 +58,9 @@ export async function middleware(request: NextRequest) {
   // If someone hits these paths on the root domain, bounce to app.<domain>.
   if (
     !isAppHost &&
+    !isLocalDevHostname(hostname) &&
     (path.startsWith("/dashboard") ||
+      path.startsWith("/onboarding") ||
       path.startsWith("/operator") ||
       path.startsWith("/login") ||
       path.startsWith("/signup") ||
@@ -70,6 +78,7 @@ export async function middleware(request: NextRequest) {
   if (
     isAppHost &&
     !path.startsWith("/dashboard") &&
+    !path.startsWith("/onboarding") &&
     !path.startsWith("/auth") &&
     !path.startsWith("/login") &&
     !path.startsWith("/signup") &&
