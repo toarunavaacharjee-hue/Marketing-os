@@ -40,10 +40,43 @@ export async function POST(req: Request) {
       );
     }
 
+    const companyId = String(selectedProduct.company_id);
+
+    // Enforce product add-on limits (1 included product per company + products_addon).
+    const [{ count: productCount }, { data: subRow }] = await Promise.all([
+      supabase.from("products").select("id", { count: "exact", head: true }).eq("company_id", companyId),
+      supabase
+        .from("company_subscriptions")
+        .select("products_included,products_addon,status")
+        .eq("company_id", companyId)
+        .maybeSingle()
+    ]);
+
+    const status = String((subRow as any)?.status ?? "active").toLowerCase();
+    if (status === "canceled") {
+      return NextResponse.json({ error: "Subscription canceled." }, { status: 402 });
+    }
+
+    const productsIncluded = Number.isFinite((subRow as any)?.products_included)
+      ? Number((subRow as any)?.products_included)
+      : 1;
+    const productsAddon = Number.isFinite((subRow as any)?.products_addon) ? Number((subRow as any)?.products_addon) : 0;
+    const productsAllowed = Math.max(0, Math.floor(productsIncluded) + Math.max(0, Math.floor(productsAddon)));
+
+    const currentProducts = productCount ?? 0;
+    if (currentProducts >= productsAllowed) {
+      return NextResponse.json(
+        {
+          error: `Product limit reached (${currentProducts}/${productsAllowed}). Add an add-on product or upgrade.`
+        },
+        { status: 402 }
+      );
+    }
+
     const { data: product, error: pErr } = await supabase
       .from("products")
       .insert({
-        company_id: selectedProduct.company_id,
+        company_id: companyId,
         name,
         website_url: websiteUrl || null
       })
@@ -64,6 +97,15 @@ export async function POST(req: Request) {
         { error: envErr.message ?? "Could not create product environment." },
         { status: 500 }
       );
+    }
+
+    const { error: pmErr } = await supabase.from("product_members").insert({
+      product_id: product.id,
+      user_id: user.id,
+      role: "admin"
+    });
+    if (pmErr) {
+      return NextResponse.json({ error: pmErr.message ?? "Could not grant product access." }, { status: 500 });
     }
 
     return NextResponse.json({

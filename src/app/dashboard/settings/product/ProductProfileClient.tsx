@@ -369,7 +369,7 @@ export default function ProductProfileClient() {
         </button>
       </div>
 
-      <div className="mt-8 border-t border-border pt-6">
+      <div id="add-product" className="mt-8 scroll-mt-24 border-t border-border pt-6">
         <div className="text-sm font-semibold text-text">Add new product (same workspace)</div>
         <div className="mt-1 text-sm text-text2">
           Creates a new product under the current company and switches you to it.

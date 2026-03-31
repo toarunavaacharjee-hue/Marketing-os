@@ -6,10 +6,13 @@ type CompanyRow = {
   id: string;
   name: string | null;
   members_count: number;
+  products_count: number;
   plan: string | null;
   status: string | null;
   seats_included: number | null;
   seats_addon: number | null;
+  products_included: number | null;
+  products_addon: number | null;
 };
 
 const PLAN_OPTIONS = ["starter", "growth", "enterprise"] as const;
@@ -19,6 +22,10 @@ function seatsIncludedFor(plan: string) {
   const p = (plan ?? "starter").toLowerCase();
   if (p === "growth") return 5;
   if (p === "enterprise") return 10;
+  return 1;
+}
+
+function productsIncludedFor(_plan: string) {
   return 1;
 }
 
@@ -34,7 +41,10 @@ export default function OperatorCompaniesClient({
 
   const byId = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
 
-  async function updateCompany(companyId: string, patch: Partial<Pick<CompanyRow, "plan" | "status" | "seats_addon">>) {
+  async function updateCompany(
+    companyId: string,
+    patch: Partial<Pick<CompanyRow, "plan" | "status" | "seats_addon" | "products_addon">>
+  ) {
     setBusyId(companyId);
     setError(null);
     setOk(null);
@@ -48,11 +58,17 @@ export default function OperatorCompaniesClient({
           : typeof cur?.seats_addon === "number"
             ? cur.seats_addon
             : 0;
+      const products_addon =
+        typeof patch.products_addon === "number"
+          ? patch.products_addon
+          : typeof cur?.products_addon === "number"
+            ? cur.products_addon
+            : 0;
 
       const res = await fetch("/api/operator/set-company-subscription", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ company_id: companyId, plan, status, seats_addon })
+        body: JSON.stringify({ company_id: companyId, plan, status, seats_addon, products_addon })
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to update company subscription.");
@@ -65,7 +81,9 @@ export default function OperatorCompaniesClient({
                 plan,
                 status,
                 seats_addon,
-                seats_included: seatsIncludedFor(plan)
+                seats_included: seatsIncludedFor(plan),
+                products_addon,
+                products_included: productsIncludedFor(plan)
               }
             : r
         )
@@ -93,10 +111,13 @@ export default function OperatorCompaniesClient({
             <tr>
               <th className="px-3 py-2">Company</th>
               <th className="px-3 py-2">Members</th>
+              <th className="px-3 py-2">Products</th>
               <th className="px-3 py-2">Plan</th>
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2">Seats</th>
               <th className="px-3 py-2">Extra seats</th>
+              <th className="px-3 py-2">Product limit</th>
+              <th className="px-3 py-2">Extra products</th>
             </tr>
           </thead>
           <tbody className="text-[var(--text2)]">
@@ -107,6 +128,9 @@ export default function OperatorCompaniesClient({
               const included = seatsIncludedFor(plan);
               const addon = typeof c.seats_addon === "number" ? c.seats_addon : 0;
               const seatsTotal = included + addon;
+              const productsIncluded = productsIncludedFor(plan);
+              const productsAddon = typeof c.products_addon === "number" ? c.products_addon : 0;
+              const productsTotal = productsIncluded + productsAddon;
               return (
                 <tr key={c.id} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2 font-medium text-[var(--text)]">
@@ -114,6 +138,7 @@ export default function OperatorCompaniesClient({
                     <span className="font-mono text-[11px] text-[var(--text3)]">({c.id.slice(0, 8)}…)</span>
                   </td>
                   <td className="px-3 py-2">{c.members_count}</td>
+                  <td className="px-3 py-2">{c.products_count}</td>
                   <td className="px-3 py-2">
                     <select
                       value={PLAN_OPTIONS.includes(plan as any) ? (plan as any) : "starter"}
@@ -158,6 +183,22 @@ export default function OperatorCompaniesClient({
                     />
                     <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {included}</div>
                   </td>
+                  <td className="px-3 py-2 font-mono text-[12px] text-[var(--text)]">{productsTotal}</td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      defaultValue={productsAddon}
+                      disabled={busy}
+                      onBlur={(e) => {
+                        const n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                        void updateCompany(c.id, { products_addon: n });
+                      }}
+                      className="w-[110px] rounded-lg border border-[var(--border)] bg-[var(--surface2)] px-2 py-1 text-sm text-[var(--text)] disabled:opacity-60"
+                    />
+                    <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {productsIncluded}</div>
+                  </td>
                 </tr>
               );
             })}
@@ -173,11 +214,13 @@ export default function OperatorCompaniesClient({
           const status = (c.status ?? "active").toLowerCase();
           const included = seatsIncludedFor(plan);
           const addon = typeof c.seats_addon === "number" ? c.seats_addon : 0;
+          const productsIncluded = productsIncludedFor(plan);
+          const productsAddon = typeof c.products_addon === "number" ? c.products_addon : 0;
           return (
             <div key={c.id} className="p-3">
               <div className="text-sm font-semibold text-[var(--text)]">{c.name ?? "Company"}</div>
               <div className="mt-1 text-xs text-[var(--text2)]">
-                Members: {c.members_count} · Seats: {included + addon}
+                Members: {c.members_count} · Products: {c.products_count} · Seats: {included + addon}
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-[var(--text2)]">
                 <div className="rounded-lg border border-[var(--border)] bg-[var(--surface2)] p-2">
@@ -210,6 +253,22 @@ export default function OperatorCompaniesClient({
                     className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--text)] disabled:opacity-60"
                   />
                   <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {included}</div>
+                </div>
+                <div className="rounded-lg border border-[var(--border)] bg-[var(--surface2)] p-2">
+                  <div className="text-[10px] font-semibold uppercase text-[var(--text3)]">Extra products</div>
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    defaultValue={productsAddon}
+                    disabled={busy}
+                    onBlur={(e) => {
+                      const n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                      void updateCompany(c.id, { products_addon: n });
+                    }}
+                    className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--text)] disabled:opacity-60"
+                  />
+                  <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {productsIncluded}</div>
                 </div>
               </div>
               <div className="mt-2">

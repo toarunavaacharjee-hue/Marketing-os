@@ -76,11 +76,19 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className="mt-3 text-xs text-text2">
-        Need a new company/product?{" "}
-        <a className="font-medium text-accent hover:underline" href="/onboarding">
-          Create one
-        </a>
+      <div className="mt-3 space-y-1 text-xs text-text2">
+        <div>
+          Want to add a product to this company?{" "}
+          <a className="font-medium text-accent hover:underline" href="/dashboard/settings/product#add-product">
+            Add product
+          </a>
+        </div>
+        <div>
+          Need a new company?{" "}
+          <a className="font-medium text-accent hover:underline" href="/onboarding">
+            Create company
+          </a>
+        </div>
       </div>
     </div>
   );

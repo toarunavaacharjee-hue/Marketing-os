@@ -47,7 +47,9 @@ export default function OnboardingPage() {
       plan: "starter",
       status: "active",
       seats_included: 1,
-      seats_addon: 0
+      seats_addon: 0,
+      products_included: 1,
+      products_addon: 0
     });
 
     const { data: product, error: productErr } = await supabase
@@ -69,6 +71,12 @@ export default function OnboardingPage() {
     await supabase.from("product_environments").insert({
       product_id: product.id,
       name: "Default"
+    });
+
+    await supabase.from("product_members").insert({
+      product_id: product.id,
+      user_id: user.id,
+      role: "owner"
     });
 
     await fetch("/api/context/select", {

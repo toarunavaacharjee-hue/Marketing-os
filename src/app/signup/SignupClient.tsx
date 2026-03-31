@@ -68,7 +68,8 @@ export default function SignupClient() {
     }
 
     setLoading(false);
-    router.push("/dashboard/settings");
+    // Company membership is required for /dashboard. Send new users to onboarding to create a company/product.
+    router.push("/onboarding");
   }
 
   return (

@@ -65,6 +65,7 @@ declare
   v_inv public.company_invites%rowtype;
   v_email text;
   v_now timestamptz := now();
+  v_first_product uuid;
 begin
   v_email := lower(coalesce((auth.jwt() ->> 'email'), ''));
   if v_email = '' then
@@ -100,6 +101,21 @@ begin
   insert into public.company_members(company_id, user_id, role)
   values (v_inv.company_id, auth.uid(), v_inv.role)
   on conflict (company_id, user_id) do update set role = excluded.role;
+
+  -- Product-level membership: auto-grant access to the company's first product.
+  -- (Admins can later curate product access explicitly.)
+  select p.id
+  into v_first_product
+  from public.products p
+  where p.company_id = v_inv.company_id
+  order by p.created_at asc
+  limit 1;
+
+  if v_first_product is not null then
+    insert into public.product_members(product_id, user_id, role)
+    values (v_first_product, auth.uid(), 'member')
+    on conflict (product_id, user_id) do nothing;
+  end if;
 
   update public.company_invites
   set accepted_at = v_now, accepted_by = auth.uid()

@@ -31,10 +31,13 @@ export type OperatorCompanyRow = {
   id: string;
   name: string | null;
   members_count: number;
+  products_count: number;
   plan: string | null;
   status: string | null;
   seats_included: number | null;
   seats_addon: number | null;
+  products_included: number | null;
+  products_addon: number | null;
 };
 
 type ProfileRow = {
@@ -154,7 +157,7 @@ export async function loadOperatorData(): Promise<OperatorData> {
 
       const { data: subs, error: sErr } = await admin
         .from("company_subscriptions")
-        .select("company_id,plan,status,seats_included,seats_addon")
+        .select("company_id,plan,status,seats_included,seats_addon,products_included,products_addon")
         .in("company_id", companyIds);
 
       const subList = (sErr ? [] : subs ?? []) as any[];
@@ -175,6 +178,13 @@ export async function loadOperatorData(): Promise<OperatorData> {
         countMap.set(cid, (countMap.get(cid) ?? 0) + 1);
       });
 
+      const { data: products } = await admin.from("products").select("id,company_id");
+      const productCountMap = new Map<string, number>();
+      (products ?? []).forEach((r: any) => {
+        const cid = String(r.company_id);
+        productCountMap.set(cid, (productCountMap.get(cid) ?? 0) + 1);
+      });
+
       companies = (cRows ?? []).map((c: any) => {
         const cid = String(c.id);
         const sub = subMap.get(cid) as any;
@@ -182,10 +192,14 @@ export async function loadOperatorData(): Promise<OperatorData> {
           id: cid,
           name: typeof c.name === "string" ? c.name : null,
           members_count: countMap.get(cid) ?? 0,
+          products_count: productCountMap.get(cid) ?? 0,
           plan: sub?.plan ?? null,
           status: sub?.status ?? null,
           seats_included: typeof sub?.seats_included === "number" ? sub.seats_included : null,
-          seats_addon: typeof sub?.seats_addon === "number" ? sub.seats_addon : null
+          seats_addon: typeof sub?.seats_addon === "number" ? sub.seats_addon : null,
+          products_included:
+            typeof sub?.products_included === "number" ? sub.products_included : null,
+          products_addon: typeof sub?.products_addon === "number" ? sub.products_addon : null
         };
       });
     }

@@ -5,7 +5,6 @@ import { UserProvider } from "@/lib/user/UserProvider";
 import { cookies } from "next/headers";
 import { TENANT_COOKIE } from "@/lib/tenant";
 import { getCompanyPlan } from "@/lib/companyContext";
-import { ForceDarkScript } from "@/components/theme/ForceDarkScript";
 
 export default async function DashboardLayout({
   children
@@ -48,20 +47,20 @@ export default async function DashboardLayout({
   const selectedCompanyId = companyIdCookie ?? companies[0].id;
   const companyPlan = await getCompanyPlan(selectedCompanyId);
 
-  const { data: products } = await supabase
-    .from("products")
-    .select("id,name,company_id")
-    .in(
-      "company_id",
-      companies.map((c) => c.id)
-    );
+  const { data: productMemberships } = await supabase
+    .from("product_members")
+    .select("product_id, role, products(id,name,company_id)")
+    .eq("user_id", user.id);
 
   const allProducts =
-    products?.map((p) => ({
-      id: p.id as string,
-      name: p.name as string,
-      company_id: p.company_id as string
-    })) ?? [];
+    productMemberships
+      ?.map((pm) => (pm as any).products)
+      .filter(Boolean)
+      .map((p: any) => ({
+        id: p.id as string,
+        name: (p.name as string) ?? "Product",
+        company_id: p.company_id as string
+      })) ?? [];
 
   const selectedProductId =
     productIdCookie ??
@@ -74,7 +73,6 @@ export default async function DashboardLayout({
 
   return (
     <UserProvider>
-      <ForceDarkScript />
       <DashboardShell
         profile={profile ?? null}
         companyPlan={companyPlan}

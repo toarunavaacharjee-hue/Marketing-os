@@ -15,7 +15,7 @@ const primaryCta =
 export default function LoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/dashboard/settings";
+  const next = searchParams.get("next") ?? "/dashboard";
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
