@@ -100,12 +100,12 @@ export default function HomePage() {
               PMM &amp; GTM platform
             </div>
             <h1
-              className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-[#fafafc] md:text-5xl lg:text-[3.25rem]"
+              className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-text md:text-5xl lg:text-[3.25rem]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               AI Marketing Workbench
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-[#9090b0]">
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-text2">
               The PMM + GTM operating layer (not a CRM). Connect ICP, positioning, messaging, campaigns, and measurement
               loops — then turn them into repeatable workflows.
             </p>
@@ -118,7 +118,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.04] px-5 py-3 text-[15px] font-medium text-[#e8e8f0] transition hover:border-white/[0.14] hover:bg-white/[0.07]"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-5 py-3 text-[15px] font-medium text-text transition hover:bg-surface3"
               >
                 See pricing
               </Link>
@@ -135,18 +135,18 @@ export default function HomePage() {
                 <div className="h-9 w-9 rounded-full border-2 border-[#141420] bg-[#b8ff6c]" />
                 <div className="h-9 w-9 rounded-full border-2 border-[#141420] bg-[#2a2e3f]" />
               </div>
-              <div className="h-8 w-px bg-white/[0.08]" />
+              <div className="h-8 w-px bg-border" />
               <div className="text-text2">
                 Trusted by <span className="font-medium text-text">120+ growth teams</span>
               </div>
-              <div className="hidden h-8 w-px bg-white/[0.08] sm:block" />
+              <div className="hidden h-8 w-px bg-border sm:block" />
               <div className="text-text2">
                 Avg setup <span className="font-mono text-text">1.8h</span>
               </div>
             </div>
           </div>
           <div className="saas-card saas-card-hover p-6 sm:p-7">
-            <div className="mb-4 flex items-center gap-2 border-b border-white/[0.06] pb-4 font-mono text-[11px] text-[#707090]">
+            <div className="mb-4 flex items-center gap-2 border-b border-border pb-4 font-mono text-[11px] text-text3">
               <span className="flex gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
                 <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
@@ -156,7 +156,7 @@ export default function HomePage() {
             </div>
             <div className="rounded-xl border border-border bg-surface2 p-4 shadow-inner">
               <div className="text-sm font-medium text-text">What you get on day 1</div>
-              <div className="mt-3 grid gap-2 text-sm text-[#9090b0]">
+              <div className="mt-3 grid gap-2 text-sm text-text2">
                 {[
                   "Templates to seed launch plans and event playbooks",
                   "Marketing Workbench: your unified cross-module view",
@@ -188,19 +188,19 @@ export default function HomePage() {
 
         <section id="features" data-reveal className="mt-24">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Platform</div>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[#fafafc] md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Built for modern GTM teams
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="saas-card saas-card-hover p-6 md:col-span-2">
               <div className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wider text-[#7c6cff]">AI Copilot</div>
               <div className="mt-2 text-lg font-medium text-text">Strategic answers, shipped as actions</div>
-              <p className="mt-2 text-sm leading-relaxed text-[#9090b0]">
+              <p className="mt-2 text-sm leading-relaxed text-text2">
                 Ask strategic questions, get tactical action plans, and run follow-ups instantly.
               </p>
               <div className="mt-5 grid grid-cols-3 gap-2 text-center text-[12px]">
                 {["Response ~8s", "Weekly plans: 24", "Success: 96%"].map((m) => (
-                  <div key={m} className="rounded-lg border border-white/[0.06] bg-[#0c0c12] px-2 py-3 font-mono text-[#9090b0]">
+                  <div key={m} className="rounded-lg border border-border bg-surface2 px-2 py-3 font-mono text-text2">
                     {m}
                   </div>
                 ))}
@@ -215,7 +215,7 @@ export default function HomePage() {
             ].map((f) => (
               <div key={f} className="saas-card saas-card-hover p-5">
                 <div className="text-[15px] font-medium text-text">{f}</div>
-                <p className="mt-2 text-sm leading-relaxed text-[#9090b0]">
+                <p className="mt-2 text-sm leading-relaxed text-text2">
                   Built for high-velocity GTM teams that need clarity and execution speed.
                 </p>
               </div>
@@ -224,7 +224,7 @@ export default function HomePage() {
         </section>
 
         <section id="modules" data-reveal className="saas-card mt-24 p-6 sm:p-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-[#fafafc] md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <h2 className="text-2xl font-semibold tracking-tight text-text md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
             All 18 modules
           </h2>
           <div className="mt-5 grid gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
@@ -238,7 +238,7 @@ export default function HomePage() {
                 "border-[#2a2e3f] bg-[#1a1a28]"
               }`}>
                 <div>{name}</div>
-                <div className="mt-1 text-xs text-[#9090b0]">{cat}</div>
+                <div className="mt-1 text-xs text-text2">{cat}</div>
               </div>
             ))}
           </div>
@@ -246,7 +246,7 @@ export default function HomePage() {
 
         <section id="how-it-works" data-reveal className="mt-24">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Workflow</div>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[#fafafc] md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             How it works
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-4">
@@ -260,7 +260,7 @@ export default function HomePage() {
                 <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#7c6cff]/20 font-mono text-sm font-semibold text-[#c4b8ff]">
                   {i + 1}
                 </div>
-                <p className="text-sm leading-relaxed text-[#9090b0]">{s}</p>
+                <p className="text-sm leading-relaxed text-text2">{s}</p>
               </div>
             ))}
           </div>
@@ -270,14 +270,14 @@ export default function HomePage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Pricing</div>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[#fafafc] md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
                 Simple plans
               </h2>
             </div>
             <button
               type="button"
               onClick={() => setAnnual((v) => !v)}
-              className="rounded-lg border border-white/[0.1] bg-white/[0.04] px-4 py-2 text-[13px] font-medium text-[#9090b0] transition hover:bg-white/[0.07]"
+              className="rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3"
             >
               {annual ? "Annual billing (~20% off)" : "Monthly billing"}
             </button>
@@ -287,10 +287,10 @@ export default function HomePage() {
               <div key={p.name} className="saas-card saas-card-hover flex flex-col p-6">
                 <div className="text-base font-semibold text-text">{p.name}</div>
                 <div className="mt-3 flex items-baseline gap-1" style={{ fontFamily: "var(--font-heading)" }}>
-                  <span className="text-4xl font-semibold tracking-tight text-[#fafafc]">${annual ? p.a : p.m}</span>
-                  <span className="text-sm text-[#9090b0]">/mo</span>
+                  <span className="text-4xl font-semibold tracking-tight text-text">${annual ? p.a : p.m}</span>
+                  <span className="text-sm text-text2">/mo</span>
                 </div>
-                <ul className="mt-4 flex-1 space-y-2 text-sm text-[#9090b0]">
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-text2">
                   {p.bullets.map((b) => (
                     <li key={b} className="flex gap-2">
                       <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#7c6cff]" />
@@ -319,7 +319,7 @@ export default function HomePage() {
 
         <section data-reveal className="mt-24">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Social proof</div>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-[#fafafc] md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Teams shipping faster
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -329,27 +329,27 @@ export default function HomePage() {
               ["Founder, MarTech agency", "Our team ships better content and clearer GTM plans every week."]
             ].map(([role, quote]) => (
               <div key={role} className="saas-card saas-card-hover p-5">
-                <p className="text-sm leading-relaxed text-[#e8e8f0]">&ldquo;{quote}&rdquo;</p>
-                <p className="mt-4 text-[12px] font-medium uppercase tracking-wider text-[#707090]">{role}</p>
+                <p className="text-sm leading-relaxed text-text">&ldquo;{quote}&rdquo;</p>
+                <p className="mt-4 text-[12px] font-medium uppercase tracking-wider text-text3">{role}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section id="faq" data-reveal className="mt-24">
-          <h2 className="text-3xl font-semibold tracking-tight text-[#fafafc] md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             FAQ
           </h2>
           <div className="mt-6 space-y-2">
             {faq.map(([q, a], idx) => (
-              <div key={q} className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#141420]">
+              <div key={q} className="overflow-hidden rounded-xl border border-border bg-surface">
                 <button
                   type="button"
                   onClick={() => setOpenFaq((v) => (v === idx ? -1 : idx))}
                   className="flex w-full items-center justify-between px-4 py-4 text-left text-[15px] font-medium text-text transition hover:bg-surface2"
                 >
                   <span>{q}</span>
-                  <span className="ml-2 font-mono text-[#9090b0]">{openFaq === idx ? "−" : "+"}</span>
+                  <span className="ml-2 font-mono text-text2">{openFaq === idx ? "−" : "+"}</span>
                 </button>
                 {openFaq === idx ? (
                   <div className="border-t border-border px-4 pb-4 pt-1 text-sm leading-relaxed text-text2">{a}</div>
@@ -360,10 +360,10 @@ export default function HomePage() {
         </section>
 
         <section data-reveal className="saas-card mt-24 border-[#7c6cff]/25 bg-gradient-to-br from-[#7c6cff]/10 via-[#141420] to-[#141420] p-8 text-center sm:p-10">
-          <h3 className="text-2xl font-semibold tracking-tight text-[#fafafc] sm:text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <h3 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Ready to run smarter marketing?
           </h3>
-          <p className="mt-3 text-[#9090b0]">Start free and launch your first weekly operating loop today.</p>
+          <p className="mt-3 text-text2">Start free and launch your first weekly operating loop today.</p>
           <div className="mt-6">
             <Link
               href="/signup?plan=starter"

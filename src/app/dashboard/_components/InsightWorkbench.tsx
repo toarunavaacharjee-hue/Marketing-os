@@ -424,24 +424,24 @@ export function InsightWorkbench({
     return (
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <p className="text-xs text-[#9090b0]">
+          <p className="text-xs text-text2">
             Capture the official site, who is going, logistics, and a prep timeline alongside goals and tasks. Use{" "}
-            <strong className="text-[#f0f0f8]">Import PDF</strong> to draft from an agenda or exhibitor pack — then edit.{" "}
-            <strong className="text-[#f0f0f8]">Match prep to tasks</strong> syncs the slider with your checklist. Expand{" "}
-            <strong className="text-[#f0f0f8]">Program &amp; commercial</strong> for sponsor/budget, lead capture, speaking,
+            <strong className="text-text">Import PDF</strong> to draft from an agenda or exhibitor pack — then edit.{" "}
+            <strong className="text-text">Match prep to tasks</strong> syncs the slider with your checklist. Expand{" "}
+            <strong className="text-text">Program &amp; commercial</strong> for sponsor/budget, lead capture, speaking,
             meetings, competitors, and follow-up.
           </p>
 
           {events.events.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[#2a2e3f] bg-[#141420]/60 p-8 text-center text-sm text-[#9090b0]">
-              No upcoming events yet. Click <span className="text-[#f0f0f8]">Add event</span> or import a PDF.
+            <div className="rounded-2xl border border-dashed border-border bg-surface2 p-8 text-center text-sm text-text2">
+              No upcoming events yet. Click <span className="font-medium text-text">Add event</span> or import a PDF.
             </div>
           ) : null}
 
           {events.events.map((ev, i) => (
             <div
               key={ev.id}
-              className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4"
+              className="rounded-2xl border border-border bg-surface p-4 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <input
@@ -453,7 +453,7 @@ export function InsightWorkbench({
                     replaceEventsList(next);
                   }}
                   placeholder="Conference or event name (e.g. SIIA National Conference — AI Forum)"
-                  className="min-w-0 flex-1 rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm font-medium text-[#f0f0f8]"
+                  className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-3 py-2 text-sm font-medium text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                 />
                 <button
                   type="button"
@@ -466,7 +466,7 @@ export function InsightWorkbench({
 
               <div className="mt-3 flex flex-wrap items-end gap-2">
                 <div className="min-w-0 flex-1">
-                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Event website</div>
+                  <div className="mb-1 text-[10px] uppercase text-text3">Event website</div>
                   <input
                     value={ev.eventUrl}
                     onChange={(e) => {
@@ -476,7 +476,7 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="https://conference.example.com"
-                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                   />
                 </div>
                 {hrefForUserUrl(ev.eventUrl) ? (
@@ -484,7 +484,7 @@ export function InsightWorkbench({
                     href={hrefForUserUrl(ev.eventUrl)!}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1.5 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                    className="shrink-0 rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/15"
                   >
                     Open site
                   </a>

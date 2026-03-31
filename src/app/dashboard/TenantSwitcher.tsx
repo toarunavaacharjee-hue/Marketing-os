@@ -38,7 +38,7 @@ export function TenantSwitcher({
 
   return (
     <div className="px-4 pb-3 pt-3">
-      <div className="mb-2 text-xs uppercase tracking-wider text-[#9090b0]">
+      <div className="mb-2 text-xs uppercase tracking-wider text-text2">
         Workspace
       </div>
 
@@ -51,7 +51,7 @@ export function TenantSwitcher({
             products.find((p) => p.company_id === nextCompanyId) ?? null;
           setContext(nextCompanyId, firstProduct?.id ?? null);
         }}
-        className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text shadow-sm focus:border-accent focus:outline-none"
       >
         {companies.map((c) => (
           <option key={c.id} value={c.id}>
@@ -60,14 +60,14 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className="mt-3 mb-2 text-xs uppercase tracking-wider text-[#9090b0]">
+      <div className="mb-2 mt-3 text-xs uppercase tracking-wider text-text2">
         Product
       </div>
       <select
         value={selectedProductId ?? ""}
         disabled={loading || companyProducts.length === 0}
         onChange={(e) => setContext(selectedCompanyId ?? "", e.target.value)}
-        className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text shadow-sm focus:border-accent focus:outline-none"
       >
         {companyProducts.map((p) => (
           <option key={p.id} value={p.id}>
@@ -76,9 +76,9 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className="mt-3 text-xs text-[#9090b0]">
+      <div className="mt-3 text-xs text-text2">
         Need a new company/product?{" "}
-        <a className="text-[#7c6cff]" href="/onboarding">
+        <a className="font-medium text-accent hover:underline" href="/onboarding">
           Create one
         </a>
       </div>

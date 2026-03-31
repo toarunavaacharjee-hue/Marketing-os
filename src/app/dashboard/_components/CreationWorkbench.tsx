@@ -461,14 +461,14 @@ export function CreationWorkbench({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+        <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>
           {title}
         </h1>
-        <p className="mt-1 text-sm text-[#9090b0]">{description}</p>
+        <p className="mt-1 text-sm text-text2">{description}</p>
         {loading ? (
-          <p className="mt-2 text-sm text-[#9090b0]">Loading workspace…</p>
+          <p className="mt-2 text-sm text-text2">Loading workspace…</p>
         ) : (
-          <p className="mt-2 text-xs text-[#9090b0]">{saving ? "Saving…" : "Saved to this product environment."}</p>
+          <p className="mt-2 text-xs text-text3">{saving ? "Saving…" : "Saved to this product environment."}</p>
         )}
       </div>
 
@@ -479,22 +479,22 @@ export function CreationWorkbench({
       ) : null}
 
       {contentStudio ? (
-        <div className="rounded-xl border border-[#7c6cff]/25 bg-[#7c6cff]/5 px-4 py-3 text-xs leading-relaxed text-[#c4c8e8]">
-          <strong className="text-[#f0f0f8]">Assist</strong> — Queue items carry type, channel, audience, owners, and
+        <div className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-xs leading-relaxed text-text2">
+          <strong className="text-text">Assist</strong> — Queue items carry type, channel, audience, owners, and
           links. AI uses your product + ICP segments from the workspace (same as Copilot). Tone and length shape each
-          draft; history keeps past runs. Use <strong className="text-[#f0f0f8]">Add draft to queue</strong> to turn output
+          draft; history keeps past runs. Use <strong className="text-text">Add draft to queue</strong> to turn output
           into a tracked piece.
         </div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 lg:col-span-2">
+        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm lg:col-span-2">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-[#f0f0f8]">{contentStudio ? "Content pipeline" : "Content queue"}</div>
+            <div className="text-sm font-medium text-text">{contentStudio ? "Content pipeline" : "Content queue"}</div>
             <button
               type="button"
               onClick={addQueueRow}
-              className="rounded-xl border border-[#2a2e3f] px-3 py-1.5 text-xs text-[#f0f0f8] hover:bg-white/5"
+              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
             >
               + Add {contentStudio ? "piece" : "row"}
             </button>
@@ -503,7 +503,7 @@ export function CreationWorkbench({
           {!contentStudio ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-[#9090b0]">
+                <thead className="text-text3">
                   <tr>
                     <th className="pb-2 text-left font-medium">Title</th>
                     <th className="pb-2 text-left font-medium">Due</th>
@@ -511,42 +511,42 @@ export function CreationWorkbench({
                     <th className="w-10" />
                   </tr>
                 </thead>
-                <tbody className="text-[#f0f0f8]">
+                <tbody className="text-text">
                   {ws.queue.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-4 text-[#9090b0]">
+                      <td colSpan={4} className="py-4 text-text2">
                         No items yet. Add a row or use AI output below.
                       </td>
                     </tr>
                   ) : (
                     ws.queue.map((r) => (
-                      <tr key={r.id} className="border-t border-[#2a2e3f]">
+                      <tr key={r.id} className="border-t border-border">
                         <td className="py-2 pr-2 align-top">
                           <input
                             value={r.title}
                             onChange={(e) => updateQueue(r.id, { title: e.target.value })}
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                            className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                           />
                         </td>
                         <td className="py-2 pr-2 align-top">
                           <input
                             value={r.due}
                             onChange={(e) => updateQueue(r.id, { due: e.target.value })}
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                            className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                           />
                         </td>
                         <td className="py-2 pr-2 align-top">
                           <input
                             value={r.status}
                             onChange={(e) => updateQueue(r.id, { status: e.target.value })}
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                            className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                           />
                         </td>
                         <td className="py-2 align-top">
                           <button
                             type="button"
                             onClick={() => removeQueue(r.id)}
-                            className="text-xs text-[#9090b0] hover:text-red-300"
+                            className="text-xs text-text2 hover:text-red"
                           >
                             ✕
                           </button>
@@ -560,21 +560,22 @@ export function CreationWorkbench({
           ) : (
             <div className="space-y-3">
               {ws.queue.length === 0 ? (
-                <p className="py-4 text-sm text-[#9090b0]">
-                  No pieces yet. Add one, or generate with AI and click <span className="text-[#f0f0f8]">Add draft to queue</span>.
+                <p className="py-4 text-sm text-text2">
+                  No pieces yet. Add one, or generate with AI and click{" "}
+                  <span className="font-medium text-text">Add draft to queue</span>.
                 </p>
               ) : (
                 ws.queue.map((r) => (
                   <div
                     key={r.id}
-                    className="rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+                    className="rounded-xl border border-border bg-surface2 p-3 text-sm text-text"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <input
                         value={r.title}
                         onChange={(e) => updateQueue(r.id, { title: e.target.value })}
                         placeholder="Working title"
-                        className="min-w-0 flex-1 rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 font-medium"
+                        className="min-w-0 flex-1 rounded-lg border border-border bg-bg px-2 py-1.5 font-medium text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                       />
                       {contentStudio ? (
                         <span
