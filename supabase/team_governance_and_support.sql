@@ -62,7 +62,26 @@ create policy company_members_insert_admin
 on public.company_members
 for insert
 to authenticated
-with check (public.is_company_admin(company_id));
+with check (
+  public.is_company_admin(company_id)
+  or (
+    -- Bootstrap the very first owner membership for a newly created company.
+    -- Allows the company creator to insert themselves as owner when no members exist yet.
+    user_id = auth.uid()
+    and role = 'owner'
+    and exists (
+      select 1
+      from public.companies c
+      where c.id = company_id
+        and c.created_by = auth.uid()
+        and not exists (
+          select 1
+          from public.company_members cm
+          where cm.company_id = c.id
+        )
+    )
+  )
+);
 
 drop policy if exists company_members_update_admin on public.company_members;
 create policy company_members_update_admin

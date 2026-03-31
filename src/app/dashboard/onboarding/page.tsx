@@ -35,14 +35,19 @@ export default function OnboardingPage() {
       return;
     }
 
-    await supabase.from("company_members").insert({
+    const { error: memberErr } = await supabase.from("company_members").insert({
       company_id: company.id,
       user_id: user.id,
       role: "owner"
     });
+    if (memberErr) {
+      setLoading(false);
+      setError(memberErr.message ?? "Could not add you to the company.");
+      return;
+    }
 
     // Create default subscription (per company)
-    await supabase.from("company_subscriptions").insert({
+    const { error: subErr } = await supabase.from("company_subscriptions").insert({
       company_id: company.id,
       plan: "starter",
       status: "active",
@@ -51,6 +56,11 @@ export default function OnboardingPage() {
       products_included: 1,
       products_addon: 0
     });
+    if (subErr) {
+      setLoading(false);
+      setError(subErr.message ?? "Could not create subscription row.");
+      return;
+    }
 
     const { data: product, error: productErr } = await supabase
       .from("products")
@@ -69,23 +79,39 @@ export default function OnboardingPage() {
     }
 
     // Default environment per product
-    await supabase.from("product_environments").insert({
+    const { error: envErr } = await supabase.from("product_environments").insert({
       product_id: product.id,
       name: "Default"
     });
+    if (envErr) {
+      setLoading(false);
+      setError(envErr.message ?? "Could not create product environment.");
+      return;
+    }
 
-    await supabase.from("product_members").insert({
+    const { error: pmErr } = await supabase.from("product_members").insert({
       product_id: product.id,
       user_id: user.id,
       role: "owner"
     });
+    if (pmErr) {
+      setLoading(false);
+      setError(pmErr.message ?? "Could not grant you access to the product.");
+      return;
+    }
 
     // Save selection cookies via API, then go to dashboard
-    await fetch("/api/context/select", {
+    const ctxRes = await fetch("/api/context/select", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ companyId: company.id, productId: product.id })
     });
+    if (!ctxRes.ok) {
+      const t = await ctxRes.text();
+      setLoading(false);
+      setError(t || "Could not set workspace context.");
+      return;
+    }
 
     window.location.href = "/dashboard";
   }
