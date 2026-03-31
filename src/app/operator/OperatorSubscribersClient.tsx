@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type Subscriber = {
   id: string;
@@ -15,13 +15,49 @@ type Subscriber = {
 };
 
 export default function OperatorSubscribersClient({
-  initialSubscribers
+  initialSubscribers,
+  operatorUserId
 }: {
   initialSubscribers: Subscriber[];
+  operatorUserId: string;
 }) {
   const [rows, setRows] = useState<Subscriber[]>(initialSubscribers);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  async function deleteUser(target: Subscriber) {
+    if (!operatorUserId) return;
+    if (target.id === operatorUserId) {
+      setError("You cannot delete your own account.");
+      return;
+    }
+    if (target.is_platform_admin) {
+      setError("Remove platform admin in Supabase (profiles.is_platform_admin) before deleting this user.");
+      return;
+    }
+    const label = target.email ?? target.id;
+    if (!window.confirm(`Permanently delete user ${label}? This cannot be undone.`)) return;
+
+    setBusyId(target.id);
+    setError(null);
+    setOk(null);
+    try {
+      const res = await fetch("/api/operator/delete-user", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ user_id: target.id })
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Delete failed.");
+      setRows((prev) => prev.filter((r) => r.id !== target.id));
+      setOk("User deleted.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Delete failed.");
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   // Profiles.plan is now legacy; company_subscriptions is the source of truth.
   // This table remains useful for subscriber discovery + AI usage.
@@ -59,6 +95,20 @@ export default function OperatorSubscribersClient({
                 {" · "}
                 Last sign-in: {s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString() : "—"}
               </div>
+              <div className="mt-3 flex justify-end">
+                <button
+                  type="button"
+                  disabled={
+                    busyId === s.id ||
+                    s.id === operatorUserId ||
+                    s.is_platform_admin
+                  }
+                  onClick={() => void deleteUser(s)}
+                  className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-200 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {busyId === s.id ? "Deleting…" : "Delete"}
+                </button>
+              </div>
             </div>
           );
         })}
@@ -66,7 +116,7 @@ export default function OperatorSubscribersClient({
 
       {/* Desktop table */}
       <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[980px] text-left text-sm">
+        <table className="w-full min-w-[1080px] text-left text-sm">
           <thead className="border-b border-[var(--border)] text-[10px] font-semibold uppercase text-[var(--text3)]">
             <tr>
               <th className="px-3 py-2">Email</th>
@@ -76,6 +126,7 @@ export default function OperatorSubscribersClient({
               <th className="px-3 py-2">Operator</th>
               <th className="px-3 py-2">Signed up</th>
               <th className="px-3 py-2">Last sign-in</th>
+              <th className="px-3 py-2 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[var(--text2)]">
@@ -92,6 +143,20 @@ export default function OperatorSubscribersClient({
                   </td>
                   <td className="px-3 py-2 text-xs">
                     {s.last_sign_in_at ? new Date(s.last_sign_in_at).toLocaleString() : "—"}
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <button
+                      type="button"
+                      disabled={
+                        busyId === s.id ||
+                        s.id === operatorUserId ||
+                        s.is_platform_admin
+                      }
+                      onClick={() => void deleteUser(s)}
+                      className="rounded-lg border border-red-500/40 bg-red-500/10 px-2 py-1 text-[11px] font-semibold text-red-200 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {busyId === s.id ? "…" : "Delete"}
+                    </button>
                   </td>
                 </tr>
               );

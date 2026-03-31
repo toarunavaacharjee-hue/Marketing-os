@@ -1,6 +1,7 @@
 import { loadOperatorData } from "@/app/operator/loadOperatorData";
 import OperatorCompaniesClient from "@/app/operator/OperatorCompaniesClient";
 import OperatorSubscribersClient from "@/app/operator/OperatorSubscribersClient";
+import { getOperatorGate } from "@/lib/platformAdmin";
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
   return (
@@ -13,6 +14,7 @@ function StatCard({ label, value, hint }: { label: string; value: string | numbe
 }
 
 export default async function OperatorPage() {
+  const gate = await getOperatorGate();
   const data = await loadOperatorData();
 
   if (!data.serviceRole) {
@@ -106,7 +108,10 @@ export default async function OperatorPage() {
         <p className="mt-1 text-xs text-[var(--text2)]">
           From Auth users, merged with public.profiles. Sort: newest registration first.
         </p>
-        <OperatorSubscribersClient initialSubscribers={subscribers} />
+        <OperatorSubscribersClient
+          initialSubscribers={subscribers}
+          operatorUserId={gate.ok ? gate.userId : ""}
+        />
       </div>
     </div>
   );
