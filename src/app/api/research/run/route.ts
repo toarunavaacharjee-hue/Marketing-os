@@ -13,6 +13,10 @@ import {
   isLikelyDistinctPage
 } from "@/lib/websiteAssetIngest";
 
+// Allow longer scans on platforms that enforce route timeouts (e.g. Vercel).
+export const runtime = "nodejs";
+export const maxDuration = 90;
+
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
   error?: { message?: string };
@@ -181,19 +185,27 @@ function normalizeUrl(u: string) {
   return `https://${raw}`;
 }
 
-async function fetchPage(url: string) {
-  const res = await fetch(url, {
-    method: "GET",
-    redirect: "follow",
-    headers: {
-      "user-agent":
-        "MarketingOSResearchBot/1.0 (+https://example.local; contact: support)"
-    }
-  });
-  const html = await res.text();
-  const title = titleFromHtml(html);
-  const text = stripHtmlToText(html);
-  return { ok: res.ok, status: res.status, url: res.url, title, text, html };
+async function fetchPage(url: string, timeoutMs = 9000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: controller.signal,
+      headers: {
+        "user-agent": "MarketingOSResearchBot/1.0 (+https://example.local; contact: support)"
+      }
+    });
+    const html = await res.text();
+    const title = titleFromHtml(html);
+    const text = stripHtmlToText(html);
+    return { ok: res.ok, status: res.status, url: res.url, title, text, html };
+  } catch {
+    return { ok: false, status: 0, url, title: null, text: "", html: "" };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function fetchRssSnapshot(
@@ -201,9 +213,12 @@ async function fetchRssSnapshot(
   keywords: string | null
 ): Promise<CrawlRow> {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 9000);
     const res = await fetch(feedUrl, {
       method: "GET",
       redirect: "follow",
+      signal: controller.signal,
       headers: {
         "user-agent":
           "MarketingOSResearchBot/1.0 (+https://example.local; contact: support)",
@@ -211,6 +226,7 @@ async function fetchRssSnapshot(
       }
     });
     const xml = await res.text();
+    clearTimeout(timeout);
     if (!res.ok) {
       return {
         ok: false,
