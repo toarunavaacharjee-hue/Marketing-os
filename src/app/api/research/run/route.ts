@@ -56,7 +56,10 @@ type CrawlRow = {
   html?: string;
 };
 
-const MAX_EXTRA_PRODUCT_PAGES = 12;
+// Keep scans fast/reliable on serverless runtimes.
+const MAX_EXTRA_PRODUCT_PAGES = 6;
+const FETCH_TIMEOUT_MS = 9000;
+const ANTHROPIC_TIMEOUT_MS = 35000;
 
 function buildNewsMonitoringRow(
   rssUrl: string,
@@ -185,7 +188,7 @@ function normalizeUrl(u: string) {
   return `https://${raw}`;
 }
 
-async function fetchPage(url: string, timeoutMs = 9000) {
+async function fetchPage(url: string, timeoutMs = FETCH_TIMEOUT_MS) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -214,7 +217,7 @@ async function fetchRssSnapshot(
 ): Promise<CrawlRow> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 9000);
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     const res = await fetch(feedUrl, {
       method: "GET",
       redirect: "follow",
@@ -518,7 +521,7 @@ export async function POST(req: Request) {
         source_type: r.source_type,
         competitor_id: r.competitor_id,
         title: r.title,
-        text_content: r.text.slice(0, 20000)
+        text_content: r.text.slice(0, 8000)
       }));
 
     if (snapshotsToInsert.length) {
@@ -529,9 +532,18 @@ export async function POST(req: Request) {
       }
     }
 
-    const ingest = await ingestPageAssetsFromCrawl(supabase, environmentId, results);
-    if (ingest.error) {
-      console.warn("[research/run] asset ingest:", ingest.error);
+    // Best-effort asset ingest; keep it lightweight.
+    try {
+      const ingest = await ingestPageAssetsFromCrawl(
+        supabase,
+        environmentId,
+        results.filter((r) => r.source_type === "product" || r.source_type === "competitor").slice(0, 8)
+      );
+      if (ingest.error) {
+        console.warn("[research/run] asset ingest:", ingest.error);
+      }
+    } catch {
+      // ignore
     }
 
     const g2Row = results.find((r) => r.source_type === "review_g2");
@@ -561,7 +573,16 @@ export async function POST(req: Request) {
 
       const system = `You are Market Research inside AI Marketing Workbench.
 Output ONLY valid JSON. No prose outside JSON.
-Be in-depth, descriptive, and structured (do NOT minimize tokens).
+Be in-depth, descriptive, and structured.
+
+Use this structure inspired by ZoomInfo's "B2B SaaS GTM Strategy Templates" (framework only; do not copy text verbatim).
+Your report MUST be actionable and worksheet-like:
+- TAM/SAM/SOM section: include 3 methods (Top-down, Bottom-up, Value theory) with placeholders + assumptions.
+- Competitive analysis section: include a 1–10 rating table for 3–5 competitors across Product strength, Pricing, Market position, GTM strategy, Threat level, plus "Our advantages" and "Their advantages".
+- Persona/ICP section: 2–3 personas with firmographics, roles, pains, buying behavior, and info sources.
+- Pain point assessment: top 5 pains with Severity/Frequency/Urgency (1–10) and Priority score = (S+F+U)/3.
+- Positioning + messaging hooks: 1-sentence value prop, 3–4 pillars, proof points needed.
+- Next actions: 5 concrete next steps for marketing/sales/product.
 
 Schema:
 {
@@ -572,15 +593,11 @@ Schema:
 }
 
 Rules:
-- report_lines: 18–28 lines. Use multiple ## sections and bullet lists. Include: ## Executive summary, ## Key signals, ## Competitive notes, ## Risks, ## Opportunities, ## Recommended next actions.
-- signals: 6–10 items. Each description should be 3–6 sentences and include:
-  - what happened / what’s changing
-  - why it matters for the base product + 1 named competitor when possible
-  - evidence: quote or paraphrase with SOURCE label(s) from snapshots
-  - suggested action
-- opportunity_map: 7 rows. Make segment names specific (firmographics + buyer role + trigger). Provide a short justification in the segment text (use parentheses).
-- monitoring_sources: include the most important scanned sources with short notes on what was learned; server merges Industry News and Review Sites rows.
-- Ground everything in snapshots. If evidence is thin, say so explicitly. Do not invent metrics or facts.`;
+- report_lines: 30–55 lines. Use multiple ## sections and bullets. Keep each bullet concise but specific.
+- Ground claims in the provided snapshots only. If evidence is thin, say so explicitly; do not invent metrics/facts.
+- signals: 5–8 items, but deeper. Each description 4–8 sentences with: what changed, why it matters, evidence (SOURCE labels), recommended action.
+- opportunity_map: 6–8 rows. Segment names must be specific (firmographics + role + trigger). Put 1 short justification in parentheses.
+- monitoring_sources: include the most important scanned sources with short notes; server merges Industry News and Review Sites rows.`;
 
       const snapshotBlobs = results
         .filter((r) => r.ok && r.text)
