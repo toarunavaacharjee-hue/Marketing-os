@@ -165,6 +165,27 @@ export default function ProductProfileClient() {
         body: JSON.stringify({ companyId, productId })
       });
 
+      // Best-effort: auto-fill ICP + segments from the product website URL.
+      // If it fails (e.g. missing Anthropic key), we still take the user to Product profile.
+      try {
+        const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
+        const autoRes = await fetch("/api/product/profile/generate-from-website", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            ...(key ? { "x-anthropic-key": key } : {})
+          },
+          body: JSON.stringify({})
+        });
+        if (!autoRes.ok) {
+          const data = (await autoRes.json().catch(() => null)) as { error?: string } | null;
+          const msg = data?.error ?? (await autoRes.text());
+          window.localStorage.setItem("marketing_os_autofill_error", msg || "Auto-fill failed.");
+        }
+      } catch {
+        // ignore
+      }
+
       window.location.href = "/dashboard/settings/product";
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create product.");
@@ -175,6 +196,15 @@ export default function ProductProfileClient() {
 
   useEffect(() => {
     load();
+  }, []);
+
+  // Auto-fill runs during onboarding/product creation and may store an error message here.
+  useEffect(() => {
+    const msg = window.localStorage.getItem("marketing_os_autofill_error");
+    if (msg) {
+      window.localStorage.removeItem("marketing_os_autofill_error");
+      setError(msg);
+    }
   }, []);
 
   return (

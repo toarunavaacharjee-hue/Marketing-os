@@ -111,7 +111,28 @@ export default function OnboardingPage() {
       return;
     }
 
-    window.location.href = "/dashboard";
+    // Auto-fill ICP + initial segment drafts from the product website URL (best-effort).
+    // Even if it fails (e.g. missing Anthropic key), we still take the user to Product profile.
+    try {
+      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
+      const autoRes = await fetch("/api/product/profile/generate-from-website", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(key ? { "x-anthropic-key": key } : {})
+        },
+        body: JSON.stringify({})
+      });
+      if (!autoRes.ok) {
+        const data = (await autoRes.json().catch(() => null)) as { error?: string } | null;
+        const msg = data?.error ?? (await autoRes.text());
+        window.localStorage.setItem("marketing_os_autofill_error", msg || "Auto-fill failed.");
+      }
+    } catch {
+      // Ignore — we'll still redirect.
+    }
+
+    window.location.href = "/dashboard/settings/product";
   }
 
   return (
