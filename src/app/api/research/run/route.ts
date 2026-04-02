@@ -57,12 +57,13 @@ type CrawlRow = {
 };
 
 // Keep scans fast/reliable on serverless runtimes.
-const MAX_EXTRA_PRODUCT_PAGES = 6;
-const FETCH_TIMEOUT_MS = 9000;
-const ANTHROPIC_TIMEOUT_MS = 35000;
-const MAX_SNAPSHOT_SOURCES_FOR_PROMPT = 10;
-const MAX_SNAPSHOT_TEXT_PER_SOURCE = 2400;
-const MAX_PROMPT_SNAPSHOT_CHARS = 55_000;
+const MAX_EXTRA_PRODUCT_PAGES = 2;
+const FETCH_TIMEOUT_MS = 6000;
+// Keep this comfortably under typical serverless limits (~60s) after crawl time.
+const ANTHROPIC_TIMEOUT_MS = 25000;
+const MAX_SNAPSHOT_SOURCES_FOR_PROMPT = 6;
+const MAX_SNAPSHOT_TEXT_PER_SOURCE = 1600;
+const MAX_PROMPT_SNAPSHOT_CHARS = 35_000;
 
 function buildNewsMonitoringRow(
   rssUrl: string,
@@ -485,27 +486,35 @@ export async function POST(req: Request) {
           ? productHome.html.slice(0, 400_000)
           : productHome.html;
       const links = extractSameOriginLinks(htmlForLinks, productHome.url, MAX_EXTRA_PRODUCT_PAGES);
-      const extra: CrawlRow[] = [];
       const homeText = productHome.text ?? "";
-      for (const link of links) {
-        if (link.split("#")[0] === homeNorm) continue;
-        try {
-          const page = await fetchPage(link);
-          if (!isLikelyDistinctPage(homeText, page.text, page.ok)) continue;
-          extra.push({
-            url: page.url,
-            source_type: "product",
-            competitor_id: null,
-            label: "Your site",
-            ok: page.ok,
-            status: page.status,
-            title: page.title,
-            text: page.text
-          });
-        } catch {
-          /* skip broken link */
-        }
-      }
+      const linkTargets = links
+        .map((l) => l.split("#")[0])
+        .filter((l) => l && l !== homeNorm)
+        .slice(0, MAX_EXTRA_PRODUCT_PAGES);
+
+      const fetched = await Promise.all(
+        linkTargets.map(async (link) => {
+          try {
+            const page = await fetchPage(link);
+            return { link, page };
+          } catch {
+            return { link, page: null as any };
+          }
+        })
+      );
+
+      const extra: CrawlRow[] = fetched
+        .filter((x) => x.page && isLikelyDistinctPage(homeText, x.page.text, x.page.ok))
+        .map((x) => ({
+          url: x.page.url,
+          source_type: "product" as const,
+          competitor_id: null,
+          label: "Your site",
+          ok: x.page.ok,
+          status: x.page.status,
+          title: x.page.title,
+          text: x.page.text
+        }));
       htmlResults = [...htmlResults, ...extra];
     }
 
@@ -543,7 +552,13 @@ export async function POST(req: Request) {
         results.filter((r) => r.source_type === "product" || r.source_type === "competitor").slice(0, 8)
       );
       if (ingest.error) {
-        console.warn("[research/run] asset ingest:", ingest.error);
+        // Older DBs may not have the assets schema; don't spam logs or fail scans.
+        const msg = String(ingest.error);
+        if (msg.toLowerCase().includes("schema cache") || msg.toLowerCase().includes("could not find")) {
+          // ignore
+        } else {
+          console.warn("[research/run] asset ingest:", ingest.error);
+        }
       }
     } catch {
       // ignore
