@@ -421,6 +421,28 @@ ${bundle}`;
       }
     }
 
+    // Final guard: these fields are Required in the UI. If the model still returns blanks
+    // (or parsing fails), fill with conservative, editable drafts so the flow isn't blocked.
+    let host = "";
+    try {
+      host = new URL(baseUrl).host.replace(/^www\./, "");
+    } catch {
+      host = "";
+    }
+    if (!incomingProfile.category.trim()) {
+      incomingProfile.category = "B2B SaaS Marketing Platform";
+    }
+    if (!incomingProfile.icp_summary.trim()) {
+      incomingProfile.icp_summary =
+        `Best-fit customers are mid-market B2B teams evaluating ${productName} at ${host || "the product website"}. ` +
+        `Typical buyers include Marketing, Growth, and RevOps leaders looking to improve pipeline and automate go-to-market workflows.`;
+    }
+    if (!incomingProfile.positioning_summary.trim()) {
+      incomingProfile.positioning_summary =
+        `${productName} is positioned as an end-to-end platform to help teams plan, execute, and measure marketing initiatives more efficiently. ` +
+        `It aims to replace fragmented tools and manual processes with a single workflow, improving speed-to-impact and reporting clarity.`;
+    }
+
     const current = product as Record<string, unknown>;
     const pick = (incoming: string, existing: unknown): string | null => {
       if (incoming.trim().length) return incoming.trim();
