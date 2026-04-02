@@ -625,28 +625,33 @@ ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
         lines.join("\n").trim() ||
         "## Market scan\n\nReview structured signals and opportunity map below.";
 
-      if (
-        parsed &&
-        Array.isArray(parsed.signals) &&
-        Array.isArray(parsed.opportunity_map) &&
-        Array.isArray(parsed.monitoring_sources)
-      ) {
-        resultJson = {
-          signals: parsed.signals,
-          opportunity_map: parsed.opportunity_map,
-          monitoring_sources: parsed.monitoring_sources
-        } as ScanResult;
-      } else {
+      // Be tolerant: the model may omit some keys even when it returns useful content.
+      // Coerce missing sections to empty arrays instead of failing the scan.
+      if (!parsed || typeof parsed !== "object") {
         await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
         return NextResponse.json(
-          {
-            error:
-              "AI returned an incomplete scan structure. Run scan again after refining product inputs."
-          },
+          { error: "AI returned an invalid response. Please run scan again." },
           { status: 502 }
         );
       }
 
+      const parsedSignals = Array.isArray(parsed.signals) ? parsed.signals : [];
+      const parsedOpp = Array.isArray(parsed.opportunity_map) ? parsed.opportunity_map : [];
+      const parsedSources = Array.isArray(parsed.monitoring_sources) ? parsed.monitoring_sources : [];
+
+      resultJson = {
+        signals: parsedSignals,
+        opportunity_map: parsedOpp,
+        monitoring_sources: parsedSources
+      } as ScanResult;
+
+    // Ensure monitoring sources always exist even if the model omitted them.
+    if (!resultJson.monitoring_sources || resultJson.monitoring_sources.length === 0) {
+      resultJson.monitoring_sources = buildWebsiteRowsFromResults(
+        results,
+        ((product.name as string) ?? "Product").trim() || "Product"
+      );
+    }
     resultJson = applyMonitoringFacts(resultJson, industryRow, reviewRow);
 
     await supabase
