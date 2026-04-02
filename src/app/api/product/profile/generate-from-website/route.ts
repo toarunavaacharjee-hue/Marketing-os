@@ -354,6 +354,73 @@ ${bundle}`;
       positioning_summary: asStr(ppObj.positioning_summary)
     };
 
+    // The initial extraction prompt allows the model to return empty strings ("")
+    // when it thinks the website doesn't contain enough basis. If that happens and
+    // the current DB fields are empty too, we would otherwise keep the fields blank.
+    //
+    // To keep the product page "auto-filled" (Required fields), do a best-effort
+    // follow-up only for missing fields.
+    const needsCategory = !incomingProfile.category.trim();
+    const needsIcp = !incomingProfile.icp_summary.trim();
+    const needsPositioning = !incomingProfile.positioning_summary.trim();
+    if (needsCategory || needsIcp || needsPositioning) {
+      const followupSystem = `You fill missing product profile fields from website content for a B2B marketing product.
+Output ONLY valid JSON (no prose, no markdown fences).
+
+Schema exactly:
+{
+  "category": string,
+  "icp_summary": string,
+  "positioning_summary": string
+}
+
+Rules:
+- Do NOT return empty strings. Provide best-effort summaries using the provided text.
+- Do not invent review URLs or competitor URLs.`;
+
+      const missingUser = `Product name: ${productName}
+Website: ${baseUrl}
+
+Missing fields:
+- category: ${needsCategory ? "YES" : "NO"}
+- icp_summary: ${needsIcp ? "YES" : "NO"}
+- positioning_summary: ${needsPositioning ? "YES" : "NO"}
+
+Website pages text (condensed):
+${bundle}`;
+
+      const followupRes = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 900,
+          temperature: 0.25,
+          system: followupSystem,
+          messages: [{ role: "user", content: missingUser }]
+        })
+      });
+
+      if (followupRes.ok) {
+        const followupData = (await followupRes.json()) as AnthropicMessageResponse;
+        const followupOutText = followupData.content?.find((c) => c.type === "text")?.text ?? "";
+        const followupParsed = parseJsonObject(followupOutText);
+        const followupPP = followupParsed && typeof followupParsed === "object" ? (followupParsed as Record<string, unknown>) : {};
+
+        const fbCategory = asStr(followupPP["category"]);
+        const fbIcp = asStr(followupPP["icp_summary"]);
+        const fbPositioning = asStr(followupPP["positioning_summary"]);
+
+        incomingProfile.category = needsCategory ? fbCategory : incomingProfile.category;
+        incomingProfile.icp_summary = needsIcp ? fbIcp : incomingProfile.icp_summary;
+        incomingProfile.positioning_summary = needsPositioning ? fbPositioning : incomingProfile.positioning_summary;
+      }
+    }
+
     const current = product as Record<string, unknown>;
     const pick = (incoming: string, existing: unknown): string | null => {
       if (incoming.trim().length) return incoming.trim();
