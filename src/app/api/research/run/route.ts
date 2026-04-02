@@ -593,31 +593,70 @@ ${competitorUrls.map((c) => `- ${c.name}: ${c.url}`).join("\n")}
 Snapshots:
 ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": anthropicKey,
-          "anthropic-version": "2023-06-01"
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 3500,
-          temperature: 0.3,
-          system,
-          messages: [{ role: "user", content: prompt }]
-        })
-      });
+      async function callAnthropicScan(args: {
+        system: string;
+        prompt: string;
+        max_tokens: number;
+        temperature: number;
+      }): Promise<{ ok: boolean; text: string; errorMessage: string | null; status: number }> {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01"
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: args.max_tokens,
+            temperature: args.temperature,
+            system: args.system,
+            messages: [{ role: "user", content: args.prompt }]
+          })
+        });
 
-      const data = (await res.json()) as AnthropicMessageResponse;
-      if (!res.ok) {
-        const normalized = normalizeAnthropicError(data?.error?.message);
-        await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
-        return NextResponse.json({ error: normalized.error }, { status: normalized.status });
+        const data = (await res.json()) as AnthropicMessageResponse;
+        if (!res.ok) {
+          const normalized = normalizeAnthropicError(data?.error?.message);
+          return { ok: false, text: "", errorMessage: normalized.error, status: normalized.status };
+        }
+        const text = data.content?.find((c) => c.type === "text")?.text ?? "";
+        return { ok: true, text, errorMessage: null, status: 200 };
       }
 
-      const text = data.content?.find((c) => c.type === "text")?.text ?? "";
-      const parsed = parseJsonObject(text);
+      const first = await callAnthropicScan({
+        system,
+        prompt,
+        max_tokens: 3500,
+        temperature: 0.3
+      });
+      if (!first.ok) {
+        await supabase.from("research_scans").update({ status: "failed" }).eq("id", scanId);
+        return NextResponse.json({ error: first.errorMessage ?? "Anthropic request failed." }, { status: first.status });
+      }
+
+      let text = first.text;
+      let parsed = parseJsonObject(text);
+      if (!parsed) {
+        // One retry with stricter formatting to avoid stray prose / truncation.
+        const strictSystem = `${system}
+
+STRICT MODE:
+- Output MUST be a single JSON object.
+- Do not include any prefix/suffix text.
+- All schema keys must be present even if empty (use [] for arrays).`;
+
+        const second = await callAnthropicScan({
+          system: strictSystem,
+          prompt,
+          max_tokens: 3500,
+          temperature: 0.15
+        });
+        if (second.ok) {
+          text = second.text;
+          parsed = parseJsonObject(text);
+        }
+      }
       const lines = Array.isArray(parsed?.report_lines)
         ? (parsed!.report_lines as unknown[]).map(String).filter(Boolean)
         : [];
