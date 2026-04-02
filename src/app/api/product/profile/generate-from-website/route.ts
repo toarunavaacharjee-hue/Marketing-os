@@ -3,6 +3,12 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct, getSelectedProductId } from "@/lib/productContext";
 import { extractSameOriginLinks, isLikelyDistinctPage } from "@/lib/websiteAssetIngest";
 import { parseJsonObject } from "@/lib/extractJsonObject";
+import {
+  POSITIONING_KEY,
+  POSITIONING_MODULE,
+  type PositioningCanvasValue,
+  type PositioningHealth
+} from "@/lib/positioningStudio";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
@@ -20,6 +26,34 @@ type SegmentDraft = {
   icp_profile: string;
   notes: string | null;
 };
+
+type PositioningHistoryItem = { version: string; label: string };
+
+function clamp0to100Default70(n: unknown): number {
+  if (typeof n !== "number" || Number.isNaN(n)) return 70;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function buildSegmentBrief(rows: Array<Record<string, unknown>>): string {
+  const lines: string[] = [];
+  for (const r of rows) {
+    const name = asStr(r.name);
+    const pnf = typeof r.pnf_score === "number" ? r.pnf_score : 0;
+    const pains = Array.isArray(r.pain_points)
+      ? (r.pain_points as unknown[]).map((p) => asStr(p)).filter(Boolean)
+      : [];
+    const notes = asStr(r.notes);
+    const details = r.details && typeof r.details === "object" ? (r.details as Record<string, unknown>) : {};
+    const profile = asStr(details.icp_profile);
+    lines.push(
+      `### ${name} (PNF ${pnf})\n` +
+        `- Pain points: ${pains.join("; ") || "—"}\n` +
+        (profile ? `- ICP profile: ${profile}\n` : "") +
+        (notes ? `- Notes: ${notes}\n` : "")
+    );
+  }
+  return lines.join("\n");
+}
 
 function clamp0to100(n: unknown, fallback: number): number {
   if (typeof n !== "number" || Number.isNaN(n)) return fallback;
@@ -354,6 +388,35 @@ ${bundle}`;
       positioning_summary: asStr(ppObj.positioning_summary)
     };
 
+    const segmentsForBrief: SegmentDraft[] = Array.isArray(rawSegments)
+      ? (rawSegments as unknown[]).slice(0, 8).map((item) => {
+          const o = item as Record<string, unknown>;
+          const pnf = clamp0to100(o.pnf_score, 50);
+          const painPoints = asPainPoints(o.pain_points);
+          return {
+            name: asStr(o.name),
+            pnf_score: pnf,
+            pain_points: painPoints.length ? painPoints : ["—"],
+            urgency: clamp0to100(o.urgency, pnf),
+            budget_fit: clamp0to100(o.budget_fit, pnf),
+            acv_potential: clamp0to100(o.acv_potential, pnf),
+            retention_potential: clamp0to100(o.retention_potential, pnf),
+            icp_profile: asStr(o.icp_profile),
+            notes: asStr(o.notes) || null
+          };
+        })
+      : [];
+
+    const segmentBrief = segmentsForBrief
+      .filter((s) => s.name)
+      .map(
+        (s) =>
+          `- ${s.name} (PNF ${s.pnf_score})\n` +
+          `  pains: ${(s.pain_points ?? []).join("; ") || "—"}\n` +
+          (s.icp_profile ? `  icp_profile: ${s.icp_profile}\n` : "")
+      )
+      .join("\n");
+
     // The initial extraction prompt allows the model to return empty strings ("")
     // when it thinks the website doesn't contain enough basis. If that happens and
     // the current DB fields are empty too, we would otherwise keep the fields blank.
@@ -385,6 +448,9 @@ Missing fields:
 - category: ${needsCategory ? "YES" : "NO"}
 - icp_summary: ${needsIcp ? "YES" : "NO"}
 - positioning_summary: ${needsPositioning ? "YES" : "NO"}
+
+ICP segments (auto-generated):
+${segmentBrief || "(none)"}
 
 Website pages text (condensed):
 ${bundle}`;
@@ -526,6 +592,149 @@ ${bundle}`;
       .eq("id", productId);
     if (updProduct.error) {
       return NextResponse.json({ error: updProduct.error.message }, { status: 500 });
+    }
+
+    // Best-effort: generate Positioning Studio canvas from saved segments,
+    // then sync product category + positioning_summary from that canvas.
+    try {
+      const { data: segRows, error: segErr } = await supabase
+        .from("segments")
+        .select("name,pnf_score,pain_points,notes,details")
+        .eq("environment_id", env.environmentId)
+        .order("created_at", { ascending: false });
+      if (!segErr && (segRows ?? []).length) {
+        const { data: currentProductForPos } = await supabase
+          .from("products")
+          .select("name,category,icp_summary,positioning_summary")
+          .eq("id", productId)
+          .maybeSingle();
+
+        const productBrief = currentProductForPos
+          ? `Product name: ${asStr((currentProductForPos as any).name)}
+Category: ${asStr((currentProductForPos as any).category)}
+Existing ICP summary: ${asStr((currentProductForPos as any).icp_summary)}
+Existing positioning summary: ${asStr((currentProductForPos as any).positioning_summary)}`
+          : `Product name: ${productName}`;
+
+        const segmentBrief2 = buildSegmentBrief((segRows ?? []) as Array<Record<string, unknown>>);
+
+        const systemPos = `You are a B2B positioning strategist. Given ICP segments, produce a coherent positioning canvas for the product.
+
+Output ONLY one JSON object (no markdown fences, no prose).
+
+Keys exactly:
+{
+  "category": string (short category frame, e.g. "AI-powered GTM OS for B2B SaaS"),
+  "target": string (who we win with — synthesize segments),
+  "problem": string (core pains from segments),
+  "solution": string (how we fix it — concrete),
+  "diff": string (differentiation vs status quo / alternatives),
+  "wedge": string (narrow entry / first value),
+  "health": {
+    "clarity": number 0-100,
+    "differentiation": number 0-100,
+    "credibility": number 0-100,
+    "message_market_fit": number 0-100
+  }
+}`;
+
+        const userPos = `${productBrief}
+
+ICP segments:
+${segmentBrief2}
+
+Write concise lines (1-2 sentences each for category/target/problem; 2-3 short clauses for solution/diff/wedge where appropriate).`;
+
+        const posRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01"
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 2048,
+            temperature: 0.25,
+            system: systemPos,
+            messages: [{ role: "user", content: userPos }]
+          })
+        });
+
+        if (posRes.ok) {
+          const posData = (await posRes.json()) as AnthropicMessageResponse;
+          const posOut = posData.content?.find((c) => c.type === "text")?.text ?? "";
+          const posParsed = parseJsonObject(posOut);
+          if (posParsed) {
+            const hRaw =
+              posParsed.health && typeof posParsed.health === "object"
+                ? (posParsed.health as Record<string, unknown>)
+                : {};
+            const health: PositioningHealth = {
+              clarity: clamp0to100Default70(hRaw.clarity),
+              differentiation: clamp0to100Default70(hRaw.differentiation),
+              credibility: clamp0to100Default70(hRaw.credibility),
+              message_market_fit: clamp0to100Default70(hRaw.message_market_fit)
+            };
+
+            const doc: PositioningCanvasValue["doc"] = {
+              category: asStr(posParsed.category),
+              target: asStr(posParsed.target),
+              problem: asStr(posParsed.problem),
+              solution: asStr(posParsed.solution),
+              diff: asStr(posParsed.diff),
+              wedge: asStr(posParsed.wedge)
+            };
+
+            const { data: existing } = await supabase
+              .from("module_settings")
+              .select("value_json")
+              .eq("environment_id", env.environmentId)
+              .eq("module", POSITIONING_MODULE)
+              .eq("key", POSITIONING_KEY)
+              .maybeSingle();
+
+            const prev = (existing?.value_json ?? null) as Partial<PositioningCanvasValue> | null;
+            const prevRevision = typeof prev?.revision === "number" ? prev.revision : 0;
+            const revision = prevRevision + 1;
+            const prevHistory = Array.isArray(prev?.history) ? (prev.history as PositioningHistoryItem[]) : [];
+            const history: PositioningHistoryItem[] = [
+              { version: `v1.${revision}`, label: "Generated from website ICP segments" },
+              ...prevHistory.filter((x) => x && typeof x.label === "string").slice(0, 9)
+            ];
+
+            const value: PositioningCanvasValue = { doc, health, revision, history };
+
+            await supabase.from("module_settings").upsert({
+              environment_id: env.environmentId,
+              module: POSITIONING_MODULE,
+              key: POSITIONING_KEY,
+              value_json: value
+            });
+
+            const positioning_summary_from_canvas = [
+              doc.target && `Target: ${doc.target}`,
+              doc.problem && `Problem: ${doc.problem}`,
+              doc.solution && `Solution: ${doc.solution}`,
+              doc.diff && `Differentiation: ${doc.diff}`
+            ]
+              .filter(Boolean)
+              .join(" ");
+
+            // Sync into Product Profile to keep screens consistent (only fill if blank).
+            await supabase
+              .from("products")
+              .update({
+                category: doc.category.trim() || updatedProduct.category,
+                positioning_summary:
+                  (positioning_summary_from_canvas || updatedProduct.positioning_summary || "").trim()
+              })
+              .eq("id", productId);
+          }
+        }
+      }
+    } catch {
+      // ignore
     }
 
     // Competitors: fill only if we currently have none (or if replaceCompetitors was requested).
