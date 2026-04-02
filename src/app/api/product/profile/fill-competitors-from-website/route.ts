@@ -328,8 +328,12 @@ Product website: ${baseUrl}`;
           if (verified.length >= 5) break;
         }
 
-        if (verified.length) {
-          const rows = verified.map((c) => ({
+        // Validation only requires competitor URLs to exist.
+        // If verification fails (sites block bots), still insert top suggestions so scans can proceed.
+        const toInsert = verified.length ? verified : toTry.slice(0, 3);
+
+        if (toInsert.length) {
+          const rows = toInsert.map((c) => ({
             product_id: productId,
             name: c.name.trim(),
             website_url: c.website_url.trim()

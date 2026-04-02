@@ -58,10 +58,14 @@ export default function MarketResearchClient() {
 
       const pid = data.product.id;
       const cached = readMrCache(pid);
-      if (cached && (cached.summary || cached.resultJson)) {
+      // If we only have cached `summary` but `resultJson` is missing/null,
+      // we must still fetch the latest scan so UI sections render.
+      if (cached) {
         setSummary(cached.summary);
-        setResultJson(cached.resultJson);
-        return;
+        if (cached.resultJson) {
+          setResultJson(cached.resultJson);
+          return;
+        }
       }
 
       const latest = await loadLatestScanOnce(pid);
