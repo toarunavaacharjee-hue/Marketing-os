@@ -514,13 +514,19 @@ ${bundle}`;
     }
 
     // Merge product profile fields (avoid overwriting existing non-empty values).
-    await supabase.from("products").update({
-      name: updatedProduct.name,
-      website_url: updatedProduct.website_url ?? null,
-      category: updatedProduct.category ?? null,
-      icp_summary: updatedProduct.icp_summary ?? null,
-      positioning_summary: updatedProduct.positioning_summary ?? null
-    });
+    const updProduct = await supabase
+      .from("products")
+      .update({
+        name: updatedProduct.name,
+        website_url: updatedProduct.website_url ?? null,
+        category: updatedProduct.category ?? null,
+        icp_summary: updatedProduct.icp_summary ?? null,
+        positioning_summary: updatedProduct.positioning_summary ?? null
+      })
+      .eq("id", productId);
+    if (updProduct.error) {
+      return NextResponse.json({ error: updProduct.error.message }, { status: 500 });
+    }
 
     // Competitors: fill only if we currently have none (or if replaceCompetitors was requested).
     const { count: competitorCount } = await supabase
