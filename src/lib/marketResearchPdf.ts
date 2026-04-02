@@ -4,13 +4,14 @@ import { jsPDF } from "jspdf";
 function markdownToPlain(md: string): string {
   const cleaned = md
     .replace(/\r\n/g, "\n")
+    // Preserve headings as plain section titles.
+    .replace(/^#{1,6}\s+(.+)$/gm, "\n$1\n")
     // Remove markdown table separators.
     .replace(/^\|?[\s:-]+\|[\s|:-]*$/gm, "")
     // Convert markdown table rows to readable bullets.
     .replace(/^\|\s*\d+\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|?\s*$/gm, "• $1 — $2")
     // Remove obviously truncated trailing table rows like "| 5 | Fr"
     .replace(/^\|\s*\d+\s*\|.*$/gm, "")
-    .replace(/^#+\s+/gm, "")
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/\*(.+?)\*/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
@@ -142,7 +143,7 @@ export function downloadMarketResearchPdf(opts: {
 
   if (opts.resultJson?.signals?.length) {
     section("Top Market Signals");
-    for (const s of opts.resultJson.signals.slice(0, 8)) {
+    for (const s of opts.resultJson.signals.slice(0, 10)) {
       ensureSpace(17);
       doc.setFillColor(250, 251, 255);
       doc.setDrawColor(palette.border[0], palette.border[1], palette.border[2]);

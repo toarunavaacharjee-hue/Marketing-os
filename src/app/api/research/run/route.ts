@@ -543,7 +543,9 @@ export async function POST(req: Request) {
       );
     }
 
-      const system = `You are Market Research inside AI Marketing Workbench. Output ONLY valid JSON. No prose outside JSON. Minimize tokens — short strings.
+      const system = `You are Market Research inside AI Marketing Workbench.
+Output ONLY valid JSON. No prose outside JSON.
+Be in-depth, descriptive, and structured (do NOT minimize tokens).
 
 Schema:
 {
@@ -554,9 +556,15 @@ Schema:
 }
 
 Rules:
-- report_lines: 8–12 lines max; use # headings and - bullets; ground claims in snapshots only.
-- signals: 4–6 items. opportunity_map: 5 rows. monitoring_sources: scanned sources; server merges Industry News and Review Sites rows.
-- If data is thin, say so in descriptions — do not invent metrics.`;
+- report_lines: 18–28 lines. Use multiple ## sections and bullet lists. Include: ## Executive summary, ## Key signals, ## Competitive notes, ## Risks, ## Opportunities, ## Recommended next actions.
+- signals: 6–10 items. Each description should be 3–6 sentences and include:
+  - what happened / what’s changing
+  - why it matters for the base product + 1 named competitor when possible
+  - evidence: quote or paraphrase with SOURCE label(s) from snapshots
+  - suggested action
+- opportunity_map: 7 rows. Make segment names specific (firmographics + buyer role + trigger). Provide a short justification in the segment text (use parentheses).
+- monitoring_sources: include the most important scanned sources with short notes on what was learned; server merges Industry News and Review Sites rows.
+- Ground everything in snapshots. If evidence is thin, say so explicitly. Do not invent metrics or facts.`;
 
       const snapshotBlobs = results
         .filter((r) => r.ok && r.text)
@@ -594,7 +602,7 @@ ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 2000,
+          max_tokens: 3500,
           temperature: 0.3,
           system,
           messages: [{ role: "user", content: prompt }]
