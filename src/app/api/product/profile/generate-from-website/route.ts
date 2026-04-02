@@ -96,6 +96,34 @@ function extractExternalLinksFromHtml(html: string, baseUrl: string, limit: numb
   return out;
 }
 
+function stripUrlToOrigin(url: string): string {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return "";
+  }
+}
+
+async function urlRespondsOk(url: string, timeoutMs: number): Promise<boolean> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      redirect: "follow",
+      signal: controller.signal,
+      headers: {
+        "user-agent": "MarketingOSResearchBot/1.0 (+https://example.local; contact: support)"
+      }
+    });
+    return Boolean(res.ok);
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function titleFromHtml(html: string): string | null {
   const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   return m?.[1]?.replace(/\s+/g, " ").trim() ?? null;
@@ -418,7 +446,7 @@ ${bundle}`;
 
     if (shouldInsertCompetitors) {
       if (!competitorCandidates.length) {
-        competitor_generation_available = false;
+        competitor_generation_available = true;
       } else {
         const allowed = new Set(competitorCandidates);
         const systemC = `You choose likely direct competitors from a list of candidate URLs extracted from the product's own website.

@@ -147,13 +147,38 @@ export default function ProductProfileClient() {
         : ({ error: raw || "Server error" } as any)) as { error?: string; filled?: any };
       if (!res.ok) throw new Error(data.error ?? "Auto-fill failed.");
 
-      const filled = data.filled ?? {};
+      let filled = data.filled ?? {};
       if (filled.competitors_inserted === 0) {
-        const msg =
-          filled.competitor_generation_available === false
-            ? "Auto-fill could not find competitor links on your website. Please add at least one competitor URL manually."
-            : "Auto-fill did not generate competitor URLs. Please add at least one competitor URL manually.";
-        setError(msg);
+        // Fallback: try generating competitor URLs even when they are not linked from the product site.
+        try {
+          const key2 = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
+          const compRes = await fetch("/api/product/profile/fill-competitors-from-website", {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              ...(key2 ? { "x-anthropic-key": key2 } : {})
+            },
+            body: JSON.stringify({ replaceCompetitors: false })
+          });
+          const compContentType = compRes.headers.get("content-type") ?? "";
+          const compRaw = await compRes.text();
+          const compData = (compContentType.includes("application/json")
+            ? (JSON.parse(compRaw) as { error?: string; filled?: any })
+            : ({ error: compRaw || "Server error" } as any)) as { error?: string; filled?: any };
+          if (compRes.ok) filled = { ...filled, ...(compData.filled ?? {}) };
+        } catch {
+          // ignore; we'll show the main error below
+        }
+
+        if (filled.competitors_inserted === 0) {
+          const msg =
+            filled.competitor_generation_available === false
+              ? "Auto-fill could not find competitor links on your website. Please add at least one competitor URL manually."
+              : "Auto-fill did not generate competitor URLs. Please add at least one competitor URL manually.";
+          setError(msg);
+        } else {
+          setSaved("Auto-filled from website.");
+        }
       } else {
         setSaved("Auto-filled from website.");
       }
