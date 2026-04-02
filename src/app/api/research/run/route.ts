@@ -60,6 +60,9 @@ type CrawlRow = {
 const MAX_EXTRA_PRODUCT_PAGES = 6;
 const FETCH_TIMEOUT_MS = 9000;
 const ANTHROPIC_TIMEOUT_MS = 35000;
+const MAX_SNAPSHOT_SOURCES_FOR_PROMPT = 10;
+const MAX_SNAPSHOT_TEXT_PER_SOURCE = 2400;
+const MAX_PROMPT_SNAPSHOT_CHARS = 55_000;
 
 function buildNewsMonitoringRow(
   rssUrl: string,
@@ -601,11 +604,16 @@ Rules:
 
       const snapshotBlobs = results
         .filter((r) => r.ok && r.text)
+        .slice(0, MAX_SNAPSHOT_SOURCES_FOR_PROMPT)
         .map((r) => {
           const title = r.title ? `Title: ${r.title}\n` : "";
-          return `SOURCE: ${r.label}\nTYPE: ${r.source_type}\nURL: ${r.url}\n${title}TEXT:\n${r.text.slice(0, 3500)}\n`;
+          return `SOURCE: ${r.label}\nTYPE: ${r.source_type}\nURL: ${r.url}\n${title}TEXT:\n${r.text.slice(0, MAX_SNAPSHOT_TEXT_PER_SOURCE)}\n`;
         })
         .join("\n---\n");
+      const snapshotBlobsCapped =
+        snapshotBlobs.length > MAX_PROMPT_SNAPSHOT_CHARS
+          ? snapshotBlobs.slice(0, MAX_PROMPT_SNAPSHOT_CHARS)
+          : snapshotBlobs;
 
       const prompt = `Base product:
 Name: ${(product.name as string) ?? "Unknown"}
@@ -624,7 +632,7 @@ Competitors:
 ${competitorUrls.map((c) => `- ${c.name}: ${c.url}`).join("\n")}
 
 Snapshots:
-${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
+${snapshotBlobsCapped || "(no snapshot text — all fetches failed)"}`;
 
       async function callAnthropicScan(args: {
         system: string;
@@ -632,35 +640,64 @@ ${snapshotBlobs || "(no snapshot text — all fetches failed)"}`;
         max_tokens: number;
         temperature: number;
       }): Promise<{ ok: boolean; text: string; errorMessage: string | null; status: number }> {
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "x-api-key": anthropicKey,
-            "anthropic-version": "2023-06-01"
-          },
-          body: JSON.stringify({
-            model: "claude-sonnet-4-6",
-            max_tokens: args.max_tokens,
-            temperature: args.temperature,
-            system: args.system,
-            messages: [{ role: "user", content: args.prompt }]
-          })
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), ANTHROPIC_TIMEOUT_MS);
+        try {
+          const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            signal: controller.signal,
+            headers: {
+              "content-type": "application/json",
+              "x-api-key": anthropicKey,
+              "anthropic-version": "2023-06-01"
+            },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-6",
+              max_tokens: args.max_tokens,
+              temperature: args.temperature,
+              system: args.system,
+              messages: [{ role: "user", content: args.prompt }]
+            })
+          });
 
-        const data = (await res.json()) as AnthropicMessageResponse;
-        if (!res.ok) {
-          const normalized = normalizeAnthropicError(data?.error?.message);
-          return { ok: false, text: "", errorMessage: normalized.error, status: normalized.status };
+          const data = (await res.json()) as AnthropicMessageResponse;
+          if (!res.ok) {
+            const normalized = normalizeAnthropicError(data?.error?.message);
+            return {
+              ok: false,
+              text: "",
+              errorMessage: normalized.error,
+              status: normalized.status
+            };
+          }
+          const text = data.content?.find((c) => c.type === "text")?.text ?? "";
+          return { ok: true, text, errorMessage: null, status: 200 };
+        } catch (e) {
+          const message = e instanceof Error ? e.message : String(e);
+          if (message.toLowerCase().includes("aborted")) {
+            return {
+              ok: false,
+              text: "",
+              errorMessage:
+                "AI request timed out. Try again, or reduce sources (competitors/news/reviews) to shrink the scan.",
+              status: 504
+            };
+          }
+          return {
+            ok: false,
+            text: "",
+            errorMessage: "AI request failed (network error). Please try again.",
+            status: 502
+          };
+        } finally {
+          clearTimeout(timeout);
         }
-        const text = data.content?.find((c) => c.type === "text")?.text ?? "";
-        return { ok: true, text, errorMessage: null, status: 200 };
       }
 
       const first = await callAnthropicScan({
         system,
         prompt,
-        max_tokens: 3500,
+        max_tokens: 3000,
         temperature: 0.3
       });
       if (!first.ok) {
@@ -682,7 +719,7 @@ STRICT MODE:
         const second = await callAnthropicScan({
           system: strictSystem,
           prompt,
-          max_tokens: 3500,
+          max_tokens: 3000,
           temperature: 0.15
         });
         if (second.ok) {
