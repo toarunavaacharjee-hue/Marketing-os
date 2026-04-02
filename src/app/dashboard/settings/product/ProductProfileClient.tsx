@@ -28,6 +28,7 @@ export default function ProductProfileClient() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [autoFilling, setAutoFilling] = useState(false);
 
   const [name, setName] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -121,6 +122,46 @@ export default function ProductProfileClient() {
       setError(e instanceof Error ? e.message : "Failed to save.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function autoFillFromWebsite() {
+    setAutoFilling(true);
+    setSaving(false);
+    setError(null);
+    setSaved(null);
+    try {
+      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
+      const res = await fetch("/api/product/profile/generate-from-website", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(key ? { "x-anthropic-key": key } : {})
+        },
+        body: JSON.stringify({ replaceSegments: false, replaceCompetitors: false })
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      const data = (contentType.includes("application/json")
+        ? (JSON.parse(raw) as { error?: string; filled?: any })
+        : ({ error: raw || "Server error" } as any)) as { error?: string; filled?: any };
+      if (!res.ok) throw new Error(data.error ?? "Auto-fill failed.");
+
+      const filled = data.filled ?? {};
+      if (filled.competitors_inserted === 0) {
+        const msg =
+          filled.competitor_generation_available === false
+            ? "Auto-fill could not find competitor links on your website. Please add at least one competitor URL manually."
+            : "Auto-fill did not generate competitor URLs. Please add at least one competitor URL manually.";
+        setError(msg);
+      } else {
+        setSaved("Auto-filled from website.");
+      }
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Auto-fill failed.");
+    } finally {
+      setAutoFilling(false);
     }
   }
 
@@ -396,6 +437,15 @@ export default function ProductProfileClient() {
           className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-60"
         >
           Reload
+        </button>
+        <button
+          type="button"
+          onClick={autoFillFromWebsite}
+          disabled={autoFilling || saving || loading}
+          className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-60"
+          title="Auto-fill missing category/ICP/positioning + competitor URLs from your product website"
+        >
+          {autoFilling ? "Auto-filling…" : "Auto-fill from website"}
         </button>
       </div>
 

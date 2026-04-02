@@ -61,6 +61,41 @@ function stripHtmlToText(html: string): string {
     .trim();
 }
 
+function extractExternalLinksFromHtml(html: string, baseUrl: string, limit: number): string[] {
+  let base: URL;
+  try {
+    base = new URL(baseUrl);
+  } catch {
+    return [];
+  }
+
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const re = /<a[^>]+href\s*=\s*["']([^"'<>]+)["']/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null && out.length < limit) {
+    const raw = (m[1] ?? "").trim();
+    if (!raw) continue;
+    if (raw.startsWith("mailto:") || raw.startsWith("javascript:") || raw.startsWith("tel:")) continue;
+    if (raw.startsWith("#")) continue;
+    try {
+      const u = new URL(raw, base);
+      if (u.protocol !== "http:" && u.protocol !== "https:") continue;
+      if (u.origin === base.origin) continue;
+      const path = u.pathname.toLowerCase();
+      // Skip obvious non-site links.
+      if (/\.(pdf|zip|png|jpe?g|gif|webp|svg|ico|css|js|xml|json)$/i.test(path)) continue;
+      const normalized = u.href.split("#")[0];
+      if (seen.has(normalized)) continue;
+      seen.add(normalized);
+      out.push(normalized);
+    } catch {
+      /* skip */
+    }
+  }
+  return out;
+}
+
 function titleFromHtml(html: string): string | null {
   const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   return m?.[1]?.replace(/\s+/g, " ").trim() ?? null;
@@ -103,6 +138,7 @@ export async function POST(req: Request) {
     }
 
     const replaceSegments = Boolean(body?.replaceSegments);
+    const replaceCompetitors = Boolean(body?.replaceCompetitors);
 
     const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
     const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
@@ -182,6 +218,19 @@ export async function POST(req: Request) {
     }
 
     const bundle = snapshots.join("\n---\n") || homeText.slice(0, MAX_HOME_TEXT);
+    // Candidate competitor URLs: only use external links that appear on the crawled product pages.
+    // Then the model picks likely competitors from this constrained candidate set.
+    const competitorCandidatesSet = new Set<string>();
+    const candidateHtmlPages: Array<{ html?: string; url: string }> = [
+      { html: home.html, url: home.url },
+      ...distinctExtra.map((p) => ({ html: p.html, url: p.url }))
+    ];
+    for (const page of candidateHtmlPages) {
+      if (!page.html) continue;
+      for (const u of extractExternalLinksFromHtml(page.html, baseUrl, 20)) competitorCandidatesSet.add(u);
+      if (competitorCandidatesSet.size >= 60) break;
+    }
+    const competitorCandidates = Array.from(competitorCandidatesSet).slice(0, 60);
 
     const system = `You extract ICP (ideal customer profile) segments AND a product profile from website pages for a B2B marketing product.
 Output ONLY one JSON object (no prose, no markdown fences).
@@ -356,13 +405,109 @@ ${bundle}`;
       positioning_summary: updatedProduct.positioning_summary ?? null
     });
 
+    // Competitors: fill only if we currently have none (or if replaceCompetitors was requested).
+    const { count: competitorCount } = await supabase
+      .from("product_competitors")
+      .select("id", { count: "exact", head: true })
+      .eq("product_id", productId);
+
+    const shouldInsertCompetitors =
+      replaceCompetitors || !competitorCount || Number(competitorCount) === 0;
+    let competitorsInserted = 0;
+    let competitor_generation_available = true;
+
+    if (shouldInsertCompetitors) {
+      if (!competitorCandidates.length) {
+        competitor_generation_available = false;
+      } else {
+        const allowed = new Set(competitorCandidates);
+        const systemC = `You choose likely direct competitors from a list of candidate URLs extracted from the product's own website.
+Output ONLY valid JSON (no prose).
+
+Schema exactly:
+{
+  "competitors": [ { "name": string, "website_url": string } ]
+}
+
+Rules:
+- You MUST copy "website_url" values exactly from the provided candidates list.
+- Only include competitors if they are clearly alternative products.
+- If unsure, return an empty array.`;
+
+        const userC = `Product name: ${productName}
+
+Candidate external URLs (pick from these exactly):
+${competitorCandidates.map((u, i) => `${i + 1}. ${u}`).join("\n")}`;
+
+        const competitorRes = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01"
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 900,
+            temperature: 0.2,
+            system: systemC,
+            messages: [{ role: "user", content: userC }]
+          })
+        });
+
+        const competitorData = (await competitorRes.json()) as AnthropicMessageResponse;
+        if (competitorRes.ok) {
+          const competitorOutText = competitorData.content?.find((c) => c.type === "text")?.text ?? "";
+          const competitorParsed = parseJsonObject(competitorOutText);
+          const rawComps = competitorParsed?.competitors;
+          const compsArr = Array.isArray(rawComps) ? rawComps : [];
+
+          const validated = compsArr
+            .map((item) => item as Record<string, unknown>)
+            .map((c) => {
+              const website_url = asStr(c.website_url);
+              if (!website_url || !allowed.has(website_url)) return null;
+              const name = asStr(c.name);
+              const derived = website_url.replace(/^https?:\/\//, "").split("/")[0] ?? "";
+              return { name: name || derived, website_url };
+            })
+            .filter(Boolean) as Array<{ name: string; website_url: string }>;
+
+          const uniqueByUrl = new Map<string, { name: string; website_url: string }>();
+          for (const c of validated) uniqueByUrl.set(c.website_url, c);
+
+          const toInsert = Array.from(uniqueByUrl.values()).slice(0, 5);
+
+          if (replaceCompetitors) {
+            await supabase.from("product_competitors").delete().eq("product_id", productId);
+          }
+
+          if (toInsert.length) {
+            const rows = toInsert
+              .filter((c) => c.name.trim() && c.website_url.trim())
+              .map((c) => ({
+                product_id: productId,
+                name: c.name.trim(),
+                website_url: c.website_url.trim()
+              }));
+            if (rows.length) {
+              const ins = await supabase.from("product_competitors").insert(rows);
+              if (!ins.error) competitorsInserted = rows.length;
+            }
+          }
+        }
+      }
+    }
+
     return NextResponse.json({
       ok: true,
       filled: {
         category: Boolean(updatedProduct.category),
         icp_summary: Boolean(updatedProduct.icp_summary),
         positioning_summary: Boolean(updatedProduct.positioning_summary),
-        segments_inserted: shouldInsertSegments
+        segments_inserted: shouldInsertSegments,
+        competitors_inserted: competitorsInserted,
+        competitor_generation_available
       }
     });
   } catch (e) {
