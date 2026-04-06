@@ -3,6 +3,7 @@ import { createSupabaseServiceRoleClient } from "@/lib/supabase/service-role";
 import { getCompanyPlan, getSelectedCompanyId } from "@/lib/companyContext";
 import { decryptWorkspaceSecret } from "@/lib/crypto/workspaceKeyCrypto";
 import { planEligibleForPlatformAnthropicDefault } from "@/lib/planEntitlements";
+import { isMissingCompanyAiKeysTable } from "@/lib/supabase/missingCompanyAiKeysTable";
 
 export type ResolveAnthropicKeyResult =
   | { ok: true; key: string }
@@ -68,7 +69,7 @@ export async function resolveWorkspaceAnthropicKey(): Promise<ResolveAnthropicKe
     .eq("company_id", companyId)
     .maybeSingle();
 
-  if (error) {
+  if (error && !isMissingCompanyAiKeysTable(error)) {
     return { ok: false, error: error.message, status: 500 };
   }
 

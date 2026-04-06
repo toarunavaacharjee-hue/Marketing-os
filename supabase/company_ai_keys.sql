@@ -1,6 +1,7 @@
 -- Per-workspace Anthropic API key (ciphertext only). Read/write from app server using
 -- SUPABASE_SERVICE_ROLE_KEY after verifying the user is a workspace member/admin.
--- Run in Supabase SQL Editor.
+--
+-- Required once per Supabase project: Dashboard → SQL → New query → paste → Run.
 
 create table if not exists public.company_ai_keys (
   company_id uuid primary key references public.companies(id) on delete cascade,

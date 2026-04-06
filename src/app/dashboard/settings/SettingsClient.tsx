@@ -14,6 +14,8 @@ type WorkspaceKeyMeta = {
   canManage: boolean;
   updated_at?: string | null;
   error?: string;
+  warning?: string;
+  workspace_key_storage_ready?: boolean;
   plan?: string;
   platform_ai_eligible?: boolean;
   platform_ai_configured?: boolean;
@@ -50,6 +52,8 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
         canManage: Boolean(data.canManage),
         updated_at: data.updated_at ?? null,
         error: typeof data.error === "string" ? data.error : undefined,
+        warning: typeof data.warning === "string" ? data.warning : undefined,
+        workspace_key_storage_ready: data.workspace_key_storage_ready !== false,
         plan: typeof data.plan === "string" ? data.plan : undefined,
         platform_ai_eligible: Boolean(data.platform_ai_eligible),
         platform_ai_configured: Boolean(data.platform_ai_configured),
@@ -190,6 +194,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
   const canManage = workspaceMeta?.canManage ?? false;
   const anthropicReady = workspaceMeta?.anthropic_ready ?? false;
   const keySource = workspaceMeta?.key_source ?? "none";
+  const byokStorageReady = workspaceMeta?.workspace_key_storage_ready !== false;
 
   return (
     <div className="space-y-4">
@@ -275,6 +280,12 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
             overrides platform AI. Keys are encrypted server-side, never stored in the browser.
           </div>
 
+          {workspaceMeta?.warning ? (
+            <div className="mt-3 rounded-xl border border-sky-500/35 bg-sky-500/10 px-3 py-2 text-xs text-sky-100">
+              {workspaceMeta.warning}
+            </div>
+          ) : null}
+
           {workspaceMeta?.error ? (
             <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
               {workspaceMeta.error}
@@ -323,7 +334,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
                 <button
                   type="button"
                   onClick={() => void saveWorkspaceKey()}
-                  disabled={savingKey || !keyLooksValid}
+                  disabled={savingKey || !keyLooksValid || !byokStorageReady}
                   className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
                 >
                   {savingKey ? "Saving…" : configured ? "Replace key" : "Save key"}

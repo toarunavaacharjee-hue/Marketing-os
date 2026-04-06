@@ -5,6 +5,7 @@ import { getCompanyPlan, getSelectedCompanyId } from "@/lib/companyContext";
 import { planEligibleForPlatformAnthropicDefault } from "@/lib/planEntitlements";
 import { encryptWorkspaceSecret } from "@/lib/crypto/workspaceKeyCrypto";
 import { isWorkspaceAdminForSelectedCompany } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
+import { isMissingCompanyAiKeysTable } from "@/lib/supabase/missingCompanyAiKeysTable";
 
 async function assertMember(): Promise<
   | { ok: false; res: NextResponse }
@@ -75,11 +76,12 @@ export async function GET() {
     .eq("company_id", companyId)
     .maybeSingle();
 
-  if (error) {
+  if (error && !isMissingCompanyAiKeysTable(error)) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const byok = Boolean(row);
+  const byokStorageMissing = Boolean(error && isMissingCompanyAiKeysTable(error));
+  const byok = Boolean(row) && !byokStorageMissing;
   const anthropic_ready = byok || (platformEligible && platformKeySet);
   const key_source = byok ? ("workspace" as const) : platformEligible && platformKeySet ? ("platform" as const) : ("none" as const);
 
@@ -91,7 +93,11 @@ export async function GET() {
     platform_ai_eligible: platformEligible,
     platform_ai_configured: platformKeySet,
     key_source,
-    anthropic_ready
+    anthropic_ready,
+    workspace_key_storage_ready: !byokStorageMissing,
+    warning: byokStorageMissing
+      ? "Workspace key storage is not installed yet. In the Supabase dashboard, open SQL Editor and run the script from supabase/company_ai_keys.sql in this project. After that, owners can save BYOK keys here. Platform AI still works when your plan allows it and ANTHROPIC_API_KEY is set on the server."
+      : undefined
   });
 }
 
@@ -149,6 +155,15 @@ export async function POST(req: Request) {
   );
 
   if (error) {
+    if (isMissingCompanyAiKeysTable(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "Database table company_ai_keys is missing. In Supabase → SQL Editor, run supabase/company_ai_keys.sql from the repo, then try again."
+        },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -171,6 +186,15 @@ export async function DELETE() {
 
   const { error } = await svc.from("company_ai_keys").delete().eq("company_id", admin.companyId);
   if (error) {
+    if (isMissingCompanyAiKeysTable(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "Database table company_ai_keys is missing. In Supabase → SQL Editor, run supabase/company_ai_keys.sql from the repo."
+        },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
