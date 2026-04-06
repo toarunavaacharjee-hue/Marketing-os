@@ -5,6 +5,7 @@ import {
   getSelectedProductId
 } from "@/lib/productContext";
 import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
@@ -13,7 +14,6 @@ type AnthropicMessageResponse = {
 
 type ProfileRow = {
   ai_queries_used?: number | null;
-  anthropic_api_key?: string | null;
 };
 
 /**
@@ -64,21 +64,13 @@ export async function POST(req: Request) {
 
   const profileSelect = await supabase
     .from("profiles")
-    .select("ai_queries_used,anthropic_api_key")
+    .select("ai_queries_used")
     .eq("id", user.id)
     .maybeSingle();
 
   const profile = (profileSelect.data ?? null) as ProfileRow | null;
   const plan = (await getCompanyPlanForSelectedCompany()).toLowerCase();
   const used = profile?.ai_queries_used ?? 0;
-
-  const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-  const anthropicKey = (
-    headerKey ||
-    (profile?.anthropic_api_key ?? "").trim() ||
-    process.env.ANTHROPIC_API_KEY ||
-    ""
-  ).trim();
 
   if (plan === "starter" && used >= 100) {
     return NextResponse.json(
@@ -91,12 +83,11 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!anthropicKey) {
-    return NextResponse.json(
-      { error: "Add your Anthropic API key in the sidebar or Settings." },
-      { status: 400 }
-    );
+  const keyRes = await resolveWorkspaceAnthropicKey();
+  if (!keyRes.ok) {
+    return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
   }
+  const anthropicKey = keyRes.key;
 
   const productId = await getSelectedProductId();
   let productBrief = "";

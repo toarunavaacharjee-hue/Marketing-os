@@ -72,8 +72,6 @@ const NAV: NavSection[] = [
   }
 ];
 
-const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
-
 function PurpleBar() {
   return <div className="absolute left-0 top-0 h-full w-[3px] bg-accent2" />;
 }
@@ -99,16 +97,33 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const ent = useMemo(() => getEntitlements(companyPlan ?? "starter"), [companyPlan]);
 
-  const [anthropicKey, setAnthropicKey] = useState("");
+  const [anthropicReady, setAnthropicReady] = useState(false);
+  const [aiKeySource, setAiKeySource] = useState<"workspace" | "platform" | "none">("none");
   useEffect(() => {
-    const v =
-      typeof window !== "undefined"
-        ? window.localStorage.getItem(ANTHROPIC_KEY_STORAGE)
-        : null;
-    if (v) setAnthropicKey(v);
-  }, []);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/settings/workspace-ai-key");
+        const data = (await res.json()) as {
+          anthropic_ready?: boolean;
+          key_source?: "workspace" | "platform" | "none";
+        };
+        if (!cancelled) {
+          setAnthropicReady(Boolean(data.anthropic_ready));
+          setAiKeySource(data.key_source ?? "none");
+        }
+      } catch {
+        if (!cancelled) {
+          setAnthropicReady(false);
+          setAiKeySource("none");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCompanyId]);
 
-  const keyEntered = anthropicKey.trim().startsWith("sk-ant-");
   const [aiStatus, setAiStatus] = useState<
     "idle" | "checking" | "connected" | "error"
   >("idle");
@@ -118,7 +133,7 @@ export function DashboardShell({
     let cancelled = false;
 
     async function ping() {
-      if (!keyEntered) {
+      if (!anthropicReady) {
         setAiStatus("idle");
         setAiError(null);
         return;
@@ -131,8 +146,7 @@ export function DashboardShell({
         const res = await fetch("/api/ai/ping", {
           method: "POST",
           headers: {
-            "content-type": "application/json",
-            "x-anthropic-key": anthropicKey.trim()
+            "content-type": "application/json"
           }
         });
         const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -157,7 +171,7 @@ export function DashboardShell({
       cancelled = true;
       window.clearTimeout(t);
     };
-  }, [keyEntered, anthropicKey]);
+  }, [anthropicReady]);
 
   const activeMap = useMemo(() => {
     const map = new Map<string, boolean>();
@@ -284,10 +298,10 @@ export function DashboardShell({
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-[11px] font-semibold text-text2 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-2">
                 <span
-                  className={`h-2 w-2 rounded-full ${keyEntered ? "bg-green" : "bg-white/20"}`}
+                  className={`h-2 w-2 rounded-full ${anthropicReady ? "bg-green" : "bg-white/20"}`}
                   aria-hidden
                 />
-                AI key & mode
+                Workspace AI
               </span>
               <span className="text-text3 transition group-open:rotate-90">›</span>
             </summary>
@@ -295,30 +309,23 @@ export function DashboardShell({
             <div className="mt-3">
               <div className="mb-2 flex items-center justify-between">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.5px] text-text3">
-                  Anthropic API Key
+                  Anthropic (this workspace)
                 </div>
                 <div
                   className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    keyEntered
+                    anthropicReady
                       ? "bg-[rgba(52,211,153,0.15)] text-green"
                       : "bg-[rgba(251,191,36,0.15)] text-yellow"
                   }`}
                 >
-                  {keyEntered ? "LIVE" : "DEMO"}
+                  {aiKeySource === "workspace"
+                    ? "YOUR KEY"
+                    : aiKeySource === "platform"
+                      ? "PLATFORM"
+                      : "NOT SET"}
                 </div>
               </div>
-              <input
-                value={anthropicKey}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setAnthropicKey(v);
-                  window.localStorage.setItem(ANTHROPIC_KEY_STORAGE, v);
-                }}
-                placeholder="sk-ant-..."
-                className="w-full rounded-[6px] border border-border bg-bg px-2 py-1.5 text-[11px] text-text placeholder:text-text3 focus:border-accent focus:outline-none"
-                style={{ fontFamily: "var(--font-mono)" }}
-              />
-              {keyEntered ? (
+              {anthropicReady ? (
                 <div className="mt-2 text-[11px] text-text2">
                   {aiStatus === "checking" ? (
                     <span>Checking connection…</span>
@@ -332,9 +339,17 @@ export function DashboardShell({
                 </div>
               ) : (
                 <div className="mt-2 text-[11px] text-text2">
-                  Paste your key to enable Live AI.
+                  Enterprise needs a workspace key; Starter, Free, and Growth may use platform AI when enabled. Open
+                  Settings → AI integration.
                 </div>
               )}
+              <Link
+                href="/dashboard/settings"
+                onClick={onNavigate}
+                className="mt-2 inline-block text-[11px] font-semibold text-accent2 hover:underline"
+              >
+                Open Settings
+              </Link>
             </div>
           </details>
         </div>

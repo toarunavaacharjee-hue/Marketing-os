@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { POSITIONING_KEY, POSITIONING_MODULE, type PositioningCanvasValue } from "@/lib/positioningStudio";
@@ -52,14 +53,11 @@ export async function POST(req: Request) {
     const ctx = await getDefaultEnvironmentIdForSelectedProduct();
     if (!ctx) return NextResponse.json({ error: "No product selected." }, { status: 400 });
 
-    const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-    const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
-    if (!anthropicKey) {
-      return NextResponse.json(
-        { error: "Missing Anthropic API key. Add your key in the sidebar or Settings." },
-        { status: 400 }
-      );
+    const keyRes = await resolveWorkspaceAnthropicKey();
+    if (!keyRes.ok) {
+      return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
+    const anthropicKey = keyRes.key;
 
     const positioning = await supabase
       .from("module_settings")

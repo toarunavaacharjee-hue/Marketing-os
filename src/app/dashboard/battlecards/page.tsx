@@ -246,16 +246,11 @@ export default function BattlecardsPage() {
     const setBusy = kind === "icp" ? setUploadingIcp : setUploadingAccount;
     setBusy(true);
     try {
-      const key =
-        typeof window === "undefined"
-          ? ""
-          : (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
       const fd = new FormData();
       fd.append("file", file);
       fd.append("kind", kind);
       const res = await fetch("/api/battlecards/extract-document", {
         method: "POST",
-        headers: key ? { "x-anthropic-key": key } : {},
         body: fd
       });
       const data = (await res.json()) as {
@@ -333,15 +328,10 @@ export default function BattlecardsPage() {
   ): Promise<{ markdown: string | null; needsMore: boolean }> {
     const personaId = kind === "icp" ? icpPersonaId : accountPersonaId;
     if (!activeId || !personaId) return { markdown: null, needsMore: false };
-    const key =
-      typeof window === "undefined"
-        ? ""
-        : (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
     const res = await fetch("/api/battlecards/pitch", {
       method: "POST",
       headers: {
-        "content-type": "application/json",
-        ...(key ? { "x-anthropic-key": key } : {})
+        "content-type": "application/json"
       },
       body: JSON.stringify({ competitor_id: activeId, persona_id: personaId })
     });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { parseJsonObject } from "@/lib/extractJsonObject";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 function sliceText(s: string | null | undefined, max: number) {
   const t = (s ?? "").trim();
@@ -50,8 +51,6 @@ export async function POST(req: Request) {
     if (!question)
       return NextResponse.json({ error: "Question is required." }, { status: 400 });
 
-    const anthropicKey = (process.env.ANTHROPIC_API_KEY || "").trim();
-
     const { data: scan, error: sErr } = await supabase
       .from("research_scans")
       .select("id,summary,created_at")
@@ -77,15 +76,11 @@ export async function POST(req: Request) {
       .limit(12);
     if (snapsErr) return NextResponse.json({ error: snapsErr.message }, { status: 500 });
 
-    if (!anthropicKey) {
-      return NextResponse.json(
-        {
-          error:
-            "Missing Anthropic API key on the server. Set ANTHROPIC_API_KEY in your deployment environment, then try again."
-        },
-        { status: 400 }
-      );
+    const keyRes = await resolveWorkspaceAnthropicKey();
+    if (!keyRes.ok) {
+      return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
+    const anthropicKey = keyRes.key;
 
     const snapshotContext = (snaps ?? [])
       .map((s, idx) => {
@@ -161,4 +156,3 @@ Rules:
     );
   }
 }
-

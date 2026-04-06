@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSelectedProductId } from "@/lib/productContext";
 import { extractSameOriginLinks, isLikelyDistinctPage } from "@/lib/websiteAssetIngest";
 import { parseJsonObject } from "@/lib/extractJsonObject";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
@@ -149,11 +150,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, filled: { competitors_inserted: 0, competitor_generation_available: true } });
     }
 
-    const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-    const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
-    if (!anthropicKey) {
-      return NextResponse.json({ error: "Missing Anthropic API key." }, { status: 400 });
+    const keyRes = await resolveWorkspaceAnthropicKey();
+    if (!keyRes.ok) {
+      return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
+    const anthropicKey = keyRes.key;
 
     // Candidate competitor URLs from the product's own website external links.
     const MAX_EXTRA_PRODUCT_PAGES = 6;

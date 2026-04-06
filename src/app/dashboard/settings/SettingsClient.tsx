@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Props = {
@@ -9,7 +9,17 @@ type Props = {
   email: string;
 };
 
-const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
+type WorkspaceKeyMeta = {
+  configured: boolean;
+  canManage: boolean;
+  updated_at?: string | null;
+  error?: string;
+  plan?: string;
+  platform_ai_eligible?: boolean;
+  platform_ai_configured?: boolean;
+  key_source?: "workspace" | "platform" | "none";
+  anthropic_ready?: boolean;
+};
 
 export default function SettingsClient({ initialName, initialCompany, email }: Props) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -19,22 +29,54 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
   const [saved, setSaved] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [anthropicKey, setAnthropicKey] = useState(
-    typeof window !== "undefined"
-      ? window.localStorage.getItem(ANTHROPIC_KEY_STORAGE) ?? ""
-      : ""
-  );
-  const keyLooksValid = anthropicKey.trim().startsWith("sk-ant-");
-  const [aiStatus, setAiStatus] = useState<
-    "idle" | "checking" | "connected" | "error"
-  >("idle");
+  const [workspaceMeta, setWorkspaceMeta] = useState<WorkspaceKeyMeta | null>(null);
+  const [metaLoading, setMetaLoading] = useState(true);
+  const [keyInput, setKeyInput] = useState("");
+  const [savingKey, setSavingKey] = useState(false);
+  const [keyMessage, setKeyMessage] = useState<string | null>(null);
+  const [keyError, setKeyError] = useState<string | null>(null);
+
+  const keyLooksValid = keyInput.trim().startsWith("sk-ant-");
+  const [aiStatus, setAiStatus] = useState<"idle" | "checking" | "connected" | "error">("idle");
   const [aiError, setAiError] = useState<string | null>(null);
+
+  const refreshWorkspaceMeta = useCallback(async () => {
+    setMetaLoading(true);
+    try {
+      const res = await fetch("/api/settings/workspace-ai-key", { method: "GET" });
+      const data = (await res.json()) as WorkspaceKeyMeta & { error?: string };
+      setWorkspaceMeta({
+        configured: Boolean(data.configured),
+        canManage: Boolean(data.canManage),
+        updated_at: data.updated_at ?? null,
+        error: typeof data.error === "string" ? data.error : undefined,
+        plan: typeof data.plan === "string" ? data.plan : undefined,
+        platform_ai_eligible: Boolean(data.platform_ai_eligible),
+        platform_ai_configured: Boolean(data.platform_ai_configured),
+        key_source: data.key_source,
+        anthropic_ready: Boolean(data.anthropic_ready)
+      });
+    } catch {
+      setWorkspaceMeta({
+        configured: false,
+        canManage: false,
+        anthropic_ready: false,
+        error: "Could not load workspace key status."
+      });
+    } finally {
+      setMetaLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshWorkspaceMeta();
+  }, [refreshWorkspaceMeta]);
 
   useEffect(() => {
     let cancelled = false;
 
     async function ping() {
-      if (!keyLooksValid) {
+      if (!workspaceMeta?.anthropic_ready) {
         setAiStatus("idle");
         setAiError(null);
         return;
@@ -46,10 +88,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
       try {
         const res = await fetch("/api/ai/ping", {
           method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "x-anthropic-key": anthropicKey.trim()
-          }
+          headers: { "content-type": "application/json" }
         });
         const data = (await res.json()) as { ok?: boolean; error?: string };
         if (cancelled) return;
@@ -68,12 +107,12 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
       }
     }
 
-    const t = window.setTimeout(ping, 600);
+    const t = window.setTimeout(ping, 400);
     return () => {
       cancelled = true;
       window.clearTimeout(t);
     };
-  }, [anthropicKey, keyLooksValid]);
+  }, [workspaceMeta?.anthropic_ready]);
 
   async function saveProfile() {
     setSaving(true);
@@ -97,6 +136,61 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
     else setSaved("Saved.");
   }
 
+  async function saveWorkspaceKey() {
+    setKeyMessage(null);
+    setKeyError(null);
+    const apiKey = keyInput.trim();
+    if (!apiKey.startsWith("sk-ant-")) {
+      setKeyError("Key must start with sk-ant-.");
+      return;
+    }
+    setSavingKey(true);
+    try {
+      const res = await fetch("/api/settings/workspace-ai-key", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ apiKey })
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) {
+        setKeyError(data.error ?? "Could not save key.");
+        return;
+      }
+      setKeyInput("");
+      setKeyMessage("Workspace Anthropic key saved.");
+      await refreshWorkspaceMeta();
+    } catch (e) {
+      setKeyError(e instanceof Error ? e.message : "Could not save key.");
+    } finally {
+      setSavingKey(false);
+    }
+  }
+
+  async function removeWorkspaceKey() {
+    setKeyMessage(null);
+    setKeyError(null);
+    setSavingKey(true);
+    try {
+      const res = await fetch("/api/settings/workspace-ai-key", { method: "DELETE" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) {
+        setKeyError(data.error ?? "Could not remove key.");
+        return;
+      }
+      setKeyMessage("Workspace key removed.");
+      await refreshWorkspaceMeta();
+    } catch (e) {
+      setKeyError(e instanceof Error ? e.message : "Could not remove key.");
+    } finally {
+      setSavingKey(false);
+    }
+  }
+
+  const configured = workspaceMeta?.configured ?? false;
+  const canManage = workspaceMeta?.canManage ?? false;
+  const anthropicReady = workspaceMeta?.anthropic_ready ?? false;
+  const keySource = workspaceMeta?.key_source ?? "none";
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
@@ -109,9 +203,17 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
           <SetupItem title="Supabase connected" ok subtitle="Auth + profiles enabled" />
           <SetupItem title="Billing" ok={false} subtitle="Free mode (enable later)" />
           <SetupItem
-            title="Anthropic key"
-            ok={anthropicKey.trim().length > 0}
-            subtitle="Needed for AI Copilot"
+            title="Anthropic / AI"
+            ok={anthropicReady}
+            subtitle={
+              metaLoading
+                ? "Checking…"
+                : keySource === "workspace"
+                  ? "Workspace key (BYOK)"
+                  : keySource === "platform"
+                    ? "Platform AI (no BYOK)"
+                    : "Not configured"
+            }
           />
         </div>
       </div>
@@ -165,52 +267,110 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
         <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
           <div className="text-sm font-medium text-text">AI integration</div>
           <div className="mt-1 text-sm text-text2">
-            Paste your Anthropic API key here. It’s saved in this browser (localStorage).
+            <span className="font-medium text-text">Starter, Free, and Growth</span> workspaces can use{" "}
+            <span className="font-medium text-text">platform AI</span> (operator{" "}
+            <span className="font-mono text-xs">ANTHROPIC_API_KEY</span>) with no setup.{" "}
+            <span className="font-medium text-text">Enterprise</span> must add a workspace key below.{" "}
+            Optionally, any plan can add its own key (BYOK) so calls bill to your Anthropic account—when set, it always
+            overrides platform AI. Keys are encrypted server-side, never stored in the browser.
           </div>
 
-          <div className="mt-4">
-            <div className="mb-1 flex items-center justify-between">
-              <div className="text-xs text-text2">Anthropic API key</div>
-              <div
-                className={`h-2 w-2 rounded-full ${
-                  keyLooksValid ? "bg-[#b8ff6c]" : "bg-white/20"
-                }`}
+          {workspaceMeta?.error ? (
+            <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+              {workspaceMeta.error}
+            </div>
+          ) : null}
+
+          {!metaLoading && !canManage ? (
+            <div className="mt-4 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text2">
+              {configured
+                ? "A workspace Anthropic key is configured (BYOK). Only owners and admins can change it."
+                : anthropicReady
+                  ? "AI is available via platform defaults for this plan, or a workspace key if your admin added one."
+                  : workspaceMeta?.platform_ai_eligible
+                    ? "Platform AI is not enabled by your operator yet. Ask an owner or admin to add a workspace key here, or contact support."
+                    : "This workspace needs an Anthropic key. Ask a workspace owner or admin to add one under AI integration."}
+            </div>
+          ) : null}
+
+          {canManage ? (
+            <div className="mt-4">
+              <div className="mb-1 flex items-center justify-between">
+                <div className="text-xs text-text2">Anthropic API key</div>
+                <div
+                  className={`h-2 w-2 rounded-full ${anthropicReady ? "bg-[#b8ff6c]" : "bg-white/20"}`}
+                />
+              </div>
+              {configured ? (
+                <div className="mb-2 text-xs text-text2">
+                  A key is on file for this workspace
+                  {workspaceMeta?.updated_at
+                    ? ` (updated ${new Date(workspaceMeta.updated_at).toLocaleString()})`
+                    : ""}
+                  . Paste a new key below to replace it.
+                </div>
+              ) : null}
+              <input
+                value={keyInput}
+                onChange={(e) => setKeyInput(e.target.value)}
+                placeholder="sk-ant-..."
+                type="password"
+                autoComplete="off"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
               />
-            </div>
-            <input
-              value={anthropicKey}
-              onChange={(e) => {
-                const v = e.target.value;
-                setAnthropicKey(v);
-                window.localStorage.setItem(ANTHROPIC_KEY_STORAGE, v);
-              }}
-              placeholder="sk-ant-..."
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-            />
 
-            {keyLooksValid ? (
-              <div className="mt-3 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
-                {aiStatus === "checking" ? (
-                  <span>Checking connection…</span>
-                ) : aiStatus === "connected" ? (
-                  <span className="text-[#b8ff6c]">Connected to Anthropic</span>
-                ) : aiStatus === "error" ? (
-                  <span className="text-red-200">
-                    Not connected{aiError ? ` — ${aiError}` : ""}
-                  </span>
-                ) : (
-                  <span>—</span>
-                )}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void saveWorkspaceKey()}
+                  disabled={savingKey || !keyLooksValid}
+                  className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                >
+                  {savingKey ? "Saving…" : configured ? "Replace key" : "Save key"}
+                </button>
+                {configured ? (
+                  <button
+                    type="button"
+                    onClick={() => void removeWorkspaceKey()}
+                    disabled={savingKey}
+                    className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-text2 hover:bg-surface2 disabled:opacity-60"
+                  >
+                    Remove key
+                  </button>
+                ) : null}
               </div>
-            ) : anthropicKey.trim().length ? (
-              <div className="mt-3 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
-                Key format looks wrong. It should start with <span className="font-medium text-text">sk-ant-</span>.
-              </div>
-            ) : null}
 
-            <div className="mt-3 text-xs text-text2">
-              Tip: once set, open <span className="font-medium text-text">AI Copilot</span> to start chatting.
+              {keyError ? (
+                <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                  {keyError}
+                </div>
+              ) : null}
+              {keyMessage ? (
+                <div className="mt-3 rounded-xl border border-[rgba(184,255,108,0.35)] bg-[rgba(184,255,108,0.12)] px-3 py-2 text-xs text-[rgb(22,163,74)]">
+                  {keyMessage}
+                </div>
+              ) : null}
+
+              {anthropicReady ? (
+                <div className="mt-3 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
+                  {aiStatus === "checking" ? (
+                    <span>Checking connection…</span>
+                  ) : aiStatus === "connected" ? (
+                    <span className="text-[#b8ff6c]">Connected to Anthropic</span>
+                  ) : aiStatus === "error" ? (
+                    <span className="text-red-200">
+                      Not connected{aiError ? ` — ${aiError}` : ""}
+                    </span>
+                  ) : (
+                    <span>—</span>
+                  )}
+                </div>
+              ) : null}
             </div>
+          ) : null}
+
+          <div className="mt-3 text-xs text-text2">
+            Tip: open <span className="font-medium text-text">AI Copilot</span> once AI is available for this workspace.
           </div>
         </div>
       </div>
@@ -244,4 +404,3 @@ function SetupItem({
     </div>
   );
 }
-

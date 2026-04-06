@@ -295,14 +295,12 @@ export function InsightWorkbench({
   async function importEventsFromPdf(file: File) {
     setImporting(true);
     setError(null);
-    const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
     const fd = new FormData();
     fd.set("file", file);
     try {
       const res = await fetch("/api/events/extract-document", {
         method: "POST",
-        body: fd,
-        headers: key ? { "x-anthropic-key": key } : {}
+        body: fd
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -368,7 +366,6 @@ export function InsightWorkbench({
   async function generateInsight() {
     setGenerating(true);
     setError(null);
-    const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
     const prompts: Record<Variant, string> = {
       events:
         "Summarize 3 upcoming event priorities and 3 KPIs to track for a B2B marketing team. Short bullets.",
@@ -381,8 +378,7 @@ export function InsightWorkbench({
       const res = await fetch("/api/ai/module-generate", {
         method: "POST",
         headers: {
-          "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
+          "content-type": "application/json"
         },
         body: JSON.stringify({
           prompt: prompts[variant],

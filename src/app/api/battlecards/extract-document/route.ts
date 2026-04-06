@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { extractTextFromBuffer } from "@/lib/extractDocumentText";
@@ -63,14 +64,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-    const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
-    if (!anthropicKey) {
-      return NextResponse.json(
-        { error: "Missing Anthropic API key. Add your key in the sidebar or Settings." },
-        { status: 400 }
-      );
+    const keyRes = await resolveWorkspaceAnthropicKey();
+    if (!keyRes.ok) {
+      return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
+    const anthropicKey = keyRes.key;
 
     const system = `Extract profile fields from the document. Output ONLY one JSON object (no prose, no markdown fences).
 Keys exactly: name, website_url, industry, segment, company_size, buyer_roles, pains, current_stack, decision_criteria, notes

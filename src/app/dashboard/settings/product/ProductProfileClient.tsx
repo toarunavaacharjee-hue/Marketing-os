@@ -131,12 +131,10 @@ export default function ProductProfileClient() {
     setError(null);
     setSaved(null);
     try {
-      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
       const res = await fetch("/api/product/profile/generate-from-website", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
         },
         body: JSON.stringify({ replaceSegments: false, replaceCompetitors: false })
       });
@@ -151,12 +149,10 @@ export default function ProductProfileClient() {
       if (filled.competitors_inserted === 0) {
         // Fallback: try generating competitor URLs even when they are not linked from the product site.
         try {
-          const key2 = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
           const compRes = await fetch("/api/product/profile/fill-competitors-from-website", {
             method: "POST",
             headers: {
               "content-type": "application/json",
-              ...(key2 ? { "x-anthropic-key": key2 } : {})
             },
             body: JSON.stringify({ replaceCompetitors: false })
           });
@@ -234,12 +230,10 @@ export default function ProductProfileClient() {
       // Best-effort: auto-fill ICP + segments from the product website URL.
       // If it fails (e.g. missing Anthropic key), we still take the user to Product profile.
       try {
-        const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
         const autoRes = await fetch("/api/product/profile/generate-from-website", {
           method: "POST",
           headers: {
             "content-type": "application/json",
-            ...(key ? { "x-anthropic-key": key } : {})
           },
           body: JSON.stringify({})
         });

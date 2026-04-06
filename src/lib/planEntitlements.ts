@@ -7,6 +7,11 @@ export function normalizePlan(raw: string | null | undefined): Plan {
   return "starter";
 }
 
+/** Starter, free, and growth workspaces may use the operator's ANTHROPIC_API_KEY when no BYOK is set. Enterprise must BYOK. */
+export function planEligibleForPlatformAnthropicDefault(plan: Plan): boolean {
+  return plan === "starter" || plan === "free" || plan === "growth";
+}
+
 export type Entitlements = {
   plan: Plan;
   allowedDashboardSlugs: Set<string>; // "" means /dashboard home

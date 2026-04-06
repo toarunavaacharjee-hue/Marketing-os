@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseJsonObject } from "@/lib/extractJsonObject";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -23,17 +24,13 @@ function normalizeAnthropicError(message: string | undefined) {
   return { status: 502, error: m || "Anthropic request failed." };
 }
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
-    const headerKey = req.headers.get("x-anthropic-key")?.trim();
-    const key = headerKey || process.env.ANTHROPIC_API_KEY || "";
-
-    if (!key) {
-      return NextResponse.json(
-        { error: "Missing Anthropic API key. Add it in the sidebar." },
-        { status: 400 }
-      );
+    const keyRes = await resolveWorkspaceAnthropicKey();
+    if (!keyRes.ok) {
+      return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
+    const key = keyRes.key;
 
     const system = `You write a tiny daily marketing digest for a SaaS dashboard. Output ONLY valid JSON. No markdown, no extra text.
 

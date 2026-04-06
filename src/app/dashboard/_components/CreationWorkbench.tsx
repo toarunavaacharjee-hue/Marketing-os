@@ -323,13 +323,11 @@ export function CreationWorkbench({
     }
     setGenerating(true);
     setError(null);
-    const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
     try {
       const res = await fetch("/api/ai/module-generate", {
         method: "POST",
         headers: {
-          "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
+          "content-type": "application/json"
         },
         body: JSON.stringify({
           prompt: ws.prompt,

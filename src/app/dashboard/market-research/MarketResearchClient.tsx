@@ -310,8 +310,7 @@ export default function MarketResearchClient() {
               </div>
             </div>
             <div className="mt-2 text-xs text-text2">
-              AI calls use a server-side key. Set{" "}
-              <span className="font-semibold">ANTHROPIC_API_KEY</span> in your deployment environment.
+              AI uses your workspace key if one is set (Settings → AI integration), otherwise platform AI on Starter, Free, or Growth when your operator enables it.
             </div>
           </div>
         </div>

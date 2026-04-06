@@ -328,7 +328,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     const runId = startRun("ai_generate_messaging_draft", workId, segmentName);
     setError(null);
     try {
-      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
 
       const MOD = "messaging_artifacts";
       const KEY = "artifacts";
@@ -354,7 +353,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
         },
         body: JSON.stringify({
           prompt,
@@ -413,12 +411,11 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     const runId = startRun("ai_generate_pitch_battlecard", workId, "Positioning canvas");
     setError(null);
     try {
-      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
 
       // 1) Create an ICP persona from the positioning canvas
       const personaRes = await fetch("/api/battlecards/persona-from-positioning", {
         method: "POST",
-        headers: key ? { "x-anthropic-key": key } : {}
+        headers: { "content-type": "application/json" }
       });
       const personaData = (await personaRes.json()) as {
         ok?: boolean;
@@ -439,7 +436,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
         },
         body: JSON.stringify({ competitor_id: competitorId, persona_id: personaId })
       });

@@ -112,7 +112,6 @@ export function MessagingArtifactsClient({ environmentId }: { environmentId: str
   async function generate() {
     setGenerating(true);
     setError(null);
-    const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
     const prompt = `Create a ${store.genType} for the segment "${store.genSegment || "primary ICP"}".
 Tone: ${store.genTone}.
 Return:
@@ -125,7 +124,6 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
         method: "POST",
         headers: {
           "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
         },
         body: JSON.stringify({
           prompt,

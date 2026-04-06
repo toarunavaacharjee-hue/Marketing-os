@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -22,17 +23,16 @@ function normalizeAnthropicError(message: string | undefined) {
   return { status: 502, error: m || "Anthropic request failed." };
 }
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
-    const headerKey = req.headers.get("x-anthropic-key")?.trim();
-    const key = headerKey || process.env.ANTHROPIC_API_KEY || "";
-
-    if (!key) {
+    const keyRes = await resolveWorkspaceAnthropicKey();
+    if (!keyRes.ok) {
       return NextResponse.json(
-        { ok: false, error: "Missing Anthropic API key." },
-        { status: 400 }
+        { ok: false, error: keyRes.error },
+        { status: keyRes.status }
       );
     }
+    const key = keyRes.key;
 
     // Minimal request to validate key works.
     const res = await fetch("https://api.anthropic.com/v1/messages", {

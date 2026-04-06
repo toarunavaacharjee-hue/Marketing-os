@@ -3,6 +3,7 @@ import { waitUntil } from "@vercel/functions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { runResearchScanJob } from "@/lib/research/runResearchScanJob";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 export const runtime = "nodejs";
 export const maxDuration = 90;
@@ -27,16 +28,11 @@ export async function POST() {
     const productId = selected.productId;
     const environmentId = selected.environmentId;
 
-    const anthropicKey = (process.env.ANTHROPIC_API_KEY || "").trim();
-    if (!anthropicKey) {
-      return NextResponse.json(
-        {
-          error:
-            "Missing Anthropic API key on the server. Set ANTHROPIC_API_KEY in your deployment environment."
-        },
-        { status: 400 }
-      );
+    const keyRes = await resolveWorkspaceAnthropicKey();
+    if (!keyRes.ok) {
+      return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
+    const anthropicKey = keyRes.key;
 
     const { data: product, error: pErr } = await supabase
       .from("products")

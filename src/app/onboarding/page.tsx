@@ -114,12 +114,10 @@ export default function OnboardingPage() {
     // Auto-fill ICP + initial segment drafts from the product website URL (best-effort).
     // Even if it fails (e.g. missing Anthropic key), we still take the user to Product profile.
     try {
-      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
       const autoRes = await fetch("/api/product/profile/generate-from-website", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
         },
         body: JSON.stringify({})
       });

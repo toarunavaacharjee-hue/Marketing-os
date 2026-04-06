@@ -114,11 +114,10 @@ export default function PositioningStudioClient({ environmentId }: { environment
     setGenerating(true);
     setError(null);
     setSaved(null);
-    const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
     try {
       const res = await fetch("/api/positioning/generate-from-segments", {
         method: "POST",
-        headers: key ? { "x-anthropic-key": key } : {}
+        headers: { "content-type": "application/json" }
       });
       const data = (await res.json()) as { ok?: boolean; canvas?: PositioningCanvasValue; error?: string };
       if (!res.ok) {

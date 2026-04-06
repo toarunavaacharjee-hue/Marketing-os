@@ -137,14 +137,13 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
   async function onUpload(file: File) {
     setExtracting(true);
     setError(null);
-    const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
     const fd = new FormData();
     fd.set("file", file);
     try {
       const res = await fetch("/api/segments/extract-document", {
         method: "POST",
         body: fd,
-        headers: key ? { "x-anthropic-key": key } : {}
+        headers: { "content-type": "application/json" }
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -217,11 +216,9 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
           );
         }
       }
-
-      const key = (window.localStorage.getItem("marketing_os_anthropic_api_key") ?? "").trim();
       const posRes = await fetch("/api/positioning/generate-from-segments", {
         method: "POST",
-        headers: key ? { "x-anthropic-key": key } : {}
+        headers: { "content-type": "application/json" }
       });
       const posData = (await posRes.json()) as { ok?: boolean; error?: string };
       if (!posRes.ok) {

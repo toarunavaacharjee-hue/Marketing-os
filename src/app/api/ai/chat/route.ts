@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseJsonObject } from "@/lib/extractJsonObject";
 import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
+import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -12,7 +13,6 @@ type ProfileRow = {
   ai_queries_used?: number | null;
   company?: string | null;
   name?: string | null;
-  anthropic_api_key?: string | null;
 };
 
 export async function POST(req: Request) {
@@ -33,36 +33,15 @@ export async function POST(req: Request) {
 
   const profileSelect = await supabase
     .from("profiles")
-    .select("ai_queries_used,company,name,anthropic_api_key")
+    .select("ai_queries_used,company,name")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
-  let profile: ProfileRow | null = null;
-  if (profileSelect.error) {
-    const fallback = await supabase
-      .from("profiles")
-      .select("ai_queries_used,company,name")
-      .eq("id", user.id)
-      .single();
-    profile = (fallback.data ?? null) as ProfileRow | null;
-  } else {
-    profile = (profileSelect.data ?? null) as ProfileRow | null;
-  }
+  const profile = (profileSelect.data ?? null) as ProfileRow | null;
 
   const plan = (await getCompanyPlanForSelectedCompany()).toLowerCase();
   const used = profile?.ai_queries_used ?? 0;
   const company = profile?.company ?? "Unknown company";
-  // Key priority:
-  // 1) Per-request header (user pastes key in UI; stored in localStorage)
-  // 2) Profile column (optional if you decide to store it server-side later)
-  // 3) Server env var (team-wide default)
-  const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-  const anthropicKey = (
-    headerKey ||
-    (profile?.anthropic_api_key ?? "").trim() ||
-    process.env.ANTHROPIC_API_KEY ||
-    ""
-  ).trim();
 
   if (plan === "starter" && used >= 100) {
     return NextResponse.json(
@@ -75,15 +54,11 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!anthropicKey) {
-    return NextResponse.json(
-      {
-        error:
-          "Missing Anthropic API key. Add your key in the sidebar or Settings before using AI Copilot."
-      },
-      { status: 400 }
-    );
+  const keyRes = await resolveWorkspaceAnthropicKey();
+  if (!keyRes.ok) {
+    return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
   }
+  const anthropicKey = keyRes.key;
 
   const systemPrompt = `You are the AI Copilot for AI Marketing Workbench. Output ONLY valid JSON. Minimize tokens — short strings, no prose outside JSON.
 
@@ -169,7 +144,6 @@ Rules:
     suggestions: sugg.length ? sugg : needsInput ? qs.slice(0, 3) : []
   };
 
-  // Increment usage after each successful response.
   await supabase
     .from("profiles")
     .update({ ai_queries_used: used + 1 })
@@ -177,5 +151,3 @@ Rules:
 
   return NextResponse.json(payload);
 }
-
-

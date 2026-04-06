@@ -5,8 +5,6 @@ import { useEffect, useRef, useState } from "react";
 type Metric = { label: string; value: string };
 type ChatRole = "assistant" | "user";
 
-const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
-
 type ChatMessage = {
   id: string;
   role: ChatRole;
@@ -63,16 +61,10 @@ export default function CopilotPage() {
     setLoading(true);
 
     try {
-      const key =
-        typeof window !== "undefined"
-          ? (window.localStorage.getItem(ANTHROPIC_KEY_STORAGE) ?? "").trim()
-          : "";
-
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
         },
         body: JSON.stringify({ message: text })
       });
