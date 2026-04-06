@@ -28,6 +28,7 @@ export const PMM_JOURNEY: JourneyStep[] = [
   { href: "/dashboard/website-pages", label: "Website & Pages", phase: "Creation" },
   { href: "/dashboard/analytics", label: "Analytics", phase: "Intelligence" },
   { href: "/dashboard/battlecards", label: "Battlecards", phase: "Intelligence" },
+  { href: "/dashboard/prospect-research", label: "Prospect Research", phase: "Intelligence" },
   { href: "/dashboard/sales-intelligence", label: "Sales Intelligence", phase: "Intelligence" },
   { href: "/dashboard/customer-insights", label: "Customer Insights", phase: "Intelligence" },
   { href: "/dashboard/copilot", label: "AI Copilot", phase: "AI" }

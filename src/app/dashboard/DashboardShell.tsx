@@ -62,6 +62,7 @@ const NAV: NavSection[] = [
     items: [
       { label: "Analytics", slug: "analytics", icon: "📈" },
       { label: "Battlecards", slug: "battlecards", icon: "⚔️" },
+      { label: "Prospect Research", slug: "prospect-research", icon: "🧭", badge: "NEW" },
       { label: "Sales Intelligence", slug: "sales-intelligence", icon: "🎤" },
       { label: "Customer Insights", slug: "customer-insights", icon: "💬" }
     ]
