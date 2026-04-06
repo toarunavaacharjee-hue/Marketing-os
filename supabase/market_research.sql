@@ -324,3 +324,6 @@ alter table public.customer_personas alter column kind set not null;
 alter table public.customer_personas drop constraint if exists customer_personas_kind_check;
 alter table public.customer_personas add constraint customer_personas_kind_check check (kind in ('icp', 'account'));
 
+-- 9) Ensure research_scans has result_json (older DBs may have created the table before this column existed)
+alter table public.research_scans add column if not exists result_json jsonb;
+
