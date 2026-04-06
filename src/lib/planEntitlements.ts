@@ -27,6 +27,7 @@ const STARTER_ALLOWED = new Set<string>([
   "icp-segmentation",
   "positioning-studio",
   "messaging-artifacts",
+  "prospect-research",
   "copilot",
   "settings",
   "support",
