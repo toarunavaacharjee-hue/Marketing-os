@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Markdown } from "@/lib/Markdown";
 import { readMrCache, writeMrCache } from "@/lib/marketResearchCache";
 import { loadLatestScanOnce } from "@/lib/marketResearchRemote";
 import type { MarketResearchScanResult } from "@/lib/marketResearchTypes";
 import { downloadMarketResearchPdf } from "@/lib/marketResearchPdf";
 
-const ANTHROPIC_KEY_STORAGE = "marketing_os_anthropic_api_key";
+const POLL_INTERVAL_MS = 1500;
+const POLL_TIMEOUT_MS = 6 * 60 * 1000;
 
 type ProfilePayload = {
   product: {
@@ -35,11 +36,6 @@ export default function MarketResearchClient() {
   const [answer, setAnswer] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [showReport, setShowReport] = useState(false);
-
-  const key = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return (window.localStorage.getItem(ANTHROPIC_KEY_STORAGE) ?? "").trim();
-  }, []);
 
   async function load() {
     setLoading(true);
@@ -80,6 +76,39 @@ export default function MarketResearchClient() {
     }
   }
 
+  async function pollUntilDone(productId: string) {
+    const start = Date.now();
+    while (Date.now() - start < POLL_TIMEOUT_MS) {
+      const res = await fetch("/api/research/latest", { method: "GET" });
+      const contentType = res.headers.get("content-type") ?? "";
+      const raw = await res.text();
+      if (!contentType.includes("application/json")) {
+        await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+        continue;
+      }
+      let data: { scan?: any; error?: string } | null = null;
+      try {
+        data = JSON.parse(raw) as typeof data;
+      } catch {
+        data = null;
+      }
+      const scan = data?.scan;
+      if (scan?.status === "completed") {
+        const s = (scan.summary ?? null) as string | null;
+        const rj = (scan.result_json ?? null) as MarketResearchScanResult | null;
+        setSummary(s);
+        setResultJson(rj);
+        writeMrCache(productId, { summary: s, resultJson: rj });
+        return;
+      }
+      if (scan?.status === "failed") {
+        throw new Error(scan?.summary || data?.error || "Scan failed.");
+      }
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+    }
+    throw new Error("Scan timed out. Please try again.");
+  }
+
   async function runScan() {
     setRunning(true);
     setError(null);
@@ -89,10 +118,7 @@ export default function MarketResearchClient() {
     try {
       const res = await fetch("/api/research/run", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
-        }
+        headers: { "content-type": "application/json" }
       });
       const contentType = res.headers.get("content-type") ?? "";
       const raw = await res.text();
@@ -100,20 +126,31 @@ export default function MarketResearchClient() {
         ? (JSON.parse(raw) as {
             summary?: string;
             result_json?: MarketResearchScanResult | null;
+            scan_id?: string;
+            status?: string;
             error?: string;
           })
         : ({ error: raw || "Server error" } as any)) as {
         summary?: string;
         result_json?: MarketResearchScanResult | null;
+        scan_id?: string;
+        status?: string;
         error?: string;
       };
       if (!res.ok) throw new Error(data.error ?? "Scan failed.");
-      setSummary(data.summary ?? null);
-      setResultJson(data.result_json ?? null);
+
+      // Vercel: async job (202). Local dev: may return 200 with completed payload.
+      if (res.status === 202 || data.status === "running") {
+        if (profile?.product.id) await pollUntilDone(profile.product.id);
+        return;
+      }
+
+      setSummary((data.summary ?? null) as string | null);
+      setResultJson((data.result_json ?? null) as MarketResearchScanResult | null);
       if (profile?.product.id) {
         writeMrCache(profile.product.id, {
-          summary: data.summary ?? null,
-          resultJson: data.result_json ?? null
+          summary: (data.summary ?? null) as string | null,
+          resultJson: (data.result_json ?? null) as MarketResearchScanResult | null
         });
       }
     } catch (e) {
@@ -133,8 +170,7 @@ export default function MarketResearchClient() {
       const res = await fetch("/api/research/ask", {
         method: "POST",
         headers: {
-          "content-type": "application/json",
-          ...(key ? { "x-anthropic-key": key } : {})
+          "content-type": "application/json"
         },
         body: JSON.stringify({ question: q })
       });
@@ -273,11 +309,10 @@ export default function MarketResearchClient() {
                 </div>
               </div>
             </div>
-            {!key ? (
-              <div className="mt-2 text-xs text-text2">
-                Add your Anthropic key in the sidebar to generate real summaries and answers.
-              </div>
-            ) : null}
+            <div className="mt-2 text-xs text-text2">
+              AI calls use a server-side key. Set{" "}
+              <span className="font-semibold">ANTHROPIC_API_KEY</span> in your deployment environment.
+            </div>
           </div>
         </div>
 

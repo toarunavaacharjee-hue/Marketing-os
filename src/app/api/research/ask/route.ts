@@ -50,8 +50,7 @@ export async function POST(req: Request) {
     if (!question)
       return NextResponse.json({ error: "Question is required." }, { status: 400 });
 
-    const headerKey = req.headers.get("x-anthropic-key")?.trim() ?? "";
-    const anthropicKey = (headerKey || process.env.ANTHROPIC_API_KEY || "").trim();
+    const anthropicKey = (process.env.ANTHROPIC_API_KEY || "").trim();
 
     const { data: scan, error: sErr } = await supabase
       .from("research_scans")
@@ -63,39 +62,39 @@ export async function POST(req: Request) {
       .maybeSingle();
     if (sErr) return NextResponse.json({ error: sErr.message }, { status: 500 });
 
-  if (!scan?.id) {
-    return NextResponse.json(
-      { error: "No scan found. Click “Run scan” first." },
-      { status: 400 }
-    );
-  }
+    if (!scan?.id) {
+      return NextResponse.json(
+        { error: "No scan found. Click “Run scan” first." },
+        { status: 400 }
+      );
+    }
 
-  const { data: snaps, error: snapsErr } = await supabase
-    .from("research_snapshots")
-    .select("url,source_type,title,text_content")
-    .eq("scan_id", scan.id)
-    .order("fetched_at", { ascending: true })
-    .limit(12);
-  if (snapsErr) return NextResponse.json({ error: snapsErr.message }, { status: 500 });
+    const { data: snaps, error: snapsErr } = await supabase
+      .from("research_snapshots")
+      .select("url,source_type,title,text_content")
+      .eq("scan_id", scan.id)
+      .order("fetched_at", { ascending: true })
+      .limit(12);
+    if (snapsErr) return NextResponse.json({ error: snapsErr.message }, { status: 500 });
 
-  if (!anthropicKey) {
-    return NextResponse.json(
-      {
-        error:
-          "Missing Anthropic API key. Add your key in the sidebar or Settings, then ask again."
-      },
-      { status: 400 }
-    );
-  }
+    if (!anthropicKey) {
+      return NextResponse.json(
+        {
+          error:
+            "Missing Anthropic API key on the server. Set ANTHROPIC_API_KEY in your deployment environment, then try again."
+        },
+        { status: 400 }
+      );
+    }
 
-  const snapshotContext = (snaps ?? [])
-    .map((s, idx) => {
-      const title = s.title ? `${s.title} ` : "";
-      return `[${idx + 1}:${s.source_type}] ${title}${sliceText(s.text_content as string, 500)}`;
-    })
-    .join("\n");
+    const snapshotContext = (snaps ?? [])
+      .map((s, idx) => {
+        const title = s.title ? `${s.title} ` : "";
+        return `[${idx + 1}:${s.source_type}] ${title}${sliceText(s.text_content as string, 500)}`;
+      })
+      .join("\n");
 
-  const system = `You answer Market Research questions using ONLY the provided summary + snapshot excerpts. Output ONLY valid JSON. Minimize tokens.
+    const system = `You answer Market Research questions using ONLY the provided summary + snapshot excerpts. Output ONLY valid JSON. Minimize tokens.
 
 Schema:
 {
@@ -109,52 +108,52 @@ Rules:
 - If snapshots don't support a solid answer, use needs_input with questions — do not invent facts.
 - No markdown fences, no text outside JSON.`;
 
-  const prompt = `Summary:\n${sliceText(scan.summary as string, 900)}\n\nSnaps:\n${snapshotContext || "(none)"}\n\nQ:\n${sliceText(question, 500)}`;
+    const prompt = `Summary:\n${sliceText(scan.summary as string, 900)}\n\nSnaps:\n${snapshotContext || "(none)"}\n\nQ:\n${sliceText(question, 500)}`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": anthropicKey,
-      "anthropic-version": "2023-06-01"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 380,
-      temperature: 0.3,
-      system,
-      messages: [{ role: "user", content: prompt }]
-    })
-  });
-
-  const data = (await res.json()) as AnthropicMessageResponse;
-  if (!res.ok) {
-    const normalized = normalizeAnthropicError(data?.error?.message);
-    return NextResponse.json({ error: normalized.error }, { status: normalized.status });
-  }
-
-  const text = data.content?.find((c) => c.type === "text")?.text ?? "";
-  const raw = parseJsonObject(text);
-  const st = String(raw?.status ?? "ok").toLowerCase();
-
-  if (st === "needs_input") {
-    const questions = Array.isArray(raw?.questions)
-      ? (raw.questions as unknown[]).map((q) => String(q).trim()).filter(Boolean).slice(0, 4)
-      : [];
-    const message = typeof raw?.message === "string" ? raw.message.trim() : "";
-    const answer = [message, ...questions.map((q) => `• ${q}`)].filter(Boolean).join("\n");
-    return NextResponse.json({
-      answer: answer || "Re-run a scan or narrow your question.",
-      needs_input: true,
-      questions
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": anthropicKey,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 380,
+        temperature: 0.3,
+        system,
+        messages: [{ role: "user", content: prompt }]
+      })
     });
-  }
 
-  const answer =
-    typeof raw?.answer === "string" && raw.answer.trim()
-      ? raw.answer.trim()
-      : text.trim() || "No answer returned.";
-  return NextResponse.json({ answer, needs_input: false });
+    const data = (await res.json()) as AnthropicMessageResponse;
+    if (!res.ok) {
+      const normalized = normalizeAnthropicError(data?.error?.message);
+      return NextResponse.json({ error: normalized.error }, { status: normalized.status });
+    }
+
+    const text = data.content?.find((c) => c.type === "text")?.text ?? "";
+    const raw = parseJsonObject(text);
+    const st = String(raw?.status ?? "ok").toLowerCase();
+
+    if (st === "needs_input") {
+      const questions = Array.isArray(raw?.questions)
+        ? (raw.questions as unknown[]).map((q) => String(q).trim()).filter(Boolean).slice(0, 4)
+        : [];
+      const message = typeof raw?.message === "string" ? raw.message.trim() : "";
+      const answer = [message, ...questions.map((q) => `• ${q}`)].filter(Boolean).join("\n");
+      return NextResponse.json({
+        answer: answer || "Re-run a scan or narrow your question.",
+        needs_input: true,
+        questions
+      });
+    }
+
+    const answer =
+      typeof raw?.answer === "string" && raw.answer.trim()
+        ? raw.answer.trim()
+        : text.trim() || "No answer returned.";
+    return NextResponse.json({ answer, needs_input: false });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Unknown error" },
