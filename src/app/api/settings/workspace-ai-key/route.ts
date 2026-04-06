@@ -126,12 +126,14 @@ export async function POST(req: Request) {
   try {
     ciphertext = encryptWorkspaceSecret(apiKey);
   } catch (e) {
+    const raw = e instanceof Error ? e.message : "";
+    const missingSecret =
+      raw.includes("WORKSPACE_AI_KEY_ENCRYPTION_SECRET") || raw.includes("Missing WORKSPACE");
     return NextResponse.json(
       {
-        error:
-          e instanceof Error
-            ? e.message
-            : "Encryption failed. Set WORKSPACE_AI_KEY_ENCRYPTION_SECRET on the server."
+        error: missingSecret
+          ? "The server cannot encrypt workspace keys yet. Add WORKSPACE_AI_KEY_ENCRYPTION_SECRET (a long random string) in your host’s environment — e.g. Vercel → Project → Settings → Environment Variables — for Production (and Preview if you use it), then redeploy. See .env.local.example."
+          : raw || "Encryption failed. Set WORKSPACE_AI_KEY_ENCRYPTION_SECRET on the server."
       },
       { status: 500 }
     );
