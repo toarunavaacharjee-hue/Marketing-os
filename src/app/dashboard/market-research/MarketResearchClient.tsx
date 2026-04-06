@@ -23,6 +23,16 @@ type ProfilePayload = {
   competitors: Array<{ id?: string; name: string; website_url: string }>;
 };
 
+/** Response from GET /api/research/latest (avoid `as typeof data` on a null-initialized let — breaks TS to `never`). */
+type LatestResearchApiBody = {
+  error?: string;
+  scan?: {
+    status?: string;
+    summary?: string | null;
+    result_json?: MarketResearchScanResult | null;
+  };
+};
+
 export default function MarketResearchClient() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
@@ -86,9 +96,9 @@ export default function MarketResearchClient() {
         await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
         continue;
       }
-      let data: { scan?: any; error?: string } | null = null;
+      let data: LatestResearchApiBody | null = null;
       try {
-        data = JSON.parse(raw) as typeof data;
+        data = JSON.parse(raw) as LatestResearchApiBody;
       } catch {
         data = null;
       }
