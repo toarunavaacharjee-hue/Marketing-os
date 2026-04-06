@@ -51,10 +51,21 @@ type CrawlRow = {
 
 const MAX_EXTRA_PRODUCT_PAGES = 2;
 const FETCH_TIMEOUT_MS = 6000;
-const ANTHROPIC_TIMEOUT_MS = 25000;
-const MAX_SNAPSHOT_SOURCES_FOR_PROMPT = 6;
-const MAX_SNAPSHOT_TEXT_PER_SOURCE = 1600;
-const MAX_PROMPT_SNAPSHOT_CHARS = 35_000;
+/** Primary scan — override with ANTHROPIC_SCAN_TIMEOUT_MS (ms). */
+const ANTHROPIC_TIMEOUT_MS = (() => {
+  const n = Number(process.env.ANTHROPIC_SCAN_TIMEOUT_MS);
+  return Number.isFinite(n) && n >= 15_000 ? n : 90_000;
+})();
+/** Strict JSON repair pass after failed parse. */
+const ANTHROPIC_RETRY_TIMEOUT_MS = 60_000;
+/** Second attempt when the full prompt hits the wire timeout (smaller expected output). */
+const ANTHROPIC_LIGHTWEIGHT_TIMEOUT_MS = 90_000;
+const MAX_SNAPSHOT_SOURCES_FOR_PROMPT = 5;
+const MAX_SNAPSHOT_TEXT_PER_SOURCE = 1200;
+const MAX_PROMPT_SNAPSHOT_CHARS = 28_000;
+
+const MARKET_RESEARCH_MODEL =
+  process.env.ANTHROPIC_MARKET_RESEARCH_MODEL?.trim() || "claude-sonnet-4-6";
 
 function buildNewsMonitoringRow(
   rssUrl: string,
@@ -282,9 +293,12 @@ async function callAnthropicScan(args: {
   prompt: string;
   max_tokens: number;
   temperature: number;
+  /** Override default ANTHROPIC_TIMEOUT_MS (e.g. shorter retry). */
+  timeoutMs?: number;
 }): Promise<{ ok: boolean; text: string; errorMessage: string | null; status: number }> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), ANTHROPIC_TIMEOUT_MS);
+  const timeoutMs = args.timeoutMs ?? ANTHROPIC_TIMEOUT_MS;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -295,7 +309,7 @@ async function callAnthropicScan(args: {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: MARKET_RESEARCH_MODEL,
         max_tokens: args.max_tokens,
         temperature: args.temperature,
         system: args.system,
@@ -335,6 +349,17 @@ async function callAnthropicScan(args: {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function isAiRequestTimeout(res: {
+  ok: boolean;
+  errorMessage: string | null;
+  status: number;
+}): boolean {
+  if (res.ok) return false;
+  if (res.status === 504) return true;
+  const m = (res.errorMessage ?? "").toLowerCase();
+  return m.includes("timed out") || m.includes("timeout");
 }
 
 async function markFailed(
@@ -570,33 +595,42 @@ export async function runResearchScanJob(args: {
       return;
     }
 
-    const system = `You are Market Research inside AI Marketing Workbench.
+    const systemMain = `You are Market Research inside AI Marketing Workbench.
 Output ONLY valid JSON. No prose outside JSON.
-Be in-depth, descriptive, and structured.
-
-Use this structure inspired by ZoomInfo's "B2B SaaS GTM Strategy Templates" (framework only; do not copy text verbatim).
-Your report MUST be actionable and worksheet-like:
-- TAM/SAM/SOM section: include 3 methods (Top-down, Bottom-up, Value theory) with placeholders + assumptions.
-- Competitive analysis section: include a 1–10 rating table for 3–5 competitors across Product strength, Pricing, Market position, GTM strategy, Threat level, plus "Our advantages" and "Their advantages".
-- Persona/ICP section: 2–3 personas with firmographics, roles, pains, buying behavior, and info sources.
-- Pain point assessment: top 5 pains with Severity/Frequency/Urgency (1–10) and Priority score = (S+F+U)/3.
-- Positioning + messaging hooks: 1-sentence value prop, 3–4 pillars, proof points needed.
-- Next actions: 5 concrete next steps for marketing/sales/product.
 
 Schema:
 {
-  "report_lines": ["# Title", "- bullet", ...],
+  "report_lines": ["# Title", "## Section", "- bullet", ...],
+  "signals": [{"title":"...","description":"...","source":"...","recency":"...","severity":"info|opportunity|risk"}],
+  "opportunity_map": [{"segment":"...","opportunity_score":0-100,"tam_signal":"Low|Medium|High|Very High|Growing","competition":"Low|Medium|High"}],
+  "monitoring_sources": [{"label":"...","status":"ok|warn|err","note":"optional"}]
+}
+
+Content rules (keep output compact so it completes in one response):
+- report_lines: 14–22 markdown lines. Cover: market snapshot, 2–3 competitor angles vs us, TAM/SAM/SOM placeholders with assumptions, top buyer pains, positioning, 3 next steps.
+- signals: exactly 5 items. Each description 2–4 sentences, grounded in SOURCE names from snapshots; include evidence or say evidence is thin.
+- opportunity_map: 5 rows with specific segment names (firmographics + role).
+- monitoring_sources: 4–6 rows for scanned sources (URLs); server merges Industry News and Review Sites rows.
+- Do not invent revenue or customer counts; cite only snapshot evidence or state uncertainty.`;
+
+    const systemLight = `You are Market Research inside AI Marketing Workbench.
+Output ONLY valid JSON. No prose outside JSON.
+FAILSAFE MODE: prioritize finishing a valid JSON object over length. Be concise.
+
+Schema:
+{
+  "report_lines": ["# Title", "## Section", "- bullet", ...],
   "signals": [{"title":"...","description":"...","source":"...","recency":"...","severity":"info|opportunity|risk"}],
   "opportunity_map": [{"segment":"...","opportunity_score":0-100,"tam_signal":"Low|Medium|High|Very High|Growing","competition":"Low|Medium|High"}],
   "monitoring_sources": [{"label":"...","status":"ok|warn|err","note":"optional"}]
 }
 
 Rules:
-- report_lines: 30–55 lines. Use multiple ## sections and bullets. Keep each bullet concise but specific.
-- Ground claims in the provided snapshots only. If evidence is thin, say so explicitly; do not invent metrics/facts.
-- signals: 5–8 items, but deeper. Each description 4–8 sentences with: what changed, why it matters, evidence (SOURCE labels), recommended action.
-- opportunity_map: 6–8 rows. Segment names must be specific (firmographics + role + trigger). Put 1 short justification in parentheses.
-- monitoring_sources: include the most important scanned sources with short notes; server merges Industry News and Review Sites rows.`;
+- report_lines: 10–16 lines total.
+- signals: 4 items, 2 sentences each, grounded in snapshots.
+- opportunity_map: 4 rows.
+- monitoring_sources: 3–5 items.
+- Ground claims in snapshots only.`;
 
     const snapshotBlobs = results
       .filter((r) => r.ok && r.text)
@@ -630,13 +664,23 @@ ${competitorUrls.map((c) => `- ${c.name}: ${c.url}`).join("\n")}
 Snapshots:
 ${snapshotBlobsCapped || "(no snapshot text — all fetches failed)"}`;
 
-    const first = await callAnthropicScan({
+    let first = await callAnthropicScan({
       anthropicKey,
-      system,
+      system: systemMain,
       prompt,
-      max_tokens: 3000,
+      max_tokens: 2500,
       temperature: 0.3
     });
+    if (!first.ok && isAiRequestTimeout(first)) {
+      first = await callAnthropicScan({
+        anthropicKey,
+        system: systemLight,
+        prompt,
+        max_tokens: 2200,
+        temperature: 0.25,
+        timeoutMs: ANTHROPIC_LIGHTWEIGHT_TIMEOUT_MS
+      });
+    }
     if (!first.ok) {
       await markFailed(supabase, scanId, first.errorMessage ?? "Anthropic request failed.");
       return;
@@ -645,7 +689,7 @@ ${snapshotBlobsCapped || "(no snapshot text — all fetches failed)"}`;
     let text = first.text;
     let parsed = parseJsonObject(text);
     if (!parsed) {
-      const strictSystem = `${system}
+      const strictSystem = `${systemMain}
 
 STRICT MODE:
 - Output MUST be a single JSON object.
@@ -656,11 +700,26 @@ STRICT MODE:
         anthropicKey,
         system: strictSystem,
         prompt,
-        max_tokens: 3000,
-        temperature: 0.15
+        max_tokens: 2400,
+        temperature: 0.15,
+        timeoutMs: ANTHROPIC_RETRY_TIMEOUT_MS
       });
       if (second.ok) {
         text = second.text;
+        parsed = parseJsonObject(text);
+      }
+    }
+    if (!parsed) {
+      const third = await callAnthropicScan({
+        anthropicKey,
+        system: systemLight,
+        prompt,
+        max_tokens: 2200,
+        temperature: 0.2,
+        timeoutMs: ANTHROPIC_LIGHTWEIGHT_TIMEOUT_MS
+      });
+      if (third.ok) {
+        text = third.text;
         parsed = parseJsonObject(text);
       }
     }

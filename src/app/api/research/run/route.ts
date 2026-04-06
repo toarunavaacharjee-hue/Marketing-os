@@ -6,7 +6,8 @@ import { runResearchScanJob } from "@/lib/research/runResearchScanJob";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 export const runtime = "nodejs";
-export const maxDuration = 90;
+/** Crawl + multiple Anthropic attempts (main, timeout fallback, JSON repair). Pro plan supports up to 300s. */
+export const maxDuration = 300;
 
 function normalizeUrl(u: string) {
   const raw = (u ?? "").trim();
