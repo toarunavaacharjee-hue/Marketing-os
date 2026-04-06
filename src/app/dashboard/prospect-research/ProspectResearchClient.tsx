@@ -30,13 +30,24 @@ function isLikelyNetworkFailure(e: unknown): boolean {
   return false;
 }
 
+function networkErrorHintForEnv(): string {
+  if (typeof window === "undefined") {
+    return "Check your connection and try again.";
+  }
+  const h = window.location.hostname;
+  if (h === "localhost" || h === "127.0.0.1") {
+    return "Check your connection, or confirm the dev server is running (npm run dev).";
+  }
+  return "Your network may be unstable, or the app may be temporarily unavailable. Wait a moment and try again, or check the deployment status in Vercel.";
+}
+
 /** User-facing fetch errors. Use `list` when the saved-prospects list failed (non-blocking for memo generation). */
 function formatProspectFetchError(e: unknown, context: "list" | "default" = "default"): string {
   if (isLikelyNetworkFailure(e)) {
     if (context === "list") {
       return "Saved prospects could not be loaded (network or server). You can still generate a memo below. Use Retry when your connection is back.";
     }
-    return "Could not reach the server. Check your connection and try again. If you run the app locally, ensure the dev server is running.";
+    return `Could not reach the server. ${networkErrorHintForEnv()}`;
   }
   if (e instanceof Error) return e.message;
   return "Something went wrong.";
