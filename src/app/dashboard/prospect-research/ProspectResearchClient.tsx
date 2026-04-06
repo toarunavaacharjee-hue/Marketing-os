@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { Markdown } from "@/lib/Markdown";
 import {
   PROSPECT_MEMO_KEYS,
@@ -20,11 +21,48 @@ type ProspectRow = {
   created_at: string;
 };
 
+function isLikelyNetworkFailure(e: unknown): boolean {
+  if (e instanceof TypeError) {
+    const m = e.message.toLowerCase();
+    return m.includes("failed to fetch") || m.includes("network") || m.includes("load failed");
+  }
+  if (e instanceof Error && e.message === "Failed to fetch") return true;
+  return false;
+}
+
+/** User-facing fetch errors. Use `list` when the saved-prospects list failed (non-blocking for memo generation). */
+function formatProspectFetchError(e: unknown, context: "list" | "default" = "default"): string {
+  if (isLikelyNetworkFailure(e)) {
+    if (context === "list") {
+      return "Saved prospects could not be loaded (network or server). You can still generate a memo below. Use Retry when your connection is back.";
+    }
+    return "Could not reach the server. Check your connection and try again. If you run the app locally, ensure the dev server is running.";
+  }
+  if (e instanceof Error) return e.message;
+  return "Something went wrong.";
+}
+
+async function readApiJson<T>(res: Response): Promise<T> {
+  const text = await res.text();
+  if (!text.trim()) return {} as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(
+      !res.ok
+        ? `Request failed (${res.status}). The server returned a non-JSON response — check logs or env (e.g. Supabase).`
+        : "The server returned an invalid response."
+    );
+  }
+}
+
 export default function ProspectResearchClient() {
   const [prospects, setProspects] = useState<ProspectRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  /** List GET failed — shown in sidebar only; does not block memo generation. */
+  const [listError, setListError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [accountName, setAccountName] = useState("");
@@ -46,14 +84,15 @@ export default function ProspectResearchClient() {
 
   const loadList = useCallback(async () => {
     setLoadingList(true);
-    setError(null);
+    setListError(null);
     try {
       const res = await fetch("/api/prospects");
-      const data = (await res.json()) as { prospects?: ProspectRow[]; error?: string };
+      const data = await readApiJson<{ prospects?: ProspectRow[]; error?: string }>(res);
       if (!res.ok) throw new Error(data.error ?? "Failed to load prospects.");
       setProspects(data.prospects ?? []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load.");
+      setProspects([]);
+      setListError(formatProspectFetchError(e, "list"));
     } finally {
       setLoadingList(false);
     }
@@ -68,7 +107,7 @@ export default function ProspectResearchClient() {
     setError(null);
     try {
       const res = await fetch(`/api/prospects/${id}`);
-      const data = (await res.json()) as { prospect?: { memo_json: unknown } & ProspectRow; error?: string };
+      const data = await readApiJson<{ prospect?: { memo_json: unknown } & ProspectRow; error?: string }>(res);
       if (!res.ok) throw new Error(data.error ?? "Failed to load prospect.");
       if (data.prospect) {
         setDraftMemo(normalizeProspectMemo(data.prospect.memo_json));
@@ -78,7 +117,7 @@ export default function ProspectResearchClient() {
         setDealStage(data.prospect.deal_stage ?? "");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load.");
+      setError(formatProspectFetchError(e));
     } finally {
       setLoadingDetail(false);
     }
@@ -116,11 +155,11 @@ export default function ProspectResearchClient() {
           additionalContext: additionalContext.trim() || undefined
         })
       });
-      const data = (await res.json()) as { memo?: ProspectIntelligenceMemo; error?: string };
+      const data = await readApiJson<{ memo?: ProspectIntelligenceMemo; error?: string }>(res);
       if (!res.ok) throw new Error(data.error ?? "Research failed.");
       setDraftMemo(normalizeProspectMemo(data.memo));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Research failed.");
+      setError(formatProspectFetchError(e));
     } finally {
       setGenerating(false);
     }
@@ -150,14 +189,14 @@ export default function ProspectResearchClient() {
           memo_json: draftMemo
         })
       });
-      const data = (await res.json()) as { prospect?: { id: string }; error?: string };
+      const data = await readApiJson<{ prospect?: { id: string }; error?: string }>(res);
       if (!res.ok) throw new Error(data.error ?? "Save failed.");
       await loadList();
       if (data.prospect?.id) {
         setSelectedId(data.prospect.id);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed.");
+      setError(formatProspectFetchError(e));
     } finally {
       setSaving(false);
     }
@@ -179,11 +218,11 @@ export default function ProspectResearchClient() {
           memo_json: draftMemo
         })
       });
-      const data = (await res.json()) as { error?: string };
+      const data = await readApiJson<{ error?: string }>(res);
       if (!res.ok) throw new Error(data.error ?? "Update failed.");
       await loadList();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Update failed.");
+      setError(formatProspectFetchError(e));
     } finally {
       setSaving(false);
     }
@@ -195,14 +234,14 @@ export default function ProspectResearchClient() {
     try {
       const res = await fetch(`/api/prospects/${selectedId}`, { method: "DELETE" });
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
+        const data = await readApiJson<{ error?: string }>(res);
         throw new Error(data.error ?? "Delete failed.");
       }
       setSelectedId(null);
       setDraftMemo(null);
       await loadList();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Delete failed.");
+      setError(formatProspectFetchError(e));
     }
   }
 
@@ -217,11 +256,11 @@ export default function ProspectResearchClient() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ question: chatQ.trim() })
       });
-      const data = (await res.json()) as { answer?: string; error?: string };
+      const data = await readApiJson<{ answer?: string; error?: string }>(res);
       if (!res.ok) throw new Error(data.error ?? "Ask failed.");
       setChatA(data.answer ?? "");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Ask failed.");
+      setError(formatProspectFetchError(e));
     } finally {
       setChatLoading(false);
     }
@@ -280,9 +319,21 @@ export default function ProspectResearchClient() {
           <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">
             Saved prospects
           </div>
+          {listError ? (
+            <div className="mb-3 text-xs leading-relaxed text-amber-200/90">
+              <p>{listError}</p>
+              <button
+                type="button"
+                onClick={() => void loadList()}
+                className="mt-2 rounded-[var(--radius2)] border border-amber-500/40 bg-surface2 px-2 py-1 text-[11px] font-semibold text-text transition hover:bg-surface3"
+              >
+                Retry
+              </button>
+            </div>
+          ) : null}
           {loadingList ? (
             <div className="text-sm text-text2">Loading…</div>
-          ) : prospects.length === 0 ? (
+          ) : listError ? null : prospects.length === 0 ? (
             <div className="text-sm text-text2">None yet. Generate and save below.</div>
           ) : (
             <ul className="space-y-1">
@@ -423,6 +474,16 @@ export default function ProspectResearchClient() {
               <div className="mb-4 font-[var(--font-heading)] text-[14px] font-bold text-text">
                 Prospect Intelligence Memo
               </div>
+              {generating ? (
+                <div className="mb-6">
+                  <AiProgressBar
+                    active
+                    title="Regenerating prospect intelligence memo…"
+                    estimate={AI_PROGRESS_ESTIMATE.memo}
+                    durationMs={100_000}
+                  />
+                </div>
+              ) : null}
               <div className="space-y-6">
                 {PROSPECT_MEMO_KEYS.map((key) => (
                   <section key={key} className="border-t border-border pt-4 first:border-t-0 first:pt-0">
@@ -440,6 +501,21 @@ export default function ProspectResearchClient() {
                 ))}
               </div>
             </div>
+          ) : generating ? (
+            <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+              <div className="mb-3 font-[var(--font-heading)] text-[14px] font-bold text-text">
+                Prospect Intelligence Memo
+              </div>
+              <AiProgressBar
+                active
+                title="Generating prospect intelligence memo…"
+                estimate={AI_PROGRESS_ESTIMATE.memo}
+                durationMs={100_000}
+              />
+              <p className="mt-3 text-center text-xs text-text3">
+                This can take 30 seconds to a few minutes. You can keep this tab open.
+              </p>
+            </div>
           ) : (
             <div className="rounded-[var(--radius)] border border-dashed border-border bg-surface2/50 p-8 text-center text-sm text-text2">
               Fill inputs and click <strong className="text-text">Generate intelligence memo</strong> to create
@@ -452,6 +528,16 @@ export default function ProspectResearchClient() {
               <div className="mb-2 font-[var(--font-heading)] text-[14px] font-bold text-text">
                 Prospect agent
               </div>
+              {chatLoading ? (
+                <div className="mb-4">
+                  <AiProgressBar
+                    active
+                    title="Answering with your saved research…"
+                    estimate={AI_PROGRESS_ESTIMATE.short}
+                    durationMs={55_000}
+                  />
+                </div>
+              ) : null}
               <p className="mb-3 text-xs text-text2">
                 Ask questions about this saved memo. Answers use only the intelligence below unless marked as
                 inference.

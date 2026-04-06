@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { Markdown } from "@/lib/Markdown";
 import { downloadPitchPdf } from "@/lib/pitchPdf";
 
@@ -482,6 +483,19 @@ export default function BattlecardsPage() {
           {saved}
         </div>
       ) : null}
+
+      <AiProgressBar
+        active={pitchLoading || uploadingIcp || uploadingAccount}
+        title={
+          uploadingIcp || uploadingAccount
+            ? "Extracting persona from document…"
+            : "Generating battlecard with AI…"
+        }
+        estimate={
+          uploadingIcp || uploadingAccount ? AI_PROGRESS_ESTIMATE.extract : AI_PROGRESS_ESTIMATE.memo
+        }
+        durationMs={uploadingIcp || uploadingAccount ? 75_000 : 100_000}
+      />
 
       {!loading && competitors.length === 0 ? (
         <div className="rounded-[var(--radius)] border border-border bg-surface p-5">

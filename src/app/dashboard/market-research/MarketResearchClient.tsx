@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { Markdown } from "@/lib/Markdown";
 import { readMrCache, writeMrCache } from "@/lib/marketResearchCache";
 import { loadLatestScanOnce } from "@/lib/marketResearchRemote";
@@ -10,8 +11,6 @@ import { downloadMarketResearchPdf } from "@/lib/marketResearchPdf";
 
 const POLL_INTERVAL_MS = 1500;
 const POLL_TIMEOUT_MS = 6 * 60 * 1000;
-/** Visual progress eases toward this cap until the scan completes or times out. */
-const SCAN_PROGRESS_CAP = 94;
 
 type ProfilePayload = {
   product: {
@@ -48,8 +47,6 @@ export default function MarketResearchClient() {
   const [answer, setAnswer] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
   const [showReport, setShowReport] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
-  const scanProgressRafRef = useRef<number | null>(null);
 
   async function load() {
     setLoading(true);
@@ -108,11 +105,6 @@ export default function MarketResearchClient() {
       }
       const scan = data?.scan;
       if (scan?.status === "completed") {
-        if (scanProgressRafRef.current != null) {
-          cancelAnimationFrame(scanProgressRafRef.current);
-          scanProgressRafRef.current = null;
-        }
-        setScanProgress(100);
         const s = (scan.summary ?? null) as string | null;
         const rj = (scan.result_json ?? null) as MarketResearchScanResult | null;
         setSummary(s);
@@ -130,7 +122,6 @@ export default function MarketResearchClient() {
 
   async function runScan() {
     setRunning(true);
-    setScanProgress(0);
     setError(null);
     setSummary(null);
     setResultJson(null);
@@ -165,11 +156,6 @@ export default function MarketResearchClient() {
         return;
       }
 
-      if (scanProgressRafRef.current != null) {
-        cancelAnimationFrame(scanProgressRafRef.current);
-        scanProgressRafRef.current = null;
-      }
-      setScanProgress(100);
       setSummary((data.summary ?? null) as string | null);
       setResultJson((data.result_json ?? null) as MarketResearchScanResult | null);
       if (profile?.product.id) {
@@ -219,32 +205,6 @@ export default function MarketResearchClient() {
   useEffect(() => {
     load();
   }, []);
-
-  useEffect(() => {
-    if (!running) {
-      if (scanProgressRafRef.current != null) {
-        cancelAnimationFrame(scanProgressRafRef.current);
-        scanProgressRafRef.current = null;
-      }
-      return;
-    }
-    const started = performance.now();
-    const durationToCap = POLL_TIMEOUT_MS * 0.72;
-    const tick = (now: number) => {
-      const elapsed = now - started;
-      const t = Math.min(1, elapsed / durationToCap);
-      const eased = 1 - (1 - t) * (1 - t);
-      setScanProgress(Math.min(SCAN_PROGRESS_CAP, eased * SCAN_PROGRESS_CAP));
-      scanProgressRafRef.current = requestAnimationFrame(tick);
-    };
-    scanProgressRafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (scanProgressRafRef.current != null) {
-        cancelAnimationFrame(scanProgressRafRef.current);
-        scanProgressRafRef.current = null;
-      }
-    };
-  }, [running]);
 
   const baseUrl = profile?.product.website_url ?? "";
   const competitors = profile?.competitors ?? [];
@@ -296,31 +256,20 @@ export default function MarketResearchClient() {
         </div>
       ) : null}
 
-      {running ? (
-        <div
-          className="rounded-[var(--radius)] border border-border bg-surface p-4"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(scanProgress)}
-          aria-label="AI scan progress"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-semibold text-text">
-            <span>Running AI scan…</span>
-            <span className="tabular-nums text-text2">{Math.round(scanProgress)}%</span>
-          </div>
-          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-surface2 ring-1 ring-inset ring-border/60">
-            <div
-              className="h-full rounded-full bg-accent transition-[width] duration-150 ease-out"
-              style={{ width: `${Math.min(100, scanProgress)}%` }}
-            />
-          </div>
-          <p className="mt-2 text-xs leading-relaxed text-text2">
-            Gathering pages and synthesizing market signals. You can leave this tab open; this step often
-            takes a few minutes.
-          </p>
-        </div>
-      ) : null}
+      <AiProgressBar
+        active={running}
+        title="Running AI scan…"
+        estimate={AI_PROGRESS_ESTIMATE.scan}
+        durationMs={POLL_TIMEOUT_MS * 0.72}
+        capPercent={94}
+      />
+
+      <AiProgressBar
+        active={asking}
+        title="Answering with AI…"
+        estimate={AI_PROGRESS_ESTIMATE.short}
+        durationMs={55_000}
+      />
 
       {/* Top row: signals + assistant */}
       <div className="grid gap-4 lg:grid-cols-3">

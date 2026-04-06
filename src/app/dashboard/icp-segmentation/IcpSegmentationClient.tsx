@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type SegmentDetails = {
@@ -290,6 +291,21 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
           {profileNote}
         </div>
       ) : null}
+
+      <AiProgressBar
+        active={extracting}
+        variant="dark"
+        title="Reading ICP document…"
+        estimate={AI_PROGRESS_ESTIMATE.extract}
+        durationMs={75_000}
+      />
+      <AiProgressBar
+        active={saving}
+        variant="dark"
+        title="Saving segments and updating positioning…"
+        estimate={AI_PROGRESS_ESTIMATE.positioning}
+        durationMs={120_000}
+      />
 
       {draft?.length ? (
         <div className="rounded-2xl border border-[#7c6cff]/40 bg-[#141420] p-5">

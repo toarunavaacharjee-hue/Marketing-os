@@ -60,14 +60,15 @@ export async function POST(req: Request) {
     }
 
     if (!gen.ok) {
-      return NextResponse.json({ error: gen.error }, { status: 502 });
+      // Use 503 (not 502) so Vercel logs distinguish app-level AI failures from edge/gateway 502s.
+      console.error("[prospects/research/run] generation failed:", gen.error);
+      return NextResponse.json({ error: gen.error }, { status: 503 });
     }
 
     return NextResponse.json({ memo: gen.memo });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Unknown error" },
-      { status: 500 }
-    );
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    console.error("[prospects/research/run] uncaught:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

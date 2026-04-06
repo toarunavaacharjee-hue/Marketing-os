@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 
 type DailyBriefResponse = {
   summary?: string;
@@ -61,6 +62,13 @@ export function DailyDigestCard() {
           {error}
         </div>
       ) : null}
+
+      <AiProgressBar
+        active={loading}
+        title="Writing your daily brief…"
+        estimate={AI_PROGRESS_ESTIMATE.short}
+        durationMs={55_000}
+      />
 
       <div className="mt-3 whitespace-pre-wrap text-[13px] leading-6 text-text2">
         {summary ?? (loading ? "Generating your brief..." : "—")}
