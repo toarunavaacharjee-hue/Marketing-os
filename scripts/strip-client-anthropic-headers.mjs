@@ -7,7 +7,6 @@ const root = path.join(__dirname, "..");
 
 const files = [
   "src/app/dashboard/copilot/page.tsx",
-  "src/app/dashboard/DailyDigestCard.tsx",
   "src/app/dashboard/settings/product/ProductProfileClient.tsx",
   "src/app/onboarding/page.tsx",
   "src/app/dashboard/work/AllWorkClient.tsx",
