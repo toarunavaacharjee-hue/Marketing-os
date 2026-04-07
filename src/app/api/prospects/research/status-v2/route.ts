@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import {
-  type GenInput
-} from "@/lib/prospectResearch/generateProspectMemo";
+import { type GenInput } from "@/lib/prospectResearch/generateProspectMemo";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
 
 type JobRow = {
   id: string;
@@ -23,8 +20,8 @@ function isStaleRunning(job: JobRow): boolean {
   if (job.status !== "running") return false;
   const started = job.started_at ? Date.parse(job.started_at) : NaN;
   if (!Number.isFinite(started)) return true;
-  // If the worker died mid-run, allow re-claim after 2 minutes.
-  return Date.now() - started > 2 * 60_000;
+  // If the worker died mid-run, allow re-claim after 5 minutes.
+  return Date.now() - started > 5 * 60_000;
 }
 
 export async function GET(req: Request) {
@@ -41,43 +38,25 @@ export async function GET(req: Request) {
 
     const { data: job, error: jobErr } = await supabase
       .from("prospect_research_jobs")
-      .select(
-        "id,created_by,status,input_json,memo_json,error,started_at,finished_at,updated_at"
-      )
+      .select("id,created_by,status,input_json,memo_json,error,started_at,finished_at,updated_at")
       .eq("id", jobId)
       .single<JobRow>();
 
-    if (jobErr || !job) {
-      return NextResponse.json({ error: "Job not found." }, { status: 404 });
-    }
-    if (job.created_by !== user.id) {
-      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-    }
+    if (jobErr || !job) return NextResponse.json({ error: "Job not found." }, { status: 404 });
+    if (job.created_by !== user.id) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
 
-    if (job.status === "completed") {
-      return NextResponse.json({ status: "completed", memo: job.memo_json });
-    }
-    if (job.status === "failed") {
-      return NextResponse.json({ status: "failed", error: job.error ?? "AI request failed." });
-    }
+    if (job.status === "completed") return NextResponse.json({ status: "completed", memo: job.memo_json });
+    if (job.status === "failed") return NextResponse.json({ status: "failed", error: job.error ?? "AI failed." });
 
-    // If "running" is stale, re-queue so a new poll can take ownership.
+    // If stale, re-queue so the background worker can pick it up again.
     if (isStaleRunning(job)) {
-      await supabase
-        .from("prospect_research_jobs")
-        .update({
-          status: "queued",
-          error: null
-        })
-        .eq("id", jobId);
+      await supabase.from("prospect_research_jobs").update({ status: "queued", error: null }).eq("id", jobId);
       return NextResponse.json({ status: "queued" });
     }
 
-    // Background worker performs generation; status endpoint stays read-only to avoid long-running requests.
     return NextResponse.json({ status: job.status });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
-    console.error("[prospects/research/status] uncaught:", msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
