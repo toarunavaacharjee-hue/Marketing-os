@@ -30,15 +30,26 @@ function isLikelyNetworkFailure(e: unknown): boolean {
   return false;
 }
 
+function isLocalLoopbackHost(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname === "[::1]"
+  );
+}
+
 function networkErrorHintForEnv(): string {
   if (typeof window === "undefined") {
     return "Check your connection and try again.";
   }
-  const h = window.location.hostname;
-  if (h === "localhost" || h === "127.0.0.1") {
+  // Production builds must never show dev-server copy (hostname alone is not enough if you `next start` on localhost).
+  const showLocalDevHint =
+    process.env.NODE_ENV === "development" && isLocalLoopbackHost(window.location.hostname);
+  if (showLocalDevHint) {
     return "Check your connection, or confirm the dev server is running (npm run dev).";
   }
-  return "Your network may be unstable, or the app may be temporarily unavailable. Wait a moment and try again, or check the deployment status in Vercel.";
+  return "Check your connection and try again. If this keeps happening, the service may be temporarily unavailable.";
 }
 
 /** User-facing fetch errors. Use `list` when the saved-prospects list failed (non-blocking for memo generation). */
