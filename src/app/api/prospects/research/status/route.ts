@@ -6,6 +6,8 @@ import {
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
+/** Avoid static analysis during `next build` (uses `request.url` / search params). */
+export const dynamic = "force-dynamic";
 
 type JobRow = {
   id: string;

@@ -10,6 +10,7 @@ import { normalizeProspectMemo, type ProspectIntelligenceMemo } from "@/lib/pros
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
+export const dynamic = "force-dynamic";
 
 type JobRow = {
   id: string;
