@@ -53,9 +53,10 @@ export async function POST(req: Request) {
       additionalContext: body.additionalContext?.trim()
     };
 
-    let gen = await generateProspectMemo(keyRes.key, input);
+    // Tie provider calls to the request lifecycle so client disconnects don't burn compute (and risk HTTP/2 drops).
+    let gen = await generateProspectMemo(keyRes.key, input, { signal: req.signal });
     if (!gen.ok) {
-      const retry = await retryProspectMemoStrict(keyRes.key, input);
+      const retry = await retryProspectMemoStrict(keyRes.key, input, { signal: req.signal });
       if (retry.ok) gen = retry;
     }
 

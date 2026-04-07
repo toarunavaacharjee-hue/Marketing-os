@@ -6,7 +6,8 @@ import {
 } from "@/lib/prospectIntelligenceTypes";
 
 const MODEL = process.env.ANTHROPIC_MARKET_RESEARCH_MODEL?.trim() || "claude-sonnet-4-6";
-const TIMEOUT_MS = 120_000;
+// Keep this comfortably under common serverless/proxy timeouts to avoid dropped HTTP/2 connections.
+const TIMEOUT_MS = 55_000;
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -87,11 +88,18 @@ Prefer clarity and usable detail over length, but each section should feel "memo
 
 export async function generateProspectMemo(
   anthropicKey: string,
-  input: GenInput
+  input: GenInput,
+  opts?: { signal?: AbortSignal }
 ): Promise<{ ok: true; memo: ProspectIntelligenceMemo } | { ok: false; error: string }> {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), TIMEOUT_MS);
   const user = buildUserMessage(input);
+  const outerSignal = opts?.signal;
+  const onOuterAbort = () => controller.abort();
+  if (outerSignal) {
+    if (outerSignal.aborted) controller.abort();
+    else outerSignal.addEventListener("abort", onOuterAbort, { once: true });
+  }
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -104,7 +112,8 @@ export async function generateProspectMemo(
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 8000,
+        // Reducing tokens improves latency and reduces timeouts in serverless environments.
+        max_tokens: 4000,
         temperature: 0.35,
         system: SYSTEM,
         messages: [{ role: "user", content: user }]
@@ -132,20 +141,28 @@ export async function generateProspectMemo(
     return { ok: false, error: msg || "Network error." };
   } finally {
     clearTimeout(t);
+    if (outerSignal) outerSignal.removeEventListener("abort", onOuterAbort);
   }
 }
 
 export async function retryProspectMemoStrict(
   anthropicKey: string,
-  input: GenInput
+  input: GenInput,
+  opts?: { signal?: AbortSignal }
 ): Promise<{ ok: true; memo: ProspectIntelligenceMemo } | { ok: false; error: string }> {
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 90_000);
+  const t = setTimeout(() => controller.abort(), TIMEOUT_MS);
   const strict = `${SYSTEM}
 
 STRICT: Return ONLY minified JSON. No markdown fences. All 8 string keys must be non-empty (use "TBD" if needed).`;
 
   const user = buildUserMessage(input);
+  const outerSignal = opts?.signal;
+  const onOuterAbort = () => controller.abort();
+  if (outerSignal) {
+    if (outerSignal.aborted) controller.abort();
+    else outerSignal.addEventListener("abort", onOuterAbort, { once: true });
+  }
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -158,7 +175,7 @@ STRICT: Return ONLY minified JSON. No markdown fences. All 8 string keys must be
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 8000,
+        max_tokens: 4000,
         temperature: 0.2,
         system: strict,
         messages: [{ role: "user", content: user }]
@@ -182,6 +199,7 @@ STRICT: Return ONLY minified JSON. No markdown fences. All 8 string keys must be
     return { ok: false, error: msg || "Network error." };
   } finally {
     clearTimeout(t);
+    if (outerSignal) outerSignal.removeEventListener("abort", onOuterAbort);
   }
 }
 
