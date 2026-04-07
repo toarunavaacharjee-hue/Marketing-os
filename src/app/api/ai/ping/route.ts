@@ -20,7 +20,8 @@ function normalizeAnthropicError(message: string | undefined) {
         "Insufficient Anthropic API credits. Add credits / enable billing in Anthropic Console."
     };
   }
-  return { status: 502, error: m || "Anthropic request failed." };
+  // Treat most provider failures as temporary upstream unavailability.
+  return { status: 503, error: m || "AI provider temporarily unavailable." };
 }
 
 export async function POST() {
@@ -35,6 +36,9 @@ export async function POST() {
     const key = keyRes.key;
 
     // Minimal request to validate key works.
+    const controller = new AbortController();
+    const timeoutMs = 12_000;
+    const t = setTimeout(() => controller.abort(), timeoutMs);
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -47,12 +51,17 @@ export async function POST() {
         max_tokens: 1,
         temperature: 0,
         messages: [{ role: "user", content: "ping" }]
-      })
-    });
+      }),
+      signal: controller.signal
+    }).finally(() => clearTimeout(t));
 
     const data = (await res.json()) as AnthropicMessageResponse;
     if (!res.ok) {
       const normalized = normalizeAnthropicError(data?.error?.message);
+      console.error("Anthropic ping failed", {
+        status: res.status,
+        providerMessage: data?.error?.message
+      });
       return NextResponse.json(
         { ok: false, error: normalized.error },
         { status: normalized.status }
@@ -61,6 +70,13 @@ export async function POST() {
 
     return NextResponse.json({ ok: true });
   } catch (e) {
+    if (e instanceof Error && e.name === "AbortError") {
+      console.error("Anthropic ping timed out");
+      return NextResponse.json(
+        { ok: false, error: "AI provider temporarily unavailable." },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : "Unknown error" },
       { status: 500 }
