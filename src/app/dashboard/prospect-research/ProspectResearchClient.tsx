@@ -43,11 +43,10 @@ function networkErrorHintForEnv(): string {
   if (typeof window === "undefined") {
     return "Check your connection and try again.";
   }
-  // Production builds must never show dev-server copy (hostname alone is not enough if you `next start` on localhost).
-  const showLocalDevHint =
-    process.env.NODE_ENV === "development" && isLocalLoopbackHost(window.location.hostname);
-  if (showLocalDevHint) {
-    return "Check your connection, or confirm the dev server is running (npm run dev).";
+  // If you're on loopback, the most common cause is the local server not running or crashing.
+  // This applies to both `next dev` and `next start`.
+  if (isLocalLoopbackHost(window.location.hostname)) {
+    return "Check your connection, or confirm the app server is running (npm run dev or npm run start).";
   }
   return "Check your connection and try again. If this keeps happening, the service may be temporarily unavailable.";
 }
@@ -177,9 +176,44 @@ export default function ProspectResearchClient() {
           additionalContext: additionalContext.trim() || undefined
         })
       });
-      const data = await readApiJson<{ memo?: ProspectIntelligenceMemo; error?: string }>(res);
-      if (!res.ok) throw new Error(data.error ?? "Research failed.");
-      setDraftMemo(normalizeProspectMemo(data.memo));
+      const data = await readApiJson<{ jobId?: string; error?: string }>(res);
+      if (!res.ok) throw new Error(data.error ?? "Failed to start research.");
+      if (!data.jobId) throw new Error("Missing jobId.");
+
+      const startedAt = Date.now();
+      const maxWaitMs = 2 * 60_000;
+      let transientNetworkFailures = 0;
+      while (true) {
+        await new Promise((r) => setTimeout(r, 1000));
+        let stRes: Response;
+        try {
+          stRes = await fetch(`/api/prospects/research/status?jobId=${encodeURIComponent(data.jobId)}`);
+        } catch (e) {
+          // If the connection hiccups mid-poll, keep trying briefly before failing the whole run.
+          if (isLikelyNetworkFailure(e) && transientNetworkFailures < 3) {
+            transientNetworkFailures++;
+            continue;
+          }
+          throw e;
+        }
+        const stData = await readApiJson<{
+          status?: "queued" | "running" | "completed" | "failed";
+          memo?: ProspectIntelligenceMemo;
+          error?: string;
+        }>(stRes);
+        if (!stRes.ok) throw new Error(stData.error ?? "Research status failed.");
+
+        if (stData.status === "completed") {
+          setDraftMemo(normalizeProspectMemo(stData.memo));
+          break;
+        }
+        if (stData.status === "failed") {
+          throw new Error(stData.error ?? "Research failed.");
+        }
+        if (Date.now() - startedAt > maxWaitMs) {
+          throw new Error("Research is taking longer than expected. Please retry in a moment.");
+        }
+      }
     } catch (e) {
       setError(formatProspectFetchError(e));
     } finally {
