@@ -177,9 +177,35 @@ export default function ProspectResearchClient() {
           additionalContext: additionalContext.trim() || undefined
         })
       });
-      const data = await readApiJson<{ memo?: ProspectIntelligenceMemo; error?: string }>(res);
-      if (!res.ok) throw new Error(data.error ?? "Research failed.");
-      setDraftMemo(normalizeProspectMemo(data.memo));
+      const data = await readApiJson<{ jobId?: string; error?: string }>(res);
+      if (!res.ok) throw new Error(data.error ?? "Failed to start research.");
+      if (!data.jobId) throw new Error("Missing jobId.");
+
+      const startedAt = Date.now();
+      const maxWaitMs = 2 * 60_000;
+      while (true) {
+        await new Promise((r) => setTimeout(r, 1000));
+        const stRes = await fetch(
+          `/api/prospects/research/status?jobId=${encodeURIComponent(data.jobId)}`
+        );
+        const stData = await readApiJson<{
+          status?: "queued" | "running" | "completed" | "failed";
+          memo?: ProspectIntelligenceMemo;
+          error?: string;
+        }>(stRes);
+        if (!stRes.ok) throw new Error(stData.error ?? "Research status failed.");
+
+        if (stData.status === "completed") {
+          setDraftMemo(normalizeProspectMemo(stData.memo));
+          break;
+        }
+        if (stData.status === "failed") {
+          throw new Error(stData.error ?? "Research failed.");
+        }
+        if (Date.now() - startedAt > maxWaitMs) {
+          throw new Error("Research is taking longer than expected. Please retry in a moment.");
+        }
+      }
     } catch (e) {
       setError(formatProspectFetchError(e));
     } finally {

@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
-import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
-import {
-  generateProspectMemo,
-  retryProspectMemoStrict
-} from "@/lib/prospectResearch/generateProspectMemo";
+import { type GenInput } from "@/lib/prospectResearch/generateProspectMemo";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -20,6 +16,7 @@ export async function POST(req: Request) {
 
     const selected = await getDefaultEnvironmentIdForSelectedProduct();
     if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    const { environmentId, productId } = selected;
 
     const body = (await req.json()) as {
       accountName?: string;
@@ -37,12 +34,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Account name (or opportunity name) is required." }, { status: 400 });
     }
 
-    const keyRes = await resolveWorkspaceAnthropicKey();
-    if (!keyRes.ok) {
-      return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
-    }
-
-    const input = {
+    const input: GenInput = {
       accountName,
       companyName: body.companyName?.trim(),
       websiteUrl: body.websiteUrl?.trim(),
@@ -53,20 +45,24 @@ export async function POST(req: Request) {
       additionalContext: body.additionalContext?.trim()
     };
 
-    // Tie provider calls to the request lifecycle so client disconnects don't burn compute (and risk HTTP/2 drops).
-    let gen = await generateProspectMemo(keyRes.key, input, { signal: req.signal });
-    if (!gen.ok) {
-      const retry = await retryProspectMemoStrict(keyRes.key, input, { signal: req.signal });
-      if (retry.ok) gen = retry;
+    const { data, error } = await supabase
+      .from("prospect_research_jobs")
+      .insert({
+        environment_id: environmentId,
+        product_id: productId,
+        created_by: user.id,
+        status: "queued",
+        input_json: input
+      })
+      .select("id")
+      .single();
+
+    if (error || !data?.id) {
+      console.error("[prospects/research/run] enqueue failed:", error);
+      return NextResponse.json({ error: "Failed to start research job." }, { status: 500 });
     }
 
-    if (!gen.ok) {
-      // Use 503 (not 502) so Vercel logs distinguish app-level AI failures from edge/gateway 502s.
-      console.error("[prospects/research/run] generation failed:", gen.error);
-      return NextResponse.json({ error: gen.error }, { status: 503 });
-    }
-
-    return NextResponse.json({ memo: gen.memo });
+    return NextResponse.json({ jobId: data.id }, { status: 202 });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     console.error("[prospects/research/run] uncaught:", msg);
