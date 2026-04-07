@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type ArtifactRow = {
@@ -168,6 +169,13 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
           {error}
         </div>
       ) : null}
+      <AiProgressBar
+        active={generating}
+        variant="dark"
+        title="Generating messaging artifact…"
+        estimate={AI_PROGRESS_ESTIMATE.short}
+        durationMs={50_000}
+      />
       <p className="text-xs text-[#9090b0]">{saving ? "Saving…" : "Artifacts saved per product."}</p>
 
       <div className="grid gap-4 lg:grid-cols-3">

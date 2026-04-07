@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   aggregateWorkFromSettings,
@@ -492,6 +493,14 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
       ) : null}
+
+      <AiProgressBar
+        active={Object.keys(busyIds).length > 0}
+        variant="dark"
+        title="Running AI workflow…"
+        estimate={AI_PROGRESS_ESTIMATE.deep}
+        durationMs={120_000}
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="min-w-[200px] flex-1">

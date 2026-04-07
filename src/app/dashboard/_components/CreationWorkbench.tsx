@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type QueueRow = {
@@ -475,6 +476,14 @@ export function CreationWorkbench({
           {error}
         </div>
       ) : null}
+
+      <AiProgressBar
+        active={generating}
+        variant="dark"
+        title="Generating with AI…"
+        estimate={AI_PROGRESS_ESTIMATE.short}
+        durationMs={50_000}
+      />
 
       {contentStudio ? (
         <div className="rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 text-xs leading-relaxed text-text2">

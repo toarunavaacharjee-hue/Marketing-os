@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 
 type Metric = { label: string; value: string };
 type ChatRole = "assistant" | "user";
@@ -120,8 +121,15 @@ export default function CopilotPage() {
           {loading ? (
             <div className="flex items-start gap-3">
               <Avatar role="assistant" />
-              <div className="rounded-2xl border border-[#2a2e3f] bg-[#1e1e2e] px-4 py-3 text-sm text-[#9090b0]">
-                Thinking...
+              <div className="min-w-0 flex-1">
+                <AiProgressBar
+                  active
+                  variant="dark"
+                  title="Copilot is thinking…"
+                  estimate={AI_PROGRESS_ESTIMATE.chat}
+                  durationMs={60_000}
+                  className="!p-3"
+                />
               </div>
             </div>
           ) : null}

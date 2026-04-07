@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   POSITIONING_KEY,
@@ -186,6 +187,14 @@ export default function PositioningStudioClient({ environmentId }: { environment
           {saved}
         </div>
       ) : null}
+
+      <AiProgressBar
+        active={generating}
+        variant="dark"
+        title="Regenerating positioning from ICP segments…"
+        estimate={AI_PROGRESS_ESTIMATE.positioning}
+        durationMs={90_000}
+      />
 
       {loading ? (
         <div className="text-sm text-[#9090b0]">Loading…</div>

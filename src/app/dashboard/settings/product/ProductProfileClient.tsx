@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 
 type Competitor = {
   name: string;
@@ -290,6 +291,13 @@ export default function ProductProfileClient() {
           {saved}
         </div>
       ) : null}
+
+      <AiProgressBar
+        active={autoFilling}
+        title="Auto-filling from your website…"
+        estimate={AI_PROGRESS_ESTIMATE.deep}
+        durationMs={90_000}
+      />
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         <Field label="Product name (Required)">

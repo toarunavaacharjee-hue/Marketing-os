@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Variant = "events" | "customer" | "sales";
@@ -1022,6 +1023,14 @@ export function InsightWorkbench({
           {error}
         </div>
       ) : null}
+
+      <AiProgressBar
+        active={generating || importing}
+        variant="dark"
+        title={importing ? "Extracting from document…" : "Generating AI insight…"}
+        estimate={importing ? AI_PROGRESS_ESTIMATE.extract : AI_PROGRESS_ESTIMATE.short}
+        durationMs={importing ? 75_000 : 50_000}
+      />
 
       {variant === "events" ? renderEvents() : null}
       {variant === "customer" ? renderCustomer() : null}
