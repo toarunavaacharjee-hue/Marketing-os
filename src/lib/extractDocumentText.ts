@@ -1,9 +1,11 @@
 const MAX_CHARS = 48_000;
 
 async function extractTextFromPdfBuffer(buffer: Buffer): Promise<string> {
-  // Use pdf-parse's built-in text extraction (server-safe).
+  // pdf-parse@1.1.1 avoids pdf-parse v2's pdfjs-dist + @napi-rs/canvas stack (broken on Vercel without native canvas).
   const mod = await import("pdf-parse");
-  const pdfParse = (mod as any).default ?? (mod as any);
+  const pdfParse = ((mod as { default?: unknown }).default ?? mod) as (
+    data: Buffer
+  ) => Promise<{ text?: string }>;
   const result = await pdfParse(buffer);
   return (result?.text ?? "").toString();
 }
@@ -37,4 +39,3 @@ export async function extractTextFromBuffer(buffer: Buffer, filename: string): P
   }
   return text;
 }
-

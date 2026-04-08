@@ -46,3 +46,15 @@ export function parseJsonObject(text: string): Record<string, unknown> | null {
     return null;
   }
 }
+
+/** Same as parseJsonObject, plus common AI JSON slip-ups (trailing commas, curly quotes). */
+export function parseJsonObjectLenient(text: string): Record<string, unknown> | null {
+  const direct = parseJsonObject(text);
+  if (direct) return direct;
+  const cleaned = stripCodeFences(text).trim();
+  const normalized = cleaned
+    .replace(/[\u201c\u201d\u2018\u2019]/g, '"')
+    .replace(/,\s*}/g, "}")
+    .replace(/,\s*]/g, "]");
+  return parseJsonObject(normalized);
+}

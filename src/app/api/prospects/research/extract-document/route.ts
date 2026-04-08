@@ -3,7 +3,7 @@ import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAn
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { extractTextFromBuffer } from "@/lib/extractDocumentText";
-import { parseJsonObject } from "@/lib/extractJsonObject";
+import { parseJsonObjectLenient } from "@/lib/extractJsonObject";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -121,7 +121,7 @@ ${trimForAi(text)}`;
     });
     if (!first.ok) return NextResponse.json({ error: first.error }, { status: 502 });
 
-    let parsed = parseJsonObject(first.text);
+    let parsed = parseJsonObjectLenient(first.text);
     if (!parsed) {
       const retrySystem = `${system}\n\nIf you are missing fields, still output them as empty strings. Return ONLY the JSON object.`;
       const retryPrompt = `${userPrompt}\n\nIMPORTANT: Output ONLY a single JSON object.`;
@@ -132,7 +132,7 @@ ${trimForAi(text)}`;
         maxTokens: 1200
       });
       if (!second.ok) return NextResponse.json({ error: second.error }, { status: 502 });
-      parsed = parseJsonObject(second.text);
+      parsed = parseJsonObjectLenient(second.text);
     }
     if (!parsed) {
       return NextResponse.json(
@@ -166,4 +166,3 @@ ${trimForAi(text)}`;
     );
   }
 }
-
