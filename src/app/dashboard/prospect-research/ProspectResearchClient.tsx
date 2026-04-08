@@ -96,6 +96,36 @@ export default function ProspectResearchClient() {
   const [additionalContext, setAdditionalContext] = useState("");
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [publicAutofilling, setPublicAutofilling] = useState(false);
+
+  const [industrySubvertical, setIndustrySubvertical] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [geography, setGeography] = useState("");
+  const [businessModel, setBusinessModel] = useState("");
+  const [techStack, setTechStack] = useState("");
+  const [fundingOwnership, setFundingOwnership] = useState("");
+  const [recentNewsEvents, setRecentNewsEvents] = useState("");
+
+  function publicInfoBlock(): string {
+    const rows: Array<[string, string]> = [
+      ["Industry (sub-vertical)", industrySubvertical.trim()],
+      ["Company size", companySize.trim()],
+      ["Geography", geography.trim()],
+      ["Business model", businessModel.trim()],
+      ["Tech stack", techStack.trim()],
+      ["Funding/ownership", fundingOwnership.trim()],
+      ["Recent news/events", recentNewsEvents.trim()]
+    ];
+    const nonEmpty = rows.filter(([, v]) => v.length > 0);
+    if (nonEmpty.length === 0) return "";
+    return [
+      "### Public info (AI autofill)",
+      "",
+      "| Field | Value |",
+      "| --- | --- |",
+      ...nonEmpty.map(([k, v]) => `| ${k} | ${v.replace(/\\n/g, "<br/>")} |`)
+    ].join("\n");
+  }
 
   const [draftMemo, setDraftMemo] = useState<ProspectIntelligenceMemo | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -175,7 +205,8 @@ export default function ProspectResearchClient() {
           preparedFor: preparedFor.trim() || undefined,
           demoOrMeetingDate: demoOrMeetingDate.trim() || undefined,
           sellerName: sellerName.trim() || undefined,
-          additionalContext: additionalContext.trim() || undefined
+          additionalContext:
+            [publicInfoBlock(), additionalContext.trim()].filter(Boolean).join("\n\n---\n\n") || undefined
         })
       });
       const data = await readApiJson<{ jobId?: string; error?: string }>(res);
@@ -260,6 +291,44 @@ export default function ProspectResearchClient() {
     } finally {
       setUploading(false);
       if (uploadRef.current) uploadRef.current.value = "";
+    }
+  }
+
+  async function autofillFromPublicInfo() {
+    setPublicAutofilling(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/prospects/research/autofill-public", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ companyName: companyName.trim(), websiteUrl: websiteUrl.trim() })
+      });
+      const data = await readApiJson<{
+        ok?: boolean;
+        result?: {
+          industrySubvertical?: string;
+          companySize?: string;
+          geography?: string;
+          businessModel?: string;
+          techStack?: string;
+          fundingOwnership?: string;
+          recentNewsEvents?: string;
+        };
+        error?: string;
+      }>(res);
+      if (!res.ok) throw new Error(data.error ?? "Failed to autofill.");
+      const r = data.result ?? {};
+      setIndustrySubvertical(r.industrySubvertical ?? "");
+      setCompanySize(r.companySize ?? "");
+      setGeography(r.geography ?? "");
+      setBusinessModel(r.businessModel ?? "");
+      setTechStack(r.techStack ?? "");
+      setFundingOwnership(r.fundingOwnership ?? "");
+      setRecentNewsEvents(r.recentNewsEvents ?? "");
+    } catch (e) {
+      setError(formatProspectFetchError(e));
+    } finally {
+      setPublicAutofilling(false);
     }
   }
 
@@ -375,6 +444,13 @@ export default function ProspectResearchClient() {
     setDemoOrMeetingDate("");
     setSellerName("");
     setAdditionalContext("");
+    setIndustrySubvertical("");
+    setCompanySize("");
+    setGeography("");
+    setBusinessModel("");
+    setTechStack("");
+    setFundingOwnership("");
+    setRecentNewsEvents("");
     setChatA(null);
     setChatQ("");
     setError(null);
@@ -498,6 +574,19 @@ export default function ProspectResearchClient() {
                   placeholder="e.g. Discovery, Evaluation"
                 />
               </label>
+              <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2">
+                <div className="text-xs text-text3">
+                  Auto-fill company basics (public knowledge) from Company name / Website.
+                </div>
+                <button
+                  type="button"
+                  onClick={autofillFromPublicInfo}
+                  disabled={publicAutofilling || (!companyName.trim() && !websiteUrl.trim())}
+                  className="rounded-[var(--radius2)] bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                >
+                  {publicAutofilling ? "Auto-filling…" : "Auto-fill from public info"}
+                </button>
+              </div>
               <label className="block text-sm md:col-span-2">
                 <span className="text-text2">Prepared for (memo header)</span>
                 <input
@@ -523,6 +612,64 @@ export default function ProspectResearchClient() {
                   onChange={(e) => setSellerName(e.target.value)}
                   className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
                   placeholder="For sales strategy notes section"
+                />
+              </label>
+            </div>
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <label className="block text-sm">
+                <span className="text-text2">Industry (specific sub-vertical)</span>
+                <input
+                  value={industrySubvertical}
+                  onChange={(e) => setIndustrySubvertical(e.target.value)}
+                  className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-text2">Company size</span>
+                <input
+                  value={companySize}
+                  onChange={(e) => setCompanySize(e.target.value)}
+                  className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-text2">Geography</span>
+                <input
+                  value={geography}
+                  onChange={(e) => setGeography(e.target.value)}
+                  className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-text2">Business model</span>
+                <input
+                  value={businessModel}
+                  onChange={(e) => setBusinessModel(e.target.value)}
+                  className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-text2">Tech stack</span>
+                <input
+                  value={techStack}
+                  onChange={(e) => setTechStack(e.target.value)}
+                  className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-text2">Funding/ownership</span>
+                <input
+                  value={fundingOwnership}
+                  onChange={(e) => setFundingOwnership(e.target.value)}
+                  className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                />
+              </label>
+              <label className="block text-sm md:col-span-2">
+                <span className="text-text2">Recent news/events</span>
+                <input
+                  value={recentNewsEvents}
+                  onChange={(e) => setRecentNewsEvents(e.target.value)}
+                  className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
                 />
               </label>
             </div>
