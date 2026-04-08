@@ -50,6 +50,7 @@ ${clippedAdditional || "(none)"}`;
 
 const SYSTEM = `You are a B2B sales intelligence analyst. Return JSON ONLY (no markdown fences).
 Use only reasonable inference from the provided inputs; do not invent facts. If unknown, use "TBD".
+Prefer details explicitly present in Additional context (including pasted LinkedIn/Google snippets or uploaded-doc extracts).
 Each value is concise GitHub-flavored Markdown (bullets/tables OK).
 
 Return exactly this JSON shape (no extra keys):

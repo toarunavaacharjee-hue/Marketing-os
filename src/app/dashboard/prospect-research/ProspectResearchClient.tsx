@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { Markdown } from "@/lib/Markdown";
 import {
@@ -94,6 +94,8 @@ export default function ProspectResearchClient() {
   const [demoOrMeetingDate, setDemoOrMeetingDate] = useState("");
   const [sellerName, setSellerName] = useState("");
   const [additionalContext, setAdditionalContext] = useState("");
+  const uploadRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [draftMemo, setDraftMemo] = useState<ProspectIntelligenceMemo | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -218,6 +220,46 @@ export default function ProspectResearchClient() {
       setError(formatProspectFetchError(e));
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function extractFromUpload(file: File) {
+    setUploading(true);
+    setError(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/prospects/research/extract-document", { method: "POST", body: fd });
+      const data = await readApiJson<{
+        ok?: boolean;
+        result?: {
+          companyName?: string;
+          websiteUrl?: string;
+          keyDecisionMakersMarkdown?: string;
+          notes?: string;
+        };
+        error?: string;
+      }>(res);
+      if (!res.ok) throw new Error(data.error ?? "Failed to extract from document.");
+
+      const r = data.result ?? {};
+      if (!companyName.trim() && r.companyName?.trim()) setCompanyName(r.companyName.trim());
+      if (!websiteUrl.trim() && r.websiteUrl?.trim()) setWebsiteUrl(r.websiteUrl.trim());
+
+      const parts: string[] = [];
+      if (r.notes?.trim()) parts.push(`### Uploaded notes\n${r.notes.trim()}`);
+      if (r.keyDecisionMakersMarkdown?.trim()) {
+        parts.push(`### Key decision makers (from uploaded info)\n${r.keyDecisionMakersMarkdown.trim()}`);
+      }
+      if (parts.length) {
+        const next = [additionalContext.trim(), parts.join("\n\n")].filter(Boolean).join("\n\n---\n\n");
+        setAdditionalContext(next);
+      }
+    } catch (e) {
+      setError(formatProspectFetchError(e));
+    } finally {
+      setUploading(false);
+      if (uploadRef.current) uploadRef.current.value = "";
     }
   }
 
@@ -493,6 +535,30 @@ export default function ProspectResearchClient() {
                 className="mt-1 w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text"
               />
             </label>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input
+                ref={uploadRef}
+                type="file"
+                accept=".pdf,.docx,.xlsx,.xls,.csv"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void extractFromUpload(f);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => uploadRef.current?.click()}
+                disabled={uploading}
+                className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
+              >
+                {uploading ? "Extracting…" : "Upload info (PDF/DOCX/XLSX/CSV)"}
+              </button>
+              <div className="text-xs text-text3">
+                Upload call notes, an org chart, a LinkedIn export, or any internal doc. We’ll extract key details and
+                append them into Additional context.
+              </div>
+            </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 type="button"
