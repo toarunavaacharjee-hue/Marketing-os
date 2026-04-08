@@ -9,8 +9,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
+type AnthropicContentBlock =
+  | { type: "text"; text?: string }
+  | { type: "tool_use"; id?: string; name?: string; input?: Record<string, unknown> };
+
 type AnthropicMessageResponse = {
-  content?: Array<{ type?: string; text?: string }>;
+  content?: AnthropicContentBlock[];
   error?: { message?: string };
 };
 
@@ -30,6 +34,75 @@ function trimForAi(raw: string): string {
   const head = text.slice(0, Math.floor(MAX_AI_INPUT_CHARS * 0.7));
   const tail = text.slice(-Math.floor(MAX_AI_INPUT_CHARS * 0.3));
   return `${head}\n\n[...snip...]\n\n${tail}`;
+}
+
+const EXTRACT_TOOL = {
+  name: "prospect_upload_extract",
+  description:
+    "Return structured fields extracted from the uploaded prospect/opportunity document. Use empty strings when unknown."
+} as const;
+
+const EXTRACT_TOOL_SCHEMA = {
+  type: "object",
+  properties: {
+    company_name: { type: "string", description: "Company or account name, or empty." },
+    website_url: { type: "string", description: "Website URL if present, or empty." },
+    key_decision_makers_markdown: {
+      type: "string",
+      description:
+        "GitHub-flavored Markdown: stakeholders/roles; include at least one small table; TBD names if unknown."
+    },
+    notes: {
+      type: "string",
+      description: "6–12 concise bullets: facts, pains, initiatives, tools, competitors."
+    }
+  },
+  required: ["company_name", "website_url", "key_decision_makers_markdown", "notes"],
+  additionalProperties: false
+} as const;
+
+async function callAnthropicExtractTool(args: {
+  apiKey: string;
+  system: string;
+  userPrompt: string;
+  maxTokens: number;
+}): Promise<
+  { ok: true; input: Record<string, unknown> } | { ok: false; error: string }
+> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": args.apiKey,
+      "anthropic-version": "2023-06-01"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: args.maxTokens,
+      temperature: 0,
+      system: args.system,
+      tools: [
+        {
+          name: EXTRACT_TOOL.name,
+          description: EXTRACT_TOOL.description,
+          input_schema: EXTRACT_TOOL_SCHEMA
+        }
+      ],
+      tool_choice: { type: "tool", name: EXTRACT_TOOL.name },
+      messages: [{ role: "user", content: args.userPrompt }]
+    })
+  });
+
+  const data = (await res.json()) as AnthropicMessageResponse;
+  if (!res.ok) return { ok: false, error: data?.error?.message ?? "Anthropic request failed." };
+  const block = data.content?.find((c) => c.type === "tool_use" && c.name === EXTRACT_TOOL.name) as
+    | { type: "tool_use"; input?: Record<string, unknown> }
+    | undefined;
+  const input = block?.input;
+  if (!input || typeof input !== "object") {
+    return { ok: false, error: "Model did not return structured tool output." };
+  }
+  return { ok: true, input };
 }
 
 async function callAnthropicJsonOnly(args: {
@@ -102,7 +175,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
 
-    const system = `Extract prospect-research hints from the document. Output ONLY a valid JSON object (no prose, no markdown fences, no extra keys).
+    const systemTool = `You extract prospect-research hints from an uploaded document. Call the tool ${EXTRACT_TOOL.name} exactly once with all fields filled. Use empty strings for unknown values. Do not reply with plain text or JSON outside the tool.`;
+
+    const systemJsonFallback = `Extract prospect-research hints from the document. Output ONLY a valid JSON object (no prose, no markdown fences, no extra keys).
 Keys exactly:
 - company_name (string, may be "")
 - website_url (string, may be "")
@@ -114,17 +189,30 @@ Keys exactly:
 Document text:
 ${trimForAi(text)}`;
 
-    const first = await callAnthropicJsonOnly({
+    let parsed: Record<string, unknown> | null = null;
+
+    const toolFirst = await callAnthropicExtractTool({
       apiKey: keyRes.key,
-      system,
+      system: systemTool,
       userPrompt,
       maxTokens: 1200
     });
-    if (!first.ok) return NextResponse.json({ error: first.error }, { status: 502 });
+    if (toolFirst.ok) {
+      parsed = toolFirst.input;
+    }
 
-    let parsed = parseJsonObjectLenient(first.text);
     if (!parsed) {
-      const retrySystem = `${system}\n\nIf you are missing fields, still output them as empty strings. Return ONLY the JSON object.`;
+      const first = await callAnthropicJsonOnly({
+        apiKey: keyRes.key,
+        system: systemJsonFallback,
+        userPrompt,
+        maxTokens: 1200
+      });
+      if (!first.ok) return NextResponse.json({ error: first.error }, { status: 502 });
+      parsed = parseJsonObjectLenient(first.text);
+    }
+    if (!parsed) {
+      const retrySystem = `${systemJsonFallback}\n\nIf you are missing fields, still output them as empty strings. Return ONLY the JSON object.`;
       const retryPrompt = `${userPrompt}\n\nIMPORTANT: Output ONLY a single JSON object.`;
       const second = await callAnthropicJsonOnly({
         apiKey: keyRes.key,
