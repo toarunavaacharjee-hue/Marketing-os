@@ -10,6 +10,7 @@ import {
   normalizeProspectMemo,
   type ProspectIntelligenceMemo
 } from "@/lib/prospectIntelligenceTypes";
+import { PROSPECT_RESEARCH_CLIENT_POLL_MAX_MS } from "@/lib/prospectResearch/pollingConstants";
 
 type ProspectRow = {
   id: string;
@@ -214,7 +215,7 @@ export default function ProspectResearchClient() {
       if (!data.jobId) throw new Error("Missing jobId.");
 
       const startedAt = Date.now();
-      const maxWaitMs = 2 * 60_000;
+      const maxWaitMs = PROSPECT_RESEARCH_CLIENT_POLL_MAX_MS;
       let transientNetworkFailures = 0;
       while (true) {
         await new Promise((r) => setTimeout(r, 1000));
@@ -244,7 +245,9 @@ export default function ProspectResearchClient() {
           throw new Error(stData.error ?? "Research failed.");
         }
         if (Date.now() - startedAt > maxWaitMs) {
-          throw new Error("Research is taking longer than expected. Please retry in a moment.");
+          throw new Error(
+            "Research is still running after several minutes. You can close this tab and try again later, or retry now if you think the run stalled."
+          );
         }
       }
     } catch (e) {
@@ -749,7 +752,7 @@ export default function ProspectResearchClient() {
                     active
                     title="Regenerating prospect intelligence memo…"
                     estimate={AI_PROGRESS_ESTIMATE.memo}
-                    durationMs={100_000}
+                    durationMs={PROSPECT_RESEARCH_CLIENT_POLL_MAX_MS}
                   />
                 </div>
               ) : null}
@@ -779,10 +782,11 @@ export default function ProspectResearchClient() {
                 active
                 title="Generating prospect intelligence memo…"
                 estimate={AI_PROGRESS_ESTIMATE.memo}
-                durationMs={100_000}
+                durationMs={PROSPECT_RESEARCH_CLIENT_POLL_MAX_MS}
               />
               <p className="mt-3 text-center text-xs text-text3">
-                This can take 30 seconds to a few minutes. You can keep this tab open.
+                This usually finishes within several minutes; keep this tab open. If the queue is busy, it can take up
+                to about 15 minutes before this page times out.
               </p>
             </div>
           ) : (

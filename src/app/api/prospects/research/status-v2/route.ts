@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { type GenInput } from "@/lib/prospectResearch/generateProspectMemo";
+import { PROSPECT_RESEARCH_STALE_RUNNING_MS } from "@/lib/prospectResearch/pollingConstants";
 
 export const runtime = "nodejs";
 
@@ -20,8 +21,7 @@ function isStaleRunning(job: JobRow): boolean {
   if (job.status !== "running") return false;
   const started = job.started_at ? Date.parse(job.started_at) : NaN;
   if (!Number.isFinite(started)) return true;
-  // If the worker died mid-run, allow re-claim after 5 minutes.
-  return Date.now() - started > 5 * 60_000;
+  return Date.now() - started > PROSPECT_RESEARCH_STALE_RUNNING_MS;
 }
 
 export async function GET(req: Request) {
@@ -60,4 +60,3 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
-

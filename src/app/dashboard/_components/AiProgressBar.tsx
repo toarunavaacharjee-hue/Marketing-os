@@ -15,7 +15,7 @@ export const AI_PROGRESS_ESTIMATE = {
   deep:
     "Heavier jobs often take 30 seconds to a few minutes. The percentage is an estimate until complete.",
   memo:
-    "Building your prospect memo can take 30 seconds to a few minutes depending on context.",
+    "Building your prospect memo often takes 1–8 minutes; in the background it can run longer on busy queues. The bar is an estimate until the memo appears.",
   extract:
     "Reading your file and extracting fields usually takes 20–90 seconds. The percentage is an estimate.",
   positioning:
