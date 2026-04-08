@@ -51,10 +51,32 @@ export function parseJsonObject(text: string): Record<string, unknown> | null {
 export function parseJsonObjectLenient(text: string): Record<string, unknown> | null {
   const direct = parseJsonObject(text);
   if (direct) return direct;
-  const cleaned = stripCodeFences(text).trim();
-  const normalized = cleaned
-    .replace(/[\u201c\u201d\u2018\u2019]/g, '"')
-    .replace(/,\s*}/g, "}")
-    .replace(/,\s*]/g, "]");
-  return parseJsonObject(normalized);
+  let cleaned = stripCodeFences(text).trim().replace(/^\uFEFF/, "");
+  const passes = [
+    cleaned,
+    cleaned
+      .replace(/[\u201c\u201d\u2018\u2019]/g, '"')
+      .replace(/,\s*}/g, "}")
+      .replace(/,\s*]/g, "]"),
+    cleaned.replace(/[\u201c\u201d\u2018\u2019]/g, '"').replace(/,\s*,/g, ",")
+  ];
+  for (const p of passes) {
+    const blob =
+      extractFirstJsonObjectString(p) ?? extractFirstJsonObjectString(stripCodeFences(p));
+    if (!blob) continue;
+    try {
+      return JSON.parse(blob) as Record<string, unknown>;
+    } catch {
+      const fixed = blob
+        .replace(/,\s*}/g, "}")
+        .replace(/,\s*]/g, "]")
+        .replace(/[\u201c\u201d\u2018\u2019]/g, '"');
+      try {
+        return JSON.parse(fixed) as Record<string, unknown>;
+      } catch {
+        /* next pass */
+      }
+    }
+  }
+  return null;
 }

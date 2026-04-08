@@ -7,6 +7,7 @@ import { parseJsonObjectLenient } from "@/lib/extractJsonObject";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
@@ -135,12 +136,23 @@ ${trimForAi(text)}`;
       parsed = parseJsonObjectLenient(second.text);
     }
     if (!parsed) {
+      const minimalSystem = `Return ONLY one JSON object on a single line. Keys exactly: company_name, website_url, key_decision_makers_markdown, notes. All values are strings. Use "" if unknown. No markdown, no code fences, no text before or after the JSON.`;
+      const minimalUser = `Filename: ${fname}\n\nExtract from:\n${trimForAi(text).slice(0, 8000)}`;
+      const third = await callAnthropicJsonOnly({
+        apiKey: keyRes.key,
+        system: minimalSystem,
+        userPrompt: minimalUser,
+        maxTokens: 900
+      });
+      if (third.ok) parsed = parseJsonObjectLenient(third.text);
+    }
+    if (!parsed) {
       return NextResponse.json(
         {
           error:
             "AI returned an invalid response for this document. Try a smaller / more specific file, or paste the key sections into Additional context."
         },
-        { status: 502 }
+        { status: 422 }
       );
     }
 
