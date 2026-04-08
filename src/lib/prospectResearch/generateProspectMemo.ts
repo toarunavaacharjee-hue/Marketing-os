@@ -32,6 +32,8 @@ function buildUserMessage(input: GenInput): string {
   const preparedFor = input.preparedFor?.trim() || "(not provided)";
   const demo = input.demoOrMeetingDate?.trim() || "(not provided)";
   const seller = input.sellerName?.trim() || "(not provided — use generic seller-facing notes)";
+  const additional = (input.additionalContext ?? "").trim();
+  const clippedAdditional = additional.length > 1200 ? `${additional.slice(0, 1200)}…(truncated)` : additional;
   return `# PROSPECT INTELLIGENCE MEMO (inputs)
 
 Account / opportunity name: ${input.accountName}
@@ -43,48 +45,22 @@ Demo / meeting: ${demo}
 Seller / AE name (for sales notes section): ${seller}
 
 Additional context from seller:
-${(input.additionalContext ?? "").trim() || "(none)"}`;
+${clippedAdditional || "(none)"}`;
 }
 
-const SYSTEM = `You are a B2B sales intelligence analyst. Produce a Prospect Intelligence Memo as JSON only.
-Use web-reasonable general knowledge and logical inference from the inputs provided. If data is unknown, say so in tables and gaps — do not invent facts.
-Each section value is GitHub-flavored Markdown. Be thorough and specific (dense memos like internal sales briefs), not generic one-liners.
+const SYSTEM = `You are a B2B sales intelligence analyst. Return JSON ONLY (no markdown fences).
+Use only reasonable inference from the provided inputs; do not invent facts. If unknown, use "TBD".
+Each value is concise GitHub-flavored Markdown (bullets/tables OK).
 
-Formatting (mirror professional sales intel briefs):
-- In executive_summary, START with a title block:
-  - Line 1: \`# PROSPECT INTELLIGENCE MEMO\`
-  - Line 2: \`## {Account or company display name}\`
-  - Line 3: metadata line using pipes, e.g. \`Prepared: {date or TBD}  |  For: {preparedFor or TBD}  |  Demo: {demoOrMeetingDate or TBD}\` (use inputs when provided).
-  - Then "### Executive Summary" and 2–4 tight paragraphs: who they are, why it matters, deal posture, next step.
-  - Include a small markdown table for deal meta: Primary contact, Secondary, Stage, Expected next milestone (use TBD where unknown).
-- Group stakeholders in key_decision_makers with \`###\` subsections (e.g. Executive Leadership, Operations, Technology, Partners) — each with a markdown table: Name | Title | Organization | Notes. Include plausible roles even if names are TBD.
-- In organizational_context include "### Recent Strategic Moves" as a dated bullet list (newest first; infer cautiously or mark unknown) and "### Technology Landscape" bullets.
-- In sales_strategy_notes, if a seller name was provided in inputs, use "### Sales Strategy Notes for {seller}". Include "### Key Messaging Themes" bullets and "### Competitive Positioning" with a comparison table (criteria vs us vs alternatives/TBD).
-- meeting_demo_prep: "### Demo Prep Recommendations" with actionable bullets; "### Discovery Questions".
+Return exactly this JSON shape (no extra keys):
+{"executive_summary":"","what_theyre_looking_for":"","key_decision_makers":"","organizational_context":"","sales_strategy_notes":"","open_intelligence_gaps":"","meeting_demo_prep":"","research_sources":""}
 
-Output a single JSON object with exactly these keys (no extra keys):
-{
-  "executive_summary": "...",
-  "what_theyre_looking_for": "...",
-  "key_decision_makers": "...",
-  "organizational_context": "...",
-  "sales_strategy_notes": "...",
-  "open_intelligence_gaps": "...",
-  "meeting_demo_prep": "...",
-  "research_sources": "..."
-}
-
-Section requirements:
-1) executive_summary: Title block + exec summary + meta table as above.
-2) what_theyre_looking_for: Bullets for buying criteria, pain points, trigger events; use their vocabulary when present in context.
-3) key_decision_makers: Grouped stakeholder tables with ### headings.
-4) organizational_context: Structure, recent moves (dated when possible), tech stack hints, compliance posture if relevant.
-5) sales_strategy_notes: Messaging, positioning table, objection handling; seller-specific section title when seller name known.
-6) open_intelligence_gaps: Table: Gap | Why it matters | How to close.
-7) meeting_demo_prep: Tailored demo agenda, discovery questions, prep checklist.
-8) research_sources: Honest list — user context, general knowledge, and gaps; avoid fake URLs.
-
-Prefer clarity and usable detail over length, but each section should feel "memo-complete" not sparse.`;
+Guidance:
+- executive_summary: short title block + 2–3 paragraphs + tiny deal-meta table.
+- key_decision_makers: 2–4 stakeholder groups with small tables (use TBD names).
+- open_intelligence_gaps: table Gap | Why | How to close.
+- meeting_demo_prep: demo agenda + discovery questions.
+- research_sources: be honest; no fake URLs.`;
 
 export async function generateProspectMemo(
   anthropicKey: string,
@@ -113,7 +89,7 @@ export async function generateProspectMemo(
       body: JSON.stringify({
         model: MODEL,
         // Reducing tokens improves latency and reduces timeouts in serverless environments.
-        max_tokens: 3000,
+        max_tokens: 2500,
         temperature: 0.35,
         system: SYSTEM,
         messages: [{ role: "user", content: user }]
