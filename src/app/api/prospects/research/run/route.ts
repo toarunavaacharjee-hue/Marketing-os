@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { type GenInput } from "@/lib/prospectResearch/generateProspectMemo";
+import { processProspectResearchQueue } from "@/lib/prospectResearch/prospectResearchWorker";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -61,6 +63,14 @@ export async function POST(req: Request) {
       console.error("[prospects/research/run] enqueue failed:", error);
       return NextResponse.json({ error: "Failed to start research job." }, { status: 500 });
     }
+
+    // Process queue after the 202 response (Vercel extends the invocation via waitUntil).
+    // Hobby Vercel cron is limited to once per day; this keeps jobs moving without minute-level cron.
+    waitUntil(
+      processProspectResearchQueue().catch((e) => {
+        console.error("[prospects/research/run] background queue error:", e);
+      })
+    );
 
     return NextResponse.json({ jobId: data.id }, { status: 202 });
   } catch (e) {

@@ -3,8 +3,7 @@
   "crons": [
     {
       "path": "/api/prospects/research/worker",
-      "schedule": "*/1 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
-
