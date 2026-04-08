@@ -14,12 +14,49 @@ type AnthropicMessageResponse = {
 };
 
 const MAX_BYTES = 8 * 1024 * 1024;
+const MAX_AI_INPUT_CHARS = 14_000;
 
 function asStr(v: unknown): string {
   if (v === null || v === undefined) return "";
   if (typeof v === "string") return v.trim();
   if (typeof v === "number" || typeof v === "boolean") return String(v);
   return "";
+}
+
+function trimForAi(raw: string): string {
+  const text = raw.replace(/\u0000/g, "").trim();
+  if (text.length <= MAX_AI_INPUT_CHARS) return text;
+  const head = text.slice(0, Math.floor(MAX_AI_INPUT_CHARS * 0.7));
+  const tail = text.slice(-Math.floor(MAX_AI_INPUT_CHARS * 0.3));
+  return `${head}\n\n[...snip...]\n\n${tail}`;
+}
+
+async function callAnthropicJsonOnly(args: {
+  apiKey: string;
+  system: string;
+  userPrompt: string;
+  maxTokens: number;
+}): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": args.apiKey,
+      "anthropic-version": "2023-06-01"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: args.maxTokens,
+      temperature: 0,
+      system: args.system,
+      messages: [{ role: "user", content: args.userPrompt }]
+    })
+  });
+
+  const data = (await res.json()) as AnthropicMessageResponse;
+  if (!res.ok) return { ok: false, error: data?.error?.message ?? "Anthropic request failed." };
+  const out = data.content?.find((c) => c.type === "text")?.text ?? "";
+  return { ok: true, text: out };
 }
 
 export async function POST(req: Request) {
@@ -64,7 +101,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
     }
 
-    const system = `Extract prospect-research hints from the document. Output ONLY valid JSON (no prose, no markdown fences).
+    const system = `Extract prospect-research hints from the document. Output ONLY a valid JSON object (no prose, no markdown fences, no extra keys).
 Keys exactly:
 - company_name (string, may be "")
 - website_url (string, may be "")
@@ -74,36 +111,37 @@ Keys exactly:
     const userPrompt = `Filename: ${fname}
 
 Document text:
-${text}`;
+${trimForAi(text)}`;
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": keyRes.key,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 900,
-        temperature: 0.2,
-        system,
-        messages: [{ role: "user", content: userPrompt }]
-      })
+    const first = await callAnthropicJsonOnly({
+      apiKey: keyRes.key,
+      system,
+      userPrompt,
+      maxTokens: 1200
     });
+    if (!first.ok) return NextResponse.json({ error: first.error }, { status: 502 });
 
-    const data = (await res.json()) as AnthropicMessageResponse;
-    if (!res.ok) {
+    let parsed = parseJsonObject(first.text);
+    if (!parsed) {
+      const retrySystem = `${system}\n\nIf you are missing fields, still output them as empty strings. Return ONLY the JSON object.`;
+      const retryPrompt = `${userPrompt}\n\nIMPORTANT: Output ONLY a single JSON object.`;
+      const second = await callAnthropicJsonOnly({
+        apiKey: keyRes.key,
+        system: retrySystem,
+        userPrompt: retryPrompt,
+        maxTokens: 1200
+      });
+      if (!second.ok) return NextResponse.json({ error: second.error }, { status: 502 });
+      parsed = parseJsonObject(second.text);
+    }
+    if (!parsed) {
       return NextResponse.json(
-        { error: data?.error?.message ?? "Anthropic request failed." },
+        {
+          error:
+            "AI returned an invalid response for this document. Try a smaller / more specific file, or paste the key sections into Additional context."
+        },
         { status: 502 }
       );
-    }
-
-    const out = data.content?.find((c) => c.type === "text")?.text ?? "";
-    const parsed = parseJsonObject(out);
-    if (!parsed) {
-      return NextResponse.json({ error: "AI could not extract usable data from this file." }, { status: 502 });
     }
 
     const result = {
