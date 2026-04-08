@@ -1,8 +1,24 @@
 const MAX_CHARS = 48_000;
 
+async function ensurePdfJsGlobals(): Promise<void> {
+  // pdfjs-dist expects certain DOM-ish globals in Node when it touches rendering utilities,
+  // even if we only use text extraction. Provide them via @napi-rs/canvas when available.
+  const g = globalThis as any;
+  if (g.DOMMatrix && g.Path2D && g.ImageData) return;
+  try {
+    const canvasMod = (await import("@napi-rs/canvas")) as any;
+    if (!g.DOMMatrix && canvasMod.DOMMatrix) g.DOMMatrix = canvasMod.DOMMatrix;
+    if (!g.Path2D && canvasMod.Path2D) g.Path2D = canvasMod.Path2D;
+    if (!g.ImageData && canvasMod.ImageData) g.ImageData = canvasMod.ImageData;
+  } catch {
+    // If canvas isn't available (e.g., minimal local env), we keep going; pdfjs may still work for text-only PDFs.
+  }
+}
+
 async function extractTextFromPdfBuffer(buffer: Buffer): Promise<string> {
   // Use pdf.js text extraction (no rendering) to avoid canvas/DOM polyfills in serverless.
   // pdfjs-dist is pulled in as a dependency of pdf-parse.
+  await ensurePdfJsGlobals();
   const pdfjs = (await import("pdfjs-dist/legacy/build/pdf.mjs")) as any;
   const loadingTask = pdfjs.getDocument({ data: buffer });
   const doc = await loadingTask.promise;
