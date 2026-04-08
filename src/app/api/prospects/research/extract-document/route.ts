@@ -5,6 +5,9 @@ import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext"
 import { extractTextFromBuffer } from "@/lib/extractDocumentText";
 import { parseJsonObject } from "@/lib/extractJsonObject";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
   error?: { message?: string };
