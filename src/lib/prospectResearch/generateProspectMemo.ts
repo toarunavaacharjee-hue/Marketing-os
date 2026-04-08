@@ -6,8 +6,8 @@ import {
 } from "@/lib/prospectIntelligenceTypes";
 
 const MODEL = process.env.ANTHROPIC_MARKET_RESEARCH_MODEL?.trim() || "claude-sonnet-4-6";
-// Keep this comfortably under common serverless/proxy timeouts to avoid dropped HTTP/2 connections.
-const TIMEOUT_MS = 55_000;
+// Generation runs via worker/waitUntil, so we can allow longer than client-facing HTTP timeouts.
+const TIMEOUT_MS = 120_000;
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -113,7 +113,7 @@ export async function generateProspectMemo(
       body: JSON.stringify({
         model: MODEL,
         // Reducing tokens improves latency and reduces timeouts in serverless environments.
-        max_tokens: 4000,
+        max_tokens: 3000,
         temperature: 0.35,
         system: SYSTEM,
         messages: [{ role: "user", content: user }]
@@ -175,7 +175,7 @@ STRICT: Return ONLY minified JSON. No markdown fences. All 8 string keys must be
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 4000,
+        max_tokens: 3000,
         temperature: 0.2,
         system: strict,
         messages: [{ role: "user", content: user }]
@@ -216,3 +216,4 @@ export function memoToMarkdownContext(memo: ProspectIntelligenceMemo): string {
     "## Research Sources\n\n" + m.research_sources
   ].join("\n\n---\n\n");
 }
+
