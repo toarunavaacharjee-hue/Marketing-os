@@ -24,7 +24,23 @@ export async function GET(req: Request) {
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    const msg = error.message ?? "Failed to load audit log.";
+    const isMissingTable =
+      msg.toLowerCase().includes("could not find the table") ||
+      msg.toLowerCase().includes("schema cache") ||
+      msg.toLowerCase().includes("does not exist");
+    if (isMissingTable) {
+      return NextResponse.json({
+        ok: true,
+        entries: [],
+        missing_table: true,
+        message:
+          "Audit table is not installed yet. Run `supabase/operator_audit_log.sql` in your Supabase SQL Editor, then refresh."
+      });
+    }
+    return NextResponse.json({ error: msg }, { status: 400 });
+  }
   return NextResponse.json({ ok: true, entries: data ?? [] });
 }
 

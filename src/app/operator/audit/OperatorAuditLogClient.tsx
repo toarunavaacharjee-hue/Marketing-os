@@ -20,14 +20,28 @@ export default function OperatorAuditLogClient() {
   const [rows, setRows] = useState<AuditRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [missingTable, setMissingTable] = useState(false);
+  const [missingTableMessage, setMissingTableMessage] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
     setError(null);
+    setMissingTable(false);
+    setMissingTableMessage(null);
     try {
       const res = await fetch("/api/operator/audit-log?limit=200", { cache: "no-store" });
-      const data = (await res.json()) as { ok?: boolean; error?: string; entries?: AuditRow[] };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        entries?: AuditRow[];
+        missing_table?: boolean;
+        message?: string;
+      };
       if (!res.ok) throw new Error(data.error ?? "Failed to load audit log.");
+      if (data.missing_table) {
+        setMissingTable(true);
+        setMissingTableMessage(data.message ?? "Audit table is not installed yet.");
+      }
       setRows(data.entries ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load audit log.");
@@ -45,6 +59,12 @@ export default function OperatorAuditLogClient() {
     <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]">
       {error ? (
         <div className="border-b border-[var(--border)] bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
+      ) : null}
+      {missingTable ? (
+        <div className="border-b border-[var(--border)] bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+          <div className="font-semibold">Audit log is not set up yet</div>
+          <div className="mt-1 text-xs text-amber-200/90">{missingTableMessage}</div>
+        </div>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] px-3 py-3">
