@@ -23,6 +23,17 @@ type Invite = {
   revoked_at: string | null;
 };
 
+type ProductRow = {
+  id: string;
+  name: string | null;
+};
+
+type ProductMemberRow = {
+  product_id: string;
+  user_id: string;
+  role: string;
+};
+
 export default function TeamSettingsClient({
   companyId,
   canAdmin,
@@ -52,6 +63,11 @@ export default function TeamSettingsClient({
   const [savingWorkspace, setSavingWorkspace] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deletingWorkspace, setDeletingWorkspace] = useState(false);
+
+  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [productMembers, setProductMembers] = useState<ProductMemberRow[]>([]);
+  const [productAccessUserId, setProductAccessUserId] = useState<string>("");
+  const [productAccessBusy, setProductAccessBusy] = useState(false);
 
   async function refresh() {
     setError(null);
@@ -90,6 +106,75 @@ export default function TeamSettingsClient({
     void loadInvites();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
+
+  async function loadProductsAndAccess() {
+    setError(null);
+    const { data: pRows, error: pErr } = await supabase
+      .from("products")
+      .select("id,name")
+      .eq("company_id", companyId)
+      .order("created_at", { ascending: true });
+    if (pErr) {
+      setError(pErr.message);
+      return;
+    }
+    const nextProducts = (pRows ?? []) as ProductRow[];
+    setProducts(nextProducts);
+
+    if (!nextProducts.length) {
+      setProductMembers([]);
+      return;
+    }
+    const productIds = nextProducts.map((p) => p.id);
+    const { data: pmRows, error: pmErr } = await supabase
+      .from("product_members")
+      .select("product_id,user_id,role")
+      .in("product_id", productIds);
+    if (pmErr) {
+      setError(pmErr.message);
+      return;
+    }
+    setProductMembers((pmRows ?? []) as ProductMemberRow[]);
+  }
+
+  useEffect(() => {
+    void loadProductsAndAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyId]);
+
+  async function setUserProductAccess(userId: string, productId: string, allow: boolean) {
+    if (!canAdmin) return;
+    setProductAccessBusy(true);
+    setError(null);
+    setOk(null);
+    try {
+      if (allow) {
+        const { error } = await supabase.from("product_members").insert({
+          product_id: productId,
+          user_id: userId,
+          role: "member"
+        });
+        if (error) throw new Error(error.message);
+        setProductMembers((prev) => {
+          const exists = prev.some((r) => r.product_id === productId && r.user_id === userId);
+          return exists ? prev : [...prev, { product_id: productId, user_id: userId, role: "member" }];
+        });
+      } else {
+        const { error } = await supabase
+          .from("product_members")
+          .delete()
+          .eq("product_id", productId)
+          .eq("user_id", userId);
+        if (error) throw new Error(error.message);
+        setProductMembers((prev) => prev.filter((r) => !(r.product_id === productId && r.user_id === userId)));
+      }
+      setOk("Updated product access.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update product access.");
+    } finally {
+      setProductAccessBusy(false);
+    }
+  }
 
   async function createInvite() {
     if (!canAdmin) return;
@@ -244,6 +329,72 @@ export default function TeamSettingsClient({
       ) : null}
       {ok ? (
         <div className="rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">{ok}</div>
+      ) : null}
+
+      {canAdmin ? (
+        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+          <div className="text-sm text-[#f0f0f8]">Product access</div>
+          <div className="mt-2 text-sm text-[#9090b0]">
+            Assign which products within this workspace a user can access.
+          </div>
+
+          <div className="mt-4 grid gap-2 md:grid-cols-3">
+            <select
+              value={productAccessUserId}
+              onChange={(e) => setProductAccessUserId(e.target.value)}
+              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] disabled:opacity-60"
+            >
+              <option value="">Select a member…</option>
+              {members.map((m) => (
+                <option key={m.user_id} value={m.user_id}>
+                  {(m.name ?? m.user_id.slice(0, 8) + "…") + " (" + m.role + ")"}
+                </option>
+              ))}
+            </select>
+            <div className="md:col-span-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void loadProductsAndAccess()}
+                disabled={productAccessBusy}
+                className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#f0f0f8] hover:bg-white/5 disabled:opacity-60"
+              >
+                Refresh products
+              </button>
+              <div className="text-xs text-[#9090b0]">{products.length ? `${products.length} products` : "No products yet"}</div>
+            </div>
+          </div>
+
+          {productAccessUserId ? (
+            <div className="mt-4 space-y-2">
+              {products.map((p) => {
+                const has = productMembers.some((pm) => pm.product_id === p.id && pm.user_id === productAccessUserId);
+                return (
+                  <label
+                    key={p.id}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-[#2a2e3f] bg-black/10 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm text-[#f0f0f8]">{p.name ?? "Untitled product"}</div>
+                      <div className="truncate font-mono text-[11px] text-[#9090b0]">{p.id}</div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={has}
+                      disabled={productAccessBusy}
+                      onChange={(e) => void setUserProductAccess(productAccessUserId, p.id, e.target.checked)}
+                      className="h-4 w-4 accent-[#7c6cff]"
+                    />
+                  </label>
+                );
+              })}
+              {!products.length ? (
+                <div className="text-sm text-[#9090b0]">Create a product first, then come back to assign access.</div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="mt-4 text-sm text-[#9090b0]">Pick a member to manage access.</div>
+          )}
+        </div>
       ) : null}
 
       <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">

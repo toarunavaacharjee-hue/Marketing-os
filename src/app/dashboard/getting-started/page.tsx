@@ -4,7 +4,7 @@ import { GettingStartedClient } from "@/app/dashboard/getting-started/GettingSta
 
 export default async function GettingStartedPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/onboarding");
+  if (!ctx) redirect("/dashboard/onboarding-v2");
   return <GettingStartedClient environmentId={ctx.environmentId} />;
 }
 
