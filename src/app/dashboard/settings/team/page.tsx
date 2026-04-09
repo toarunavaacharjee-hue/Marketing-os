@@ -23,6 +23,12 @@ export default async function TeamSettingsPage() {
   const companyId = cookieStore.get(TENANT_COOKIE.companyId)?.value ?? null;
   if (!companyId) redirect("/dashboard/settings");
 
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id,name")
+    .eq("id", companyId)
+    .maybeSingle();
+
   const { data: myMembership } = await supabase
     .from("company_members")
     .select("role")
@@ -32,6 +38,7 @@ export default async function TeamSettingsPage() {
 
   const myRole = ((myMembership as any)?.role ?? "member") as string;
   const canAdmin = myRole === "owner" || myRole === "admin";
+  const isOwner = myRole === "owner";
 
   const { data: members } = await supabase
     .from("company_members")
@@ -65,6 +72,8 @@ export default async function TeamSettingsPage() {
       <TeamSettingsClient
         companyId={companyId}
         canAdmin={canAdmin}
+        isOwner={isOwner}
+        initialCompanyName={String((company as any)?.name ?? "").trim()}
         initialMembers={((members ?? []) as MemberRow[]).map((m) => ({
           company_id: m.company_id,
           user_id: m.user_id,

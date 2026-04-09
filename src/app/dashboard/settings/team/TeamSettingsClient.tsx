@@ -26,10 +26,14 @@ type Invite = {
 export default function TeamSettingsClient({
   companyId,
   canAdmin,
+  isOwner,
+  initialCompanyName,
   initialMembers
 }: {
   companyId: string;
   canAdmin: boolean;
+  isOwner: boolean;
+  initialCompanyName: string;
   initialMembers: Member[];
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -43,6 +47,11 @@ export default function TeamSettingsClient({
   const [inviteRole, setInviteRole] = useState<string>("member");
   const [inviteBusy, setInviteBusy] = useState(false);
   const [lastInviteUrl, setLastInviteUrl] = useState<string | null>(null);
+
+  const [workspaceName, setWorkspaceName] = useState(initialCompanyName);
+  const [savingWorkspace, setSavingWorkspace] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deletingWorkspace, setDeletingWorkspace] = useState(false);
 
   async function refresh() {
     setError(null);
@@ -169,6 +178,58 @@ export default function TeamSettingsClient({
     }
   }
 
+  async function saveWorkspaceName() {
+    if (!canAdmin) return;
+    const name = workspaceName.trim();
+    if (!name) {
+      setError("Workspace name is required.");
+      return;
+    }
+    setSavingWorkspace(true);
+    setError(null);
+    setOk(null);
+    try {
+      const res = await fetch("/api/workspace/update", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ company_id: companyId, name })
+      });
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+      if (!res.ok) throw new Error(data?.error ?? "Failed to update workspace.");
+      setOk("Workspace updated.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to update workspace.");
+    } finally {
+      setSavingWorkspace(false);
+    }
+  }
+
+  async function deleteWorkspace() {
+    if (!isOwner) return;
+    const expected = initialCompanyName.trim();
+    if (expected && deleteConfirm.trim() !== expected) {
+      setError("Type the workspace name exactly to confirm deletion.");
+      return;
+    }
+    setDeletingWorkspace(true);
+    setError(null);
+    setOk(null);
+    try {
+      const res = await fetch("/api/workspace/delete", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ company_id: companyId, confirm_name: deleteConfirm.trim() })
+      });
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+      if (!res.ok) throw new Error(data?.error ?? "Failed to delete workspace.");
+      window.location.href = "/dashboard/settings";
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete workspace.");
+    } finally {
+      setDeletingWorkspace(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {!canAdmin ? (
@@ -184,6 +245,65 @@ export default function TeamSettingsClient({
       {ok ? (
         <div className="rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">{ok}</div>
       ) : null}
+
+      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+        <div className="text-sm text-[#f0f0f8]">Workspace settings</div>
+        <div className="mt-2 text-sm text-[#9090b0]">Rename the workspace, or delete it (owner-only).</div>
+
+        <div className="mt-4 grid gap-2 md:grid-cols-3">
+          <input
+            value={workspaceName}
+            onChange={(e) => setWorkspaceName(e.target.value)}
+            disabled={!canAdmin || savingWorkspace || deletingWorkspace}
+            className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0] disabled:opacity-60"
+            placeholder="Workspace name"
+          />
+          <div className="md:col-span-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={!canAdmin || savingWorkspace || deletingWorkspace || !workspaceName.trim()}
+              onClick={() => void saveWorkspaceName()}
+              className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm text-[#f0f0f8] hover:bg-white/5 disabled:opacity-60"
+            >
+              {savingWorkspace ? "Saving…" : "Save workspace"}
+            </button>
+          </div>
+        </div>
+
+        {isOwner ? (
+          <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+            <div className="text-sm text-red-100">Danger zone</div>
+            <div className="mt-1 text-sm text-red-200/80">
+              Deleting a workspace removes all products and associated data. This cannot be undone.
+            </div>
+            <div className="mt-3 grid gap-2 md:grid-cols-3">
+              <input
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+                disabled={deletingWorkspace || savingWorkspace}
+                className="w-full rounded-xl border border-red-500/30 bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0] disabled:opacity-60"
+                placeholder={
+                  initialCompanyName ? `Type "${initialCompanyName}" to confirm` : "Type workspace name to confirm"
+                }
+              />
+              <div className="md:col-span-2">
+                <button
+                  type="button"
+                  disabled={
+                    deletingWorkspace ||
+                    savingWorkspace ||
+                    (Boolean(initialCompanyName.trim()) && deleteConfirm.trim() !== initialCompanyName.trim())
+                  }
+                  onClick={() => void deleteWorkspace()}
+                  className="rounded-xl border border-red-500/30 bg-red-500/20 px-4 py-2 text-sm text-red-100 hover:bg-red-500/25 disabled:opacity-60"
+                >
+                  {deletingWorkspace ? "Deleting…" : "Delete workspace"}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
 
       <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
         <div className="text-sm text-[#f0f0f8]">Invites</div>

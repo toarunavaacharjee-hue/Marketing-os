@@ -31,6 +31,9 @@ export default function ProductProfileClient() {
   const [saved, setSaved] = useState<string | null>(null);
   const [autoFilling, setAutoFilling] = useState(false);
   const [canAdmin, setCanAdmin] = useState(true);
+  const [productId, setProductId] = useState<string | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState(false);
+  const [deleteConfirmProduct, setDeleteConfirmProduct] = useState("");
 
   const [name, setName] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -73,6 +76,7 @@ export default function ProductProfileClient() {
         throw new Error(data.error ?? "Failed to load product profile.");
       }
 
+      setProductId(data.product.id ?? null);
       setName(data.product.name ?? "");
       setWebsiteUrl(data.product.website_url ?? "");
       setCategory(data.product.category ?? "");
@@ -259,6 +263,41 @@ export default function ProductProfileClient() {
       setError(e instanceof Error ? e.message : "Failed to create product.");
     } finally {
       setCreatingProduct(false);
+    }
+  }
+
+  async function deleteCurrentProduct() {
+    if (!canAdmin) return;
+    if (!productId) {
+      setError("No product selected.");
+      return;
+    }
+    if (deleteConfirmProduct.trim() !== name.trim() && name.trim()) {
+      setError("Type the product name exactly to confirm deletion.");
+      return;
+    }
+    setDeletingProduct(true);
+    setError(null);
+    setSaved(null);
+    try {
+      const res = await fetch("/api/product/delete", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ product_id: productId, confirm_name: deleteConfirmProduct.trim() })
+      });
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+      if (!res.ok) throw new Error(data?.error ?? "Failed to delete product.");
+
+      await fetch("/api/context/select", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ productId: null })
+      });
+      window.location.href = "/dashboard/settings";
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete product.");
+    } finally {
+      setDeletingProduct(false);
     }
   }
 
@@ -522,6 +561,40 @@ export default function ProductProfileClient() {
           </button>
         </div>
       </div>
+
+      {canAdmin ? (
+        <div className="mt-8 border-t border-border pt-6">
+          <div className="text-sm font-semibold text-red">Danger zone</div>
+          <div className="mt-1 text-sm text-text2">
+            Deleting this product removes its environments and settings. This cannot be undone.
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <Field label="Type product name to confirm">
+              <input
+                value={deleteConfirmProduct}
+                onChange={(e) => setDeleteConfirmProduct(e.target.value)}
+                className="w-full rounded-[var(--radius2)] border border-red bg-[rgba(248,113,113,0.08)] px-3 py-2 text-sm text-text placeholder:text-text3"
+                placeholder={name ? `Type "${name}"` : "Type product name"}
+                disabled={deletingProduct}
+              />
+            </Field>
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={deleteCurrentProduct}
+                disabled={
+                  deletingProduct ||
+                  !productId ||
+                  (Boolean(name.trim()) && deleteConfirmProduct.trim() !== name.trim())
+                }
+                className="w-full rounded-[var(--radius2)] border border-red bg-[rgba(248,113,113,0.15)] px-4 py-2 text-sm font-semibold text-red transition hover:bg-[rgba(248,113,113,0.22)] disabled:opacity-60"
+              >
+                {deletingProduct ? "Deleting…" : "Delete product"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
