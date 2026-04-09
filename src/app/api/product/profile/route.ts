@@ -14,12 +14,10 @@ export async function GET() {
     const {
       data: { user }
     } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
     const productId = await getSelectedProductId();
-    if (!productId)
-      return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    if (!productId) return NextResponse.json({ error: "No product selected." }, { status: 400 });
 
     const { data: product, error: pErr } = await supabase
       .from("products")
@@ -30,10 +28,7 @@ export async function GET() {
       .maybeSingle();
 
     if (pErr || !product) {
-      return NextResponse.json(
-        { error: pErr?.message ?? "Product not found." },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: pErr?.message ?? "Product not found." }, { status: 404 });
     }
 
     const { data: competitors, error: cErr } = await supabase
@@ -63,10 +58,7 @@ export async function GET() {
       competitors: competitors ?? []
     });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Unknown error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown error" }, { status: 500 });
   }
 }
 
@@ -76,12 +68,21 @@ export async function POST(req: Request) {
     const {
       data: { user }
     } = await supabase.auth.getUser();
-    if (!user)
-      return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
     const productId = await getSelectedProductId();
-    if (!productId)
-      return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    if (!productId) return NextResponse.json({ error: "No product selected." }, { status: 400 });
+
+    const { data: pmRow, error: pmErr } = await supabase
+      .from("product_members")
+      .select("role")
+      .eq("product_id", productId)
+      .eq("user_id", user.id)
+      .maybeSingle<{ role: string }>();
+    const role = (pmRow?.role ?? "").toLowerCase();
+    if (pmErr || (role !== "owner" && role !== "admin")) {
+      return NextResponse.json({ error: "Only product admins can edit the product profile." }, { status: 403 });
+    }
 
     const body = (await req.json()) as {
       name?: string;
@@ -109,17 +110,12 @@ export async function POST(req: Request) {
     };
 
     const upd = await supabase.from("products").update(update).eq("id", productId);
-    if (upd.error)
-      return NextResponse.json({ error: upd.error.message }, { status: 500 });
+    if (upd.error) return NextResponse.json({ error: upd.error.message }, { status: 500 });
 
     const competitors = Array.isArray(body.competitors) ? body.competitors : [];
 
-    const del = await supabase
-      .from("product_competitors")
-      .delete()
-      .eq("product_id", productId);
-    if (del.error)
-      return NextResponse.json({ error: del.error.message }, { status: 500 });
+    const del = await supabase.from("product_competitors").delete().eq("product_id", productId);
+    if (del.error) return NextResponse.json({ error: del.error.message }, { status: 500 });
 
     const cleaned = competitors
       .map((c) => ({
@@ -131,16 +127,12 @@ export async function POST(req: Request) {
 
     if (cleaned.length) {
       const ins = await supabase.from("product_competitors").insert(cleaned);
-      if (ins.error)
-        return NextResponse.json({ error: ins.error.message }, { status: 500 });
+      if (ins.error) return NextResponse.json({ error: ins.error.message }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Unknown error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown error" }, { status: 500 });
   }
 }
 

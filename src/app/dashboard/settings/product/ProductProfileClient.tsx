@@ -30,6 +30,7 @@ export default function ProductProfileClient() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [autoFilling, setAutoFilling] = useState(false);
+  const [canAdmin, setCanAdmin] = useState(true);
 
   const [name, setName] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -64,7 +65,13 @@ export default function ProductProfileClient() {
         : ({ error: raw || "Server error" } as any)) as Payload & {
         error?: string;
       };
-      if (!res.ok) throw new Error(data.error ?? "Failed to load product profile.");
+      if (!res.ok) {
+        if (res.status === 403) {
+          setCanAdmin(false);
+          throw new Error(data.error ?? "Only product admins can edit this page.");
+        }
+        throw new Error(data.error ?? "Failed to load product profile.");
+      }
 
       setName(data.product.name ?? "");
       setWebsiteUrl(data.product.website_url ?? "");
@@ -452,7 +459,7 @@ export default function ProductProfileClient() {
         <button
           type="button"
           onClick={save}
-          disabled={saving || !canSave}
+          disabled={saving || !canSave || !canAdmin}
           className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save"}
@@ -468,7 +475,7 @@ export default function ProductProfileClient() {
         <button
           type="button"
           onClick={autoFillFromWebsite}
-          disabled={autoFilling || saving || loading}
+          disabled={autoFilling || saving || loading || !canAdmin}
           className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-60"
           title="Auto-fill missing category/ICP/positioning + competitor URLs from your product website"
         >
@@ -481,6 +488,11 @@ export default function ProductProfileClient() {
         <div className="mt-1 text-sm text-text2">
           Creates a new product under the current company and switches you to it.
         </div>
+        {!canAdmin ? (
+          <div className="mt-2 text-xs text-amber-200/90">
+            You can view product details, but only workspace/product admins can edit settings or add products.
+          </div>
+        ) : null}
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           <Field label="New product name">
             <input
@@ -503,7 +515,7 @@ export default function ProductProfileClient() {
           <button
             type="button"
             onClick={createProductInWorkspace}
-            disabled={creatingProduct || !newProductName.trim()}
+            disabled={creatingProduct || !newProductName.trim() || !canAdmin}
             className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
           >
             {creatingProduct ? "Creating…" : "Add product"}
