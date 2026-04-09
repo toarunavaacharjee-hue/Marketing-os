@@ -75,15 +75,6 @@ export function OnboardingWizard() {
     setStatus("Preparing your workspace…");
     setStep("creating");
 
-    const { data: auth } = await supabase.auth.getUser();
-    const user = auth.user;
-    if (!user) {
-      setLoading(false);
-      setError("You are not logged in.");
-      setStep("details");
-      return;
-    }
-
     const companyNameTrimmed = companyName.trim();
     const productNameTrimmed = productName.trim();
     if (!companyNameTrimmed || !productNameTrimmed) {
@@ -93,87 +84,21 @@ export function OnboardingWizard() {
       return;
     }
 
-    const { data: company, error: companyErr } = await supabase
-      .from("companies")
-      .insert({ name: companyNameTrimmed, created_by: user.id })
-      .select("id")
-      .single();
-    if (companyErr || !company?.id) {
-      setLoading(false);
-      setError(companyErr?.message ?? "Could not create workspace.");
-      setStep("details");
-      return;
-    }
-
-    const { error: memberErr } = await supabase.from("company_members").insert({
-      company_id: company.id,
-      user_id: user.id,
-      role: "owner"
-    });
-    if (memberErr) {
-      setLoading(false);
-      setError(memberErr.message ?? "Could not add you to the workspace.");
-      setStep("details");
-      return;
-    }
-
-    const { error: subErr } = await supabase.from("company_subscriptions").insert({
-      company_id: company.id,
-      plan: "starter",
-      status: "active",
-      seats_included: 1,
-      seats_addon: 0,
-      products_included: 1,
-      products_addon: 0
-    });
-    if (subErr) {
-      setLoading(false);
-      setError(subErr.message ?? "Could not create subscription row.");
-      setStep("details");
-      return;
-    }
-
-    setStatus("Creating your first product…");
-    const { data: product, error: productErr } = await supabase
-      .from("products")
-      .insert({
-        company_id: company.id,
-        name: productNameTrimmed,
-        website_url: websiteUrl.trim() ? normalizeUrl(websiteUrl) : null
+    const bootstrapRes = await fetch("/api/onboarding/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        companyName: companyNameTrimmed,
+        productName: productNameTrimmed,
+        websiteUrl: websiteUrl.trim() ? normalizeUrl(websiteUrl) : ""
       })
-      .select("id")
-      .single();
-    if (productErr || !product?.id) {
-      setLoading(false);
-      setError(productErr?.message ?? "Could not create product.");
-      setStep("details");
-      return;
-    }
-
-    setStatus("Setting up your environment…");
-    const { data: env, error: envErr } = await supabase
-      .from("product_environments")
-      .insert({
-        product_id: product.id,
-        name: "Default"
-      })
-      .select("id")
-      .single<{ id: string }>();
-    if (envErr || !env?.id) {
-      setLoading(false);
-      setError(envErr?.message ?? "Could not create product environment.");
-      setStep("details");
-      return;
-    }
-
-    const { error: pmErr } = await supabase.from("product_members").insert({
-      product_id: product.id,
-      user_id: user.id,
-      role: "owner"
     });
-    if (pmErr) {
+    const bootstrapData = (await bootstrapRes.json().catch(() => null)) as
+      | { ok?: boolean; companyId?: string; productId?: string; error?: string }
+      | null;
+    if (!bootstrapRes.ok || !bootstrapData?.companyId || !bootstrapData?.productId) {
       setLoading(false);
-      setError(pmErr.message ?? "Could not grant you access to the product.");
+      setError(bootstrapData?.error ?? "Could not create workspace.");
       setStep("details");
       return;
     }
@@ -182,7 +107,10 @@ export function OnboardingWizard() {
     const ctxRes = await fetch("/api/context/select", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ companyId: company.id, productId: product.id })
+      body: JSON.stringify({
+        companyId: bootstrapData.companyId,
+        productId: bootstrapData.productId
+      })
     });
     if (!ctxRes.ok) {
       const t = await ctxRes.text();
@@ -193,6 +121,15 @@ export function OnboardingWizard() {
     }
 
     try {
+      const { data: env } = await supabase
+        .from("product_environments")
+        .select("id")
+        .eq("product_id", bootstrapData.productId)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle<{ id: string }>();
+      if (!env?.id) throw new Error("No environment");
+
       await supabase.from("module_settings").upsert({
         environment_id: env.id,
         module: "work",

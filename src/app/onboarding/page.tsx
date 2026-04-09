@@ -15,94 +15,27 @@ export default function OnboardingPage() {
     setLoading(true);
     setError(null);
 
-    const { data: auth } = await supabase.auth.getUser();
-    const user = auth.user;
-    if (!user) {
-      setLoading(false);
-      setError("You are not logged in.");
-      return;
-    }
-
-    const { data: company, error: companyErr } = await supabase
-      .from("companies")
-      .insert({ name: companyName, created_by: user.id })
-      .select("id")
-      .single();
-
-    if (companyErr || !company?.id) {
-      setLoading(false);
-      setError(companyErr?.message ?? "Could not create company.");
-      return;
-    }
-
-    const { error: memberErr } = await supabase.from("company_members").insert({
-      company_id: company.id,
-      user_id: user.id,
-      role: "owner"
+    const bootstrapRes = await fetch("/api/onboarding/create", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ companyName, productName, websiteUrl })
     });
-    if (memberErr) {
+    const bootstrapData = (await bootstrapRes.json().catch(() => null)) as
+      | { ok?: boolean; companyId?: string; productId?: string; error?: string }
+      | null;
+    if (!bootstrapRes.ok || !bootstrapData?.companyId || !bootstrapData?.productId) {
       setLoading(false);
-      setError(memberErr.message ?? "Could not add you to the company.");
-      return;
-    }
-
-    // Create default subscription (per company)
-    const { error: subErr } = await supabase.from("company_subscriptions").insert({
-      company_id: company.id,
-      plan: "starter",
-      status: "active",
-      seats_included: 1,
-      seats_addon: 0,
-      products_included: 1,
-      products_addon: 0
-    });
-    if (subErr) {
-      setLoading(false);
-      setError(subErr.message ?? "Could not create subscription row.");
-      return;
-    }
-
-    const { data: product, error: productErr } = await supabase
-      .from("products")
-      .insert({
-        company_id: company.id,
-        name: productName,
-        website_url: websiteUrl || null
-      })
-      .select("id")
-      .single();
-
-    if (productErr || !product?.id) {
-      setLoading(false);
-      setError(productErr?.message ?? "Could not create product.");
-      return;
-    }
-
-    const { error: envErr } = await supabase.from("product_environments").insert({
-      product_id: product.id,
-      name: "Default"
-    });
-    if (envErr) {
-      setLoading(false);
-      setError(envErr.message ?? "Could not create product environment.");
-      return;
-    }
-
-    const { error: pmErr } = await supabase.from("product_members").insert({
-      product_id: product.id,
-      user_id: user.id,
-      role: "owner"
-    });
-    if (pmErr) {
-      setLoading(false);
-      setError(pmErr.message ?? "Could not grant you access to the product.");
+      setError(bootstrapData?.error ?? "Could not create workspace.");
       return;
     }
 
     const ctxRes = await fetch("/api/context/select", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ companyId: company.id, productId: product.id })
+      body: JSON.stringify({
+        companyId: bootstrapData.companyId,
+        productId: bootstrapData.productId
+      })
     });
     if (!ctxRes.ok) {
       const t = await ctxRes.text();
