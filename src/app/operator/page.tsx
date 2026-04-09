@@ -1,6 +1,7 @@
 import { loadOperatorData } from "@/app/operator/loadOperatorData";
 import OperatorCompaniesClient from "@/app/operator/OperatorCompaniesClient";
 import OperatorSubscribersClient from "@/app/operator/OperatorSubscribersClient";
+import OperatorNav from "@/app/operator/OperatorNav";
 import { getOperatorGate } from "@/lib/platformAdmin";
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
@@ -41,6 +42,9 @@ export default async function OperatorPage() {
         <p className="mt-1 text-sm text-[var(--text2)]">
           Aggregated with the Supabase service role on the server. RLS does not apply to these queries.
         </p>
+        <div className="mt-4">
+          <OperatorNav active="overview" />
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

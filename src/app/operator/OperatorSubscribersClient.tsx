@@ -37,7 +37,13 @@ export default function OperatorSubscribersClient({
       return;
     }
     const label = target.email ?? target.id;
-    if (!window.confirm(`Permanently delete user ${label}? This cannot be undone.`)) return;
+    const confirmLabel = window.prompt(`Type DELETE to confirm deleting user ${label}. This cannot be undone.`);
+    if ((confirmLabel ?? "").trim().toUpperCase() !== "DELETE") return;
+    const reason = window.prompt("Reason for deletion (required):");
+    if (!(reason ?? "").trim()) {
+      setError("Reason is required.");
+      return;
+    }
 
     setBusyId(target.id);
     setError(null);
@@ -46,7 +52,7 @@ export default function OperatorSubscribersClient({
       const res = await fetch("/api/operator/delete-user", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ user_id: target.id })
+        body: JSON.stringify({ user_id: target.id, reason })
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Delete failed.");

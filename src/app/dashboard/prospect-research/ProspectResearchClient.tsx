@@ -11,6 +11,13 @@ import {
   type ProspectIntelligenceMemo
 } from "@/lib/prospectIntelligenceTypes";
 import { PROSPECT_RESEARCH_CLIENT_POLL_MAX_MS } from "@/lib/prospectResearch/pollingConstants";
+import {
+  downloadBlob,
+  prospectMemoToDocxBlob,
+  prospectMemoToPdfBlob,
+  sanitizeProspectFilename,
+  type ProspectMemoExportContext
+} from "@/lib/prospectResearch/prospectMemoExport";
 
 type ProspectRow = {
   id: string;
@@ -135,6 +142,7 @@ export default function ProspectResearchClient() {
   const [chatQ, setChatQ] = useState("");
   const [chatA, setChatA] = useState<string | null>(null);
   const [chatLoading, setChatLoading] = useState(false);
+  const [exporting, setExporting] = useState<null | "docx" | "pdf">(null);
 
   const loadList = useCallback(async () => {
     setLoadingList(true);
@@ -459,6 +467,71 @@ export default function ProspectResearchClient() {
     setError(null);
   }
 
+  function buildExportContext(): ProspectMemoExportContext | null {
+    if (!draftMemo) return null;
+    const baseName = accountName.trim() || companyName.trim() || "Prospect_Intelligence_Memo";
+    return {
+      memo: draftMemo,
+      accountName: baseName,
+      companyName: companyName.trim() || undefined,
+      websiteUrl: websiteUrl.trim() || undefined,
+      dealStage: dealStage.trim() || undefined,
+      preparedFor: preparedFor.trim() || undefined,
+      demoOrMeetingDate: demoOrMeetingDate.trim() || undefined,
+      sellerName: sellerName.trim() || undefined,
+      publicInfo: {
+        industrySubvertical: industrySubvertical.trim() || undefined,
+        companySize: companySize.trim() || undefined,
+        geography: geography.trim() || undefined,
+        businessModel: businessModel.trim() || undefined,
+        techStack: techStack.trim() || undefined,
+        fundingOwnership: fundingOwnership.trim() || undefined,
+        recentNewsEvents: recentNewsEvents.trim() || undefined
+      },
+      additionalContext: additionalContext.trim() || undefined,
+      lastAgentQ: chatQ.trim() || undefined,
+      lastAgentA: chatA?.trim() || undefined
+    };
+  }
+
+  async function downloadMemoDocx() {
+    const ctx = buildExportContext();
+    if (!ctx) return;
+    setExporting("docx");
+    setError(null);
+    try {
+      const blob = await prospectMemoToDocxBlob(ctx);
+      const name = sanitizeProspectFilename(
+        accountName.trim() || companyName.trim() || "Prospect_Intelligence_Memo",
+        "docx"
+      );
+      downloadBlob(blob, name);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not build Word document.");
+    } finally {
+      setExporting(null);
+    }
+  }
+
+  function downloadMemoPdf() {
+    const ctx = buildExportContext();
+    if (!ctx) return;
+    setExporting("pdf");
+    setError(null);
+    try {
+      const blob = prospectMemoToPdfBlob(ctx);
+      const name = sanitizeProspectFilename(
+        accountName.trim() || companyName.trim() || "Prospect_Intelligence_Memo",
+        "pdf"
+      );
+      downloadBlob(blob, name);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not build PDF.");
+    } finally {
+      setExporting(null);
+    }
+  }
+
   const memo = draftMemo ?? emptyProspectMemo();
 
   return (
@@ -743,8 +816,30 @@ export default function ProspectResearchClient() {
 
           {draftMemo || selectedId ? (
             <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-              <div className="mb-4 font-[var(--font-heading)] text-[14px] font-bold text-text">
-                Prospect Intelligence Memo
+              <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
+                  Prospect Intelligence Memo
+                </div>
+                {draftMemo && !generating ? (
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void downloadMemoDocx()}
+                      disabled={exporting !== null}
+                      className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
+                    >
+                      {exporting === "docx" ? "Preparing Word…" : "Download Word"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={downloadMemoPdf}
+                      disabled={exporting !== null}
+                      className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
+                    >
+                      {exporting === "pdf" ? "Preparing PDF…" : "Download PDF"}
+                    </button>
+                  </div>
+                ) : null}
               </div>
               {generating ? (
                 <div className="mb-6">

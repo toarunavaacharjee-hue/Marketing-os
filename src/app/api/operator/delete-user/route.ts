@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getOperatorGate } from "@/lib/platformAdmin";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/service-role";
+import { writeOperatorAuditLog } from "@/lib/operator/operatorAuditLog";
 
 export async function POST(req: Request) {
   const gate = await getOperatorGate();
@@ -13,10 +14,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY on server." }, { status: 500 });
   }
 
-  const body = (await req.json()) as { user_id?: string };
+  const body = (await req.json().catch(() => ({}))) as { user_id?: string; reason?: string };
   const targetId = (body.user_id ?? "").trim();
+  const reason = (body.reason ?? "").trim();
   if (!targetId) {
     return NextResponse.json({ error: "user_id is required." }, { status: 400 });
+  }
+  if (!reason) {
+    return NextResponse.json({ error: "reason is required." }, { status: 400 });
   }
 
   if (targetId === gate.userId) {
@@ -40,10 +45,23 @@ export async function POST(req: Request) {
     );
   }
 
+  const { data: before } = await admin.auth.admin.getUserById(targetId);
   const { error: delErr } = await admin.auth.admin.deleteUser(targetId);
   if (delErr) {
     return NextResponse.json({ error: delErr.message ?? "Failed to delete user." }, { status: 400 });
   }
+
+  await writeOperatorAuditLog({
+    admin,
+    req,
+    operatorUserId: gate.userId,
+    action: "user.delete",
+    targetType: "user",
+    targetId,
+    metadata: { reason },
+    before: before?.user ?? null,
+    after: null
+  });
 
   return NextResponse.json({ ok: true });
 }

@@ -65,10 +65,16 @@ export default function OperatorCompaniesClient({
             ? cur.products_addon
             : 0;
 
+      const reason = window.prompt("Reason for subscription change (required):");
+      if (!(reason ?? "").trim()) {
+        setError("Reason is required.");
+        return;
+      }
+
       const res = await fetch("/api/operator/set-company-subscription", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ company_id: companyId, plan, status, seats_addon, products_addon })
+        body: JSON.stringify({ company_id: companyId, plan, status, seats_addon, products_addon, reason })
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to update company subscription.");
