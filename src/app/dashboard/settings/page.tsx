@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { ManageBillingButton } from "@/app/dashboard/settings/ManageBillingButton";
 import SettingsClient from "@/app/dashboard/settings/SettingsClient";
+import { TENANT_COOKIE } from "@/lib/tenant";
 
 type Profile = {
   id: string;
@@ -21,6 +23,9 @@ export default async function SettingsPage() {
 
   if (!user) redirect("/login");
 
+  const cookieStore = await cookies();
+  const companyId = cookieStore.get(TENANT_COOKIE.companyId)?.value ?? null;
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("id,name,company,plan,ai_queries_used,is_platform_admin")
@@ -28,7 +33,17 @@ export default async function SettingsPage() {
     .single();
 
   const p = (profile ?? null) as Profile | null;
-  const plan = p?.plan ?? "free";
+
+  const { data: subscription } = companyId
+    ? await supabase
+        .from("company_subscriptions")
+        .select("plan,status")
+        .eq("company_id", companyId)
+        .maybeSingle()
+    : { data: null as any };
+
+  const plan = (subscription as any)?.plan ?? p?.plan ?? "free";
+  const status = (subscription as any)?.status ?? null;
 
   return (
     <div className="space-y-4">
@@ -63,7 +78,14 @@ export default async function SettingsPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text2 shadow-sm">
-            Plan: <span className="text-text">{plan}</span> • AI used:{" "}
+            Plan: <span className="text-text">{plan}</span>
+            {status ? (
+              <>
+                {" "}
+                • Status: <span className="text-text">{String(status)}</span>
+              </>
+            ) : null}{" "}
+            • AI used:{" "}
             <span className="text-text">{p?.ai_queries_used ?? 0}</span>
           </div>
           <ManageBillingButton />
