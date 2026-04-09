@@ -23,7 +23,6 @@ export type OperatorStats = {
   researchScanCount: number;
   syncRunCount: number | null;
   totalAiQueries: number;
-  legacyUserPlanBreakdown: Record<string, number>;
   companyPlanBreakdown: Record<string, number>;
 };
 
@@ -115,11 +114,6 @@ export async function loadOperatorData(): Promise<OperatorData> {
     });
 
   const totalAiQueries = profiles.reduce((s, p) => s + (p.ai_queries_used ?? 0), 0);
-  const legacyUserPlanBreakdown: Record<string, number> = {};
-  for (const p of profiles) {
-    const key = (p.plan ?? "unknown").toLowerCase() || "unknown";
-    legacyUserPlanBreakdown[key] = (legacyUserPlanBreakdown[key] ?? 0) + 1;
-  }
 
   const [cRes, pRes, eRes, rRes, sRes] = await Promise.all([
     admin.from("companies").select("id", { count: "exact", head: true }),
@@ -144,7 +138,6 @@ export async function loadOperatorData(): Promise<OperatorData> {
     researchScanCount: researchScanCount ?? 0,
     syncRunCount: syncRunCount === null ? null : syncRunCount,
     totalAiQueries,
-    legacyUserPlanBreakdown,
     companyPlanBreakdown: {}
   };
 
@@ -197,8 +190,7 @@ export async function loadOperatorData(): Promise<OperatorData> {
           status: sub?.status ?? null,
           seats_included: typeof sub?.seats_included === "number" ? sub.seats_included : null,
           seats_addon: typeof sub?.seats_addon === "number" ? sub.seats_addon : null,
-          products_included:
-            typeof sub?.products_included === "number" ? sub.products_included : null,
+          products_included: typeof sub?.products_included === "number" ? sub.products_included : null,
           products_addon: typeof sub?.products_addon === "number" ? sub.products_addon : null
         };
       });
@@ -209,3 +201,4 @@ export async function loadOperatorData(): Promise<OperatorData> {
 
   return { serviceRole: true, stats, companies, subscribers };
 }
+

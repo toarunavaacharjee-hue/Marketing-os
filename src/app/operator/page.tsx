@@ -33,7 +33,6 @@ export default async function OperatorPage() {
 
   const { stats, companies, subscribers } = data;
   const companyPlanEntries = Object.entries(stats.companyPlanBreakdown ?? {}).sort((a, b) => b[1] - a[1]);
-  const legacyUserPlanEntries = Object.entries(stats.legacyUserPlanBreakdown ?? {}).sort((a, b) => b[1] - a[1]);
 
   return (
     <div className="space-y-8">
@@ -79,23 +78,6 @@ export default async function OperatorPage() {
               </li>
             ))}
           </ul>
-          {legacyUserPlanEntries.length ? (
-            <div className="mt-3 border-t border-[var(--border)] pt-3">
-              <div className="text-xs text-[var(--text2)]">
-                Legacy per-user plan values (profiles.plan) — no longer used for access.
-              </div>
-              <ul className="mt-2 flex flex-wrap gap-2">
-                {legacyUserPlanEntries.map(([plan, n]) => (
-                  <li
-                    key={plan}
-                    className="rounded-[var(--radius2)] border border-[var(--border)] bg-[var(--surface2)] px-3 py-1 text-xs text-[var(--text2)]"
-                  >
-                    <span className="text-[var(--text)]">{plan}</span> · {n}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </div>
       ) : null}
 
