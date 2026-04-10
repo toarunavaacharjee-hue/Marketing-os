@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+type OperatorWorkspaceRow = {
+  company_id: string;
+  company_name: string | null;
+  role: string;
+};
+
 type OperatorUserRow = {
   id: string;
   email: string | null;
@@ -14,6 +20,7 @@ type OperatorUserRow = {
   ai_queries_used: number;
   is_platform_admin: boolean;
   profile_created_at: string | null;
+  workspaces?: OperatorWorkspaceRow[];
 };
 
 function badge(text: string) {
@@ -74,8 +81,8 @@ export default function OperatorUsersClient({ operatorUserId }: { operatorUserId
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search email / name / company"
-          className="w-full max-w-[360px] rounded-lg border border-[var(--border)] bg-[var(--surface2)] px-3 py-2 text-sm text-[var(--text)]"
+          placeholder="Search email, name, profile company, or workspace"
+          className="w-full max-w-[400px] rounded-lg border border-[var(--border)] bg-[var(--surface2)] px-3 py-2 text-sm text-[var(--text)]"
         />
       </div>
 
@@ -93,6 +100,17 @@ export default function OperatorUsersClient({ operatorUserId }: { operatorUserId
             <div className="mt-2 text-[11px] text-[var(--text3)]">
               Last sign-in: {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : "—"}
             </div>
+            {u.workspaces?.length ? (
+              <div className="mt-2 text-[11px] text-[var(--text2)]">
+                <span className="font-semibold text-[var(--text3)]">Workspaces: </span>
+                {u.workspaces.map((w, i) => (
+                  <span key={w.company_id}>
+                    {i > 0 ? " · " : ""}
+                    {w.company_name ?? w.company_id.slice(0, 8) + "…"} ({w.role})
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <div className="mt-3 flex justify-end">
               <Link
                 href={`/operator/users/${u.id}`}
@@ -107,12 +125,13 @@ export default function OperatorUsersClient({ operatorUserId }: { operatorUserId
 
       {/* Desktop table */}
       <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[1080px] text-left text-sm">
+        <table className="w-full min-w-[1280px] text-left text-sm">
           <thead className="border-b border-[var(--border)] text-[10px] font-semibold uppercase text-[var(--text3)]">
             <tr>
               <th className="px-3 py-2">Email</th>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Company</th>
+              <th className="px-3 py-2 min-w-[220px]">Workspaces</th>
               <th className="px-3 py-2">AI used</th>
               <th className="px-3 py-2">Operator</th>
               <th className="px-3 py-2">Signed up</th>
@@ -126,6 +145,23 @@ export default function OperatorUsersClient({ operatorUserId }: { operatorUserId
                 <td className="px-3 py-2 font-mono text-[12px] text-[var(--text)]">{u.email ?? "—"}</td>
                 <td className="px-3 py-2">{u.name ?? "—"}</td>
                 <td className="px-3 py-2">{u.company ?? "—"}</td>
+                <td className="px-3 py-2 align-top text-xs">
+                  {u.workspaces?.length ? (
+                    <ul className="space-y-1">
+                      {u.workspaces.map((w) => (
+                        <li key={w.company_id}>
+                          <span className="rounded border border-[var(--border)] bg-[var(--surface2)] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[var(--text3)]">
+                            {w.role}
+                          </span>{" "}
+                          <span className="text-[var(--text)]">{w.company_name ?? "—"}</span>
+                          <span className="font-mono text-[10px] text-[var(--text3)]"> {w.company_id.slice(0, 8)}…</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    "—"
+                  )}
+                </td>
                 <td className="px-3 py-2">{u.ai_queries_used}</td>
                 <td className="px-3 py-2">{u.is_platform_admin ? "Yes" : "—"}</td>
                 <td className="px-3 py-2 text-xs">{u.auth_created_at ? new Date(u.auth_created_at).toLocaleString() : "—"}</td>

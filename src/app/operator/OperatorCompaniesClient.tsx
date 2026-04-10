@@ -1,6 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
+
+type CompanyMemberRow = {
+  user_id: string;
+  email: string | null;
+  name: string | null;
+  role: string;
+};
 
 type CompanyRow = {
   id: string;
@@ -13,6 +21,7 @@ type CompanyRow = {
   seats_addon: number | null;
   products_included: number | null;
   products_addon: number | null;
+  members: CompanyMemberRow[];
 };
 
 const PLAN_OPTIONS = ["starter", "growth", "enterprise"] as const;
@@ -40,6 +49,51 @@ export default function OperatorCompaniesClient({
   const [ok, setOk] = useState<string | null>(null);
 
   const byId = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
+
+  async function deleteCompany(c: CompanyRow) {
+    const label = c.name?.trim() || c.id;
+    const confirm1 = window.prompt(
+      `Delete workspace "${label}"? This cannot be undone. Type DELETE to confirm.`
+    );
+    if ((confirm1 ?? "").trim().toUpperCase() !== "DELETE") return;
+
+    const confirmName = window.prompt(
+      `Type the exact workspace name to confirm (copy from the Companies table):`
+    );
+    if ((confirmName ?? "").trim() !== (c.name ?? "").trim()) {
+      setError("Workspace name did not match.");
+      return;
+    }
+
+    const reason = window.prompt("Reason for deleting this workspace (required):");
+    if (!(reason ?? "").trim()) {
+      setError("Reason is required.");
+      return;
+    }
+
+    setBusyId(c.id);
+    setError(null);
+    setOk(null);
+    try {
+      const res = await fetch("/api/operator/delete-company", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          company_id: c.id,
+          reason: reason.trim(),
+          confirm_name: (c.name ?? "").trim()
+        })
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Failed to delete workspace.");
+      setRows((prev) => prev.filter((r) => r.id !== c.id));
+      setOk("Workspace deleted.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete workspace.");
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function updateCompany(
     companyId: string,
@@ -112,10 +166,11 @@ export default function OperatorCompaniesClient({
       ) : null}
 
       <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[980px] text-left text-sm">
+        <table className="w-full min-w-[1280px] text-left text-sm">
           <thead className="border-b border-[var(--border)] text-[10px] font-semibold uppercase text-[var(--text3)]">
             <tr>
               <th className="px-3 py-2">Company</th>
+              <th className="px-3 py-2 min-w-[320px]">Accounts</th>
               <th className="px-3 py-2">Members</th>
               <th className="px-3 py-2">Products</th>
               <th className="px-3 py-2">Plan</th>
@@ -124,6 +179,7 @@ export default function OperatorCompaniesClient({
               <th className="px-3 py-2">Extra seats</th>
               <th className="px-3 py-2">Product limit</th>
               <th className="px-3 py-2">Extra products</th>
+              <th className="px-3 py-2 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[var(--text2)]">
@@ -142,6 +198,28 @@ export default function OperatorCompaniesClient({
                   <td className="px-3 py-2 font-medium text-[var(--text)]">
                     {c.name ?? "Company"}{" "}
                     <span className="font-mono text-[11px] text-[var(--text3)]">({c.id.slice(0, 8)}…)</span>
+                  </td>
+                  <td className="px-3 py-2 align-top text-xs">
+                    {c.members?.length ? (
+                      <ul className="space-y-1.5">
+                        {c.members.map((m) => (
+                          <li key={m.user_id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                            <span className="rounded border border-[var(--border)] bg-[var(--surface2)] px-1.5 py-0.5 text-[10px] font-semibold uppercase text-[var(--text3)]">
+                              {m.role}
+                            </span>
+                            <Link
+                              href={`/operator/users/${m.user_id}`}
+                              className="font-mono text-[11px] text-[#a8b4ff] hover:underline"
+                            >
+                              {m.email ?? m.user_id.slice(0, 8) + "…"}
+                            </Link>
+                            {m.name ? <span className="text-[var(--text3)]">({m.name})</span> : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="text-[var(--text3)]">—</span>
+                    )}
                   </td>
                   <td className="px-3 py-2">{c.members_count}</td>
                   <td className="px-3 py-2">{c.products_count}</td>
@@ -205,6 +283,16 @@ export default function OperatorCompaniesClient({
                     />
                     <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {productsIncluded}</div>
                   </td>
+                  <td className="px-3 py-2 text-right align-middle">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void deleteCompany(c)}
+                      className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-200 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {busy ? "…" : "Delete workspace"}
+                    </button>
+                  </td>
                 </tr>
               );
             })}
@@ -228,6 +316,21 @@ export default function OperatorCompaniesClient({
               <div className="mt-1 text-xs text-[var(--text2)]">
                 Members: {c.members_count} · Products: {c.products_count} · Seats: {included + addon}
               </div>
+              {c.members?.length ? (
+                <div className="mt-2 text-xs text-[var(--text2)]">
+                  <div className="text-[10px] font-semibold uppercase text-[var(--text3)]">Accounts</div>
+                  <ul className="mt-1 space-y-1">
+                    {c.members.map((m) => (
+                      <li key={m.user_id}>
+                        <span className="uppercase text-[10px] text-[var(--text3)]">{m.role}</span>{" "}
+                        <Link href={`/operator/users/${m.user_id}`} className="text-[#a8b4ff] hover:underline">
+                          {m.email ?? m.user_id.slice(0, 8) + "…"}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-[var(--text2)]">
                 <div className="rounded-lg border border-[var(--border)] bg-[var(--surface2)] p-2">
                   <div className="text-[10px] font-semibold uppercase text-[var(--text3)]">Plan</div>
@@ -291,6 +394,16 @@ export default function OperatorCompaniesClient({
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="mt-3 flex justify-end">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void deleteCompany(c)}
+                  className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-200 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Delete workspace
+                </button>
               </div>
             </div>
           );

@@ -26,6 +26,13 @@ export type OperatorStats = {
   companyPlanBreakdown: Record<string, number>;
 };
 
+export type OperatorCompanyMemberRow = {
+  user_id: string;
+  email: string | null;
+  name: string | null;
+  role: string;
+};
+
 export type OperatorCompanyRow = {
   id: string;
   name: string | null;
@@ -37,6 +44,8 @@ export type OperatorCompanyRow = {
   seats_addon: number | null;
   products_included: number | null;
   products_addon: number | null;
+  /** Workspace members (from company_members + auth email + profile name). */
+  members: OperatorCompanyMemberRow[];
 };
 
 type ProfileRow = {
@@ -164,12 +173,33 @@ export async function loadOperatorData(): Promise<OperatorData> {
       });
       stats.companyPlanBreakdown = companyPlanBreakdown;
 
-      const { data: members } = await admin.from("company_members").select("company_id");
+      const emailByUserId = new Map(allAuthUsers.map((u) => [u.id, u.email ?? null]));
+
+      const { data: members } = await admin.from("company_members").select("company_id,user_id,role");
       const countMap = new Map<string, number>();
+      const membersByCompany = new Map<string, OperatorCompanyMemberRow[]>();
       (members ?? []).forEach((r: any) => {
         const cid = String(r.company_id);
         countMap.set(cid, (countMap.get(cid) ?? 0) + 1);
+        const uid = String(r.user_id);
+        const pr = profMap.get(uid);
+        const row: OperatorCompanyMemberRow = {
+          user_id: uid,
+          email: emailByUserId.get(uid) ?? null,
+          name: pr?.name ?? null,
+          role: String(r.role ?? "member")
+        };
+        if (!membersByCompany.has(cid)) membersByCompany.set(cid, []);
+        membersByCompany.get(cid)!.push(row);
       });
+      for (const [, list] of membersByCompany) {
+        list.sort((a, b) => {
+          const ra = a.role === "owner" ? 0 : a.role === "admin" ? 1 : 2;
+          const rb = b.role === "owner" ? 0 : b.role === "admin" ? 1 : 2;
+          if (ra !== rb) return ra - rb;
+          return (a.email ?? "").localeCompare(b.email ?? "");
+        });
+      }
 
       const { data: products } = await admin.from("products").select("id,company_id");
       const productCountMap = new Map<string, number>();
@@ -191,7 +221,8 @@ export async function loadOperatorData(): Promise<OperatorData> {
           seats_included: typeof sub?.seats_included === "number" ? sub.seats_included : null,
           seats_addon: typeof sub?.seats_addon === "number" ? sub.seats_addon : null,
           products_included: typeof sub?.products_included === "number" ? sub.products_included : null,
-          products_addon: typeof sub?.products_addon === "number" ? sub.products_addon : null
+          products_addon: typeof sub?.products_addon === "number" ? sub.products_addon : null,
+          members: membersByCompany.get(cid) ?? []
         };
       });
     }

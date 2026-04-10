@@ -12,6 +12,7 @@ export type OperatorAuditAction =
   | "user.suspend"
   | "user.unsuspend"
   | "user.ai_usage.reset"
+  | "company.delete"
   | "company.subscription.set"
   | "prospect_research.worker.run"
   | "operator.data.read";

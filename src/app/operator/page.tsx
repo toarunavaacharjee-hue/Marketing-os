@@ -84,7 +84,9 @@ export default async function OperatorPage() {
       <div>
         <h2 className="font-[var(--font-heading)] text-lg font-semibold text-[var(--text)]">Companies</h2>
         <p className="mt-1 text-xs text-[var(--text2)]">
-          This is the source of truth for plan and seat limits (per company). Edit plan + seats here.
+          This is the source of truth for plan and seat limits (per company). Edit plan + seats here. The Accounts column
+          shows which users belong to each workspace (from company_members). Deleting a workspace removes the company and
+          its data per your database cascade rules (irreversible).
         </p>
         <OperatorCompaniesClient initialCompanies={companies} />
       </div>
@@ -92,7 +94,8 @@ export default async function OperatorPage() {
       <div>
         <h2 className="font-[var(--font-heading)] text-lg font-semibold text-[var(--text)]">Subscribers</h2>
         <p className="mt-1 text-xs text-[var(--text2)]">
-          From Auth users, merged with public.profiles. Sort: newest registration first.
+          From Auth users, merged with public.profiles. Sort: newest registration first. The profile Company field is
+          legacy free text; use Companies → Accounts or the Users tab → Workspaces for real workspace membership.
         </p>
         <OperatorSubscribersClient
           initialSubscribers={subscribers}

@@ -47,9 +47,44 @@ export async function GET(req: Request) {
   const profiles = (profilesRaw ?? []) as ProfileRow[];
   const profMap = new Map(profiles.map((p) => [p.id, p]));
 
+  const { data: membershipRows } =
+    ids.length > 0
+      ? await admin
+          .from("company_members")
+          .select("user_id, role, company_id, companies(name)")
+          .in("user_id", ids)
+      : { data: [] as any[] };
+
+  const workspacesByUser = new Map<
+    string,
+    Array<{ company_id: string; company_name: string | null; role: string }>
+  >();
+  for (const row of membershipRows ?? []) {
+    const uid = String((row as { user_id: string }).user_id);
+    const cid = String((row as { company_id: string }).company_id);
+    const role = String((row as { role?: string }).role ?? "member");
+    const companyName =
+      (row as { companies?: { name?: string | null } | null }).companies?.name ?? null;
+    if (!workspacesByUser.has(uid)) workspacesByUser.set(uid, []);
+    workspacesByUser.get(uid)!.push({
+      company_id: cid,
+      company_name: companyName,
+      role
+    });
+  }
+  for (const [, list] of workspacesByUser) {
+    list.sort((a, b) => {
+      const ra = a.role === "owner" ? 0 : a.role === "admin" ? 1 : 2;
+      const rb = b.role === "owner" ? 0 : b.role === "admin" ? 1 : 2;
+      if (ra !== rb) return ra - rb;
+      return (a.company_name ?? "").localeCompare(b.company_name ?? "");
+    });
+  }
+
   const rows = users
     .map((u) => {
       const pr = profMap.get(u.id);
+      const workspaces = workspacesByUser.get(u.id) ?? [];
       return {
         id: u.id,
         email: u.email ?? null,
@@ -60,15 +95,23 @@ export async function GET(req: Request) {
         plan: pr?.plan ?? null,
         ai_queries_used: pr?.ai_queries_used ?? 0,
         is_platform_admin: Boolean(pr?.is_platform_admin),
-        profile_created_at: pr?.created_at ?? null
+        profile_created_at: pr?.created_at ?? null,
+        workspaces
       };
     })
     .filter((r) => {
       if (!q) return true;
+      const wsHit = (r.workspaces ?? []).some(
+        (w) =>
+          (w.company_name ?? "").toLowerCase().includes(q) ||
+          w.company_id.toLowerCase().includes(q) ||
+          (w.role ?? "").toLowerCase().includes(q)
+      );
       return (
         (r.email ?? "").toLowerCase().includes(q) ||
         (r.name ?? "").toLowerCase().includes(q) ||
-        (r.company ?? "").toLowerCase().includes(q)
+        (r.company ?? "").toLowerCase().includes(q) ||
+        wsHit
       );
     })
     .sort((a, b) => {
