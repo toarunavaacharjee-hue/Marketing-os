@@ -42,8 +42,7 @@ export default function SignupClient() {
     const { error: oauthErr } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
-        data: { name, company, plan }
+        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`
       }
     });
 
