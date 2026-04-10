@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getOperatorGate } from "@/lib/platformAdmin";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/service-role";
 import { writeOperatorAuditLog } from "@/lib/operator/operatorAuditLog";
+import { assertNotSoleCompanyOwner } from "@/lib/operator/soleOwnerGuard";
 
 export async function POST(req: Request) {
   const gate = await getOperatorGate();
@@ -43,6 +44,11 @@ export async function POST(req: Request) {
       { error: "Remove platform admin access (is_platform_admin) before deleting this user." },
       { status: 400 }
     );
+  }
+
+  const soleGuard = await assertNotSoleCompanyOwner(admin, targetId);
+  if (!soleGuard.ok) {
+    return NextResponse.json({ error: soleGuard.error }, { status: 400 });
   }
 
   const { data: before } = await admin.auth.admin.getUserById(targetId);
