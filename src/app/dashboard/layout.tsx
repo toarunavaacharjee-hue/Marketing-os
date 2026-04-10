@@ -5,6 +5,7 @@ import { UserProvider } from "@/lib/user/UserProvider";
 import { cookies } from "next/headers";
 import { TENANT_COOKIE } from "@/lib/tenant";
 import { getCompanyPlan } from "@/lib/companyContext";
+import { redirectIfUnverifiedEmail } from "@/lib/auth/emailVerification";
 
 export default async function DashboardLayout({
   children
@@ -17,6 +18,7 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  redirectIfUnverifiedEmail(user);
 
   const { data: profile } = await supabase
     .from("profiles")

@@ -45,7 +45,7 @@ export default function SignupClient() {
       email,
       password,
       options: {
-        emailRedirectTo: `${origin}/auth/callback`,
+        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
         data: { name, company, plan }
       }
     });
@@ -68,8 +68,8 @@ export default function SignupClient() {
     }
 
     setLoading(false);
-    // Company membership is required for /dashboard. Send new users to onboarding to create a company/product.
-    router.push("/onboarding");
+    // Email confirmation is required before /dashboard. Onboarding starts after they verify.
+    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
   }
 
   return (

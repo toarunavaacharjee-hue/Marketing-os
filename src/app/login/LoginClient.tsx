@@ -34,10 +34,19 @@ export default function LoginClient() {
       password
     });
 
+    if (error) {
+      setLoading(false);
+      setError(error.message);
+      return;
+    }
+
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
     setLoading(false);
 
-    if (error) {
-      setError(error.message);
+    if (user?.email && !user.email_confirmed_at) {
+      router.push(`/verify-email?email=${encodeURIComponent(user.email)}`);
       return;
     }
 

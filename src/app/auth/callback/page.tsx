@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { redirectIfUnverifiedEmail } from "@/lib/auth/emailVerification";
 
 export default async function AuthCallbackPage({
   searchParams
@@ -13,6 +14,11 @@ export default async function AuthCallbackPage({
   if (code) {
     await supabase.auth.exchangeCodeForSession(code);
   }
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  if (user) redirectIfUnverifiedEmail(user);
 
   redirect(next);
 }
