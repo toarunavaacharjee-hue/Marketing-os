@@ -65,8 +65,9 @@ export default function OperatorCompaniesClient({
       return;
     }
 
-    const reason = window.prompt("Reason for deleting this workspace (required):");
-    if (!(reason ?? "").trim()) {
+    const reasonRaw = window.prompt("Reason for deleting this workspace (required):");
+    const reason = (reasonRaw ?? "").trim();
+    if (!reason) {
       setError("Reason is required.");
       return;
     }
@@ -80,7 +81,7 @@ export default function OperatorCompaniesClient({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           company_id: c.id,
-          reason: reason.trim(),
+          reason,
           confirm_name: (c.name ?? "").trim()
         })
       });
