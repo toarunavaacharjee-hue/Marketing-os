@@ -34,26 +34,6 @@ export default function SignupClient() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function signUpWithOAuth(provider: "google" | "azure") {
-    setError(null);
-    setLoading(true);
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-
-    const { error: oauthErr } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`
-      }
-    });
-
-    if (oauthErr) {
-      setLoading(false);
-      setError(oauthErr.message);
-      return;
-    }
-    // Redirect handled by Supabase.
-  }
-
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -108,33 +88,6 @@ export default function SignupClient() {
         </p>
 
         <div className="saas-card mt-8 p-6 sm:p-8">
-          <div className="space-y-3">
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={loading}
-              className="w-full"
-              onClick={() => void signUpWithOAuth("google")}
-            >
-              Continue with Google
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={loading}
-              className="w-full"
-              onClick={() => void signUpWithOAuth("azure")}
-            >
-              Continue with Microsoft
-            </Button>
-          </div>
-
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/[0.06]" />
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-[#9090b0]">or</div>
-            <div className="h-px flex-1 bg-white/[0.06]" />
-          </div>
-
           <form onSubmit={onSubmit} className="space-y-5">
             <div>
               <Label>Your name</Label>
