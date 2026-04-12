@@ -38,6 +38,37 @@ export async function POST(req: Request) {
     // Use service role to avoid client-side RLS edge cases during bootstrap.
     const admin = createSupabaseServiceRoleClient();
 
+    // product_members.user_id references public.profiles(id). Some sign-up paths can create an Auth user
+    // before a profile row exists — ensure the profile exists before inserting memberships.
+    const { data: existingProfile } = await admin.from("profiles").select("id").eq("id", user.id).maybeSingle();
+    if (!existingProfile?.id) {
+      const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+      const metaName = typeof meta.name === "string" ? meta.name.trim() : "";
+      const metaCompany = typeof meta.company === "string" ? meta.company.trim() : "";
+      const metaPlan = typeof meta.plan === "string" ? meta.plan.trim() : "";
+
+      const emailLocal = user.email?.includes("@") ? user.email.split("@")[0] : "";
+      const derivedName =
+        metaName ||
+        (emailLocal
+          ? emailLocal.replace(/[._-]+/g, " ").replace(/\s+/g, " ").trim()
+          : "User");
+
+      const { error: profileErr } = await admin.from("profiles").upsert({
+        id: user.id,
+        name: derivedName,
+        company: metaCompany || null,
+        plan: metaPlan || "starter",
+        ai_queries_used: 0
+      });
+      if (profileErr) {
+        return NextResponse.json(
+          { error: profileErr.message ?? "Could not create user profile (required for product access)." },
+          { status: 400 }
+        );
+      }
+    }
+
     const { data: company, error: companyErr } = await admin
       .from("companies")
       .insert({ name: companyName, created_by: user.id })
