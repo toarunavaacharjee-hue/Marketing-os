@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { getEntitlements } from "@/lib/planEntitlements";
+import { publishedSelfServeMonthlyListSummary } from "@/lib/marketingPricing";
 
 export default function UpgradeClient({ nextHref }: { nextHref: string }) {
   const router = useRouter();
@@ -22,22 +23,13 @@ export default function UpgradeClient({ nextHref }: { nextHref: string }) {
       const user = auth.user;
       if (!user) throw new Error("Not logged in.");
 
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("plan")
-        .eq("id", user.id)
-        .maybeSingle();
-      const plan = ((prof as any)?.plan ?? "starter") as string;
+      const res = await fetch("/api/workspace/entitlements");
+      const j = (await res.json()) as { error?: string; plan?: string; company_id?: string };
+      if (!res.ok) throw new Error(j?.error ?? "Failed to load workspace plan.");
+      const plan = String(j.plan ?? "starter");
+      const companyId = j.company_id;
+      if (!companyId) throw new Error("No workspace selected.");
       const ent = getEntitlements(plan);
-
-      const { data: memberships, error: memErr } = await supabase
-        .from("company_members")
-        .select("company_id")
-        .eq("user_id", user.id)
-        .limit(1);
-      if (memErr) throw new Error(memErr.message);
-      const companyId = (memberships?.[0] as any)?.company_id as string | undefined;
-      if (!companyId) throw new Error("No company found for this user.");
 
       const priority =
         ent.supportTier === "priority" || ent.supportTier === "dedicated"
@@ -45,7 +37,7 @@ export default function UpgradeClient({ nextHref }: { nextHref: string }) {
           : "normal";
 
       const subject = "Upgrade request";
-      const body = `Please upgrade my account.\n\nContext:\n- Requested module: ${nextHref}\n- User: ${user.email ?? user.id}\n- Current plan: ${plan}\n- Requested: Growth (or Enterprise if needed)\n`;
+      const body = `Please upgrade my account.\n\nContext:\n- Requested module: ${nextHref}\n- User: ${user.email ?? user.id}\n- Current plan: ${plan}\n- Requested: Growth (or Enterprise if needed)\n\n${publishedSelfServeMonthlyListSummary()}\n`;
 
       const { error: insErr } = await supabase.from("support_tickets").insert({
         company_id: companyId,

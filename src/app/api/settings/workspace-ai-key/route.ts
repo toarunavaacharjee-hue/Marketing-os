@@ -178,6 +178,17 @@ export async function DELETE() {
     return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
+  const plan = await getCompanyPlan(admin.companyId);
+  if (plan === "enterprise") {
+    return NextResponse.json(
+      {
+        error:
+          "Enterprise workspaces must keep a workspace Anthropic API key (BYOK). Removing the key is not allowed — add a replacement key instead of deleting."
+      },
+      { status: 400 }
+    );
+  }
+
   const svc = createSupabaseServiceRoleClient();
   if (!svc) {
     return NextResponse.json(

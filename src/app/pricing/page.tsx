@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingFooter, MarketingHeader } from "@/components/marketing/MarketingChrome";
+import { marketingPlanPrices, MAX_SELF_SERVE_LIST_PRICE_USD } from "@/lib/marketingPricing";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -21,13 +22,13 @@ const PLANS: Array<{
   {
     plan: "starter",
     name: "Starter",
-    monthly: 49,
-    annual: 39,
+    monthly: marketingPlanPrices.starter.monthly,
+    annual: marketingPlanPrices.starter.annualMonthlyEquivalent,
     blurb: "For solo operators and early PMM foundations.",
     bullets: [
-      "100 AI workflow runs / month",
-      "All core workbenches (ICP → Positioning → Messaging)",
-      "Marketing Workbench (unified workbench)",
+      "Full platform — all modules included (same as higher tiers)",
+      "100 AI workflow runs / month (unlimited on Growth+)",
+      "1 team seat · up to 2 products",
       "Email support"
     ],
     cta: "Start with Starter"
@@ -35,12 +36,13 @@ const PLANS: Array<{
   {
     plan: "growth",
     name: "Growth",
-    monthly: 99,
-    annual: 79,
+    monthly: marketingPlanPrices.growth.monthly,
+    annual: marketingPlanPrices.growth.annualMonthlyEquivalent,
     blurb: "For teams shipping campaigns weekly.",
     bullets: [
       "Unlimited AI workflow runs",
-      "All modules (Events, Content Studio, Battlecards, etc.)",
+      "Up to 3 team seats · up to 10 products",
+      "All modules included",
       "Priority support",
       "Team-ready workflows + templates"
     ],
@@ -49,14 +51,17 @@ const PLANS: Array<{
   {
     plan: "enterprise",
     name: "Enterprise",
-    monthly: 299,
-    annual: 249,
-    blurb: "For multi-team GTM governance and scale.",
+    monthly: marketingPlanPrices.enterprise.monthly,
+    annual: marketingPlanPrices.enterprise.annualMonthlyEquivalent,
+    blurb:
+      "For multi-team GTM governance and scale. List price caps on this page; need more — talk to sales.",
     bullets: [
-      "Unlimited AI + governance patterns",
-      "Advanced controls (SSO later), audit-friendly workflows",
-      "Dedicated success + onboarding",
-      "Custom security review"
+      "Unlimited AI workflow runs in-app; with BYOK, Anthropic token usage is on your Anthropic bill (not included in list price)",
+      "Up to 5 team seats and 30 products per workspace (hit either cap first; more via sales)",
+      "Anthropic workspace key required — Enterprise cannot use the shared platform key",
+      "Team roles & invites (owner, admin, member)",
+      "SSO & audit-friendly workflows — on the roadmap; dedicated onboarding + success",
+      "Security review scoped with sales"
     ],
     cta: "Talk to sales"
   }
@@ -65,10 +70,22 @@ const PLANS: Array<{
 const MATRIX = [
   { group: "Core workflow", rows: [["Marketing Workbench (unified workbench)", true, true, true]] },
   {
+    group: "Modules",
+    rows: [["All dashboard modules (18+)", true, true, true]]
+  },
+  {
+    group: "Workspace",
+    rows: [
+      ["Team seats (members + invites)", "1", "3", "5"],
+      ["Products per workspace", "Up to 2", "Up to 10", "Up to 30"]
+    ]
+  },
+  {
     group: "AI",
     rows: [
       ["AI workflow runs", "100/mo", "Unlimited", "Unlimited"],
-      ["Use your own Anthropic key", true, true, true]
+      ["Anthropic: optional platform key (if operator enables)", true, true, false],
+      ["Anthropic: bring your own workspace key (BYOK)", true, true, true]
     ]
   },
   {
@@ -76,7 +93,7 @@ const MATRIX = [
     rows: [
       ["Getting started + template library", true, true, true],
       ["Workflow run logs", true, true, true],
-      ["Team governance patterns", false, true, true]
+      ["Multi-seat collaboration (invites + roles)", false, true, true]
     ]
   },
   {
@@ -128,7 +145,7 @@ export default function PricingPage() {
               </li>
               <li className="flex gap-2">
                 <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#b8ff6c]" />
-                Enterprise is for governance + onboarding at scale.
+                {`Enterprise lists up to $${MAX_SELF_SERVE_LIST_PRICE_USD}/mo; above that, talk to sales for custom terms.`}
               </li>
             </ul>
           </div>
@@ -180,11 +197,20 @@ export default function PricingPage() {
           ))}
         </section>
 
+        <p className="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-text2">
+          {`Published list prices top out at $${MAX_SELF_SERVE_LIST_PRICE_USD}/mo. Volume discounts, SSO, higher seat or product limits, or procurement-friendly terms — `}
+          <Link href="/contact" className="font-medium text-accent2 hover:underline">
+            talk to sales
+          </Link>
+          .
+        </p>
+
         <section className="saas-card mt-14 overflow-hidden p-0 sm:p-0">
           <div className="border-b border-border px-6 py-5 sm:px-8">
             <div className="text-lg font-semibold text-text">Compare plans</div>
             <div className="mt-1 text-sm text-text2">
-              Workflow velocity + governance — not feature bloat.
+              Same modules everywhere — tiers differ by AI volume, seats, products, support, and how Anthropic is
+              connected.
             </div>
           </div>
           <div className="overflow-x-auto px-2 pb-4 sm:px-4">
@@ -240,10 +266,32 @@ export default function PricingPage() {
                 <div className="mt-2">Yes — upgrade any time from Settings.</div>
               </div>
               <div>
-                <div className="font-medium text-text">Do I need to add an Anthropic key?</div>
+                <div className="font-medium text-text">Are modules paywalled by plan?</div>
                 <div className="mt-2">
-                  You can bring your own key. Starter includes limited workflow runs; Growth and Enterprise are
-                  unlimited.
+                  No. Every plan includes the full module set. Starter is limited by AI workflow runs per month, product
+                  slots, and seats — not by which modules you can open.
+                </div>
+              </div>
+              <div>
+                <div className="font-medium text-text">Do I need an Anthropic key? Does my plan include AI API cost?</div>
+                <div className="mt-2">
+                  <span className="font-medium text-text">Starter &amp; Growth:</span> you can use{" "}
+                  <span className="font-medium text-text">platform AI</span> when your operator enables it, or add a{" "}
+                  <span className="font-medium text-text">workspace key (BYOK)</span> so usage bills to your Anthropic
+                  account. <span className="font-medium text-text">Enterprise</span> requires a workspace Anthropic key —
+                  no shared platform key. Your subscription covers the Marketing Workbench app;{" "}
+                  <span className="font-medium text-text">Anthropic token usage</span> is paid to Anthropic (or included in
+                  your Anthropic contract), not folded into the prices shown here for BYOK workspaces.
+                </div>
+              </div>
+              <div>
+                <div className="font-medium text-text">What if we need more than the Enterprise list price?</div>
+                <div className="mt-2">
+                  {`Published list prices top out at $${MAX_SELF_SERVE_LIST_PRICE_USD}/mo. For larger rollouts, SSO, procurement, or custom limits, `}
+                  <Link href="/contact" className="font-medium text-accent2 hover:underline">
+                    talk to sales
+                  </Link>
+                  .
                 </div>
               </div>
             </div>

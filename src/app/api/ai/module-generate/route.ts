@@ -5,6 +5,7 @@ import {
   getSelectedProductId
 } from "@/lib/productContext";
 import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
+import { getEntitlements, isAiMonthlyQuotaExceeded } from "@/lib/planEntitlements";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 type AnthropicMessageResponse = {
@@ -72,11 +73,12 @@ export async function POST(req: Request) {
   const plan = (await getCompanyPlanForSelectedCompany()).toLowerCase();
   const used = profile?.ai_queries_used ?? 0;
 
-  if (plan === "starter" && used >= 100) {
+  const ent = getEntitlements(plan);
+  if (isAiMonthlyQuotaExceeded(ent, used)) {
+    const cap = ent.aiQueriesPerMonth ?? 0;
     return NextResponse.json(
       {
-        error:
-          "Starter plan limit reached (100 AI queries/month). Upgrade for unlimited.",
+        error: `Plan limit reached (${cap} AI workflow runs/month). Upgrade for unlimited.`,
         code: "UPGRADE_REQUIRED"
       },
       { status: 402 }

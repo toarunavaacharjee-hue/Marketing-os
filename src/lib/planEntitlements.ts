@@ -14,50 +14,76 @@ export function planEligibleForPlatformAnthropicDefault(plan: Plan): boolean {
 
 export type Entitlements = {
   plan: Plan;
-  allowedDashboardSlugs: Set<string>; // "" means /dashboard home
+  allowedDashboardSlugs: Set<string>; // "" means /dashboard home; "*" = all modules
   supportTier: "standard" | "priority" | "dedicated";
-  seatsMax: number | null; // null = unlimited
+  /**
+   * Max company members + pending invites (team / “workspace seats”).
+   * Enterprise: 5 seats OR 30 products — whichever quota you hit first blocks scaling.
+   */
+  seatsMax: number | null; // null = unlimited (unused tier)
+  /** Max products (brands) for the company. Clamps subscription totals. */
+  productsMax: number | null;
+  /** AI workflow runs (Copilot + module generators) per user per month; null = unlimited. */
+  aiQueriesPerMonth: number | null;
 };
 
-// Slugs correspond to /dashboard/<slug>
-const STARTER_ALLOWED = new Set<string>([
-  "",
-  "work",
-  "getting-started",
-  "icp-segmentation",
-  "positioning-studio",
-  "messaging-artifacts",
-  "prospect-research",
-  "copilot",
-  "settings",
-  "support",
-  "upgrade"
-]);
+/** Starter / free monthly cap; must match marketing + enforcement in /api/ai/*. */
+export const STARTER_AI_QUERIES_PER_MONTH = 100;
+
+const ALL_MODULES = new Set<string>(["*"]);
 
 export function getEntitlements(rawPlan: string | null | undefined): Entitlements {
   const plan = normalizePlan(rawPlan);
   if (plan === "starter" || plan === "free") {
     return {
       plan,
-      allowedDashboardSlugs: STARTER_ALLOWED,
+      allowedDashboardSlugs: ALL_MODULES,
       supportTier: "standard",
-      seatsMax: 1
+      seatsMax: 1,
+      productsMax: 2,
+      aiQueriesPerMonth: STARTER_AI_QUERIES_PER_MONTH
     };
   }
   if (plan === "growth") {
     return {
       plan,
-      allowedDashboardSlugs: new Set<string>(["*"]),
+      allowedDashboardSlugs: ALL_MODULES,
       supportTier: "priority",
-      seatsMax: 5
+      seatsMax: 3,
+      productsMax: 10,
+      aiQueriesPerMonth: null
     };
   }
   return {
     plan: "enterprise",
-    allowedDashboardSlugs: new Set<string>(["*"]),
+    allowedDashboardSlugs: ALL_MODULES,
     supportTier: "dedicated",
-    seatsMax: null
+    seatsMax: 5,
+    productsMax: 30,
+    aiQueriesPerMonth: null
   };
+}
+
+export function isAiMonthlyQuotaExceeded(ent: Entitlements, aiQueriesUsed: number): boolean {
+  const cap = ent.aiQueriesPerMonth;
+  if (cap === null) return false;
+  return aiQueriesUsed >= cap;
+}
+
+/**
+ * Effective product slots from subscription row, after plan cap (prevents cheap tiers + huge products_addon abuse).
+ */
+export function effectiveProductsAllowed(
+  rawPlan: string | null | undefined,
+  productsIncluded: number,
+  productsAddon: number
+): number {
+  const included = Number.isFinite(productsIncluded) ? Math.max(0, Math.floor(productsIncluded)) : 1;
+  const addon = Number.isFinite(productsAddon) ? Math.max(0, Math.floor(productsAddon)) : 0;
+  const dbTotal = included + addon;
+  const cap = getEntitlements(rawPlan).productsMax;
+  if (cap === null) return dbTotal;
+  return Math.min(dbTotal, cap);
 }
 
 export function isSlugAllowed(ent: Entitlements, slug: string) {

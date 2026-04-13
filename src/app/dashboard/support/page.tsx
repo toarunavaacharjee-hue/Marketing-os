@@ -17,6 +17,7 @@ type TicketRow = {
 export default function SupportPage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [plan, setPlan] = useState<string>("starter");
+  const [workspaceCompanyId, setWorkspaceCompanyId] = useState<string | null>(null);
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -84,14 +85,8 @@ export default function SupportPage() {
       const user = auth.user;
       if (!user) throw new Error("Not logged in.");
 
-      const { data: memberships, error: memErr } = await supabase
-        .from("company_members")
-        .select("company_id")
-        .eq("user_id", user.id)
-        .limit(1);
-      if (memErr) throw new Error(memErr.message);
-      const companyId = (memberships?.[0] as any)?.company_id as string | undefined;
-      if (!companyId) throw new Error("No company found for this user.");
+      const companyId = workspaceCompanyId;
+      if (!companyId) throw new Error("Workspace not loaded yet. Refresh the page.");
 
       const priority = ent.supportTier === "priority" || ent.supportTier === "dedicated" ? "priority" : "normal";
 
@@ -168,7 +163,7 @@ export default function SupportPage() {
           <button
             type="button"
             onClick={() => void submitTicket()}
-            disabled={saving}
+            disabled={saving || loading || !workspaceCompanyId}
             className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
           >
             {saving ? "Submitting..." : ent.supportTier === "priority" || ent.supportTier === "dedicated" ? "Submit (priority)" : "Submit"}

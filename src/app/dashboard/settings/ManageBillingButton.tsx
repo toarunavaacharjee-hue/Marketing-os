@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/lib/ui";
+import { publishedSelfServeMonthlyListSummary } from "@/lib/marketingPricing";
 
 export function ManageBillingButton() {
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,7 @@ export function ManageBillingButton() {
     window.setTimeout(() => {
       setLoading(false);
       window.alert(
-        "Billing is not enabled yet. Your account is currently in free mode."
+        `Billing is not enabled yet. Your workspace is in operator-managed mode until Stripe checkout is wired.\n\n${publishedSelfServeMonthlyListSummary()}`
       );
     }, 250);
   }

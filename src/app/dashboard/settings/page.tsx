@@ -5,6 +5,8 @@ import { cookies } from "next/headers";
 import { ManageBillingButton } from "@/app/dashboard/settings/ManageBillingButton";
 import SettingsClient from "@/app/dashboard/settings/SettingsClient";
 import { TENANT_COOKIE } from "@/lib/tenant";
+import { getEntitlements } from "@/lib/planEntitlements";
+import { listPriceForWorkspacePlan } from "@/lib/marketingPricing";
 
 type Profile = {
   id: string;
@@ -44,6 +46,8 @@ export default async function SettingsPage() {
 
   const plan = (subscription as any)?.plan ?? p?.plan ?? "free";
   const status = (subscription as any)?.status ?? null;
+  const ent = getEntitlements(plan);
+  const listPrices = listPriceForWorkspacePlan(plan);
 
   return (
     <div className="space-y-4">
@@ -94,6 +98,63 @@ export default async function SettingsPage() {
               Log out
             </button>
           </form>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="text-sm font-medium text-text">Plan &amp; limits (this workspace)</div>
+            <p className="mt-2 text-sm text-text2">
+              Entitlements follow <span className="text-text">{ent.plan}</span> on{" "}
+              <code className="rounded bg-surface2 px-1 py-0.5 text-xs text-text">company_subscriptions</code> when a
+              workspace is selected; otherwise your profile plan is shown.
+            </p>
+            <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-text2">
+              <li>
+                Seats (members + pending invites):{" "}
+                <span className="text-text">{ent.seatsMax === null ? "Unlimited" : ent.seatsMax}</span>
+              </li>
+              <li>
+                Products:{" "}
+                <span className="text-text">{ent.productsMax === null ? "Unlimited" : ent.productsMax}</span>
+              </li>
+              <li>
+                AI runs / month:{" "}
+                <span className="text-text">
+                  {ent.aiQueriesPerMonth === null ? "Unlimited" : ent.aiQueriesPerMonth}
+                </span>
+              </li>
+              <li>
+                Support:{" "}
+                <span className="text-text">
+                  {ent.supportTier === "dedicated"
+                    ? "Dedicated onboarding"
+                    : ent.supportTier === "priority"
+                      ? "Priority"
+                      : "Standard"}
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div className="min-w-[200px] rounded-xl border border-border bg-surface2 p-4 text-sm text-text2">
+            <div className="font-medium text-text">Published list prices</div>
+            {listPrices ? (
+              <ul className="mt-2 space-y-1">
+                <li>
+                  Monthly: <span className="text-text">${listPrices.monthly}</span>/mo
+                </li>
+                <li>
+                  Annual (effective): <span className="text-text">${listPrices.annualMonthlyEquivalent}</span>/mo
+                </li>
+              </ul>
+            ) : (
+              <p className="mt-2">No list price mapping for this plan label.</p>
+            )}
+            <Link href="/pricing" className="mt-3 inline-block text-xs font-medium text-accent hover:underline">
+              View pricing page →
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseJsonObject } from "@/lib/extractJsonObject";
 import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
+import { getEntitlements, isAiMonthlyQuotaExceeded } from "@/lib/planEntitlements";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
 type AnthropicMessageResponse = {
@@ -43,11 +44,12 @@ export async function POST(req: Request) {
   const used = profile?.ai_queries_used ?? 0;
   const company = profile?.company ?? "Unknown company";
 
-  if (plan === "starter" && used >= 100) {
+  const ent = getEntitlements(plan);
+  if (isAiMonthlyQuotaExceeded(ent, used)) {
+    const cap = ent.aiQueriesPerMonth ?? 0;
     return NextResponse.json(
       {
-        error:
-          "You have reached your Starter plan limit (100 AI queries/month). Upgrade to Growth or Enterprise for unlimited queries.",
+        error: `You have reached your plan limit (${cap} AI workflow runs/month). Upgrade to Growth or Enterprise for unlimited runs.`,
         code: "UPGRADE_REQUIRED"
       },
       { status: 402 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSelectedProductId } from "@/lib/productContext";
+import { effectiveProductsAllowed, getEntitlements } from "@/lib/planEntitlements";
 
 function asText(v: unknown): string {
   return typeof v === "string" ? v : "";
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
       supabase.from("products").select("id", { count: "exact", head: true }).eq("company_id", companyId),
       supabase
         .from("company_subscriptions")
-        .select("products_included,products_addon,status")
+        .select("plan,products_included,products_addon,status")
         .eq("company_id", companyId)
         .maybeSingle()
     ]);
@@ -64,18 +65,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Subscription canceled." }, { status: 402 });
     }
 
+    const planRaw = String((subRow as any)?.plan ?? "starter");
     const productsIncluded = Number.isFinite((subRow as any)?.products_included)
       ? Number((subRow as any)?.products_included)
       : 1;
     const productsAddon = Number.isFinite((subRow as any)?.products_addon)
       ? Number((subRow as any)?.products_addon)
       : 0;
-    const productsAllowed = Math.max(0, Math.floor(productsIncluded) + Math.max(0, Math.floor(productsAddon)));
+    const productsAllowed = effectiveProductsAllowed(planRaw, productsIncluded, productsAddon);
+    const planCap = getEntitlements(planRaw).productsMax;
 
     const currentProducts = productCount ?? 0;
     if (currentProducts >= productsAllowed) {
+      const capHint =
+        planCap !== null
+          ? ` Your plan allows up to ${planCap} product${planCap === 1 ? "" : "s"}.`
+          : "";
       return NextResponse.json(
-        { error: `Product limit reached (${currentProducts}/${productsAllowed}). Add an add-on product or upgrade.` },
+        {
+          error: `Product limit reached (${currentProducts}/${productsAllowed}).${capHint} Add a product add-on or upgrade for more.`
+        },
         { status: 402 }
       );
     }

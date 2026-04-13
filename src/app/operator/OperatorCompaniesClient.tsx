@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { getEntitlements } from "@/lib/planEntitlements";
 
 type CompanyMemberRow = {
   user_id: string;
@@ -29,13 +30,25 @@ const STATUS_OPTIONS = ["trialing", "active", "past_due", "canceled"] as const;
 
 function seatsIncludedFor(plan: string) {
   const p = (plan ?? "starter").toLowerCase();
-  if (p === "growth") return 5;
-  if (p === "enterprise") return 10;
+  if (p === "growth") return 3;
+  if (p === "enterprise") return 5;
   return 1;
+}
+
+function maxSeatsAddonForPlan(plan: string, seatsIncluded: number): number | undefined {
+  const cap = getEntitlements(plan).seatsMax;
+  if (cap === null) return undefined;
+  return Math.max(0, cap - seatsIncluded);
 }
 
 function productsIncludedFor(_plan: string) {
   return 1;
+}
+
+function maxProductsAddonForPlan(plan: string, productsIncluded: number): number | undefined {
+  const cap = getEntitlements(plan).productsMax;
+  if (cap === null) return undefined;
+  return Math.max(0, cap - productsIncluded);
 }
 
 export default function OperatorCompaniesClient({
@@ -188,12 +201,19 @@ export default function OperatorCompaniesClient({
               const busy = busyId === c.id;
               const plan = (c.plan ?? "starter").toLowerCase();
               const status = (c.status ?? "active").toLowerCase();
-              const included = seatsIncludedFor(plan);
+              const included = typeof c.seats_included === "number" ? c.seats_included : seatsIncludedFor(plan);
               const addon = typeof c.seats_addon === "number" ? c.seats_addon : 0;
-              const seatsTotal = included + addon;
-              const productsIncluded = productsIncludedFor(plan);
+              const planSeatsCap = getEntitlements(plan).seatsMax;
+              const seatsTotal =
+                planSeatsCap === null ? included + addon : Math.min(included + addon, planSeatsCap);
+              const productsIncluded =
+                typeof c.products_included === "number" ? c.products_included : productsIncludedFor(plan);
               const productsAddon = typeof c.products_addon === "number" ? c.products_addon : 0;
-              const productsTotal = productsIncluded + productsAddon;
+              const planProductsCap = getEntitlements(plan).productsMax;
+              const productsTotal =
+                planProductsCap === null
+                  ? productsIncluded + productsAddon
+                  : Math.min(productsIncluded + productsAddon, planProductsCap);
               return (
                 <tr key={c.id} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2 font-medium text-[var(--text)]">
@@ -257,32 +277,44 @@ export default function OperatorCompaniesClient({
                     <input
                       type="number"
                       min={0}
+                      max={maxSeatsAddonForPlan(plan, included)}
                       step={1}
                       defaultValue={addon}
                       disabled={busy}
                       onBlur={(e) => {
-                        const n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                        let n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                        const maxA = maxSeatsAddonForPlan(plan, included);
+                        if (typeof maxA === "number") n = Math.min(n, maxA);
                         void updateCompany(c.id, { seats_addon: n });
                       }}
                       className="w-[110px] rounded-lg border border-[var(--border)] bg-[var(--surface2)] px-2 py-1 text-sm text-[var(--text)] disabled:opacity-60"
                     />
-                    <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {included}</div>
+                    <div className="mt-1 text-[10px] text-[var(--text3)]">
+                      Included: {included}
+                      {planSeatsCap !== null ? ` · Plan cap ${planSeatsCap} seats` : ""}
+                    </div>
                   </td>
                   <td className="px-3 py-2 font-mono text-[12px] text-[var(--text)]">{productsTotal}</td>
                   <td className="px-3 py-2">
                     <input
                       type="number"
                       min={0}
+                      max={maxProductsAddonForPlan(plan, productsIncluded)}
                       step={1}
                       defaultValue={productsAddon}
                       disabled={busy}
                       onBlur={(e) => {
-                        const n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                        let n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                        const maxA = maxProductsAddonForPlan(plan, productsIncluded);
+                        if (typeof maxA === "number") n = Math.min(n, maxA);
                         void updateCompany(c.id, { products_addon: n });
                       }}
                       className="w-[110px] rounded-lg border border-[var(--border)] bg-[var(--surface2)] px-2 py-1 text-sm text-[var(--text)] disabled:opacity-60"
                     />
-                    <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {productsIncluded}</div>
+                    <div className="mt-1 text-[10px] text-[var(--text3)]">
+                      Included: {productsIncluded}
+                      {planProductsCap !== null ? ` · Plan cap ${planProductsCap} total` : ""}
+                    </div>
                   </td>
                   <td className="px-3 py-2 text-right align-middle">
                     <button
@@ -307,15 +339,21 @@ export default function OperatorCompaniesClient({
           const busy = busyId === c.id;
           const plan = (c.plan ?? "starter").toLowerCase();
           const status = (c.status ?? "active").toLowerCase();
-          const included = seatsIncludedFor(plan);
+          const included =
+            typeof c.seats_included === "number" ? c.seats_included : seatsIncludedFor(plan);
           const addon = typeof c.seats_addon === "number" ? c.seats_addon : 0;
-          const productsIncluded = productsIncludedFor(plan);
+          const planSeatsCap = getEntitlements(plan).seatsMax;
+          const seatsShown =
+            planSeatsCap === null ? included + addon : Math.min(included + addon, planSeatsCap);
+          const productsIncluded =
+            typeof c.products_included === "number" ? c.products_included : productsIncludedFor(plan);
           const productsAddon = typeof c.products_addon === "number" ? c.products_addon : 0;
+          const planProductsCap = getEntitlements(plan).productsMax;
           return (
             <div key={c.id} className="p-3">
               <div className="text-sm font-semibold text-[var(--text)]">{c.name ?? "Company"}</div>
               <div className="mt-1 text-xs text-[var(--text2)]">
-                Members: {c.members_count} · Products: {c.products_count} · Seats: {included + addon}
+                Members: {c.members_count} · Products: {c.products_count} · Seats: {seatsShown}
               </div>
               {c.members?.length ? (
                 <div className="mt-2 text-xs text-[var(--text2)]">
@@ -353,32 +391,44 @@ export default function OperatorCompaniesClient({
                   <input
                     type="number"
                     min={0}
+                    max={maxSeatsAddonForPlan(plan, included)}
                     step={1}
                     defaultValue={addon}
                     disabled={busy}
                     onBlur={(e) => {
-                      const n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                      let n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                      const maxA = maxSeatsAddonForPlan(plan, included);
+                      if (typeof maxA === "number") n = Math.min(n, maxA);
                       void updateCompany(c.id, { seats_addon: n });
                     }}
                     className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--text)] disabled:opacity-60"
                   />
-                  <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {included}</div>
+                  <div className="mt-1 text-[10px] text-[var(--text3)]">
+                    Included: {included}
+                    {planSeatsCap !== null ? ` · Cap ${planSeatsCap}` : ""}
+                  </div>
                 </div>
                 <div className="rounded-lg border border-[var(--border)] bg-[var(--surface2)] p-2">
                   <div className="text-[10px] font-semibold uppercase text-[var(--text3)]">Extra products</div>
                   <input
                     type="number"
                     min={0}
+                    max={maxProductsAddonForPlan(plan, productsIncluded)}
                     step={1}
                     defaultValue={productsAddon}
                     disabled={busy}
                     onBlur={(e) => {
-                      const n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                      let n = Math.max(0, Math.floor(Number(e.target.value || "0")));
+                      const maxA = maxProductsAddonForPlan(plan, productsIncluded);
+                      if (typeof maxA === "number") n = Math.min(n, maxA);
                       void updateCompany(c.id, { products_addon: n });
                     }}
                     className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--text)] disabled:opacity-60"
                   />
-                  <div className="mt-1 text-[10px] text-[var(--text3)]">Included: {productsIncluded}</div>
+                  <div className="mt-1 text-[10px] text-[var(--text3)]">
+                    Included: {productsIncluded}
+                    {planProductsCap !== null ? ` · Plan cap ${planProductsCap} total` : ""}
+                  </div>
                 </div>
               </div>
               <div className="mt-2">

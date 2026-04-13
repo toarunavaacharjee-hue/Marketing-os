@@ -2,18 +2,18 @@ import { NextResponse } from "next/server";
 import { getOperatorGate } from "@/lib/platformAdmin";
 import { createSupabaseServiceRoleClient } from "@/lib/supabase/service-role";
 import { writeOperatorAuditLog } from "@/lib/operator/operatorAuditLog";
+import { getEntitlements } from "@/lib/planEntitlements";
 
 const PLANS = ["starter", "growth", "enterprise"] as const;
 
 function seatsIncludedFor(plan: (typeof PLANS)[number]) {
   if (plan === "starter") return 1;
-  if (plan === "growth") return 5;
-  return 10;
+  if (plan === "growth") return 3;
+  return 5;
 }
 
 function productsIncludedFor(_plan: (typeof PLANS)[number]) {
-  // Pricing model (per your choice B): every company gets 1 included product,
-  // then pays for each additional product via products_addon.
+  // Pricing model: every company gets 1 included product, then pays via products_addon.
   return 1;
 }
 
@@ -54,6 +54,19 @@ export async function POST(req: Request) {
 
   const seatsIncluded = seatsIncludedFor(plan);
   const productsIncluded = productsIncludedFor(plan);
+  const ent = getEntitlements(plan);
+  const productsMax = ent.productsMax;
+  const seatsMax = ent.seatsMax;
+  let productsAddonClamped = productsAddon;
+  if (productsMax !== null) {
+    const maxAddon = Math.max(0, productsMax - productsIncluded);
+    productsAddonClamped = Math.min(productsAddon, maxAddon);
+  }
+  let seatsAddonClamped = seatsAddon;
+  if (seatsMax !== null) {
+    const maxSeatAddon = Math.max(0, seatsMax - seatsIncluded);
+    seatsAddonClamped = Math.min(seatsAddon, maxSeatAddon);
+  }
 
   const { data: before } = await admin
     .from("company_subscriptions")
@@ -66,9 +79,9 @@ export async function POST(req: Request) {
     plan,
     status,
     seats_included: seatsIncluded,
-    seats_addon: seatsAddon,
+    seats_addon: seatsAddonClamped,
     products_included: productsIncluded,
-    products_addon: productsAddon
+    products_addon: productsAddonClamped
   };
 
   const { error } = await admin.from("company_subscriptions").upsert(nextRow);

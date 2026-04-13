@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { MarketingFooter, MarketingHeader } from "@/components/marketing/MarketingChrome";
 import { BLOG_POSTS } from "@/lib/blog/posts";
+import { marketingPlanPrices, MAX_SELF_SERVE_LIST_PRICE_USD } from "@/lib/marketingPricing";
 
 const modules = [
   ["Command Centre", "Core"],
@@ -30,7 +31,10 @@ const faq = [
   ["How long does setup take?", "Most teams are live in under 2 hours with demo data, then connect real channels module by module."],
   ["Do I need a technical team?", "No. AI Marketing Workbench is designed for operators and founders first. A developer helps only for deeper integrations."],
   ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
-  ["Does AI usage have limits?", "Starter includes 100 AI queries/month. Growth and Enterprise include unlimited queries."],
+  [
+    "Does AI usage have limits?",
+    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes the full module set — tiers differ by products, AI volume, seats, and support."
+  ],
   ["Can we use our own Anthropic key?", "Yes. Each user can store their API key and run AI features in Copilot and module generators."],
   ["Is there a contract?", "Starter and Growth are month-to-month. Enterprise can be monthly or annual with custom terms."]
 ];
@@ -60,16 +64,34 @@ export default function HomePageClient() {
     () => [
       {
         name: "Starter",
-        m: 49,
-        a: 39,
-        bullets: ["100 AI workflow runs / month", "Core PMM spine", "Marketing Workbench"]
+        m: marketingPlanPrices.starter.monthly,
+        a: marketingPlanPrices.starter.annualMonthlyEquivalent,
+        bullets: [
+          "All modules included — full platform",
+          "100 AI workflow runs / month",
+          "1 seat · up to 2 products"
+        ]
       },
-      { name: "Growth", m: 99, a: 79, bullets: ["Unlimited AI workflow runs", "All modules", "Priority support"] },
+      {
+        name: "Growth",
+        m: marketingPlanPrices.growth.monthly,
+        a: marketingPlanPrices.growth.annualMonthlyEquivalent,
+        bullets: [
+          "Unlimited AI workflow runs",
+          "3 seats · up to 10 products",
+          "All modules",
+          "Priority support"
+        ]
+      },
       {
         name: "Enterprise",
-        m: 299,
-        a: 249,
-        bullets: ["Unlimited AI + governance patterns", "Operator-friendly controls", "Dedicated success"]
+        m: marketingPlanPrices.enterprise.monthly,
+        a: marketingPlanPrices.enterprise.annualMonthlyEquivalent,
+        bullets: [
+          "Unlimited AI in-app; BYOK required (AI usage on your Anthropic bill)",
+          "5 seats · up to 30 products · dedicated success",
+          "Higher limits & procurement — talk to sales"
+        ]
       }
     ],
     []
@@ -368,6 +390,13 @@ export default function HomePageClient() {
               </div>
             ))}
           </div>
+          <p className="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-text2">
+            {`List prices top out at $${MAX_SELF_SERVE_LIST_PRICE_USD}/mo on this page. Beyond that — `}
+            <Link href="/contact" className="font-medium text-[#c4b8ff] hover:underline">
+              talk to sales
+            </Link>
+            .
+          </p>
         </section>
 
         <section data-reveal className="mt-24">

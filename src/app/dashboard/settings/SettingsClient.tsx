@@ -271,14 +271,53 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
 
         <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
           <div className="text-sm font-medium text-text">AI integration</div>
-          <div className="mt-1 text-sm text-text2">
-            <span className="font-medium text-text">Starter, Free, and Growth</span> workspaces can use{" "}
-            <span className="font-medium text-text">platform AI</span> (operator{" "}
-            <span className="font-mono text-xs">ANTHROPIC_API_KEY</span>) with no setup.{" "}
-            <span className="font-medium text-text">Enterprise</span> must add a workspace key below.{" "}
-            Optionally, any plan can add its own key (BYOK) so calls bill to your Anthropic account—when set, it always
-            overrides platform AI. Keys are encrypted server-side, never stored in the browser.
-          </div>
+          <p className="mt-1 text-sm text-text2">
+            Copilot and module generators use the{" "}
+            <span className="font-medium text-text">Anthropic API</span> only (Claude). OpenAI and other providers are not
+            supported yet.
+          </p>
+          <p className="mt-2 text-sm text-text2">
+            <span className="font-medium text-text">Starter, Free, and Growth</span> can use{" "}
+            <span className="font-medium text-text">platform AI</span> when your operator sets{" "}
+            <span className="font-mono text-xs">ANTHROPIC_API_KEY</span>.{" "}
+            <span className="font-medium text-text">Enterprise</span> must add a workspace key below.
+          </p>
+          <p className="mt-2 text-sm text-text2">
+            <span className="font-medium text-text">Bring your own key (BYOK):</span> optional on any plan. Your key bills
+            to your Anthropic account and always overrides platform AI. Keys are encrypted server-side; we never store them
+            in the browser.
+          </p>
+
+          <details className="group mt-4 rounded-xl border border-border bg-surface2 px-4 py-3 [&_summary::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-text">
+              <span>When should I add my own API key?</span>
+              <span className="text-text3 transition group-open:rotate-90" aria-hidden>
+                ›
+              </span>
+            </summary>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-xs leading-relaxed text-text2">
+              <li>
+                <span className="font-medium text-text">Enterprise:</span> required — your subscription expects this
+                workspace to use your Anthropic contract and limits.
+              </li>
+              <li>
+                <span className="font-medium text-text">Cost &amp; volume:</span> add a key when you want usage to bill
+                directly to you (e.g. heavy Copilot or module runs beyond Starter&apos;s monthly workflow cap).
+              </li>
+              <li>
+                <span className="font-medium text-text">Security &amp; policy:</span> when your team needs the key under
+                your control for audit or data-handling review.
+              </li>
+              <li>
+                <span className="font-medium text-text">Reliability:</span> a dedicated key can avoid shared platform
+                rate limits during peak use.
+              </li>
+              <li>
+                <span className="font-medium text-text">Not required</span> for small teams getting started — use platform
+                AI when available until one of the above applies.
+              </li>
+            </ul>
+          </details>
 
           {workspaceMeta?.warning ? (
             <div className="mt-3 rounded-xl border border-sky-500/35 bg-sky-500/10 px-3 py-2 text-xs text-sky-100">

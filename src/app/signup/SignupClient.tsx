@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { AuthShell } from "@/components/marketing/AuthShell";
 import { Button, Input, Label, TextLink } from "@/lib/ui";
+import { listPriceForWorkspacePlan } from "@/lib/marketingPricing";
 
 type Plan = "starter" | "growth" | "enterprise" | "free";
 
@@ -26,6 +27,7 @@ export default function SignupClient() {
   const plan = normalizePlan(sp.get("plan"));
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const signupListPrices = useMemo(() => listPriceForWorkspacePlan(plan), [plan]);
 
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
@@ -86,6 +88,14 @@ export default function SignupClient() {
           You&apos;re on the <span className="font-semibold text-[#c4b8ff]">{plan}</span> plan. Set up your workspace in
           minutes.
         </p>
+        {signupListPrices ? (
+          <p className="mt-2 text-xs leading-relaxed text-[#9090b0]">
+            When billing ships, published monthly list for this path is{" "}
+            <span className="font-medium text-[#f0f0f8]">${signupListPrices.monthly}/mo</span> (
+            <span className="font-medium text-[#f0f0f8]">${signupListPrices.annualMonthlyEquivalent}/mo</span> effective
+            on annual billing). See <TextLink href="/pricing">pricing</TextLink>.
+          </p>
+        ) : null}
 
         <div className="saas-card mt-8 p-6 sm:p-8">
           <form onSubmit={onSubmit} className="space-y-5">
