@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { MarketingFooter, MarketingHeader } from "@/components/marketing/MarketingChrome";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pricing | AI Marketing Workbench",
+  description: "Simple plans for modern PMM & GTM teams: Starter, Growth, and Enterprise."
+};
 
 type Plan = "starter" | "growth" | "enterprise";
 

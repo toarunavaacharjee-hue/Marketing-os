@@ -4,6 +4,7 @@ const nav = [
   { href: "/#features", label: "Features" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#modules", label: "Modules" },
+  { href: "/blog", label: "Blog" },
   { href: "/pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" }
 ] as const;
@@ -101,6 +102,11 @@ export function MarketingFooter() {
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Resources</div>
             <ul className="mt-4 space-y-2.5 text-sm text-text2">
               <li className="cursor-default">Docs</li>
+              <li>
+                <Link href="/blog" className="transition hover:text-text">
+                  Blog
+                </Link>
+              </li>
               <li>
                 <Link href="/#faq" className="transition hover:text-text">
                   FAQ
