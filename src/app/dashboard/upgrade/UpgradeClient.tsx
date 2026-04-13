@@ -58,33 +58,26 @@ export default function UpgradeClient({ nextHref }: { nextHref: string }) {
   }
 
   return (
-    <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-      <div
-        className="text-2xl text-[#f0f0f8]"
-        style={{ fontFamily: "var(--font-heading)" }}
-      >
+    <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+      <div className="text-2xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
         Upgrade required
       </div>
-      <div className="mt-2 text-sm text-[#9090b0]">
+      <div className="mt-2 text-sm text-text2">
         Billing isn’t enabled yet. You can request an upgrade and the operator can change your plan from the Operator
         console.
       </div>
 
       {error ? (
-        <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-          {error}
-        </div>
+        <div className="mt-4 rounded-lg border border-red/30 bg-red/10 px-3 py-2 text-sm text-red">{error}</div>
       ) : null}
       {ok ? (
-        <div className="mt-4 rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">
-          {ok}
-        </div>
+        <div className="mt-4 rounded-lg border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{ok}</div>
       ) : null}
 
       <div className="mt-5 flex flex-wrap gap-2">
         <Link
           href="/pricing"
-          className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black"
+          className="rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card hover:bg-amber-hover"
         >
           View pricing
         </Link>
@@ -92,19 +85,19 @@ export default function UpgradeClient({ nextHref }: { nextHref: string }) {
           type="button"
           onClick={() => void requestUpgrade()}
           disabled={busy}
-          className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm font-medium text-[#f0f0f8] hover:bg-white/5 disabled:opacity-60"
+          className="rounded-sm border border-input-border bg-surface2 px-4 py-2 text-sm font-medium text-text hover:bg-surface3 disabled:opacity-60"
         >
           {busy ? "Requesting…" : "Request upgrade"}
         </button>
         <Link
           href={nextHref}
-          className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm font-medium text-[#f0f0f8] hover:bg-white/5"
+          className="rounded-sm border border-input-border bg-surface2 px-4 py-2 text-sm font-medium text-text hover:bg-surface3"
         >
           Go back
         </Link>
         <Link
           href="/dashboard/support"
-          className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm font-medium text-[#f0f0f8] hover:bg-white/5"
+          className="rounded-sm border border-input-border bg-surface2 px-4 py-2 text-sm font-medium text-text hover:bg-surface3"
         >
           Support
         </Link>

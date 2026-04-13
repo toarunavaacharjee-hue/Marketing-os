@@ -100,7 +100,7 @@ export default function HomePageClient() {
   const latest = [...BLOG_POSTS].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-bg text-text antialiased" style={{ fontFamily: "var(--font-body)" }}>
+    <div className="min-h-screen bg-page text-text antialiased" style={{ fontFamily: "var(--font-body)" }}>
       <style jsx global>{`
         [data-reveal] {
           opacity: 0;
@@ -121,7 +121,7 @@ export default function HomePageClient() {
         <section data-reveal className="grid gap-10 pt-8 lg:grid-cols-2 lg:items-center lg:gap-12">
           <div>
             <div className="saas-pill">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#b8ff6c] shadow-[0_0_8px_#b8ff6c]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-amber shadow-[0_0_8px_var(--color-amber)]" />
               PMM &amp; GTM platform
             </div>
             <h1
@@ -137,7 +137,7 @@ export default function HomePageClient() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/signup?plan=starter"
-                className="inline-flex items-center justify-center rounded-lg bg-[#b8ff6c] px-5 py-3 text-[15px] font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/20 transition hover:bg-[#c8ff7c]"
+                className="inline-flex items-center justify-center rounded-lg bg-amber px-5 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card transition hover:bg-amber-hover"
               >
                 Start free
               </Link>
@@ -156,9 +156,9 @@ export default function HomePageClient() {
             </div>
             <div className="saas-card mt-8 flex flex-wrap items-center gap-5 px-5 py-4 text-sm">
               <div className="flex -space-x-2">
-                <div className="h-9 w-9 rounded-full border-2 border-[#141420] bg-gradient-to-br from-[#7c6cff] to-[#5a4fd4]" />
-                <div className="h-9 w-9 rounded-full border-2 border-[#141420] bg-[#b8ff6c]" />
-                <div className="h-9 w-9 rounded-full border-2 border-[#141420] bg-[#2a2e3f]" />
+                <div className="h-9 w-9 rounded-full border-2 border-border bg-gradient-to-br from-primary to-primary-dark" />
+                <div className="h-9 w-9 rounded-full border-2 border-border bg-amber" />
+                <div className="h-9 w-9 rounded-full border-2 border-border bg-surface3" />
               </div>
               <div className="h-8 w-px bg-border" />
               <div className="text-text2">
@@ -173,9 +173,9 @@ export default function HomePageClient() {
           <div className="saas-card saas-card-hover p-6 sm:p-7">
             <div className="mb-4 flex items-center gap-2 border-b border-border pb-4 font-mono text-[11px] text-text3">
               <span className="flex gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-red)]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-yellow)]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-green)]" />
               </span>
               <span className="ml-2 truncate">app — Marketing Workbench</span>
             </div>
@@ -196,7 +196,7 @@ export default function HomePageClient() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   href="/dashboard/work"
-                  className="rounded-lg bg-[#7c6cff] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#7c6cff]/25 transition hover:bg-[#8b7cff]"
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
                 >
                   Open Marketing Workbench
                 </Link>
@@ -212,13 +212,13 @@ export default function HomePageClient() {
         </section>
 
         <section id="features" data-reveal className="mt-24">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Platform</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Platform</div>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Built for modern GTM teams
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="saas-card saas-card-hover p-6 md:col-span-2">
-              <div className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wider text-[#7c6cff]">AI Copilot</div>
+              <div className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wider text-primary">AI Copilot</div>
               <div className="mt-2 text-lg font-medium text-text">Strategic answers, shipped as actions</div>
               <p className="mt-2 text-sm leading-relaxed text-text2">
                 Ask strategic questions, get tactical action plans, and run follow-ups instantly.
@@ -272,7 +272,7 @@ export default function HomePageClient() {
         </section>
 
         <section id="how-it-works" data-reveal className="mt-24">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Workflow</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Workflow</div>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             How it works
           </h2>
@@ -284,7 +284,7 @@ export default function HomePageClient() {
               "Track work + outcomes weekly"
             ].map((s, i) => (
               <div key={s} className="saas-card saas-card-hover p-5">
-                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#7c6cff]/20 font-mono text-sm font-semibold text-[#c4b8ff]">
+                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-light font-mono text-sm font-semibold text-primary-dark">
                   {i + 1}
                 </div>
                 <p className="text-sm leading-relaxed text-text2">{s}</p>
@@ -294,7 +294,7 @@ export default function HomePageClient() {
         </section>
 
         <section id="agent-workers" data-reveal className="mt-24">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Automation</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Automation</div>
           <div className="mt-2 grid gap-4 lg:grid-cols-2 lg:items-start">
             <div>
               <h2
@@ -316,7 +316,7 @@ export default function HomePageClient() {
                 </Link>
                 <Link
                   href="/dashboard/work"
-                  className="inline-flex items-center justify-center rounded-lg bg-[#7c6cff] px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-[#7c6cff]/25 transition hover:bg-[#8b7cff]"
+                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
                 >
                   View workbench
                 </Link>
@@ -344,7 +344,7 @@ export default function HomePageClient() {
         <section id="pricing" data-reveal className="mt-24">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Pricing</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Pricing</div>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
                 Simple plans
               </h2>
@@ -368,7 +368,7 @@ export default function HomePageClient() {
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-text2">
                   {p.bullets.map((b) => (
                     <li key={b} className="flex gap-2">
-                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#7c6cff]" />
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
                       {b}
                     </li>
                   ))}
@@ -376,7 +376,7 @@ export default function HomePageClient() {
                 <div className="mt-6 grid gap-2">
                   <Link
                     href={`/signup?plan=${p.name.toLowerCase()}`}
-                    className="inline-flex w-full items-center justify-center rounded-lg bg-[#b8ff6c] px-4 py-3 text-sm font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 hover:bg-[#c8ff7c]"
+                    className="inline-flex w-full items-center justify-center rounded-lg bg-amber px-4 py-3 text-sm font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover"
                   >
                     Choose {p.name}
                   </Link>
@@ -392,7 +392,7 @@ export default function HomePageClient() {
           </div>
           <p className="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-text2">
             {`List prices top out at $${MAX_SELF_SERVE_LIST_PRICE_USD}/mo on this page. Beyond that — `}
-            <Link href="/contact" className="font-medium text-[#c4b8ff] hover:underline">
+            <Link href="/contact" className="font-medium text-link hover:underline">
               talk to sales
             </Link>
             .
@@ -400,7 +400,7 @@ export default function HomePageClient() {
         </section>
 
         <section data-reveal className="mt-24">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Resources</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Resources</div>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Latest from the blog
           </h2>
@@ -409,7 +409,7 @@ export default function HomePageClient() {
               <div key={p.slug} className="saas-card saas-card-hover p-5">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">{p.date}</div>
                 <div className="mt-2 text-[15px] font-semibold text-text" style={{ fontFamily: "var(--font-heading)" }}>
-                  <Link href={`/blog/${p.slug}`} className="transition hover:text-[#c4b8ff]">
+                  <Link href={`/blog/${p.slug}`} className="transition hover:text-primary">
                     {p.title}
                   </Link>
                 </div>
@@ -428,7 +428,7 @@ export default function HomePageClient() {
           <div className="mt-6">
             <Link
               href="/blog"
-              className="inline-flex items-center justify-center rounded-lg bg-[#7c6cff] px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-[#7c6cff]/25 transition hover:bg-[#8b7cff]"
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
             >
               View all posts
             </Link>
@@ -458,7 +458,7 @@ export default function HomePageClient() {
           </div>
         </section>
 
-        <section data-reveal className="saas-card mt-24 border-[#7c6cff]/25 bg-gradient-to-br from-[#7c6cff]/10 via-[#141420] to-[#141420] p-8 text-center sm:p-10">
+        <section data-reveal className="saas-card mt-24 border-primary/25 bg-gradient-to-br from-primary/10 via-surface to-surface p-8 text-center sm:p-10">
           <h3 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Ready to run smarter marketing?
           </h3>
@@ -466,7 +466,7 @@ export default function HomePageClient() {
           <div className="mt-6">
             <Link
               href="/signup?plan=starter"
-              className="inline-flex rounded-lg bg-[#b8ff6c] px-6 py-3 text-[15px] font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/20 hover:bg-[#c8ff7c]"
+              className="inline-flex rounded-lg bg-amber px-6 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover"
             >
               Start free trial
             </Link>

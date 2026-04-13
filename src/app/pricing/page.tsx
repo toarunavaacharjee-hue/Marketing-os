@@ -107,7 +107,7 @@ const MATRIX = [
 ] as const;
 
 function Check({ ok }: { ok: boolean }) {
-  return ok ? <span className="text-[#b8ff6c]">✓</span> : <span className="text-text3">—</span>;
+  return ok ? <span className="text-teal">✓</span> : <span className="text-text3">—</span>;
 }
 
 export default function PricingPage() {
@@ -133,18 +133,18 @@ export default function PricingPage() {
             </p>
           </div>
           <div className="saas-card p-5 sm:p-6">
-            <div className="text-[13px] font-semibold uppercase tracking-wider text-[#7c6cff]">At a glance</div>
+            <div className="text-[13px] font-semibold uppercase tracking-wider text-primary">At a glance</div>
             <ul className="mt-3 space-y-2 text-sm leading-relaxed text-text2">
               <li className="flex gap-2">
-                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#b8ff6c]" />
+                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber" />
                 Starter is perfect for proving value fast.
               </li>
               <li className="flex gap-2">
-                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#b8ff6c]" />
+                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber" />
                 Growth removes AI limits for workflow velocity.
               </li>
               <li className="flex gap-2">
-                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#b8ff6c]" />
+                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-amber" />
                 {`Enterprise lists up to $${MAX_SELF_SERVE_LIST_PRICE_USD}/mo; above that, talk to sales for custom terms.`}
               </li>
             </ul>
@@ -156,13 +156,13 @@ export default function PricingPage() {
             <div
               key={p.plan}
               className={`saas-card saas-card-hover flex flex-col p-6 ${
-                p.plan === "growth" ? "border-[#7c6cff]/35 ring-1 ring-[#7c6cff]/20" : ""
+                p.plan === "growth" ? "border-primary/35 ring-1 ring-primary/20" : ""
               }`}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="text-lg font-semibold text-text">{p.name}</div>
                 {p.plan === "growth" ? (
-                  <span className="shrink-0 rounded-full bg-[#7c6cff]/20 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#c4b8ff]">
+                  <span className="shrink-0 rounded-full bg-primary-light px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-dark">
                     Popular
                   </span>
                 ) : null}
@@ -176,7 +176,7 @@ export default function PricingPage() {
               <ul className="mt-5 flex-1 space-y-2.5 text-sm text-text2">
                 {p.bullets.map((b) => (
                   <li key={b} className="flex gap-2">
-                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#7c6cff]" />
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
                     <span>{b}</span>
                   </li>
                 ))}
@@ -186,7 +186,7 @@ export default function PricingPage() {
                   href={p.plan === "enterprise" ? "/signup?plan=enterprise" : `/signup?plan=${p.plan}`}
                   className={`inline-flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold transition ${
                     p.plan === "growth"
-                      ? "bg-[#b8ff6c] text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 hover:bg-[#c8ff7c]"
+                      ? "bg-amber text-heading shadow-lg shadow-card hover:bg-amber-hover"
                       : "border border-border bg-surface2 text-text hover:bg-surface3"
                   }`}
                 >
@@ -226,7 +226,7 @@ export default function PricingPage() {
               <tbody className="text-text">
                 {MATRIX.flatMap((g) => [
                   <tr key={g.group} className="border-t border-border bg-surface2">
-                    <td className="py-3 pl-4 pr-4 text-xs font-semibold uppercase tracking-wider text-[#c4b8ff]" colSpan={4}>
+                    <td className="py-3 pl-4 pr-4 text-xs font-semibold uppercase tracking-wider text-primary" colSpan={4}>
                       {g.group}
                     </td>
                   </tr>,
@@ -296,13 +296,13 @@ export default function PricingPage() {
               </div>
             </div>
           </div>
-          <div className="saas-card flex flex-col justify-center bg-gradient-to-br from-[#7c6cff]/10 via-[color:var(--surface)] to-[color:var(--surface)] p-6 sm:p-8">
+          <div className="saas-card flex flex-col justify-center bg-gradient-to-br from-primary/10 via-[color:var(--surface)] to-[color:var(--surface)] p-6 sm:p-8">
             <div className="text-lg font-semibold text-text">See it in action</div>
             <div className="mt-2 text-sm text-text2">
               Apply templates, run workflows, and ship your first GTM plan in one session.
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/signup?plan=growth" className="rounded-lg bg-[#b8ff6c] px-5 py-3 text-sm font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 hover:bg-[#c8ff7c]">
+              <Link href="/signup?plan=growth" className="rounded-lg bg-amber px-5 py-3 text-sm font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover">
                 Start free
               </Link>
               <Link href="/dashboard" className="rounded-lg border border-border bg-surface2 px-5 py-3 text-sm font-medium hover:bg-surface3">

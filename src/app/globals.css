@@ -2,65 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── AIMW brand tokens (aimarketingworkbench.com) — use via var() / Tailwind theme ─── */
 :root {
-  /* Light mode (default) */
-  --bg: #ffffff;
-  --surface: #ffffff;
-  --surface2: #f6f7fb;
-  --surface3: #eef0f7;
-  --border: rgba(15, 23, 42, 0.12);
-  --border2: rgba(15, 23, 42, 0.18);
-  --accent: #7c6cff;
-  --accent2: #7c6cff;
-  --accent3: #0ea5e9;
-  --green: #34d399;
-  --yellow: #fbbf24;
-  --red: #f87171;
-  --pink: #f472b6;
-  --text: #0b1020;
-  --text2: rgba(15, 23, 42, 0.72);
-  --text3: rgba(15, 23, 42, 0.5);
-  --radius: 12px;
-  --radius2: 8px;
-  --font-heading: "Syne", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
-  --saas-cta: #b8ff6c;
+  --color-primary: #7c4dff;
+  --color-primary-dark: #5e35b1;
+  --color-primary-light: #ede7ff;
+  --color-teal: #00bfa5;
+  --color-amber: #ff8f00;
+  --color-amber-hover: #ffa726;
+  --color-link: #0091ae;
+  --color-error: #f2545b;
+  --color-warning: #ff8f00;
+
+  --bg-page: #f5f8fa;
+  --bg-surface: #ffffff;
+  --bg-hover: #f0f3f8;
+  --bg-sidebar: #2d2d2d;
+  --bg-sidebar-active: #3d3d3d;
+  --bg-onboarding-left: #ebebeb;
+  --border-default: #dfe3eb;
+  --border-input: #cbd6e2;
+  --sidebar-divider: #444444;
+
+  --text-heading: #1a1a1a;
+  --text-body: #33475b;
+  --text-secondary: #516f90;
+  --text-muted: #99acc2;
+  --text-on-dark: #ffffff;
+
+  --btn-neutral-bg: #1a1a1a;
+  --btn-neutral-hover: #333333;
+
+  /* Kanban / pipeline stage pills */
+  --badge-blue-bg: #ebf5ff;
+  --badge-blue-text: #0066cc;
+  --badge-red-bg: #fee9e7;
+  --badge-red-text: #c0392b;
+  --badge-pink-bg: #fce4f3;
+  --badge-pink-text: #ad1a72;
+  --badge-purple-bg: #f0e6ff;
+  --badge-purple-text: #6b21a8;
+  --badge-yellow-bg: #fff8e1;
+  --badge-yellow-text: #b45309;
+  --badge-green-bg: #e6f9f7;
+  --badge-green-text: #00796b;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+  --radius: var(--radius-lg);
+  --radius2: var(--radius-sm);
+
+  --shadow-card: 0 2px 8px rgba(45, 62, 80, 0.08);
+  --shadow-card-hover: 0 4px 16px rgba(45, 62, 80, 0.14);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.18);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(124, 77, 255, 0.2);
+
+  --font-heading: "DM Sans", "Helvetica Neue", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "DM Sans", "Helvetica Neue", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Inter", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Legacy semantic aliases (existing components use bg-bg, text-text, border-border, …) */
+  --bg: var(--bg-page);
+  --surface: var(--bg-surface);
+  --surface2: var(--bg-hover);
+  --surface3: #e8ecf0;
+  --border: var(--border-default);
+  --border2: var(--border-input);
+  --accent: var(--color-primary);
+  --accent2: var(--color-primary);
+  --accent3: var(--color-link);
+  --green: var(--color-teal);
+  --yellow: var(--color-amber);
+  --red: var(--color-error);
+  --pink: var(--badge-pink-text);
+  --text: var(--text-body);
+  --text2: var(--text-secondary);
+  --text3: var(--text-muted);
+
+  --saas-cta: var(--color-amber);
+  /* Decorative (browser chrome mock — not brand tokens) */
+  --decorative-traffic-red: #ff5f57;
+  --decorative-traffic-yellow: #febc2e;
+  --decorative-traffic-green: #28c840;
   --scrollbar-track: transparent;
-  --scrollbar-thumb: rgba(15, 23, 42, 0.22);
-  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.32);
+  --scrollbar-thumb: rgba(51, 71, 91, 0.28);
+  --scrollbar-thumb-hover: rgba(51, 71, 91, 0.4);
 }
 
-/* Dark mode (opt-in via <html class="dark">) */
+/* Optional dark theme (marketing or legacy screens may set <html class="dark">) */
 html.dark {
+  --bg-page: #08080c;
+  --bg-surface: #141420;
+  --bg-hover: #1a1d26;
+  --bg-sidebar: #141420;
+  --bg-sidebar-active: #222533;
   --bg: #08080c;
   --surface: #141420;
   --surface2: #1a1d26;
   --surface3: #222533;
   --border: #2a2e3f;
   --border2: #353a52;
-  --accent: #7c6cff;
-  --accent2: #a78bfa;
-  --accent3: #38bdf8;
+  --text-heading: #f0f0f8;
+  --text-body: #f0f0f8;
+  --text-secondary: #9ca3b8;
+  --text-muted: #5c6278;
   --text: #f0f0f8;
   --text2: #9ca3b8;
   --text3: #5c6278;
-  --scrollbar-track: transparent;
   --scrollbar-thumb: rgba(255, 255, 255, 0.18);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.26);
 }
 
-/* Marketing + app: tech SaaS surface pattern */
 .saas-grid {
   background-image:
-    linear-gradient(rgba(124, 108, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 108, 255, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(124, 77, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 77, 255, 0.06) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: linear-gradient(to bottom, black 0%, transparent 85%);
 }
 
+html.dark .saas-grid {
+  background-image:
+    linear-gradient(rgba(124, 108, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 108, 255, 0.07) 1px, transparent 1px);
+}
+
 .saas-hero-glow {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(124, 77, 255, 0.12), transparent 52%),
+    radial-gradient(ellipse 50% 35% at 95% 5%, rgba(255, 143, 0, 0.06), transparent 50%),
+    radial-gradient(ellipse 45% 30% at 5% 15%, rgba(0, 145, 174, 0.05), transparent 45%);
+}
+
+html.dark .saas-hero-glow {
   background:
     radial-gradient(ellipse 90% 55% at 50% -15%, rgba(124, 108, 255, 0.18), transparent 52%),
     radial-gradient(ellipse 50% 35% at 95% 5%, rgba(184, 255, 108, 0.08), transparent 50%),
@@ -68,12 +145,10 @@ html.dark {
 }
 
 .saas-card {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background: var(--surface);
-  box-shadow:
-    0 0 0 1px rgba(15, 23, 42, 0.02) inset,
-    0 20px 50px -15px rgba(2, 6, 23, 0.12);
+  box-shadow: var(--shadow-card);
 }
 
 .saas-card-hover {
@@ -84,29 +159,65 @@ html.dark {
 }
 
 .saas-card-hover:hover {
-  border-color: rgba(124, 108, 255, 0.25);
-  box-shadow:
-    0 0 0 1px rgba(124, 108, 255, 0.10) inset,
-    0 24px 56px -12px rgba(2, 6, 23, 0.18);
+  border-color: rgba(124, 77, 255, 0.35);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .saas-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(124, 108, 255, 0.25);
-  background: rgba(124, 108, 255, 0.08);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(124, 77, 255, 0.22);
+  background: var(--color-primary-light);
   padding: 0.35rem 0.85rem;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--color-primary-dark);
+}
+
+html.dark .saas-pill {
+  border-color: rgba(124, 108, 255, 0.25);
+  background: rgba(124, 108, 255, 0.08);
   color: #c4b8ff;
 }
 
-html:not(.dark) .saas-pill {
-  color: rgba(124, 108, 255, 0.95);
+/* Pipeline / Kanban stage badges */
+.badge-stage-blue {
+  border-radius: var(--radius-pill);
+  background: var(--badge-blue-bg);
+  color: var(--badge-blue-text);
+}
+.badge-stage-red {
+  border-radius: var(--radius-pill);
+  background: var(--badge-red-bg);
+  color: var(--badge-red-text);
+}
+.badge-stage-pink {
+  border-radius: var(--radius-pill);
+  background: var(--badge-pink-bg);
+  color: var(--badge-pink-text);
+}
+.badge-stage-purple {
+  border-radius: var(--radius-pill);
+  background: var(--badge-purple-bg);
+  color: var(--badge-purple-text);
+}
+.badge-stage-yellow {
+  border-radius: var(--radius-pill);
+  background: var(--badge-yellow-bg);
+  color: var(--badge-yellow-text);
+}
+.badge-stage-green {
+  border-radius: var(--radius-pill);
+  background: var(--badge-green-bg);
+  color: var(--badge-green-text);
+}
+
+.aimw-modal-backdrop {
+  background: rgba(0, 0, 0, 0.4);
 }
 
 html,
@@ -115,32 +226,16 @@ body {
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--bg-page);
+  color: var(--text-body);
   font-size: 14px;
+  line-height: 1.6;
   overflow-x: hidden;
   font-family: var(--font-body);
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
-}
-
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--surface3);
-  border-radius: 3px;
-}
-
-/* Valid scrollbar rules (override any invalid selectors above) */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar {
@@ -157,3 +252,7 @@ body {
   background: var(--scrollbar-thumb-hover);
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}

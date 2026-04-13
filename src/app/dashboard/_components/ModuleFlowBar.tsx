@@ -11,7 +11,8 @@ import {
 const bar =
   "relative mb-6 overflow-hidden rounded-2xl border border-border bg-surface/90 px-4 py-3.5 text-[12px] shadow-sm backdrop-blur-md";
 
-const barAccent = "pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-[#7c6cff] to-[#5a4fd4]";
+const barAccent =
+  "pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-primary to-primary-dark";
 
 const pill =
   "inline-flex items-center rounded-md border border-border bg-surface2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text3";
@@ -23,7 +24,7 @@ const btnAccentSoft =
   "inline-flex items-center rounded-lg border border-accent/35 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent transition hover:bg-accent/15";
 
 const btnPrimary =
-  "inline-flex items-center rounded-lg bg-[#7c6cff] px-3 py-1.5 text-[11px] font-semibold text-white shadow-md shadow-[#7c6cff]/25 transition hover:bg-[#8b7cff]";
+  "inline-flex items-center rounded-lg bg-primary px-3 py-1.5 text-[11px] font-semibold text-on-dark shadow-sm transition hover:bg-primary-dark";
 
 export function ModuleFlowBar() {
   const pathname = usePathname() ?? "/dashboard";
@@ -57,11 +58,11 @@ export function ModuleFlowBar() {
         <div className={`${bar} relative pl-3`}>
           <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <Link href="/dashboard" className="text-[11px] font-semibold text-[#c4b8ff] hover:underline">
+              <Link href="/dashboard" className="text-[11px] font-semibold text-primary hover:underline">
                 Command Centre
               </Link>
               <span className="text-text3">/</span>
-              <Link href="/dashboard/settings" className="text-[11px] font-semibold text-text hover:text-[#c4b8ff]">
+              <Link href="/dashboard/settings" className="text-[11px] font-semibold text-text hover:text-primary">
                 Settings
               </Link>
               {ctx.subPath !== "/" ? (
@@ -78,7 +79,7 @@ export function ModuleFlowBar() {
                   href={l.href}
                   className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                     pathname === l.href || pathname.startsWith(l.href + "/")
-                      ? "border border-[#7c6cff]/40 bg-[#7c6cff]/15 text-[#c4b8ff]"
+                      ? "border border-primary/40 bg-primary-light text-primary-dark"
                       : `${btnGhost}`
                   }`}
                 >

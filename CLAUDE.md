@@ -7,14 +7,13 @@
 - Anthropic API (claude-sonnet-4-6 model) for AI features
 - Vercel for deployment
 
-## Design system
-- Dark background: #08080c
-- Surface cards: #141420
-- Purple accent: #7c6cff
-- Lime CTA buttons: #b8ff6c
-- Heading font: Instrument Serif
-- Body font: Bricolage Grotesque
-- All pages dark themed, mobile responsive
+## Design system (AI Marketing Workbench — HubSpot-inspired)
+- Tokens live in `src/app/globals.css` (`:root`) and Tailwind (`tailwind.config.ts`). Prefer `bg-page`, `bg-sidebar`, `primary`, `amber`, `text-text`, `border-input-border` — see `.cursor/rules/aimw-brand.mdc`.
+- Page background: `#F5F8FA` (`--bg-page`); cards/surfaces: white; dark left nav + top bar: `#2D2D2D` / active `#3D3D3D`.
+- Brand purple `#7C4DFF` (`--color-primary`); teal success `#00BFA5`; amber hero CTAs `#FF8F00`; links `#0091AE`.
+- Typography: **DM Sans** (UI + headings), **Inter** (mono / tags). Body ~14px, HubSpot-like hierarchy.
+- Primary actions: dark `#1A1A1A` buttons; brand/AI actions: purple. Mobile responsive.
+- Optional legacy dark theme: `<html class="dark">` still remaps variables for edge pages.
 
 ## 18 app modules
 Command Centre (home dashboard)

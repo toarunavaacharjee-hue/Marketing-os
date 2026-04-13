@@ -36,21 +36,13 @@ export default function SupportPage() {
       const user = auth.user;
       if (!user) throw new Error("Not logged in.");
 
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("plan")
-        .eq("id", user.id)
-        .maybeSingle();
-      setPlan(((prof as any)?.plan ?? "starter") as string);
-
-      const { data: memberships, error: memErr } = await supabase
-        .from("company_members")
-        .select("company_id")
-        .eq("user_id", user.id)
-        .limit(1);
-      if (memErr) throw new Error(memErr.message);
-      const companyId = (memberships?.[0] as any)?.company_id as string | undefined;
-      if (!companyId) throw new Error("No company found for this user.");
+      const res = await fetch("/api/workspace/entitlements");
+      const j = (await res.json()) as { error?: string; plan?: string; company_id?: string };
+      if (!res.ok) throw new Error(j?.error ?? "Failed to load workspace plan.");
+      const companyId = j.company_id;
+      if (!companyId) throw new Error("No workspace selected.");
+      setPlan(String(j.plan ?? "starter"));
+      setWorkspaceCompanyId(companyId);
 
       const { data: t, error: tErr } = await supabase
         .from("support_tickets")
@@ -114,94 +106,100 @@ export default function SupportPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="text-sm text-[#9090b0]">
+          <div className="text-sm text-text2">
             Support tier:{" "}
-            <span className="text-[#f0f0f8]">
+            <span className="text-heading">
               {ent.supportTier === "dedicated" ? "Dedicated onboarding" : ent.supportTier === "priority" ? "Priority" : "Standard"}
             </span>
           </div>
-          <div className="mt-2 text-4xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="mt-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
             Support
           </div>
-          <div className="mt-2 text-sm text-[#9090b0]">
+          <div className="mt-2 text-sm text-text2">
             Submit a ticket from inside the app. Growth/Enterprise tickets are tagged as priority.
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/pricing" className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm text-[#f0f0f8] hover:bg-white/5">
+          <Link
+            href="/pricing"
+            className="rounded-lg border border-input-border bg-surface px-4 py-2 text-sm text-text shadow-card hover:bg-surface2"
+          >
             Pricing
           </Link>
-          <Link href="/dashboard/settings" className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm text-[#f0f0f8] hover:bg-white/5">
+          <Link
+            href="/dashboard/settings"
+            className="rounded-lg border border-input-border bg-surface px-4 py-2 text-sm text-text shadow-card hover:bg-surface2"
+          >
             Settings
           </Link>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-sm text-[#f0f0f8]">New ticket</div>
+      <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+        <div className="text-sm font-medium text-heading">New ticket</div>
         <div className="mt-3 grid gap-3">
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Subject (e.g., 'Gating blocked Events module')"
-            className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0]"
+            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus"
           />
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="What happened? Steps to reproduce, expected behavior, screenshots…"
-            className="min-h-[120px] w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0]"
+            className="min-h-[120px] w-full rounded-sm border border-input-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus"
           />
 
           {error ? (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
+            <div className="rounded-lg border border-red/30 bg-red/10 px-3 py-2 text-sm text-red">{error}</div>
           ) : null}
           {ok ? (
-            <div className="rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">{ok}</div>
+            <div className="rounded-lg border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{ok}</div>
           ) : null}
 
           <button
             type="button"
             onClick={() => void submitTicket()}
             disabled={saving || loading || !workspaceCompanyId}
-            className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+            className="rounded-sm bg-[var(--btn-neutral-bg)] px-4 py-2 text-sm font-semibold text-on-dark hover:bg-[var(--btn-neutral-hover)] disabled:opacity-60"
           >
             {saving ? "Submitting..." : ent.supportTier === "priority" || ent.supportTier === "dedicated" ? "Submit (priority)" : "Submit"}
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+      <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
         <div className="flex items-center justify-between gap-3">
-          <div className="text-sm text-[#f0f0f8]">Recent tickets</div>
+          <div className="text-sm font-medium text-heading">Recent tickets</div>
           <button
             type="button"
             onClick={() => void load()}
-            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#f0f0f8] hover:bg-white/5"
+            className="rounded-sm border border-input-border bg-surface2 px-3 py-2 text-xs text-text hover:bg-surface3"
           >
             Refresh
           </button>
         </div>
 
         {loading ? (
-          <div className="mt-3 text-sm text-[#9090b0]">Loading…</div>
+          <div className="mt-3 text-sm text-text3">Loading…</div>
         ) : tickets.length ? (
           <div className="mt-4 space-y-3">
             {tickets.map((t) => (
-              <div key={t.id} className="rounded-xl border border-[#2a2e3f] bg-black/20 p-4">
+              <div key={t.id} className="rounded-lg border border-border bg-surface2 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-sm text-[#f0f0f8]">{t.subject}</div>
-                  <div className="text-xs text-[#9090b0]">
+                  <div className="text-sm text-heading">{t.subject}</div>
+                  <div className="text-xs text-text3">
                     {t.priority === "priority" ? "Priority" : "Standard"} • {t.status} •{" "}
                     {new Date(t.created_at).toLocaleString()}
                   </div>
                 </div>
-                <div className="mt-2 whitespace-pre-wrap text-sm text-[#9090b0]">{t.body}</div>
+                <div className="mt-2 whitespace-pre-wrap text-sm text-text2">{t.body}</div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="mt-3 text-sm text-[#9090b0]">No tickets yet.</div>
+          <div className="mt-3 text-sm text-text3">No tickets yet.</div>
         )}
       </div>
     </div>

@@ -1,0 +1,19 @@
+---
+description: AIMW / AI Marketing Workbench brand — HubSpot-inspired light shell, tokens only
+globs: "**/*.{tsx,ts,css}"
+---
+
+# Brand (aimarketingworkbench.com)
+
+- **Always use CSS variables** from `src/app/globals.css` (`:root`) or Tailwind theme tokens (`bg-page`, `text-text`, `border-input-border`, `primary`, `amber`, etc.). Do not introduce new raw hex colors in TSX/CSS unless adding a token in `:root` first.
+- **Page background** is always `bg-page` / `--bg-page` (HubSpot `#F5F8FA`).
+- **App shell**: sidebar `bg-sidebar` (`#2D2D2D`), active item `bg-sidebar-active`, **top bar** height `52px`, same dark bar as HubSpot.
+- **Inputs**: border `border-input-border` / `--border-input`; focus ring `focus:shadow-focus`.
+- **Buttons**: default primary actions = **dark** (`--btn-neutral-bg`); **brand / AI** actions = **purple** (`primary` / `Button` variant `brand`).
+- **AI affordances**: purple + optional ✦; small “AI” pills use `primary-light` / `primary-dark` text.
+- **Selection cards**: white surface, `border-input-border`, hover/focus ring with `primary`.
+- **Kanban stages**: use utility classes `badge-stage-blue`, `badge-stage-red`, … in `globals.css`.
+- **Onboarding**: prefer split layout (left `--bg-onboarding-left`, right white surface).
+- **No pure black** full-page content backgrounds; use `--bg-page` / surfaces.
+- **Modal backdrop**: class `aimw-modal-backdrop` (`rgba(0,0,0,0.4)`).
+- **Optional dark marketing**: `<html class="dark">` still maps tokens in `html.dark` — avoid unless a route explicitly needs it.

@@ -12,7 +12,7 @@ const nav = [
 export function MarketingLogo({ className = "" }: { className?: string }) {
   return (
     <Link href="/" className={`group flex items-center gap-2.5 ${className}`}>
-      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#7c6cff] to-[#5a4fd4] shadow-lg shadow-[#7c6cff]/25 ring-1 ring-white/10">
+      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-dark shadow-card ring-1 ring-border">
         <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,transparent_50%)]" />
         <span className="relative text-[11px] font-bold tracking-tight text-white">AI</span>
       </span>
@@ -25,7 +25,7 @@ export function MarketingLogo({ className = "" }: { className?: string }) {
 
 export function MarketingHeader() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-bg/70 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-page/90 backdrop-blur-xl">
       <div className="saas-grid pointer-events-none absolute inset-0 opacity-[0.35]" aria-hidden />
       <div className="relative mx-auto flex h-[60px] max-w-7xl items-center justify-between px-4 sm:px-6">
         <MarketingLogo />
@@ -49,7 +49,7 @@ export function MarketingHeader() {
           </Link>
           <Link
             href="/signup?plan=starter"
-            className="rounded-lg bg-[#b8ff6c] px-3.5 py-2 text-[13px] font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 transition hover:bg-[#c8ff7c]"
+            className="rounded-sm bg-amber px-3.5 py-2 text-[13px] font-semibold text-heading shadow-card transition hover:bg-amber-hover"
           >
             Start free
           </Link>

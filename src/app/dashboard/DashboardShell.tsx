@@ -74,10 +74,6 @@ const NAV: NavSection[] = [
   }
 ];
 
-function PurpleBar() {
-  return <div className="absolute left-0 top-0 h-full w-[3px] bg-accent2" />;
-}
-
 export function DashboardShell({
   children,
   profile,
@@ -190,7 +186,7 @@ export function DashboardShell({
 
   function SectionLabel({ children }: { children: React.ReactNode }) {
     return (
-      <div className="px-[18px] pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[1.5px] text-text3">
+      <div className="px-5 pb-1 pt-4 text-xs font-semibold uppercase tracking-[0.6px] text-text3">
         {children}
       </div>
     );
@@ -198,7 +194,7 @@ export function DashboardShell({
 
   function NavBadge({ children }: { children: string }) {
     return (
-      <span className="ml-auto rounded bg-accent px-1.5 py-0.5 text-[9px] font-bold tracking-[0.5px] text-white">
+      <span className="ml-auto rounded border border-primary/25 bg-primary-light px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-primary-dark">
         {children}
       </span>
     );
@@ -206,28 +202,28 @@ export function DashboardShell({
 
   function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     return (
-      <div className="flex h-full w-[228px] min-h-0 flex-col bg-transparent text-text">
-        <div className="border-b border-white/[0.06] px-[18px] py-[16px]">
+      <div className="flex h-full w-[220px] min-h-0 flex-col bg-sidebar text-on-dark">
+        <div className="relative border-b border-[var(--sidebar-divider)] px-5 py-4">
           <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onNavigate}>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#7c6cff] to-[#5a4fd4] text-[11px] font-bold text-white shadow-lg shadow-[#7c6cff]/20 ring-1 ring-white/10">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary-dark text-[11px] font-bold text-on-dark shadow-sm">
               AI
             </span>
-            <span className="font-[var(--font-heading)] text-[15px] font-extrabold leading-tight tracking-tight">
-              Marketing <span className="text-accent2">Workbench</span>
+            <span className="font-[var(--font-heading)] text-[15px] font-bold leading-tight tracking-tight text-on-dark">
+              Marketing <span className="text-primary-light">Workbench</span>
             </span>
           </Link>
 
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="md:hidden absolute right-3 top-3 rounded-lg px-2 py-1 text-text2 hover:text-text"
+            className="absolute right-3 top-3 rounded-sm px-2 py-1 text-sm text-on-dark/70 hover:bg-sidebar-active hover:text-on-dark md:hidden"
             aria-label="Close menu"
           >
             ✕
           </button>
         </div>
 
-        <div className="border-b border-border">
+        <div className="border-b border-[var(--sidebar-divider)]">
           <TenantSwitcher
             companies={companies}
             products={products}
@@ -240,7 +236,7 @@ export function DashboardShell({
           {NAV.map((section) => (
             <div key={section.label}>
               <SectionLabel>{section.label}</SectionLabel>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {section.items.map((m) => {
                   const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
                   const active = activeMap.get(href) ?? false;
@@ -250,18 +246,15 @@ export function DashboardShell({
                       key={m.slug || "home"}
                       href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
                       onClick={onNavigate}
-                      className={`relative flex items-center gap-2 px-[18px] py-2 text-[13px] font-medium transition ${
+                      className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-5 text-sm font-medium transition ${
                         active
-                          ? "bg-surface2 text-accent2"
+                          ? "border-primary bg-sidebar-active text-on-dark"
                           : allowed
-                            ? "text-text2 hover:bg-surface2 hover:text-text"
-                            : "text-[#5c6278] hover:bg-surface2"
+                            ? "border-transparent text-on-dark/90 hover:bg-sidebar-active"
+                            : "border-transparent text-text3 hover:bg-sidebar-active"
                       }`}
                     >
-                      {active ? <PurpleBar /> : null}
-                      <span className="w-[18px] text-center text-[15px]">
-                        {m.icon ?? "•"}
-                      </span>
+                      <span className="w-[18px] text-center text-base">{m.icon ?? "•"}</span>
                       <span className="truncate">{m.label}</span>
                       {!allowed ? <NavBadge>UPGRADE</NavBadge> : m.badge ? <NavBadge>{m.badge}</NavBadge> : null}
                     </Link>
@@ -272,35 +265,34 @@ export function DashboardShell({
           ))}
         </div>
 
-        <div className="border-t border-border p-3">
+        <div className="border-t border-[var(--sidebar-divider)] p-2">
           <Link
             href="/dashboard/settings"
             onClick={onNavigate}
-            className={`relative flex items-center gap-2 rounded-none px-3 py-2 text-[13px] font-medium transition ${
+            className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-4 text-sm font-medium transition ${
               pathname === "/dashboard/settings"
-                ? "bg-surface2 text-accent2"
-                : "text-text2 hover:bg-surface2 hover:text-text"
+                ? "border-primary bg-sidebar-active text-on-dark"
+                : "border-transparent text-on-dark/90 hover:bg-sidebar-active"
             }`}
           >
-            {pathname === "/dashboard/settings" ? <PurpleBar /> : null}
-            <span className="w-[18px] text-center text-[15px]">⚙️</span>
+            <span className="w-[18px] text-center text-base">⚙️</span>
             <span className="pl-1">Settings</span>
           </Link>
         </div>
 
-        <div className="border-t border-border p-[14px]">
-          <div className="mb-2">
-            <div className="text-sm text-text">{profile?.name ?? "—"}</div>
-            <div className="text-xs text-text2">
+        <div className="border-t border-[var(--sidebar-divider)] p-3">
+          <div className="mb-2 px-1">
+            <div className="text-sm text-on-dark">{profile?.name ?? "—"}</div>
+            <div className="text-xs text-text3">
               {profile?.company ?? "—"} • {companyPlan ?? "starter"}
             </div>
           </div>
 
-          <details className="group rounded-xl border border-border bg-surface2 px-3 py-2">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-[11px] font-semibold text-text2 [&::-webkit-details-marker]:hidden">
+          <details className="group rounded-md border border-[var(--sidebar-divider)] bg-sidebar-active px-3 py-2">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-[11px] font-semibold text-on-dark/90 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-2">
                 <span
-                  className={`h-2 w-2 rounded-full ${anthropicReady ? "bg-green" : "bg-white/20"}`}
+                  className={`h-2 w-2 rounded-full ${anthropicReady ? "bg-teal" : "bg-on-dark/25"}`}
                   aria-hidden
                 />
                 Workspace AI
@@ -310,14 +302,14 @@ export function DashboardShell({
 
             <div className="mt-3">
               <div className="mb-2 flex items-center justify-between">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.5px] text-text3">
+                <div className="text-[10px] font-semibold uppercase tracking-wide text-text3">
                   Anthropic (this workspace)
                 </div>
                 <div
                   className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                     anthropicReady
-                      ? "bg-[rgba(52,211,153,0.15)] text-green"
-                      : "bg-[rgba(251,191,36,0.15)] text-yellow"
+                      ? "bg-[color-mix(in_srgb,var(--color-teal)_18%,transparent)] text-teal"
+                      : "bg-[color-mix(in_srgb,var(--color-amber)_22%,transparent)] text-amber"
                   }`}
                 >
                   {aiKeySource === "workspace"
@@ -328,11 +320,11 @@ export function DashboardShell({
                 </div>
               </div>
               {anthropicReady ? (
-                <div className="mt-2 text-[11px] text-text2">
+                <div className="mt-2 text-[11px] text-on-dark/80">
                   {aiStatus === "checking" ? (
                     <span>Checking connection…</span>
                   ) : aiStatus === "connected" ? (
-                    <span className="text-green">Connected</span>
+                    <span className="text-teal">Connected</span>
                   ) : aiStatus === "error" ? (
                     <span className="text-red">
                       Not connected{aiError ? ` — ${aiError}` : ""}
@@ -340,7 +332,7 @@ export function DashboardShell({
                   ) : null}
                 </div>
               ) : (
-                <div className="mt-2 text-[11px] text-text2">
+                <div className="mt-2 text-[11px] text-on-dark/80">
                   Enterprise needs a workspace key; Starter, Free, and Growth may use platform AI when enabled. Open
                   Settings → AI integration.
                 </div>
@@ -348,7 +340,7 @@ export function DashboardShell({
               <Link
                 href="/dashboard/settings"
                 onClick={onNavigate}
-                className="mt-2 inline-block text-[11px] font-semibold text-accent2 hover:underline"
+                className="mt-2 inline-block text-[11px] font-semibold text-primary-light hover:underline"
               >
                 Open Settings
               </Link>
@@ -361,33 +353,33 @@ export function DashboardShell({
 
   return (
     <div
-      className="h-dvh bg-bg text-text overflow-hidden"
+      className="h-dvh overflow-hidden bg-page text-text"
       style={{ fontFamily: "var(--font-body)" }}
     >
-      {/* Mobile top bar */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.06] bg-bg/90 px-4 py-3 backdrop-blur-xl md:hidden">
+      {/* Mobile top bar (HubSpot-style dark strip) */}
+      <div className="sticky top-0 z-30 flex h-[52px] items-center justify-between border-b border-[var(--sidebar-divider)] bg-sidebar px-4 text-on-dark md:hidden">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="rounded-lg border border-white/[0.08] bg-surface px-3 py-2 text-sm text-text shadow-sm"
+          className="rounded-sm bg-sidebar-active px-3 py-2 text-sm text-on-dark"
           aria-label="Open menu"
         >
           ☰
         </button>
         <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-[#7c6cff] to-[#5a4fd4] text-[10px] font-bold text-white shadow-md shadow-[#7c6cff]/20 ring-1 ring-white/10">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary-dark text-[10px] font-bold text-on-dark">
             AI
           </span>
-          <span className="font-[var(--font-heading)] text-[13px] font-bold tracking-tight text-text">
-            Marketing <span className="text-accent2">Workbench</span>
+          <span className="font-[var(--font-heading)] text-[13px] font-bold tracking-tight text-on-dark">
+            Marketing <span className="text-primary-light">Workbench</span>
           </span>
         </Link>
         <div className="w-[44px]" />
       </div>
 
-      <div className="flex h-[calc(100dvh-56px)] md:h-dvh">
+      <div className="flex h-[calc(100dvh-52px)] md:h-dvh">
         {/* Desktop sidebar */}
-        <div className="hidden w-[228px] shrink-0 border-r border-border bg-[linear-gradient(180deg,var(--surface)_0%,var(--surface2)_100%)] shadow-[4px_0_24px_rgba(2,6,23,0.10)] md:block">
+        <div className="hidden w-[220px] shrink-0 border-r border-[var(--sidebar-divider)] bg-sidebar md:block">
           <div className="h-dvh overflow-y-auto">
             <Sidebar />
           </div>
@@ -396,11 +388,8 @@ export function DashboardShell({
         {/* Mobile sidebar overlay */}
         {mobileOpen ? (
           <div className="fixed inset-0 z-40 md:hidden">
-            <div
-              className="absolute inset-0 bg-black/60"
-              onClick={() => setMobileOpen(false)}
-            />
-            <div className="absolute left-0 top-0 h-full w-[228px] border-r border-border bg-[linear-gradient(180deg,var(--surface)_0%,var(--surface2)_100%)] shadow-2xl">
+            <div className="aimw-modal-backdrop absolute inset-0" onClick={() => setMobileOpen(false)} />
+            <div className="absolute left-0 top-0 h-full w-[220px] border-r border-[var(--sidebar-divider)] bg-sidebar shadow-dropdown">
               <div className="h-full overflow-y-auto">
                 <Sidebar onNavigate={() => setMobileOpen(false)} />
               </div>
@@ -408,23 +397,29 @@ export function DashboardShell({
           </div>
         ) : null}
 
-        <main className="relative min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-10">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.4] md:opacity-50"
-            aria-hidden
-            style={{
-              backgroundImage: `linear-gradient(rgba(124, 108, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(124, 108, 255, 0.03) 1px, transparent 1px)`,
-              backgroundSize: "48px 48px",
-              maskImage: "linear-gradient(to bottom, black 0%, transparent 70%)"
-            }}
-          />
-          <div className="relative">
-            <ModuleFlowBar />
-            <ProfileCompletenessBanner />
-            {children}
-          </div>
-        </main>
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Desktop top bar */}
+          <header className="relative z-20 hidden h-[52px] shrink-0 items-center border-b border-[var(--sidebar-divider)] bg-sidebar px-6 text-on-dark md:flex">
+            <div className="mx-auto flex w-full max-w-[1200px] items-center gap-4">
+              <span className="text-sm font-medium text-on-dark/90">Workspace</span>
+              <div
+                className="ml-auto hidden max-w-md flex-1 rounded-sm bg-sidebar-active px-3 py-2 text-sm text-on-dark/50 lg:block"
+                aria-hidden
+              >
+                Search…
+              </div>
+            </div>
+          </header>
+
+          <main className="relative min-h-0 flex-1 overflow-y-auto bg-page">
+            <div className="pointer-events-none absolute inset-0 opacity-40 saas-grid" aria-hidden />
+            <div className="relative mx-auto max-w-[1200px] px-4 py-6 md:px-6 md:py-6">
+              <ModuleFlowBar />
+              <ProfileCompletenessBanner />
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );

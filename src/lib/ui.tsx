@@ -34,7 +34,7 @@ export const Input = forwardRef<
   return (
     <input
       ref={ref}
-      className={`w-full rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-3 text-text placeholder:text-text3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 ${className}`}
+      className={`w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus ${className}`}
       {...props}
     />
   );
@@ -54,20 +54,22 @@ export function Button({
   className = "",
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "green";
+  variant?: "primary" | "secondary" | "ghost" | "green" | "brand";
 }) {
   const styles =
     variant === "primary"
-      ? "bg-accent text-white hover:bg-[#5b52ee]"
-      : variant === "secondary"
-        ? "bg-surface2 text-text hover:bg-surface3 border border-border hover:border-border2"
-        : variant === "green"
-          ? "bg-[rgba(52,211,153,0.15)] text-green border border-[rgba(52,211,153,0.3)] hover:bg-[rgba(52,211,153,0.25)]"
-        : "bg-transparent text-white/80 hover:text-white";
+      ? "bg-[var(--btn-neutral-bg)] text-on-dark hover:bg-[var(--btn-neutral-hover)]"
+      : variant === "brand"
+        ? "bg-primary text-on-dark shadow-sm hover:bg-primary-dark focus-visible:shadow-focus"
+        : variant === "secondary"
+          ? "border border-input-border bg-surface text-text hover:bg-surface2"
+          : variant === "green"
+            ? "border border-[color-mix(in_srgb,var(--color-teal)_40%,var(--border-default))] bg-[color-mix(in_srgb,var(--color-teal)_14%,var(--bg-surface))] text-[var(--color-teal)] hover:bg-[color-mix(in_srgb,var(--color-teal)_22%,var(--bg-surface))]"
+            : "bg-transparent text-text2 hover:bg-surface2 hover:text-text";
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-1.5 rounded-[var(--radius2)] px-4 py-3 text-sm font-semibold transition ${styles} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-sm px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none ${styles} ${className}`}
       {...props}
     >
       {children}
@@ -83,7 +85,7 @@ export function TextLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link href={href} className="text-accent2 hover:text-accent">
+    <Link href={href} className="font-medium text-link hover:underline">
       {children}
     </Link>
   );

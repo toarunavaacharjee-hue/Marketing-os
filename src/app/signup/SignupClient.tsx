@@ -16,10 +16,10 @@ function normalizePlan(raw: string | null): Plan {
 }
 
 const inputClass =
-  "border-white/[0.08] bg-[#0c0c12] text-[#f0f0f8] placeholder:text-[#5c6278] focus:border-[#7c6cff]/50 focus:ring-[#7c6cff]/25";
+  "border border-input-border bg-surface text-text placeholder:text-text3 focus:border-primary focus:shadow-focus";
 
 const primaryCta =
-  "w-full !bg-[#b8ff6c] !text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 hover:!bg-[#c8ff7c]";
+  "w-full !bg-amber !text-heading shadow-card hover:!bg-amber-hover";
 
 export default function SignupClient() {
   const router = useRouter();
@@ -79,13 +79,13 @@ export default function SignupClient() {
       <div className="mx-auto w-full max-w-md">
         <div className="saas-pill mb-4">Get started</div>
         <h1
-          className="text-3xl font-semibold tracking-tight text-[#fafafc] sm:text-4xl"
+          className="text-3xl font-semibold tracking-tight text-heading sm:text-4xl"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           Create your account
         </h1>
-        <p className="mt-2 text-sm text-[#9090b0]">
-          You&apos;re on the <span className="font-semibold text-[#c4b8ff]">{plan}</span> plan. Set up your workspace in
+        <p className="mt-2 text-sm text-text2">
+          You&apos;re on the <span className="font-semibold text-primary">{plan}</span> plan. Set up your workspace in
           minutes.
         </p>
         {signupListPrices ? (
