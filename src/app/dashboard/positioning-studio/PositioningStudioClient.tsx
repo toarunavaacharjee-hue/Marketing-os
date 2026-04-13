@@ -43,7 +43,23 @@ const defaultHealth = (): PositioningHealth => ({
   message_market_fit: 70
 });
 
-export default function PositioningStudioClient({ environmentId }: { environmentId: string }) {
+type VersionListItem = {
+  id: string;
+  version_number: number;
+  status: string;
+  submitted_at: string | null;
+  approved_at: string | null;
+  review_due_at: string | null;
+  created_at: string;
+};
+
+export default function PositioningStudioClient({
+  environmentId,
+  productId
+}: {
+  environmentId: string;
+  productId: string;
+}) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,6 +69,12 @@ export default function PositioningStudioClient({ environmentId }: { environment
 
   const [canvas, setCanvas] = useState<PositioningCanvasValue | null>(null);
   const [doc, setDoc] = useState<PositioningCanvasValue["doc"]>(() => emptyDoc());
+
+  const [versions, setVersions] = useState<VersionListItem[]>([]);
+  const [approvedVersionId, setApprovedVersionId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [versionBusy, setVersionBusy] = useState<string | null>(null);
+  const [versionError, setVersionError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -87,6 +109,32 @@ export default function PositioningStudioClient({ environmentId }: { environment
     load();
   }, [load]);
 
+  const loadVersions = useCallback(async () => {
+    setVersionError(null);
+    try {
+      const res = await fetch("/api/positioning/versions");
+      const data = (await res.json()) as {
+        versions?: VersionListItem[];
+        approved_positioning_version_id?: string | null;
+        is_admin?: boolean;
+        error?: string;
+      };
+      if (!res.ok) {
+        setVersionError(data.error ?? "Could not load positioning versions.");
+        return;
+      }
+      setVersions(data.versions ?? []);
+      setApprovedVersionId(data.approved_positioning_version_id ?? null);
+      setIsAdmin(Boolean(data.is_admin));
+    } catch (e) {
+      setVersionError(e instanceof Error ? e.message : "Could not load versions.");
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadVersions();
+  }, [loadVersions, environmentId, productId]);
+
   async function saveManualEdits() {
     if (!canvas) return;
     setSaving(true);
@@ -109,6 +157,83 @@ export default function PositioningStudioClient({ environmentId }: { environment
     }
     setCanvas(next);
     setSaved("Saved.");
+  }
+
+  function fullCanvasSnapshot(): PositioningCanvasValue {
+    return {
+      doc: { ...doc },
+      health: canvas?.health ?? defaultHealth(),
+      revision: canvas?.revision ?? 0,
+      history: Array.isArray(canvas?.history) ? canvas!.history : []
+    };
+  }
+
+  async function snapshotDraftVersion() {
+    setVersionBusy("snapshot");
+    setVersionError(null);
+    try {
+      const res = await fetch("/api/positioning/versions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "snapshot_draft", value_json: fullCanvasSnapshot() })
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setVersionError(data.error ?? "Could not save snapshot.");
+        return;
+      }
+      await loadVersions();
+      setSaved("Snapshot saved as draft version.");
+    } catch (e) {
+      setVersionError(e instanceof Error ? e.message : "Request failed.");
+    } finally {
+      setVersionBusy(null);
+    }
+  }
+
+  async function submitVersion(id: string) {
+    setVersionBusy(id + "-submit");
+    setVersionError(null);
+    try {
+      const res = await fetch("/api/positioning/versions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "submit", version_id: id })
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setVersionError(data.error ?? "Could not submit for review.");
+        return;
+      }
+      await loadVersions();
+    } catch (e) {
+      setVersionError(e instanceof Error ? e.message : "Request failed.");
+    } finally {
+      setVersionBusy(null);
+    }
+  }
+
+  async function approveVersion(id: string) {
+    setVersionBusy(id + "-approve");
+    setVersionError(null);
+    try {
+      const res = await fetch("/api/positioning/versions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "approve", version_id: id })
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setVersionError(data.error ?? "Could not approve.");
+        return;
+      }
+      await loadVersions();
+      setSaved("Approved positioning version is now the spine for battlecards and GTM assets.");
+    } catch (e) {
+      setVersionError(e instanceof Error ? e.message : "Request failed.");
+    } finally {
+      setVersionBusy(null);
+    }
   }
 
   async function generateFromSegments() {
@@ -187,6 +312,14 @@ export default function PositioningStudioClient({ environmentId }: { environment
           {saved}
         </div>
       ) : null}
+      {versionError ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          {versionError}{" "}
+          <span className="text-[#9090b0]">
+            (If this mentions a missing table, run <code className="font-mono text-[11px]">supabase/positioning_versions_spine.sql</code> in Supabase.)
+          </span>
+        </div>
+      ) : null}
 
       <AiProgressBar
         active={generating}
@@ -235,7 +368,7 @@ export default function PositioningStudioClient({ environmentId }: { environment
               })}
             </div>
             <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
-              <div className="mb-2 text-sm text-[#f0f0f8]">Version History</div>
+              <div className="mb-2 text-sm text-[#f0f0f8]">AI version history</div>
               {canvas?.history?.length ? (
                 <div className="space-y-2">
                   {canvas.history.map((h, i) => (
@@ -247,8 +380,73 @@ export default function PositioningStudioClient({ environmentId }: { environment
                   ))}
                 </div>
               ) : (
-                <div>No versions yet. Generate from ICP segments to create history.</div>
+                <div>No AI history yet. Generate from ICP segments to create history.</div>
               )}
+            </div>
+
+            <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
+              <div className="mb-2 text-sm text-[#f0f0f8]">Governed positioning versions</div>
+              <p className="text-xs text-[#9090b0]">
+                Snapshots become your approved spine. Battlecards save against the latest approved version.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => snapshotDraftVersion()}
+                  disabled={loading || versionBusy !== null}
+                  className="rounded-xl bg-[#7c6cff] px-3 py-2 text-xs font-semibold text-white hover:bg-[#8b7cff] disabled:opacity-50"
+                >
+                  {versionBusy === "snapshot" ? "Saving…" : "Save snapshot (draft)"}
+                </button>
+              </div>
+              {approvedVersionId ? (
+                <div className="mt-3 text-xs text-emerald-200">
+                  Approved spine: <span className="font-mono text-[11px]">{approvedVersionId.slice(0, 8)}…</span>
+                </div>
+              ) : (
+                <div className="mt-3 text-xs text-[#9090b0]">No approved positioning version yet.</div>
+              )}
+              <div className="mt-4 space-y-2">
+                {versions.length ? (
+                  versions.map((v) => (
+                    <div
+                      key={v.id}
+                      className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-[12px]"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="text-[#f0f0f8]">
+                          v{v.version_number}{" "}
+                          <span className="text-[#9090b0]">({v.status})</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {v.status === "draft" ? (
+                            <button
+                              type="button"
+                              onClick={() => submitVersion(v.id)}
+                              disabled={versionBusy !== null}
+                              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white hover:bg-white/10 disabled:opacity-50"
+                            >
+                              {versionBusy === `${v.id}-submit` ? "…" : "Submit"}
+                            </button>
+                          ) : null}
+                          {isAdmin && (v.status === "pending_review" || v.status === "draft") ? (
+                            <button
+                              type="button"
+                              onClick={() => approveVersion(v.id)}
+                              disabled={versionBusy !== null}
+                              className="rounded-lg bg-[#b8ff6c] px-2 py-1 text-[11px] font-semibold text-black hover:bg-[#c8ff7c] disabled:opacity-50"
+                            >
+                              {versionBusy === `${v.id}-approve` ? "…" : "Approve"}
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-[#9090b0]">No governed versions yet. Save a snapshot to start.</div>
+                )}
+              </div>
             </div>
           </div>
         </div>

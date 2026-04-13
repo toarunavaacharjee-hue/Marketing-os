@@ -35,16 +35,26 @@ export async function GET() {
       .order("created_at", { ascending: true });
     if (cErr) return NextResponse.json({ error: cErr.message }, { status: 500 });
 
+    const { data: envRow } = await supabase
+      .from("product_environments")
+      .select("approved_positioning_version_id")
+      .eq("id", environmentId)
+      .maybeSingle();
+
+    const approvedPositioningVersionId =
+      (envRow as { approved_positioning_version_id?: string | null } | null)?.approved_positioning_version_id ?? null;
+
     const { data: cards, error: bErr } = await supabase
       .from("battlecards")
-      .select("id,competitor_id,strengths,weaknesses,why_we_win,objection_handling,updated_at")
+      .select("id,competitor_id,strengths,weaknesses,why_we_win,objection_handling,positioning_version_id,updated_at")
       .eq("environment_id", environmentId)
       .order("updated_at", { ascending: false });
     if (bErr) return NextResponse.json({ error: bErr.message }, { status: 500 });
 
     return NextResponse.json({
       competitors: competitors ?? [],
-      battlecards: cards ?? []
+      battlecards: cards ?? [],
+      approved_positioning_version_id: approvedPositioningVersionId
     });
   } catch (e) {
     return NextResponse.json(
@@ -66,6 +76,14 @@ export async function POST(req: Request) {
     if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
     const { productId, environmentId } = selected;
 
+    const { data: envRow } = await supabase
+      .from("product_environments")
+      .select("approved_positioning_version_id")
+      .eq("id", environmentId)
+      .maybeSingle();
+    const approvedPositioningVersionId =
+      (envRow as { approved_positioning_version_id?: string | null } | null)?.approved_positioning_version_id ?? null;
+
     const body = (await req.json()) as BattlecardUpsert;
     const competitorId = (body.competitor_id ?? "").trim();
     if (!competitorId) {
@@ -80,6 +98,7 @@ export async function POST(req: Request) {
       weaknesses: asText(body.weaknesses),
       why_we_win: asText(body.why_we_win),
       objection_handling: asText(body.objection_handling),
+      positioning_version_id: approvedPositioningVersionId,
       updated_at: new Date().toISOString()
     };
 

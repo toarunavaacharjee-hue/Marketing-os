@@ -93,15 +93,31 @@ export function MarketingFooter() {
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Company</div>
             <ul className="mt-4 space-y-2.5 text-sm text-text2">
-              <li className="cursor-default">About</li>
-              <li className="cursor-default">Careers</li>
-              <li className="cursor-default">Contact</li>
+              <li>
+                <Link href="/about" className="transition hover:text-text">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link href="/careers" className="transition hover:text-text">
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="transition hover:text-text">
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Resources</div>
             <ul className="mt-4 space-y-2.5 text-sm text-text2">
-              <li className="cursor-default">Docs</li>
+              <li>
+                <Link href="/docs" className="transition hover:text-text">
+                  Docs
+                </Link>
+              </li>
               <li>
                 <Link href="/blog" className="transition hover:text-text">
                   Blog
@@ -112,7 +128,11 @@ export function MarketingFooter() {
                   FAQ
                 </Link>
               </li>
-              <li className="cursor-default">Status</li>
+              <li>
+                <Link href="/status" className="transition hover:text-text">
+                  Status
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

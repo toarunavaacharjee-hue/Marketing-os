@@ -12,6 +12,7 @@ type Battlecard = {
   weaknesses: string | null;
   why_we_win: string | null;
   objection_handling: string | null;
+  positioning_version_id?: string | null;
   updated_at: string;
 };
 type Persona = {
@@ -81,6 +82,7 @@ export default function BattlecardsPage() {
   const [uploadingIcp, setUploadingIcp] = useState(false);
   const [uploadingAccount, setUploadingAccount] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [approvedPositioningVersionId, setApprovedPositioningVersionId] = useState<string | null>(null);
 
   const [pitchLoading, setPitchLoading] = useState(false);
   const [pitchError, setPitchError] = useState<string | null>(null);
@@ -153,9 +155,11 @@ export default function BattlecardsPage() {
       const payload = (await res.json()) as {
         competitors?: Competitor[];
         battlecards?: Battlecard[];
+        approved_positioning_version_id?: string | null;
         error?: string;
       };
       if (!res.ok) throw new Error(payload.error ?? "Failed to load battlecards.");
+      setApprovedPositioningVersionId(payload.approved_positioning_version_id ?? null);
       const comps = payload.competitors ?? [];
       setCompetitors(comps);
       const map: Record<string, Battlecard> = {};
@@ -448,6 +452,21 @@ export default function BattlecardsPage() {
           <div className="mt-2 text-sm text-text2">
             Competitor notes, ICP-level positioning, and named-account pitches — tied to your Product Profile.
           </div>
+          {approvedPositioningVersionId ? (
+            <div className="mt-2 text-xs text-text2">
+              Battlecard saves are linked to the{" "}
+              <span className="font-mono text-[11px] text-text">approved positioning</span> spine (v{" "}
+              {approvedPositioningVersionId.slice(0, 8)}…).
+            </div>
+          ) : (
+            <div className="mt-2 text-xs text-amber-200/90">
+              No approved positioning version yet. Approve one in{" "}
+              <Link href="/dashboard/positioning-studio" className="text-accent2 underline">
+                Positioning Studio
+              </Link>{" "}
+              so battlecards record which spine they were written against.
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link

@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
+import { ProfileCompletenessBanner } from "@/app/dashboard/_components/ProfileCompletenessBanner";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
 
 type Profile = {
@@ -420,6 +421,7 @@ export function DashboardShell({
           />
           <div className="relative">
             <ModuleFlowBar />
+            <ProfileCompletenessBanner />
             {children}
           </div>
         </main>

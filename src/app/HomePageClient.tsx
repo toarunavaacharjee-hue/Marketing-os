@@ -271,6 +271,54 @@ export default function HomePageClient() {
           </div>
         </section>
 
+        <section id="agent-workers" data-reveal className="mt-24">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#5c6278]">Automation</div>
+          <div className="mt-2 grid gap-4 lg:grid-cols-2 lg:items-start">
+            <div>
+              <h2
+                className="text-3xl font-semibold tracking-tight text-text md:text-4xl"
+                style={{ fontFamily: "var(--font-heading)" }}
+              >
+                Agent workers that run work in the background
+              </h2>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-text2">
+                Not everything should be a button-click. Agent workers run long tasks—like research runs, drafts, and
+                structured outputs—so your team stays unblocked while the system does the heavy lifting.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Link
+                  href="/docs#agent-workers"
+                  className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                >
+                  Read how it works
+                </Link>
+                <Link
+                  href="/dashboard/work"
+                  className="inline-flex items-center justify-center rounded-lg bg-[#7c6cff] px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-[#7c6cff]/25 transition hover:bg-[#8b7cff]"
+                >
+                  View workbench
+                </Link>
+              </div>
+            </div>
+            <div className="saas-card saas-card-hover p-6 sm:p-7">
+              <div className="text-sm font-semibold text-text">What agent workers do</div>
+              <div className="mt-4 grid gap-3">
+                {[
+                  ["Run long workflows", "Queue research and generation tasks without blocking the UI."],
+                  ["Produce structured outputs", "Turn inputs into briefs, segments, battlecards, and action plans."],
+                  ["Keep teams aligned", "Log progress and results so everyone sees what changed and why."],
+                  ["Guardrails by design", "Prefer explicit context; avoid inventing facts and unknown URLs."]
+                ].map(([t, d]) => (
+                  <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+                    <div className="text-[13px] font-semibold text-text">{t}</div>
+                    <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="pricing" data-reveal className="mt-24">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
