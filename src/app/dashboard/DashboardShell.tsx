@@ -68,10 +68,6 @@ const NAV: NavSection[] = [
       { label: "Sales Intelligence", slug: "sales-intelligence", icon: "🎤" },
       { label: "Customer Insights", slug: "customer-insights", icon: "💬" }
     ]
-  },
-  {
-    label: "AI",
-    items: [{ label: "AI Copilot", slug: "copilot", icon: "🤖" }]
   }
 ];
 
@@ -346,20 +342,7 @@ export function DashboardShell({
           ))}
         </div>
 
-        <div className="border-t border-[var(--sidebar-divider)] p-2">
-          <Link
-            href="/dashboard/settings"
-            onClick={onNavigate}
-            className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-4 text-sm font-medium transition-[background-color,border-color,color] duration-200 ease-out ${
-              pathname === "/dashboard/settings"
-                ? "border-primary bg-sidebar-active text-on-dark"
-                : "border-transparent text-on-dark/90 hover:bg-sidebar-active"
-            }`}
-          >
-            <span className="w-[18px] text-center text-base">⚙️</span>
-            <span className="pl-1">Settings</span>
-          </Link>
-        </div>
+        {/* Settings lives in the top-bar account menu to avoid duplication. */}
 
         <div className="border-t border-[var(--sidebar-divider)] p-3">
           <div className="mb-2 px-1">

@@ -47,6 +47,15 @@ export function DashboardTopBar({
     else router.push("/dashboard/copilot");
   }
 
+  const initials = useMemo(() => {
+    const name = profile?.name?.trim() || "";
+    if (!name) return "AA";
+    const parts = name.split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] ?? "A";
+    const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : parts[0]?.[1];
+    return `${String(first).toUpperCase()}${String(last ?? "A").toUpperCase()}`;
+  }, [profile?.name]);
+
   return (
     <header className="relative z-20 hidden h-[52px] shrink-0 border-b border-[var(--sidebar-divider)] bg-sidebar px-4 text-on-dark md:flex md:px-6">
       <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3 lg:gap-4">
@@ -109,19 +118,60 @@ export function DashboardTopBar({
           >
             Copilot
           </Link>
-          <Link
-            href="/dashboard/settings"
-            className="hidden shrink-0 rounded-sm px-2 py-1.5 text-xs font-semibold text-on-dark/90 transition-colors hover:bg-sidebar-active sm:inline"
-          >
-            Settings
-          </Link>
-          <Link
-            href="/dashboard/settings"
-            className="max-w-[100px] shrink-0 truncate text-xs text-on-dark/65 transition-colors hover:text-on-dark lg:max-w-[140px]"
-            title={profile?.name ?? "Account"}
-          >
-            {profile?.name ?? "Account"}
-          </Link>
+
+          <details className="relative">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark [&::-webkit-details-marker]:hidden">
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-sidebar-active text-[11px] font-bold text-on-dark"
+                aria-hidden
+              >
+                {initials}
+              </span>
+              <span className="hidden max-w-[140px] truncate text-xs font-medium text-on-dark/70 lg:block">
+                {profile?.name ?? "Account"}
+              </span>
+              <span className="text-on-dark/40" aria-hidden>
+                ▾
+              </span>
+            </summary>
+
+            <div className="absolute right-0 top-[calc(100%+8px)] w-[220px] overflow-hidden rounded-lg border border-border bg-surface text-text shadow-dropdown">
+              <div className="border-b border-border px-3 py-2">
+                <div className="truncate text-sm font-semibold text-heading">{profile?.name ?? "Account"}</div>
+                <div className="mt-0.5 truncate text-xs text-text2">{contextLabel ?? "Workspace"}</div>
+              </div>
+
+              <div className="p-1">
+                <Link
+                  href="/dashboard/settings/team"
+                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                >
+                  <span>My profile & team</span>
+                </Link>
+                <Link
+                  href="/dashboard/settings/integrations"
+                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                >
+                  <span>Integrations</span>
+                </Link>
+                <Link
+                  href="/dashboard/settings"
+                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                >
+                  <span>Settings</span>
+                </Link>
+              </div>
+
+              <div className="border-t border-border p-1">
+                <Link
+                  href="/logout"
+                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm font-semibold text-red transition-colors hover:bg-red/10"
+                >
+                  <span>Logout</span>
+                </Link>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
     </header>

@@ -106,9 +106,8 @@ export default async function SettingsPage() {
           <div>
             <div className="text-sm font-medium text-text">Plan &amp; limits (this workspace)</div>
             <p className="mt-2 text-sm text-text2">
-              Entitlements follow <span className="text-text">{ent.plan}</span> on{" "}
-              <code className="rounded bg-surface2 px-1 py-0.5 text-xs text-text">company_subscriptions</code> when a
-              workspace is selected; otherwise your profile plan is shown.
+              Limits are based on the <span className="text-text">{ent.plan}</span> plan for the selected workspace.
+              If no workspace is selected, we show your account plan.
             </p>
             <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-text2">
               <li>
