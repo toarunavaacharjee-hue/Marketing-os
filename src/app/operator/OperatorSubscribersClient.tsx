@@ -6,7 +6,9 @@ type Subscriber = {
   id: string;
   email: string | null;
   name: string | null;
+  display_name?: string | null;
   company: string | null;
+  job_title?: string | null;
   ai_queries_used: number;
   is_platform_admin: boolean;
   profile_created_at: string | null;
@@ -84,8 +86,9 @@ export default function OperatorSubscribersClient({
             <div key={s.id} className="p-3">
               <div className="text-sm font-semibold text-[var(--text)]">{s.email ?? "—"}</div>
               <div className="mt-1 text-xs text-[var(--text2)]">
-                {(s.name ?? "—") + " · " + (s.company ?? "—")}
+                {(s.display_name ?? s.name ?? "—") + " · " + (s.job_title ?? "—")}
               </div>
+              <div className="mt-1 text-xs text-[var(--text3)]">{s.company ?? "—"}</div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-[var(--text2)]">
                 <div className="rounded-lg border border-[var(--border)] bg-[var(--surface2)] p-2">
                   <div className="text-[10px] font-semibold uppercase text-[var(--text3)]">AI used</div>
@@ -127,6 +130,7 @@ export default function OperatorSubscribersClient({
             <tr>
               <th className="px-3 py-2">Email</th>
               <th className="px-3 py-2">Name</th>
+              <th className="px-3 py-2">Title</th>
               <th className="px-3 py-2">Company</th>
               <th className="px-3 py-2">AI used</th>
               <th className="px-3 py-2">Operator</th>
@@ -140,7 +144,8 @@ export default function OperatorSubscribersClient({
               return (
                 <tr key={s.id} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2 font-mono text-[12px] text-[var(--text)]">{s.email ?? "—"}</td>
-                  <td className="px-3 py-2">{s.name ?? "—"}</td>
+                  <td className="px-3 py-2">{s.display_name ?? s.name ?? "—"}</td>
+                  <td className="px-3 py-2">{s.job_title ?? "—"}</td>
                   <td className="px-3 py-2">{s.company ?? "—"}</td>
                   <td className="px-3 py-2">{s.ai_queries_used}</td>
                   <td className="px-3 py-2">{s.is_platform_admin ? "Yes" : "—"}</td>

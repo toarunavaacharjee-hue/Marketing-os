@@ -5,7 +5,9 @@ export type OperatorSubscriberRow = {
   id: string;
   email: string | null;
   name: string | null;
+  display_name: string | null;
   company: string | null;
+  job_title: string | null;
   plan: string | null;
   ai_queries_used: number;
   is_platform_admin: boolean;
@@ -51,7 +53,13 @@ export type OperatorCompanyRow = {
 type ProfileRow = {
   id: string;
   name: string | null;
+  display_name: string | null;
   company: string | null;
+  job_title: string | null;
+  phone: string | null;
+  timezone: string | null;
+  locale: string | null;
+  avatar_url: string | null;
   plan: string | null;
   ai_queries_used: number | null;
   is_platform_admin: boolean | null;
@@ -107,7 +115,9 @@ export async function loadOperatorData(): Promise<OperatorData> {
         id: u.id,
         email: u.email ?? null,
         name: pr?.name ?? null,
+        display_name: pr?.display_name ?? null,
         company: pr?.company ?? null,
+        job_title: pr?.job_title ?? null,
         plan: pr?.plan ?? null,
         ai_queries_used: pr?.ai_queries_used ?? 0,
         is_platform_admin: Boolean(pr?.is_platform_admin),

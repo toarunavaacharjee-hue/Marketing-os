@@ -12,12 +12,18 @@ export default async function ProfileSettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name,company")
+    .select("name,display_name,company,job_title,phone,timezone,locale,avatar_url")
     .eq("id", user.id)
     .maybeSingle();
 
   const name = String((profile as any)?.name ?? "").trim();
+  const displayName = String((profile as any)?.display_name ?? "").trim();
   const company = String((profile as any)?.company ?? "").trim();
+  const jobTitle = String((profile as any)?.job_title ?? "").trim();
+  const phone = String((profile as any)?.phone ?? "").trim();
+  const timezone = String((profile as any)?.timezone ?? "").trim();
+  const locale = String((profile as any)?.locale ?? "").trim();
+  const avatarUrl = String((profile as any)?.avatar_url ?? "").trim();
 
   return (
     <div className="space-y-4">
@@ -39,7 +45,17 @@ export default async function ProfileSettingsPage() {
         </div>
       </div>
 
-      <ProfileSettingsClient initialName={name} initialCompany={company} email={user.email ?? ""} />
+      <ProfileSettingsClient
+        initialName={name}
+        initialDisplayName={displayName}
+        initialCompany={company}
+        initialJobTitle={jobTitle}
+        initialPhone={phone}
+        initialTimezone={timezone}
+        initialLocale={locale}
+        initialAvatarUrl={avatarUrl}
+        email={user.email ?? ""}
+      />
     </div>
   );
 }

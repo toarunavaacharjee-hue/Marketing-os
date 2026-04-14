@@ -20,7 +20,9 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("id,name,company,plan,ai_queries_used,is_platform_admin,created_at")
+    .select(
+      "id,name,display_name,company,job_title,phone,timezone,locale,avatar_url,plan,ai_queries_used,is_platform_admin,created_at"
+    )
     .eq("id", userId)
     .maybeSingle();
 

@@ -30,7 +30,13 @@ type DetailResponse = {
   profile?: {
     id: string;
     name: string | null;
+    display_name?: string | null;
     company: string | null;
+    job_title?: string | null;
+    phone?: string | null;
+    timezone?: string | null;
+    locale?: string | null;
+    avatar_url?: string | null;
     plan: string | null;
     ai_queries_used: number | null;
     is_platform_admin: boolean | null;
@@ -164,8 +170,16 @@ export default function OperatorUserDetailClient({ userId }: { userId: string })
         <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Email" value={authUser?.email ?? "—"} />
           <Stat label="Name" value={profile?.name ?? "—"} />
+          <Stat label="Display name" value={profile?.display_name ?? "—"} />
           <Stat label="Company (profile)" value={profile?.company ?? "—"} />
           <Stat label="AI used" value={String(profile?.ai_queries_used ?? 0)} />
+        </div>
+
+        <div className="grid gap-3 border-t border-[var(--border)] p-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat label="Job title" value={profile?.job_title ?? "—"} />
+          <Stat label="Phone" value={profile?.phone ?? "—"} />
+          <Stat label="Timezone" value={profile?.timezone ?? "—"} />
+          <Stat label="Locale" value={profile?.locale ?? "—"} />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] px-3 py-3">
