@@ -857,7 +857,7 @@ export default function ProspectResearchClient() {
                     <h3 className="mb-2 text-[13px] font-bold text-text">
                       {PROSPECT_MEMO_LABELS[key]}
                     </h3>
-                    <div className="prose max-w-none text-sm text-text prose-headings:text-heading prose-p:text-text prose-strong:text-heading prose-li:text-text prose-a:text-link prose-a:no-underline hover:prose-a:underline prose-hr:border-border prose-blockquote:border-border prose-blockquote:text-text2 prose-code:text-heading">
+                    <div className="max-w-none text-sm text-text">
                       {memo[key]?.trim() ? (
                         <Markdown content={memo[key]} />
                       ) : (
