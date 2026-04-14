@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getDashboardBreadcrumb } from "@/lib/dashboardBreadcrumb";
 import type { CompanyOption, ProductOption } from "@/app/dashboard/TenantSwitcher";
@@ -29,6 +29,8 @@ export function DashboardTopBar({
   const pathname = usePathname();
   const router = useRouter();
   const [q, setQ] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const crumbs = useMemo(() => getDashboardBreadcrumb(pathname), [pathname]);
 
@@ -55,6 +57,18 @@ export function DashboardTopBar({
     const last = parts.length > 1 ? parts[parts.length - 1]?.[0] : parts[0]?.[1];
     return `${String(first).toUpperCase()}${String(last ?? "A").toUpperCase()}`;
   }, [profile?.name]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDocPointerDown(e: MouseEvent | PointerEvent) {
+      const el = menuRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && el.contains(e.target)) return;
+      setMenuOpen(false);
+    }
+    document.addEventListener("pointerdown", onDocPointerDown);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown);
+  }, [menuOpen]);
 
   return (
     <header className="relative z-20 hidden h-[52px] shrink-0 border-b border-[var(--sidebar-divider)] bg-sidebar px-4 text-on-dark md:flex md:px-6">
@@ -119,8 +133,14 @@ export function DashboardTopBar({
             Copilot
           </Link>
 
-          <details className="relative">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark [&::-webkit-details-marker]:hidden">
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              className="flex cursor-pointer list-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark"
+            >
               <span
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-sidebar-active text-[11px] font-bold text-on-dark"
                 aria-hidden
@@ -130,9 +150,13 @@ export function DashboardTopBar({
               <span className="text-on-dark/40" aria-hidden>
                 ▾
               </span>
-            </summary>
+            </button>
 
-            <div className="absolute right-0 top-[calc(100%+8px)] w-[220px] overflow-hidden rounded-lg border border-border bg-surface text-text shadow-dropdown">
+            {menuOpen ? (
+              <div
+                role="menu"
+                className="absolute right-0 top-[calc(100%+8px)] w-[220px] overflow-hidden rounded-lg border border-border bg-surface text-text shadow-dropdown"
+              >
               <div className="border-b border-border px-3 py-2">
                 <div className="truncate text-sm font-semibold text-heading">{profile?.name ?? "Account"}</div>
                 <div className="mt-0.5 truncate text-xs text-text2">{contextLabel ?? "Workspace"}</div>
@@ -141,24 +165,28 @@ export function DashboardTopBar({
               <div className="p-1">
                 <Link
                   href="/dashboard/settings/profile"
+                  onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
                   <span>My profile</span>
                 </Link>
                 <Link
                   href="/dashboard/settings/team"
+                  onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
                   <span>My team</span>
                 </Link>
                 <Link
                   href="/dashboard/settings/integrations"
+                  onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
                   <span>Integrations</span>
                 </Link>
                 <Link
                   href="/dashboard/settings"
+                  onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
                   <span>Settings</span>
@@ -168,13 +196,15 @@ export function DashboardTopBar({
               <div className="border-t border-border p-1">
                 <Link
                   href="/logout"
+                  onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm font-semibold text-red transition-colors hover:bg-red/10"
                 >
                   <span>Logout</span>
                 </Link>
               </div>
-            </div>
-          </details>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </header>
