@@ -31,10 +31,23 @@ export default async function DashboardLayout({
   const companyIdCookie = cookieStore.get(TENANT_COOKIE.companyId)?.value ?? null;
   const productIdCookie = cookieStore.get(TENANT_COOKIE.productId)?.value ?? null;
 
-  const { data: memberships } = await supabase
-    .from("company_members")
-    .select("company_id, role, companies(name,public_id)")
-    .eq("user_id", user.id);
+  // Migration-tolerant: if `public_id` isn't deployed yet, fall back gracefully.
+  let memberships: any[] | null = null;
+  {
+    const res = await supabase
+      .from("company_members")
+      .select("company_id, role, companies(name,public_id)")
+      .eq("user_id", user.id);
+    if (res.error) {
+      const fallback = await supabase
+        .from("company_members")
+        .select("company_id, role, companies(name)")
+        .eq("user_id", user.id);
+      memberships = fallback.data as any[] | null;
+    } else {
+      memberships = res.data as any[] | null;
+    }
+  }
 
   const companies =
     memberships?.map((m) => ({
@@ -56,10 +69,22 @@ export default async function DashboardLayout({
     console.error("sync_my_product_memberships:", syncErr.message);
   }
 
-  const { data: productMemberships } = await supabase
-    .from("product_members")
-    .select("product_id, role, products(id,name,company_id,public_id)")
-    .eq("user_id", user.id);
+  let productMemberships: any[] | null = null;
+  {
+    const res = await supabase
+      .from("product_members")
+      .select("product_id, role, products(id,name,company_id,public_id)")
+      .eq("user_id", user.id);
+    if (res.error) {
+      const fallback = await supabase
+        .from("product_members")
+        .select("product_id, role, products(id,name,company_id)")
+        .eq("user_id", user.id);
+      productMemberships = fallback.data as any[] | null;
+    } else {
+      productMemberships = res.data as any[] | null;
+    }
+  }
 
   const allProducts =
     productMemberships
