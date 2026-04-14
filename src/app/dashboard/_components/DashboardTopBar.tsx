@@ -127,9 +127,6 @@ export function DashboardTopBar({
               >
                 {initials}
               </span>
-              <span className="hidden max-w-[140px] truncate text-xs font-medium text-on-dark/70 lg:block">
-                {profile?.name ?? "Account"}
-              </span>
               <span className="text-on-dark/40" aria-hidden>
                 ▾
               </span>
@@ -143,10 +140,16 @@ export function DashboardTopBar({
 
               <div className="p-1">
                 <Link
+                  href="/dashboard/settings/profile"
+                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                >
+                  <span>My profile</span>
+                </Link>
+                <Link
                   href="/dashboard/settings/team"
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
-                  <span>My profile & team</span>
+                  <span>My team</span>
                 </Link>
                 <Link
                   href="/dashboard/settings/integrations"

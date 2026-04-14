@@ -3,10 +3,10 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { ManageBillingButton } from "@/app/dashboard/settings/ManageBillingButton";
-import SettingsClient from "@/app/dashboard/settings/SettingsClient";
 import { TENANT_COOKIE } from "@/lib/tenant";
 import { getEntitlements } from "@/lib/planEntitlements";
 import { listPriceForWorkspacePlan } from "@/lib/marketingPricing";
+import WorkspaceAiSettingsClient from "@/app/dashboard/settings/workspace-ai/WorkspaceAiSettingsClient";
 
 type Profile = {
   id: string;
@@ -157,20 +157,46 @@ export default async function SettingsPage() {
         </div>
       </div>
 
-      <SettingsClient
-        initialName={p?.name ?? ""}
-        initialCompany={p?.company ?? ""}
-        email={user.email ?? ""}
-      />
+      <div className="grid gap-4 md:grid-cols-3">
+        <Link
+          href="/dashboard/settings/profile"
+          className="saas-card-hover rounded-2xl border border-border bg-surface p-5 shadow-card"
+        >
+          <div className="text-sm font-semibold text-heading">My profile</div>
+          <div className="mt-1 text-sm text-text2">Your personal details used across the workspace.</div>
+        </Link>
+        <Link
+          href="/dashboard/settings/team"
+          className="saas-card-hover rounded-2xl border border-border bg-surface p-5 shadow-card"
+        >
+          <div className="text-sm font-semibold text-heading">My team</div>
+          <div className="mt-1 text-sm text-text2">Members, roles, invites, and governance.</div>
+        </Link>
+        <Link
+          href="/dashboard/settings/integrations"
+          className="saas-card-hover rounded-2xl border border-border bg-surface p-5 shadow-card"
+        >
+          <div className="text-sm font-semibold text-heading">Integrations</div>
+          <div className="mt-1 text-sm text-text2">Analytics + ad platform connections for this product.</div>
+        </Link>
+      </div>
+
+      <WorkspaceAiSettingsClient email={user.email ?? ""} />
 
       <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
         <div className="text-sm font-medium text-text">Module settings</div>
         <div className="mt-2 grid gap-2 md:grid-cols-2">
           <Link
+            href="/dashboard/settings/profile"
+            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+          >
+            My profile → name, company, account details
+          </Link>
+          <Link
             href="/dashboard/settings/team"
             className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
-            Team & roles → members, permissions, governance
+            My team → members, roles, invites, governance
           </Link>
           <Link
             href="/dashboard/support"
