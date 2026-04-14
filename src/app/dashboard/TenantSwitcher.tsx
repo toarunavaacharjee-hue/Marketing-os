@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export type CompanyOption = { id: string; name: string };
-export type ProductOption = { id: string; name: string; company_id: string };
+export type ProductOption = { id: string; name: string; company_id: string; public_id?: string | null };
+export type CompanyOptionWithPublicId = { id: string; name: string; public_id?: string | null };
 
 export function TenantSwitcher({
   companies,
@@ -11,7 +12,7 @@ export function TenantSwitcher({
   selectedCompanyId,
   selectedProductId
 }: {
-  companies: CompanyOption[];
+  companies: CompanyOptionWithPublicId[];
   products: ProductOption[];
   selectedCompanyId: string | null;
   selectedProductId: string | null;
@@ -76,6 +77,7 @@ export function TenantSwitcher({
         {companies.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
+            {c.public_id ? ` · ${c.public_id}` : ""}
           </option>
         ))}
       </select>
@@ -97,6 +99,7 @@ export function TenantSwitcher({
         {companyProducts.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name}
+            {p.public_id ? ` · ${p.public_id}` : ""}
           </option>
         ))}
       </select>

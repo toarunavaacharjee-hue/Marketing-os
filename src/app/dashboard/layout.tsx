@@ -33,13 +33,14 @@ export default async function DashboardLayout({
 
   const { data: memberships } = await supabase
     .from("company_members")
-    .select("company_id, role, companies(name)")
+    .select("company_id, role, companies(name,public_id)")
     .eq("user_id", user.id);
 
   const companies =
     memberships?.map((m) => ({
       id: m.company_id as string,
-      name: (m as any).companies?.name ?? "Company"
+      name: (m as any).companies?.name ?? "Company",
+      public_id: (m as any).companies?.public_id ?? null
     })) ?? [];
 
   if (companies.length === 0) {
@@ -57,7 +58,7 @@ export default async function DashboardLayout({
 
   const { data: productMemberships } = await supabase
     .from("product_members")
-    .select("product_id, role, products(id,name,company_id)")
+    .select("product_id, role, products(id,name,company_id,public_id)")
     .eq("user_id", user.id);
 
   const allProducts =
@@ -67,7 +68,8 @@ export default async function DashboardLayout({
       .map((p: any) => ({
         id: p.id as string,
         name: (p.name as string) ?? "Product",
-        company_id: p.company_id as string
+        company_id: p.company_id as string,
+        public_id: (p.public_id as string) ?? null
       })) ?? [];
 
   const validIds = new Set(allProducts.map((p) => p.id));

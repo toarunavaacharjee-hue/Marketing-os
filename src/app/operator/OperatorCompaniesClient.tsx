@@ -17,6 +17,7 @@ type CompanyRow = {
   name: string | null;
   members_count: number;
   products_count: number;
+  products?: Array<{ id: string; name: string | null; public_id: string | null }>;
   plan: string | null;
   status: string | null;
   seats_included: number | null;
@@ -248,7 +249,18 @@ export default function OperatorCompaniesClient({
                     )}
                   </td>
                   <td className="px-3 py-2">{c.members_count}</td>
-                  <td className="px-3 py-2">{c.products_count}</td>
+                  <td className="px-3 py-2">
+                    <div className="font-mono text-[12px] text-[var(--text)]">{c.products_count}</div>
+                    {c.products?.length ? (
+                      <div className="mt-1 text-[10px] text-[var(--text3)]">
+                        {c.products
+                          .slice(0, 3)
+                          .map((p) => p.public_id ?? p.id.slice(0, 8) + "…")
+                          .join(" · ")}
+                        {c.products.length > 3 ? " …" : ""}
+                      </div>
+                    ) : null}
+                  </td>
                   <td className="px-3 py-2">
                     <select
                       value={PLAN_OPTIONS.includes(plan as any) ? (plan as any) : "starter"}

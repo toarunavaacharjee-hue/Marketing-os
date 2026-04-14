@@ -41,6 +41,7 @@ export type OperatorCompanyRow = {
   name: string | null;
   members_count: number;
   products_count: number;
+  products?: Array<{ id: string; name: string | null; public_id: string | null }>;
   plan: string | null;
   status: string | null;
   seats_included: number | null;
@@ -212,12 +213,22 @@ export async function loadOperatorData(): Promise<OperatorData> {
         });
       }
 
-      const { data: products } = await admin.from("products").select("id,company_id");
+      const { data: products } = await admin.from("products").select("id,company_id,name,public_id");
       const productCountMap = new Map<string, number>();
+      const productsByCompany = new Map<string, Array<{ id: string; name: string | null; public_id: string | null }>>();
       (products ?? []).forEach((r: any) => {
         const cid = String(r.company_id);
         productCountMap.set(cid, (productCountMap.get(cid) ?? 0) + 1);
+        if (!productsByCompany.has(cid)) productsByCompany.set(cid, []);
+        productsByCompany.get(cid)!.push({
+          id: String(r.id),
+          name: typeof r.name === "string" ? r.name : null,
+          public_id: typeof r.public_id === "string" ? r.public_id : null
+        });
       });
+      for (const [, list] of productsByCompany) {
+        list.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+      }
 
       companies = (cRows ?? []).map((c: any) => {
         const cid = String(c.id);
@@ -228,6 +239,7 @@ export async function loadOperatorData(): Promise<OperatorData> {
           name: typeof c.name === "string" ? c.name : null,
           members_count: countMap.get(cid) ?? 0,
           products_count: productCountMap.get(cid) ?? 0,
+          products: productsByCompany.get(cid) ?? [],
           plan: sub?.plan ?? null,
           status: sub?.status ?? null,
           seats_included: typeof sub?.seats_included === "number" ? sub.seats_included : null,
