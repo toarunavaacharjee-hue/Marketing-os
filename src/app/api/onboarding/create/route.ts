@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceRole";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/service-role";
 
 function asStr(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
@@ -35,12 +35,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Workspace name and product name are required." }, { status: 400 });
     }
 
-    // Use service role to avoid client-side RLS edge cases during bootstrap.
+    // Prefer service role to avoid RLS edge cases during bootstrap,
+    // but fall back to the authed server client when not configured.
     const admin = createSupabaseServiceRoleClient();
+    const db = admin ?? supabase;
 
     // product_members.user_id references public.profiles(id). Some sign-up paths can create an Auth user
     // before a profile row exists — ensure the profile exists before inserting memberships.
-    const { data: existingProfile } = await admin.from("profiles").select("id").eq("id", user.id).maybeSingle();
+    const { data: existingProfile } = await db.from("profiles").select("id").eq("id", user.id).maybeSingle();
     if (!existingProfile?.id) {
       const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
       const metaName = typeof meta.name === "string" ? meta.name.trim() : "";
@@ -54,7 +56,7 @@ export async function POST(req: Request) {
           ? emailLocal.replace(/[._-]+/g, " ").replace(/\s+/g, " ").trim()
           : "User");
 
-      const { error: profileErr } = await admin.from("profiles").upsert({
+      const { error: profileErr } = await db.from("profiles").upsert({
         id: user.id,
         name: derivedName,
         company: metaCompany || null,
@@ -69,7 +71,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const { data: company, error: companyErr } = await admin
+    const { data: company, error: companyErr } = await db
       .from("companies")
       .insert({ name: companyName, created_by: user.id })
       .select("id")
@@ -78,7 +80,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: companyErr?.message ?? "Could not create workspace." }, { status: 400 });
     }
 
-    const { error: memberErr } = await admin.from("company_members").insert({
+    const { error: memberErr } = await db.from("company_members").insert({
       company_id: company.id,
       user_id: user.id,
       role: "owner"
@@ -87,7 +89,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: memberErr.message ?? "Could not add you to the workspace." }, { status: 400 });
     }
 
-    const { error: subErr } = await admin.from("company_subscriptions").insert({
+    const { error: subErr } = await db.from("company_subscriptions").insert({
       company_id: company.id,
       plan: "starter",
       status: "active",
@@ -96,11 +98,14 @@ export async function POST(req: Request) {
       products_included: 1,
       products_addon: 0
     });
-    if (subErr) {
+    // In some deployments, company_subscriptions RLS may be stricter than the bootstrap flow.
+    // The app can still function with starter defaults if this row is missing.
+    // We only hard-fail if we're using the service role (admin) and it still fails.
+    if (subErr && admin) {
       return NextResponse.json({ error: subErr.message ?? "Could not create subscription row." }, { status: 400 });
     }
 
-    const { data: product, error: productErr } = await admin
+    const { data: product, error: productErr } = await db
       .from("products")
       .insert({
         company_id: company.id,
@@ -113,7 +118,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: productErr?.message ?? "Could not create product." }, { status: 400 });
     }
 
-    const { error: envErr } = await admin.from("product_environments").insert({
+    const { error: envErr } = await db.from("product_environments").insert({
       product_id: product.id,
       name: "Default"
     });
@@ -121,7 +126,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: envErr.message ?? "Could not create product environment." }, { status: 400 });
     }
 
-    const { error: pmErr } = await admin.from("product_members").insert({
+    const { error: pmErr } = await db.from("product_members").insert({
       product_id: product.id,
       user_id: user.id,
       role: "owner"
@@ -130,7 +135,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: pmErr.message ?? "Could not grant you access to the product." }, { status: 400 });
     }
 
-    return NextResponse.json({ ok: true, companyId: company.id, productId: product.id });
+    return NextResponse.json({
+      ok: true,
+      companyId: company.id,
+      productId: product.id,
+      subscription_created: !subErr
+    });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "Unknown error" }, { status: 500 });
   }
