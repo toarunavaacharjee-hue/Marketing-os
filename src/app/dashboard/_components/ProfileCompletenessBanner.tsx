@@ -3,10 +3,23 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const MIN_KEY = "aimw-profile-banner-min";
+
 export function ProfileCompletenessBanner() {
   const [score, setScore] = useState<number | null>(null);
   const [missing, setMissing] = useState<string[]>([]);
   const [dismissed, setDismissed] = useState(false);
+  const [minimized, setMinimized] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && localStorage.getItem(MIN_KEY) === "1") {
+        setMinimized(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,6 +42,46 @@ export function ProfileCompletenessBanner() {
   }, []);
 
   if (score === null || score >= 80 || dismissed) return null;
+
+  function persistMinimize(next: boolean) {
+    setMinimized(next);
+    try {
+      if (next) localStorage.setItem(MIN_KEY, "1");
+      else localStorage.removeItem(MIN_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (minimized) {
+    return (
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/25 bg-primary-light/40 px-3 py-2 text-[12px] shadow-sm">
+        <span className="font-medium text-heading">
+          Profile {score}% complete —{" "}
+          <Link href="/dashboard/settings/product" className="text-link underline-offset-2 hover:underline">
+            finish setup
+          </Link>
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => persistMinimize(false)}
+            className="rounded-md px-2 py-1 text-[11px] font-semibold text-text2 hover:bg-surface2 hover:text-heading"
+          >
+            Expand
+          </button>
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            className="rounded-md px-2 py-1 text-[11px] text-text3 hover:text-heading"
+            aria-label="Dismiss"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6 rounded-lg border border-primary/30 bg-primary-light/50 px-4 py-3 text-sm shadow-card">
@@ -55,14 +108,23 @@ export function ProfileCompletenessBanner() {
             </Link>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setDismissed(true)}
-          className="shrink-0 rounded-lg px-2 py-1 text-[12px] text-text3 hover:text-heading"
-          aria-label="Dismiss"
-        >
-          Dismiss
-        </button>
+        <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={() => persistMinimize(true)}
+            className="rounded-lg px-2 py-1 text-[12px] font-medium text-text3 hover:text-heading"
+          >
+            Minimize
+          </button>
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            className="rounded-lg px-2 py-1 text-[12px] text-text3 hover:text-heading"
+            aria-label="Dismiss"
+          >
+            Dismiss
+          </button>
+        </div>
       </div>
     </div>
   );

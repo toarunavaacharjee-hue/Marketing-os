@@ -48,6 +48,12 @@ export default {
         dropdown: "var(--shadow-dropdown)",
         focus: "var(--shadow-focus)",
         saas: "0 1px 0 rgba(255,255,255,0.06) inset, 0 12px 40px rgba(0,0,0,0.45)"
+      },
+      transitionTimingFunction: {
+        "aimw-out": "cubic-bezier(0.33, 1, 0.68, 1)"
+      },
+      transitionDuration: {
+        250: "250ms"
       }
     }
   },

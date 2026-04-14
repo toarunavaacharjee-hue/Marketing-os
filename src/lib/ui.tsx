@@ -20,7 +20,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-[var(--radius)] border border-border bg-surface ${className}`}
+      className={`rounded-[var(--radius)] border border-border bg-surface shadow-card transition-[border-color,box-shadow] duration-200 ease-aimw-out ${className}`}
     >
       {children}
     </div>
@@ -34,7 +34,7 @@ export const Input = forwardRef<
   return (
     <input
       ref={ref}
-      className={`w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus ${className}`}
+      className={`w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus ${className}`}
       {...props}
     />
   );
@@ -69,7 +69,7 @@ export function Button({
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-1.5 rounded-sm px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none ${styles} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-sm px-4 py-2.5 text-sm font-semibold transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-aimw-out active:scale-[0.98] motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:outline-none ${styles} ${className}`}
       {...props}
     >
       {children}

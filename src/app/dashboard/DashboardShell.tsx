@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
+import { DashboardTopBar } from "@/app/dashboard/_components/DashboardTopBar";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
 import { ProfileCompletenessBanner } from "@/app/dashboard/_components/ProfileCompletenessBanner";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
@@ -246,7 +247,7 @@ export function DashboardShell({
                       key={m.slug || "home"}
                       href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
                       onClick={onNavigate}
-                      className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-5 text-sm font-medium transition ${
+                      className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-5 text-sm font-medium transition-[background-color,border-color,color] duration-200 ease-out ${
                         active
                           ? "border-primary bg-sidebar-active text-on-dark"
                           : allowed
@@ -269,7 +270,7 @@ export function DashboardShell({
           <Link
             href="/dashboard/settings"
             onClick={onNavigate}
-            className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-4 text-sm font-medium transition ${
+            className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-4 text-sm font-medium transition-[background-color,border-color,color] duration-200 ease-out ${
               pathname === "/dashboard/settings"
                 ? "border-primary bg-sidebar-active text-on-dark"
                 : "border-transparent text-on-dark/90 hover:bg-sidebar-active"
@@ -398,22 +399,18 @@ export function DashboardShell({
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          {/* Desktop top bar */}
-          <header className="relative z-20 hidden h-[52px] shrink-0 items-center border-b border-[var(--sidebar-divider)] bg-sidebar px-6 text-on-dark md:flex">
-            <div className="mx-auto flex w-full max-w-[1200px] items-center gap-4">
-              <span className="text-sm font-medium text-on-dark/90">Workspace</span>
-              <div
-                className="ml-auto hidden max-w-md flex-1 rounded-sm bg-sidebar-active px-3 py-2 text-sm text-on-dark/50 lg:block"
-                aria-hidden
-              >
-                Search…
-              </div>
-            </div>
-          </header>
+          <DashboardTopBar
+            profile={profile}
+            companies={companies}
+            products={products}
+            selectedCompanyId={selectedCompanyId}
+            selectedProductId={selectedProductId}
+            companyPlan={companyPlan ?? "starter"}
+          />
 
           <main className="relative min-h-0 flex-1 overflow-y-auto bg-page">
             <div className="pointer-events-none absolute inset-0 opacity-40 saas-grid" aria-hidden />
-            <div className="relative mx-auto max-w-[1200px] px-4 py-6 md:px-6 md:py-6">
+            <div className="relative mx-auto max-w-[1200px] px-4 py-6 md:px-6 md:py-8">
               <ModuleFlowBar />
               <ProfileCompletenessBanner />
               {children}

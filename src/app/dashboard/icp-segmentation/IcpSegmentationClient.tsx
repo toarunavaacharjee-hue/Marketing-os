@@ -236,7 +236,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1
@@ -259,7 +259,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="cursor-pointer rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card transition hover:bg-amber-hover disabled:opacity-50">
+          <label className="cursor-pointer rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card transition-[background-color,box-shadow,transform] duration-200 ease-out hover:bg-amber-hover hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50">
             {extracting ? "Reading…" : "Upload ICP document"}
             <input
               type="file"
@@ -349,7 +349,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
               type="button"
               onClick={() => confirmDraft()}
               disabled={saving}
-              className="rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card hover:bg-amber-hover disabled:opacity-50"
+              className="rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card transition-[background-color,box-shadow,transform] duration-200 ease-out hover:bg-amber-hover hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50"
             >
               {saving ? "Saving…" : "Confirm and save"}
             </button>
@@ -360,7 +360,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
                 setProductProfileDraft(null);
               }}
               disabled={saving}
-              className="rounded-sm border border-input-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface2"
+              className="rounded-sm border border-input-border bg-surface px-4 py-2 text-sm font-medium text-text transition-[background-color,border-color] duration-200 ease-out hover:bg-surface2"
             >
               Cancel
             </button>
@@ -386,10 +386,10 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
                 key={s.id}
                 type="button"
                 onClick={() => setActiveId(s.id)}
-                className={`rounded-lg border p-3 text-left shadow-card transition-colors ${
+                className={`rounded-lg border p-3 text-left shadow-card transition-[border-color,background-color,box-shadow,transform] duration-200 ease-out ${
                   active?.id === s.id
                     ? "border-primary bg-primary-light ring-1 ring-primary/25"
-                    : "border-border bg-surface hover:border-primary/40 hover:bg-surface2"
+                    : "border-border bg-surface hover:border-primary/40 hover:bg-surface2 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
                 }`}
               >
                 <div className="text-sm font-medium text-heading">{s.name}</div>
@@ -410,7 +410,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
                     </div>
                     <div className="h-2 rounded-full bg-surface3 ring-1 ring-inset ring-border/60">
                       <div
-                        className="h-2 rounded-full bg-primary"
+                        className="h-2 rounded-full bg-primary transition-[width] duration-500 ease-aimw-out motion-reduce:transition-none"
                         style={{ width: `${v}%` }}
                       />
                     </div>
