@@ -8,6 +8,8 @@ import { getEntitlements } from "@/lib/planEntitlements";
 import { listPriceForWorkspacePlan } from "@/lib/marketingPricing";
 import WorkspaceAiSettingsClient from "@/app/dashboard/settings/workspace-ai/WorkspaceAiSettingsClient";
 
+export const dynamic = "force-dynamic";
+
 type Profile = {
   id: string;
   name: string | null;

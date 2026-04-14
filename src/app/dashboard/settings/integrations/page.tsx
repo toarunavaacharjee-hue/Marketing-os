@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import IntegrationsClient from "@/app/dashboard/settings/integrations/IntegrationsClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function IntegrationsSettingsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
   if (!ctx) redirect("/onboarding");

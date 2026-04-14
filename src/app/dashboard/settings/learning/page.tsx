@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import LearningClient from "@/app/dashboard/settings/learning/LearningClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function LearningSettingsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
   if (!ctx) redirect("/onboarding");

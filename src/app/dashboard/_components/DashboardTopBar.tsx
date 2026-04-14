@@ -165,6 +165,7 @@ export function DashboardTopBar({
               <div className="p-1">
                 <Link
                   href="/dashboard/settings/profile"
+                  prefetch={false}
                   onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
@@ -172,6 +173,7 @@ export function DashboardTopBar({
                 </Link>
                 <Link
                   href="/dashboard/settings/team"
+                  prefetch={false}
                   onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
@@ -179,6 +181,7 @@ export function DashboardTopBar({
                 </Link>
                 <Link
                   href="/dashboard/settings/integrations"
+                  prefetch={false}
                   onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
@@ -186,6 +189,7 @@ export function DashboardTopBar({
                 </Link>
                 <Link
                   href="/dashboard/settings"
+                  prefetch={false}
                   onClick={() => setMenuOpen(false)}
                   className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
                 >
