@@ -96,6 +96,30 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const ent = useMemo(() => getEntitlements(companyPlan ?? "starter"), [companyPlan]);
 
+  const SIDEBAR_SECTIONS_KEY = "aimw-sidebar-sections";
+  const [sectionOpen, setSectionOpen] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(SIDEBAR_SECTIONS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as unknown;
+      if (!parsed || typeof parsed !== "object") return;
+      setSectionOpen(parsed as Record<string, boolean>);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function persistSections(next: Record<string, boolean>) {
+    setSectionOpen(next);
+    try {
+      localStorage.setItem(SIDEBAR_SECTIONS_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  }
+
   const [anthropicReady, setAnthropicReady] = useState(false);
   const [aiKeySource, setAiKeySource] = useState<"workspace" | "platform" | "none">("none");
   useEffect(() => {
@@ -185,11 +209,45 @@ export function DashboardShell({
     return map;
   }, [pathname]);
 
-  function SectionLabel({ children }: { children: React.ReactNode }) {
+  const activeSectionLabel = useMemo(() => {
+    const flat = NAV.flatMap((s) => s.items.map((i) => ({ section: s.label, item: i })));
+    for (const { section, item } of flat) {
+      const href = item.slug ? `/dashboard/${item.slug}` : "/dashboard";
+      const active =
+        href === "/dashboard"
+          ? pathname === "/dashboard"
+          : pathname === href || (pathname?.startsWith(href + "/") ?? false);
+      if (active) return section;
+    }
+    return "Home";
+  }, [pathname]);
+
+  function SectionHeader({
+    label,
+    open,
+    onToggle
+  }: {
+    label: string;
+    open: boolean;
+    onToggle: () => void;
+  }) {
     return (
-      <div className="px-5 pb-1 pt-4 text-xs font-semibold uppercase tracking-[0.6px] text-text3">
-        {children}
-      </div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="group flex w-full items-center gap-2 px-5 pb-1 pt-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-text3 transition-colors hover:text-on-dark"
+      >
+        <span className="min-w-0 flex-1">{label}</span>
+        <span
+          className={`shrink-0 text-[12px] text-text3 transition-transform duration-200 group-hover:text-on-dark/80 ${
+            open ? "rotate-90" : ""
+          }`}
+          aria-hidden
+        >
+          ›
+        </span>
+      </button>
     );
   }
 
@@ -236,32 +294,54 @@ export function DashboardShell({
         <div className="min-h-0 flex-1 overflow-y-auto py-2">
           {NAV.map((section) => (
             <div key={section.label}>
-              <SectionLabel>{section.label}</SectionLabel>
-              <div className="space-y-0.5">
-                {section.items.map((m) => {
-                  const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
-                  const active = activeMap.get(href) ?? false;
-                  const allowed = isSlugAllowed(ent, m.slug);
-                  return (
-                    <Link
-                      key={m.slug || "home"}
-                      href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
-                      onClick={onNavigate}
-                      className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-5 text-sm font-medium transition-[background-color,border-color,color] duration-200 ease-out ${
-                        active
-                          ? "border-primary bg-sidebar-active text-on-dark"
-                          : allowed
-                            ? "border-transparent text-on-dark/90 hover:bg-sidebar-active"
-                            : "border-transparent text-text3 hover:bg-sidebar-active"
-                      }`}
-                    >
-                      <span className="w-[18px] text-center text-base">{m.icon ?? "•"}</span>
-                      <span className="truncate">{m.label}</span>
-                      {!allowed ? <NavBadge>UPGRADE</NavBadge> : m.badge ? <NavBadge>{m.badge}</NavBadge> : null}
-                    </Link>
-                  );
-                })}
-              </div>
+              {(() => {
+                const open =
+                  sectionOpen[section.label] ??
+                  (section.label === "Home" || activeSectionLabel === section.label);
+                return (
+                  <>
+                    <SectionHeader
+                      label={section.label}
+                      open={open}
+                      onToggle={() => {
+                        const next = { ...sectionOpen, [section.label]: !open };
+                        persistSections(next);
+                      }}
+                    />
+                    {open ? (
+                      <div className="space-y-0.5">
+                        {section.items.map((m) => {
+                          const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
+                          const active = activeMap.get(href) ?? false;
+                          const allowed = isSlugAllowed(ent, m.slug);
+                          return (
+                            <Link
+                              key={m.slug || "home"}
+                              href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
+                              onClick={onNavigate}
+                              className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-5 text-sm font-medium transition-[background-color,border-color,color] duration-200 ease-out ${
+                                active
+                                  ? "border-primary bg-sidebar-active text-on-dark"
+                                  : allowed
+                                    ? "border-transparent text-on-dark/90 hover:bg-sidebar-active"
+                                    : "border-transparent text-text3 hover:bg-sidebar-active"
+                              }`}
+                            >
+                              <span className="w-[18px] text-center text-base">{m.icon ?? "•"}</span>
+                              <span className="truncate">{m.label}</span>
+                              {!allowed ? (
+                                <NavBadge>UPGRADE</NavBadge>
+                              ) : m.badge ? (
+                                <NavBadge>{m.badge}</NavBadge>
+                              ) : null}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </>
+                );
+              })()}
             </div>
           ))}
         </div>
