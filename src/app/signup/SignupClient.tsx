@@ -43,35 +43,49 @@ export default function SignupClient() {
 
     const origin = typeof window !== "undefined" ? window.location.origin : "";
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
-        data: { name, company, plan }
-      }
-    });
-
-    if (error) {
-      setLoading(false);
-      setError(error.message);
-      return;
-    }
-
-    const userId = data.user?.id;
-    if (userId) {
-      await supabase.from("profiles").upsert({
-        id: userId,
-        name,
-        company,
-        plan,
-        ai_queries_used: 0
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
+          data: { name, company, plan }
+        }
       });
-    }
 
-    setLoading(false);
-    // Email confirmation is required before /dashboard. Onboarding starts after they verify.
-    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      if (error) {
+        setLoading(false);
+        setError(error.message);
+        return;
+      }
+
+      const userId = data.user?.id;
+      if (userId) {
+        // Best-effort: onboarding/create will also bootstrap missing profile rows.
+        await supabase.from("profiles").upsert({
+          id: userId,
+          name,
+          company,
+          plan,
+          ai_queries_used: 0
+        });
+      }
+
+      setLoading(false);
+
+      // If email confirmations are disabled, Supabase can immediately create a session.
+      // In that case, go straight into the app with a full navigation so server components see cookies.
+      if (data.session && data.user?.email_confirmed_at) {
+        window.location.href = "/dashboard";
+        return;
+      }
+
+      // Email confirmation is required before /dashboard.
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    } catch (e) {
+      setLoading(false);
+      setError(e instanceof Error ? e.message : "Sign up failed.");
+    }
   }
 
   return (

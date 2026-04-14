@@ -61,8 +61,8 @@ export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
     } = await supabase.auth.getUser();
     setBusy(false);
     if (user?.email_confirmed_at) {
-      router.push("/dashboard");
-      router.refresh();
+      // Full navigation ensures the app sees updated auth cookies everywhere.
+      window.location.href = "/dashboard";
       return;
     }
     setError("Not verified yet. Open the link in your email, then try again.");

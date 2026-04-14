@@ -29,6 +29,13 @@ function isLocalDevHostname(hostname: string) {
   return h === "localhost" || h === "127.0.0.1";
 }
 
+// Vercel preview/production deployment hostnames typically don't have an `app.` subdomain configured.
+// If we redirect to `app.<deployment>.vercel.app`, auth routes can break.
+function isManagedDeployHostname(hostname: string) {
+  const h = hostname.toLowerCase();
+  return h.endsWith(".vercel.app") || h.endsWith(".vercel.dev");
+}
+
 function isProtectedAppPath(pathname: string) {
   return (
     pathname === "/dashboard" ||
@@ -59,6 +66,7 @@ export async function middleware(request: NextRequest) {
   if (
     !isAppHost &&
     !isLocalDevHostname(hostname) &&
+    !isManagedDeployHostname(hostname) &&
     (path.startsWith("/dashboard") ||
       path.startsWith("/onboarding") ||
       path.startsWith("/operator") ||

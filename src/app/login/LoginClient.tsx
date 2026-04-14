@@ -50,7 +50,8 @@ export default function LoginClient() {
       return;
     }
 
-    router.push(next);
+    // Use a full navigation so server components/middleware see the fresh auth cookies immediately.
+    window.location.href = next;
   }
 
   return (
