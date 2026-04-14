@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type MembershipRow = { company_id: string; role: string; companies?: { name?: string | null } | null };
+type MembershipRow = {
+  company_id: string;
+  role: string;
+  companies?: { name?: string | null; public_id?: string | null } | null;
+};
 type SubscriptionRow = {
   company_id: string;
   plan: string | null;
@@ -245,7 +249,10 @@ export default function OperatorUserDetailClient({ userId }: { userId: string })
                 <div key={idx} className="px-3 py-3 text-sm text-[var(--text2)]">
                   <div className="text-[var(--text)]">{m.companies?.name ?? m.company_id}</div>
                   <div className="mt-1 text-xs text-[var(--text3)]">
-                    {m.company_id} · role: {m.role}
+                    {m.company_id}
+                    {m.companies?.public_id ? ` · ${m.companies.public_id}` : ""}
+                    {" · "}
+                    role: {m.role}
                   </div>
                 </div>
               ))

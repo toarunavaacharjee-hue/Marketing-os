@@ -37,6 +37,7 @@ export type OperatorCompanyMemberRow = {
 
 export type OperatorCompanyRow = {
   id: string;
+  public_id: string | null;
   name: string | null;
   members_count: number;
   products_count: number;
@@ -163,7 +164,7 @@ export async function loadOperatorData(): Promise<OperatorData> {
   // Companies + subscriptions + member counts (best-effort; table may not exist yet)
   let companies: OperatorCompanyRow[] = [];
   try {
-    const { data: cRows, error: cErr } = await admin.from("companies").select("id,name");
+    const { data: cRows, error: cErr } = await admin.from("companies").select("id,name,public_id");
     if (!cErr) {
       const companyIds = (cRows ?? []).map((c: any) => String(c.id));
 
@@ -223,6 +224,7 @@ export async function loadOperatorData(): Promise<OperatorData> {
         const sub = subMap.get(cid) as any;
         return {
           id: cid,
+          public_id: typeof c.public_id === "string" ? c.public_id : null,
           name: typeof c.name === "string" ? c.name : null,
           members_count: countMap.get(cid) ?? 0,
           products_count: productCountMap.get(cid) ?? 0,

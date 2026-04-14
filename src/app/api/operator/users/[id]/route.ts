@@ -28,7 +28,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
 
   const { data: memberships } = await admin
     .from("company_members")
-    .select("company_id,role,companies(name)")
+    .select("company_id,role,companies(name,public_id)")
     .eq("user_id", userId);
 
   const companyIds = (memberships ?? []).map((m: any) => String(m.company_id)).filter(Boolean);

@@ -13,6 +13,7 @@ type CompanyMemberRow = {
 
 type CompanyRow = {
   id: string;
+  public_id: string | null;
   name: string | null;
   members_count: number;
   products_count: number;
@@ -184,6 +185,7 @@ export default function OperatorCompaniesClient({
           <thead className="border-b border-[var(--border)] text-[10px] font-semibold uppercase text-[var(--text3)]">
             <tr>
               <th className="px-3 py-2">Company</th>
+              <th className="px-3 py-2">Workspace ID</th>
               <th className="px-3 py-2 min-w-[320px]">Accounts</th>
               <th className="px-3 py-2">Members</th>
               <th className="px-3 py-2">Products</th>
@@ -219,6 +221,9 @@ export default function OperatorCompaniesClient({
                   <td className="px-3 py-2 font-medium text-[var(--text)]">
                     {c.name ?? "Company"}{" "}
                     <span className="font-mono text-[11px] text-[var(--text3)]">({c.id.slice(0, 8)}…)</span>
+                  </td>
+                  <td className="px-3 py-2 font-mono text-[12px] text-[var(--text)]">
+                    {c.public_id ?? "—"}
                   </td>
                   <td className="px-3 py-2 align-top text-xs">
                     {c.members?.length ? (
