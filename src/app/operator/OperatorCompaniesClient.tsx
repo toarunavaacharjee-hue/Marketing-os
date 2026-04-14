@@ -200,6 +200,14 @@ export default function OperatorCompaniesClient({
             </tr>
           </thead>
           <tbody className="text-[var(--text2)]">
+            {rows.length === 0 ? (
+              <tr>
+                <td className="px-3 py-6 text-sm text-[var(--text2)]" colSpan={12}>
+                  No workspaces could be loaded. This is usually caused by a missing/mismatched migration (for example
+                  `public_id`) or an Operator query error. Apply the latest Supabase migrations, then reload.
+                </td>
+              </tr>
+            ) : null}
             {rows.map((c) => {
               const busy = busyId === c.id;
               const plan = (c.plan ?? "starter").toLowerCase();

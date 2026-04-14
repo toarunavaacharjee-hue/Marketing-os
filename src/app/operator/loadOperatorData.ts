@@ -165,8 +165,18 @@ export async function loadOperatorData(): Promise<OperatorData> {
   // Companies + subscriptions + member counts (best-effort; table may not exist yet)
   let companies: OperatorCompanyRow[] = [];
   try {
-    const { data: cRows, error: cErr } = await admin.from("companies").select("id,name,public_id");
-    if (!cErr) {
+    // Some deployments may not have applied newer migrations yet (e.g. companies.public_id).
+    // Fall back gracefully so Operator can still load companies.
+    let cRows: any[] | null = null;
+    const primary = await admin.from("companies").select("id,name,public_id");
+    if (!primary.error) {
+      cRows = (primary.data ?? []) as any[];
+    } else {
+      const fallback = await admin.from("companies").select("id,name");
+      if (!fallback.error) cRows = (fallback.data ?? []) as any[];
+    }
+
+    if (cRows) {
       const companyIds = (cRows ?? []).map((c: any) => String(c.id));
 
       const { data: subs, error: sErr } = await admin
@@ -213,7 +223,15 @@ export async function loadOperatorData(): Promise<OperatorData> {
         });
       }
 
-      const { data: products } = await admin.from("products").select("id,company_id,name,public_id");
+      // Same migration tolerance for products.public_id.
+      let products: any[] = [];
+      const prodPrimary = await admin.from("products").select("id,company_id,name,public_id");
+      if (!prodPrimary.error) {
+        products = (prodPrimary.data ?? []) as any[];
+      } else {
+        const prodFallback = await admin.from("products").select("id,company_id,name");
+        products = ((prodFallback.error ? [] : prodFallback.data) ?? []) as any[];
+      }
       const productCountMap = new Map<string, number>();
       const productsByCompany = new Map<string, Array<{ id: string; name: string | null; public_id: string | null }>>();
       (products ?? []).forEach((r: any) => {

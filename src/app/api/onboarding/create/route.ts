@@ -77,7 +77,10 @@ export async function POST(req: Request) {
       .select("id")
       .single<{ id: string }>();
     if (companyErr || !company?.id) {
-      return NextResponse.json({ error: companyErr?.message ?? "Could not create workspace." }, { status: 400 });
+      return NextResponse.json(
+        { step: "workspace", error: companyErr?.message ?? "Could not create workspace." },
+        { status: 400 }
+      );
     }
 
     const { error: memberErr } = await db.from("company_members").insert({
@@ -86,7 +89,10 @@ export async function POST(req: Request) {
       role: "owner"
     });
     if (memberErr) {
-      return NextResponse.json({ error: memberErr.message ?? "Could not add you to the workspace." }, { status: 400 });
+      return NextResponse.json(
+        { step: "workspace_membership", error: memberErr.message ?? "Could not add you to the workspace." },
+        { status: 400 }
+      );
     }
 
     const { error: subErr } = await db.from("company_subscriptions").insert({
@@ -102,7 +108,10 @@ export async function POST(req: Request) {
     // The app can still function with starter defaults if this row is missing.
     // We only hard-fail if we're using the service role (admin) and it still fails.
     if (subErr && admin) {
-      return NextResponse.json({ error: subErr.message ?? "Could not create subscription row." }, { status: 400 });
+      return NextResponse.json(
+        { step: "workspace_subscription", error: subErr.message ?? "Could not create subscription row." },
+        { status: 400 }
+      );
     }
 
     const { data: product, error: productErr } = await db
@@ -115,7 +124,10 @@ export async function POST(req: Request) {
       .select("id")
       .single<{ id: string }>();
     if (productErr || !product?.id) {
-      return NextResponse.json({ error: productErr?.message ?? "Could not create product." }, { status: 400 });
+      return NextResponse.json(
+        { step: "product", error: productErr?.message ?? "Could not create product." },
+        { status: 400 }
+      );
     }
 
     const { error: envErr } = await db.from("product_environments").insert({
@@ -123,7 +135,15 @@ export async function POST(req: Request) {
       name: "Default"
     });
     if (envErr) {
-      return NextResponse.json({ error: envErr.message ?? "Could not create product environment." }, { status: 400 });
+      return NextResponse.json(
+        {
+          step: "product_environment",
+          error:
+            envErr.message ??
+            "Could not create product environment. If this is an RLS error, apply supabase/product_environments_policies.sql."
+        },
+        { status: 400 }
+      );
     }
 
     const { error: pmErr } = await db.from("product_members").insert({
@@ -132,7 +152,10 @@ export async function POST(req: Request) {
       role: "owner"
     });
     if (pmErr) {
-      return NextResponse.json({ error: pmErr.message ?? "Could not grant you access to the product." }, { status: 400 });
+      return NextResponse.json(
+        { step: "product_membership", error: pmErr.message ?? "Could not grant you access to the product." },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({
