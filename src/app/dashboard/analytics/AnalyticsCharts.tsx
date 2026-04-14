@@ -25,8 +25,8 @@ ChartJS.register(
 export function AnalyticsCharts() {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-        <div className="mb-3 text-sm text-[#f0f0f8]">ROAS Trend (8 weeks)</div>
+      <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="mb-3 text-sm text-heading">ROAS Trend (8 weeks)</div>
         <Line
           data={{
             labels: ["W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8"],
@@ -34,38 +34,38 @@ export function AnalyticsCharts() {
               {
                 label: "Blended ROAS",
                 data: [2.7, 2.9, 3.1, 3.0, 3.3, 3.2, 3.5, 3.4],
-                borderColor: "#7c6cff",
-                backgroundColor: "rgba(124,108,255,0.2)",
+                borderColor: "#7C4DFF",
+                backgroundColor: "rgba(124, 77, 255, 0.12)",
                 tension: 0.35
               }
             ]
           }}
           options={{
             responsive: true,
-            plugins: { legend: { labels: { color: "#9090b0" } } },
+            plugins: { legend: { labels: { color: "#516F90" } } },
             scales: {
-              x: { ticks: { color: "#9090b0" }, grid: { color: "#2a2e3f" } },
-              y: { ticks: { color: "#9090b0" }, grid: { color: "#2a2e3f" } }
+              x: { ticks: { color: "#516F90" }, grid: { color: "#DFE3EB" } },
+              y: { ticks: { color: "#516F90" }, grid: { color: "#DFE3EB" } }
             }
           }}
         />
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-        <div className="mb-3 text-sm text-[#f0f0f8]">Budget Mix</div>
+      <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="mb-3 text-sm text-heading">Budget Mix</div>
         <Doughnut
           data={{
             labels: ["Google Ads", "LinkedIn", "Meta", "Content"],
             datasets: [
               {
                 data: [32, 26, 22, 20],
-                backgroundColor: ["#7c6cff", "#b8ff6c", "#5a4bcf", "#2a2e3f"],
-                borderColor: "#141420"
+                backgroundColor: ["#7C4DFF", "#FF8F00", "#5E35B1", "#99ACC2"],
+                borderColor: "#FFFFFF"
               }
             ]
           }}
           options={{
-            plugins: { legend: { labels: { color: "#9090b0" } } }
+            plugins: { legend: { labels: { color: "#516F90" } } }
           }}
         />
       </div>

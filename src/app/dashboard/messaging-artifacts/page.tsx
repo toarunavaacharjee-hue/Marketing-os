@@ -8,10 +8,10 @@ export default async function MessagingArtifactsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
         Messaging &amp; Artifacts
       </h1>
-      <p className="text-sm text-[#9090b0]">
+      <p className="text-sm text-text2">
         Track messaging assets per segment. Generator uses your saved ICP segments.
       </p>
       <MessagingArtifactsClient environmentId={ctx.environmentId} />

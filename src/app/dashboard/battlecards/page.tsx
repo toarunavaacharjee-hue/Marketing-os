@@ -478,7 +478,7 @@ export default function BattlecardsPage() {
           <button
             onClick={save}
             disabled={saving || !activeId}
-            className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+            className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
           >
             {saving ? "Saving..." : "Save battlecard"}
           </button>
@@ -526,7 +526,7 @@ export default function BattlecardsPage() {
           <div className="mt-3">
             <Link
               href="/dashboard/settings/product"
-              className="inline-flex items-center rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee]"
+              className="inline-flex items-center rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark"
             >
               Add competitors
             </Link>
@@ -807,7 +807,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => generatePitch("icp")}
                     disabled={pitchLoading || !icpPersonaId || !activeId}
-                    className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                    className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
                   >
                     {pitchLoading ? "Working…" : "Generate ICP battlecard"}
                   </button>
@@ -815,7 +815,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => generatePitch("account")}
                     disabled={pitchLoading || !accountPersonaId || !activeId}
-                    className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                    className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
                   >
                     {pitchLoading ? "Working…" : "Generate account battlecard"}
                   </button>

@@ -455,7 +455,7 @@ export function InsightWorkbench({
                 <button
                   type="button"
                   onClick={() => removeEvent(ev.id)}
-                  className="shrink-0 rounded-lg border border-red-500/30 px-3 py-1.5 text-xs text-red-200 hover:bg-red-500/10"
+                  className="shrink-0 rounded-lg border border-red-500/30 px-3 py-1.5 text-xs text-red hover:bg-red-500/10"
                 >
                   Remove
                 </button>
@@ -490,7 +490,7 @@ export function InsightWorkbench({
 
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
                 <div>
-                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Dates</div>
+                  <div className="mb-1 text-[10px] uppercase text-text2">Dates</div>
                   <input
                     value={ev.eventDate}
                     onChange={(e) => {
@@ -500,11 +500,11 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="Feb 19–20, 2025"
-                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
                   />
                 </div>
                 <div>
-                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Location</div>
+                  <div className="mb-1 text-[10px] uppercase text-text2">Location</div>
                   <input
                     value={ev.location}
                     onChange={(e) => {
@@ -514,11 +514,11 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="City / venue / virtual"
-                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
                   />
                 </div>
                 <div>
-                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Booth / track</div>
+                  <div className="mb-1 text-[10px] uppercase text-text2">Booth / track</div>
                   <input
                     value={ev.boothOrTrack}
                     onChange={(e) => {
@@ -528,14 +528,14 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="Booth, pavilion, session track"
-                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
                   />
                 </div>
               </div>
 
               <div className="mt-3 grid gap-3 lg:grid-cols-2">
                 <div>
-                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Team attending</div>
+                  <div className="mb-1 text-[10px] uppercase text-text2">Team attending</div>
                   <textarea
                     value={ev.attendees}
                     onChange={(e) => {
@@ -546,11 +546,11 @@ export function InsightWorkbench({
                     }}
                     rows={4}
                     placeholder="One per line: name, role (e.g. Alex Chen — PMM; Jordan — AE)"
-                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                   />
                 </div>
                 <div>
-                  <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Timeline &amp; milestones</div>
+                  <div className="mb-1 text-[10px] uppercase text-text2">Timeline &amp; milestones</div>
                   <textarea
                     value={ev.timeline}
                     onChange={(e) => {
@@ -561,13 +561,13 @@ export function InsightWorkbench({
                     }}
                     rows={4}
                     placeholder="Reg deadline, booth setup, ship collateral, travel days, show floor hours…"
-                    className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                    className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                   />
                 </div>
               </div>
 
               <div className="mt-3">
-                <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Logistics &amp; on-site details</div>
+                <div className="mb-1 text-[10px] uppercase text-text2">Logistics &amp; on-site details</div>
                 <textarea
                   value={ev.logistics}
                   onChange={(e) => {
@@ -578,12 +578,12 @@ export function InsightWorkbench({
                   }}
                   rows={4}
                   placeholder="Hotel & confirmation, flights, badge pickup, parking, dress code, budget code, internal briefing doc link, emergency contact…"
-                  className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                 />
               </div>
 
               <div className="mt-3">
-                <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Goals</div>
+                <div className="mb-1 text-[10px] uppercase text-text2">Goals</div>
                 <textarea
                   value={ev.goals}
                   onChange={(e) => {
@@ -594,76 +594,76 @@ export function InsightWorkbench({
                   }}
                   rows={3}
                   placeholder="Pipeline targets, meetings to book, awareness, launch moments…"
-                  className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                 />
               </div>
 
-              <details className="group mt-3 rounded-xl border border-[#2a2e3f] bg-black/10 px-3 py-2 [&_summary]:list-none [&_summary::-webkit-details-marker]:hidden">
-                <summary className="cursor-pointer text-xs font-medium text-[#c4b8ff] hover:text-[#ddd6ff]">
-                  <span className="mr-1 text-[#9090b0] group-open:rotate-90 inline-block transition-transform">
+              <details className="group mt-3 rounded-xl border border-border bg-black/10 px-3 py-2 [&_summary]:list-none [&_summary::-webkit-details-marker]:hidden">
+                <summary className="cursor-pointer text-xs font-medium text-primary hover:text-primary-dark">
+                  <span className="mr-1 text-text2 group-open:rotate-90 inline-block transition-transform">
                     ▸
                   </span>
                   Program &amp; commercial (sponsor, lead capture, speaking, pipeline, follow-up)
                 </summary>
                 <div className="mt-3 grid gap-3 lg:grid-cols-2">
                   <div>
-                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Commercial &amp; budget</div>
+                    <div className="mb-1 text-[10px] uppercase text-text2">Commercial &amp; budget</div>
                     <textarea
                       value={ev.commercialNotes}
                       onChange={(e) => patchEventRow(i, { commercialNotes: e.target.value })}
                       rows={3}
                       placeholder="Sponsor tier, booth package, PO / budget owner, cancellation terms…"
-                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
-                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Lead capture</div>
+                    <div className="mb-1 text-[10px] uppercase text-text2">Lead capture</div>
                     <textarea
                       value={ev.leadCaptureNotes}
                       onChange={(e) => patchEventRow(i, { leadCaptureNotes: e.target.value })}
                       rows={3}
                       placeholder="Scanner app, login, badge rules, data export owner…"
-                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
-                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Speaking / sponsored session</div>
+                    <div className="mb-1 text-[10px] uppercase text-text2">Speaking / sponsored session</div>
                     <textarea
                       value={ev.speakingNotes}
                       onChange={(e) => patchEventRow(i, { speakingNotes: e.target.value })}
                       rows={3}
                       placeholder="Session title, slot time, AV contact, sponsor deliverables…"
-                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
-                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Meetings &amp; booth duty</div>
+                    <div className="mb-1 text-[10px] uppercase text-text2">Meetings &amp; booth duty</div>
                     <textarea
                       value={ev.meetingsNotes}
                       onChange={(e) => patchEventRow(i, { meetingsNotes: e.target.value })}
                       rows={3}
                       placeholder="Target accounts, pre-booked meetings, booth schedule, battlecard link…"
-                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
-                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Competitors on the floor</div>
+                    <div className="mb-1 text-[10px] uppercase text-text2">Competitors on the floor</div>
                     <textarea
                       value={ev.competitorNotes}
                       onChange={(e) => patchEventRow(i, { competitorNotes: e.target.value })}
                       rows={3}
                       placeholder="Who else is exhibiting; notes for reps…"
-                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
-                    <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Post-event follow-up</div>
+                    <div className="mb-1 text-[10px] uppercase text-text2">Post-event follow-up</div>
                     <textarea
                       value={ev.followUpNotes}
                       onChange={(e) => patchEventRow(i, { followUpNotes: e.target.value })}
                       rows={3}
                       placeholder="Owner, SLA for leads, nurture track, CRM campaign…"
-                      className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                 </div>
@@ -671,7 +671,7 @@ export function InsightWorkbench({
 
               <div className="mt-3">
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-[10px] uppercase text-[#9090b0]">Tasks</div>
+                  <div className="text-[10px] uppercase text-text2">Tasks</div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -689,7 +689,7 @@ export function InsightWorkbench({
                         );
                         replaceEventsList(next);
                       }}
-                      className="rounded-lg border border-[#2a2e3f] px-2 py-1 text-[11px] text-[#f0f0f8] hover:bg-white/5"
+                      className="rounded-lg border border-border px-2 py-1 text-[11px] text-heading hover:bg-surface2"
                     >
                       + Add task
                     </button>
@@ -701,7 +701,7 @@ export function InsightWorkbench({
                         );
                         replaceEventsList(next);
                       }}
-                      className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-2 py-1 text-[11px] text-[#c4b8ff]"
+                      className="rounded-lg border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] text-primary"
                     >
                       Match prep to tasks
                     </button>
@@ -709,7 +709,7 @@ export function InsightWorkbench({
                 </div>
                 <ul className="space-y-2">
                   {ev.tasks.length === 0 ? (
-                    <li className="text-xs text-[#9090b0]">No tasks — add steps like travel, booth order, lead capture.</li>
+                    <li className="text-xs text-text2">No tasks — add steps like travel, booth order, lead capture.</li>
                   ) : null}
                   {ev.tasks.map((task, ti) => (
                     <li key={task.id} className="flex items-start gap-2">
@@ -726,7 +726,7 @@ export function InsightWorkbench({
                           });
                           replaceEventsList(next);
                         }}
-                        className="mt-1 rounded border-[#2a2e3f]"
+                        className="mt-1 rounded border-border"
                       />
                       <input
                         value={task.label}
@@ -741,7 +741,7 @@ export function InsightWorkbench({
                           replaceEventsList(next);
                         }}
                         placeholder="Task description"
-                        className="min-w-0 flex-1 rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                        className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
                       />
                       <button
                         type="button"
@@ -752,7 +752,7 @@ export function InsightWorkbench({
                           });
                           replaceEventsList(next);
                         }}
-                        className="text-xs text-[#9090b0] hover:text-red-300"
+                        className="text-xs text-text2 hover:text-red-300"
                       >
                         ✕
                       </button>
@@ -761,8 +761,8 @@ export function InsightWorkbench({
                 </ul>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#2a2e3f] pt-3">
-                <span className="text-sm text-[#9090b0]">Prep {ev.prepPct}%</span>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+                <span className="text-sm text-text2">Prep {ev.prepPct}%</span>
                 <input
                   type="range"
                   min={0}
@@ -775,15 +775,15 @@ export function InsightWorkbench({
                     );
                     replaceEventsList(next);
                   }}
-                  className="max-w-full flex-1 accent-[#7c6cff] sm:max-w-[240px]"
+                  className="max-w-full flex-1 accent-[var(--color-primary)] sm:max-w-[240px]"
                 />
               </div>
             </div>
           ))}
         </div>
 
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0] lg:sticky lg:top-4 lg:self-start">
-          <div className="text-sm text-[#f0f0f8]">Past event ROI &amp; notes</div>
+        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2 lg:sticky lg:top-4 lg:self-start">
+          <div className="text-sm text-heading">Past event ROI &amp; notes</div>
           <textarea
             value={events.pastNotes}
             onChange={(e) => {
@@ -792,7 +792,7 @@ export function InsightWorkbench({
               schedule(v);
             }}
             rows={14}
-            className="mt-2 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
           />
         </div>
       </div>
@@ -803,8 +803,8 @@ export function InsightWorkbench({
     return (
       <>
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-            <div className="text-xs text-[#9090b0]">NPS</div>
+          <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="text-xs text-text2">NPS</div>
             <input
               type="number"
               value={customer.nps}
@@ -813,11 +813,11 @@ export function InsightWorkbench({
                 setCustomer(v);
                 schedule(v);
               }}
-              className="mt-1 w-full bg-transparent text-3xl text-[#f0f0f8] outline-none"
+              className="mt-1 w-full bg-transparent text-3xl text-heading outline-none"
             />
           </div>
-          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-            <div className="text-xs text-[#9090b0]">CSAT</div>
+          <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="text-xs text-text2">CSAT</div>
             <input
               value={customer.csat}
               onChange={(e) => {
@@ -825,13 +825,13 @@ export function InsightWorkbench({
                 setCustomer(v);
                 schedule(v);
               }}
-              className="mt-1 w-full bg-transparent text-3xl text-[#f0f0f8] outline-none"
+              className="mt-1 w-full bg-transparent text-3xl text-heading outline-none"
             />
           </div>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-            <div className="text-sm text-[#f0f0f8]">VOC quotes</div>
+          <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="text-sm text-heading">VOC quotes</div>
             <div className="mt-2 space-y-2">
               {customer.quotes.map((q, i) => (
                 <textarea
@@ -845,16 +845,16 @@ export function InsightWorkbench({
                     schedule(v);
                   }}
                   rows={2}
-                  className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#9090b0]"
+                  className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-text2"
                 />
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-            <div className="text-sm text-[#f0f0f8]">Feedback themes</div>
+          <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="text-sm text-heading">Feedback themes</div>
             {customer.themes.map((t, i) => (
               <div key={t.id} className="mt-3">
-                <div className="mb-1 flex justify-between text-xs text-[#9090b0]">
+                <div className="mb-1 flex justify-between text-xs text-text2">
                   <input
                     value={t.name}
                     onChange={(e) => {
@@ -864,7 +864,7 @@ export function InsightWorkbench({
                       setCustomer(v);
                       schedule(v);
                     }}
-                    className="w-2/3 rounded border border-[#2a2e3f] bg-black/20 px-2 py-1 text-xs"
+                    className="w-2/3 rounded border border-border bg-surface2 px-2 py-1 text-xs"
                   />
                   <span>{t.pct}%</span>
                 </div>
@@ -881,7 +881,7 @@ export function InsightWorkbench({
                     setCustomer(v);
                     schedule(v);
                   }}
-                  className="w-full accent-[#7c6cff]"
+                  className="w-full accent-[var(--color-primary)]"
                 />
               </div>
             ))}
@@ -893,7 +893,7 @@ export function InsightWorkbench({
                 schedule(v);
               }}
               rows={4}
-              className="mt-4 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#9090b0]"
+              className="mt-4 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-text2"
               placeholder="AI summary"
             />
           </div>
@@ -906,11 +906,11 @@ export function InsightWorkbench({
     return (
       <>
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-            <div className="text-sm text-[#f0f0f8]">Objection themes</div>
+          <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="text-sm text-heading">Objection themes</div>
             {sales.objections.map((o, i) => (
               <div key={o.id} className="mt-3">
-                <div className="mb-1 flex justify-between text-xs text-[#9090b0]">
+                <div className="mb-1 flex justify-between text-xs text-text2">
                   <input
                     value={o.name}
                     onChange={(e) => {
@@ -920,7 +920,7 @@ export function InsightWorkbench({
                       setSales(v);
                       schedule(v);
                     }}
-                    className="w-2/3 rounded border border-[#2a2e3f] bg-black/20 px-2 py-1 text-xs"
+                    className="w-2/3 rounded border border-border bg-surface2 px-2 py-1 text-xs"
                   />
                   <span>{o.pct}%</span>
                 </div>
@@ -937,13 +937,13 @@ export function InsightWorkbench({
                     setSales(v);
                     schedule(v);
                   }}
-                  className="w-full accent-[#7c6cff]"
+                  className="w-full accent-[var(--color-primary)]"
                 />
               </div>
             ))}
           </div>
-          <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
-            <div className="text-sm text-[#f0f0f8]">Win / loss by segment</div>
+          <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+            <div className="text-sm text-heading">Win / loss by segment</div>
             <textarea
               value={sales.winloss}
               onChange={(e) => {
@@ -952,12 +952,12 @@ export function InsightWorkbench({
                 schedule(v);
               }}
               rows={4}
-              className="mt-2 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+              className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
             />
           </div>
         </div>
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
-          <div className="text-sm text-[#f0f0f8]">Recent call insights</div>
+        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+          <div className="text-sm text-heading">Recent call insights</div>
           <textarea
             value={sales.calls}
             onChange={(e) => {
@@ -966,7 +966,7 @@ export function InsightWorkbench({
               schedule(v);
             }}
             rows={10}
-            className="mt-2 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
           />
         </div>
       </>
@@ -975,7 +975,7 @@ export function InsightWorkbench({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
         {title}
       </h1>
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -984,7 +984,7 @@ export function InsightWorkbench({
             type="button"
             onClick={() => generateInsight()}
             disabled={generating}
-            className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+            className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
           >
             {generating ? "Generating…" : "AI assist (append insight)"}
           </button>
@@ -993,11 +993,11 @@ export function InsightWorkbench({
               <button
                 type="button"
                 onClick={addEvent}
-                className="rounded-xl border border-[#2a2e3f] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0f0f8] hover:bg-white/5"
+                className="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-heading hover:bg-surface2"
               >
                 + Add event
               </button>
-              <label className="cursor-pointer rounded-xl border border-[#7c6cff]/50 bg-[#7c6cff]/10 px-4 py-2 text-sm font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20">
+              <label className="cursor-pointer rounded-xl border border-primary/50 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20">
                 {importing ? "Reading PDF…" : "Import PDF"}
                 <input
                   type="file"
@@ -1014,12 +1014,12 @@ export function InsightWorkbench({
             </>
           ) : null}
         </div>
-        <span className="text-xs text-[#9090b0]">
+        <span className="text-xs text-text2">
           {loading ? "Loading…" : null} {saving ? "Saving…" : "Saved per product."}
         </span>
       </div>
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
         </div>
       ) : null}

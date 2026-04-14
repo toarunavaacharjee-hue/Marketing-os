@@ -8,7 +8,7 @@ export default async function GTMPlannerPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
         GTM Planner
       </h1>
       <GtmPlannerClient environmentId={ctx.environmentId} />

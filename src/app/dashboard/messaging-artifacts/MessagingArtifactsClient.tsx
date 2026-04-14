@@ -163,9 +163,9 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
 
   return (
     <div className="space-y-4">
-      {loading ? <div className="text-sm text-[#9090b0]">Loading…</div> : null}
+      {loading ? <div className="text-sm text-text2">Loading…</div> : null}
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
         </div>
       ) : null}
@@ -176,23 +176,23 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
         estimate={AI_PROGRESS_ESTIMATE.short}
         durationMs={50_000}
       />
-      <p className="text-xs text-[#9090b0]">{saving ? "Saving…" : "Artifacts saved per product."}</p>
+      <p className="text-xs text-text2">{saving ? "Saving…" : "Artifacts saved per product."}</p>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 lg:col-span-2">
+        <div className="rounded-2xl border border-border bg-surface p-4 lg:col-span-2">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-[#f0f0f8]">Artifacts</div>
+            <div className="text-sm text-heading">Artifacts</div>
             <button
               type="button"
               onClick={addRow}
-              className="rounded-xl border border-[#2a2e3f] px-3 py-1.5 text-xs text-[#f0f0f8] hover:bg-white/5"
+              className="rounded-xl border border-border px-3 py-1.5 text-xs text-heading hover:bg-surface2"
             >
               + Add row
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-[#9090b0]">
+              <thead className="text-text2">
                 <tr>
                   <th className="pb-2 text-left font-medium">Artifact</th>
                   <th className="pb-2 text-left font-medium">Segment</th>
@@ -201,35 +201,35 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
                   <th className="w-8" />
                 </tr>
               </thead>
-              <tbody className="text-[#f0f0f8]">
+              <tbody className="text-heading">
                 {store.items.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-4 text-[#9090b0]">
+                    <td colSpan={5} className="py-4 text-text2">
                       No artifacts yet. Generate or add a row.
                     </td>
                   </tr>
                 ) : (
                   store.items.map((r) => (
-                    <tr key={r.id} className="border-t border-[#2a2e3f]">
+                    <tr key={r.id} className="border-t border-border">
                       <td className="py-2 pr-2 align-top">
                         <input
                           value={r.name}
                           onChange={(e) => updateRow(r.id, { name: e.target.value })}
-                          className="w-full min-w-[140px] rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                          className="w-full min-w-[140px] rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
                         />
                       </td>
                       <td className="py-2 pr-2 align-top">
                         <input
                           value={r.segmentName}
                           onChange={(e) => updateRow(r.id, { segmentName: e.target.value })}
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                          className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
                         />
                       </td>
                       <td className="py-2 pr-2 align-top">
                         <select
                           value={r.status}
                           onChange={(e) => updateRow(r.id, { status: e.target.value })}
-                          className="rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                          className="rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
                         >
                           {["Draft", "Review", "Approved"].map((s) => (
                             <option key={s} value={s}>
@@ -247,14 +247,14 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
                           onChange={(e) =>
                             updateRow(r.id, { consistency: Number(e.target.value) || 0 })
                           }
-                          className="w-16 rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                          className="w-16 rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
                         />
                       </td>
                       <td className="py-2 align-top">
                         <button
                           type="button"
                           onClick={() => removeRow(r.id)}
-                          className="text-xs text-[#9090b0] hover:text-red-300"
+                          className="text-xs text-text2 hover:text-red-300"
                         >
                           ✕
                         </button>
@@ -267,20 +267,20 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-          <div className="mb-3 text-sm text-[#f0f0f8]">Artifact generator</div>
+        <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="mb-3 text-sm text-heading">Artifact generator</div>
           <div className="space-y-2">
-            <label className="block text-xs text-[#9090b0]">Type</label>
+            <label className="block text-xs text-text2">Type</label>
             <input
               value={store.genType}
               onChange={(e) => schedule({ ...store, genType: e.target.value })}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-2 text-sm text-[#f0f0f8]"
+              className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
             />
-            <label className="block text-xs text-[#9090b0]">Segment</label>
+            <label className="block text-xs text-text2">Segment</label>
             <select
               value={store.genSegment}
               onChange={(e) => schedule({ ...store, genSegment: e.target.value })}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-2 text-sm text-[#f0f0f8]"
+              className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
             >
               <option value="">Best-fit segment</option>
               {segments.map((s) => (
@@ -289,29 +289,29 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
                 </option>
               ))}
             </select>
-            <label className="block text-xs text-[#9090b0]">Tone</label>
+            <label className="block text-xs text-text2">Tone</label>
             <input
               value={store.genTone}
               onChange={(e) => schedule({ ...store, genTone: e.target.value })}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-2 text-sm text-[#f0f0f8]"
+              className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
             />
             <button
               type="button"
               onClick={() => generate()}
               disabled={generating}
-              className="mt-2 w-full rounded-xl bg-[#b8ff6c] p-2 text-sm font-medium text-black disabled:opacity-50"
+              className="mt-2 w-full rounded-xl bg-amber p-2 text-sm font-medium text-black disabled:opacity-50"
             >
               {generating ? "Generating…" : "Generate"}
             </button>
             {store.lastOutput ? (
               <div className="mt-3 space-y-2">
-                <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-xl border border-[#2a2e3f] bg-black/20 p-2 text-xs text-[#9090b0]">
+                <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-surface2 p-2 text-xs text-text2">
                   {store.lastOutput}
                 </pre>
                 <button
                   type="button"
                   onClick={insertFromOutput}
-                  className="w-full rounded-xl border border-[#2a2e3f] px-2 py-2 text-xs text-[#f0f0f8] hover:bg-white/5"
+                  className="w-full rounded-xl border border-border px-2 py-2 text-xs text-heading hover:bg-surface2"
                 >
                   Add title to table
                 </button>

@@ -319,22 +319,22 @@ export default function TeamSettingsClient({
     <div className="space-y-4">
       {!canAdmin ? (
         <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm text-yellow-100">
-          You can view the team, but only <span className="text-[#f0f0f8]">owners/admins</span> can change roles or
+          You can view the team, but only <span className="text-heading">owners/admins</span> can change roles or
           remove members.
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
       ) : null}
       {ok ? (
-        <div className="rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">{ok}</div>
+        <div className="rounded-xl border border-teal/30 bg-amber/10 px-3 py-2 text-sm text-teal">{ok}</div>
       ) : null}
 
       {canAdmin ? (
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-          <div className="text-sm text-[#f0f0f8]">Product access</div>
-          <div className="mt-2 text-sm text-[#9090b0]">
+        <div className="rounded-2xl border border-border bg-surface p-6">
+          <div className="text-sm text-heading">Product access</div>
+          <div className="mt-2 text-sm text-text2">
             Assign which products within this workspace a user can access.
           </div>
 
@@ -342,7 +342,7 @@ export default function TeamSettingsClient({
             <select
               value={productAccessUserId}
               onChange={(e) => setProductAccessUserId(e.target.value)}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] disabled:opacity-60"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading disabled:opacity-60"
             >
               <option value="">Select a member…</option>
               {members.map((m) => (
@@ -356,11 +356,11 @@ export default function TeamSettingsClient({
                 type="button"
                 onClick={() => void loadProductsAndAccess()}
                 disabled={productAccessBusy}
-                className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#f0f0f8] hover:bg-white/5 disabled:opacity-60"
+                className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-heading hover:bg-surface2 disabled:opacity-60"
               >
                 Refresh products
               </button>
-              <div className="text-xs text-[#9090b0]">{products.length ? `${products.length} products` : "No products yet"}</div>
+              <div className="text-xs text-text2">{products.length ? `${products.length} products` : "No products yet"}</div>
             </div>
           </div>
 
@@ -371,42 +371,42 @@ export default function TeamSettingsClient({
                 return (
                   <label
                     key={p.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-[#2a2e3f] bg-black/10 px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-black/10 px-3 py-2"
                   >
                     <div className="min-w-0">
-                      <div className="truncate text-sm text-[#f0f0f8]">{p.name ?? "Untitled product"}</div>
-                      <div className="truncate font-mono text-[11px] text-[#9090b0]">{p.id}</div>
+                      <div className="truncate text-sm text-heading">{p.name ?? "Untitled product"}</div>
+                      <div className="truncate font-mono text-[11px] text-text2">{p.id}</div>
                     </div>
                     <input
                       type="checkbox"
                       checked={has}
                       disabled={productAccessBusy}
                       onChange={(e) => void setUserProductAccess(productAccessUserId, p.id, e.target.checked)}
-                      className="h-4 w-4 accent-[#7c6cff]"
+                      className="h-4 w-4 accent-[var(--color-primary)]"
                     />
                   </label>
                 );
               })}
               {!products.length ? (
-                <div className="text-sm text-[#9090b0]">Create a product first, then come back to assign access.</div>
+                <div className="text-sm text-text2">Create a product first, then come back to assign access.</div>
               ) : null}
             </div>
           ) : (
-            <div className="mt-4 text-sm text-[#9090b0]">Pick a member to manage access.</div>
+            <div className="mt-4 text-sm text-text2">Pick a member to manage access.</div>
           )}
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-sm text-[#f0f0f8]">Workspace settings</div>
-        <div className="mt-2 text-sm text-[#9090b0]">Rename the workspace, or delete it (owner-only).</div>
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="text-sm text-heading">Workspace settings</div>
+        <div className="mt-2 text-sm text-text2">Rename the workspace, or delete it (owner-only).</div>
 
         <div className="mt-4 grid gap-2 md:grid-cols-3">
           <input
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             disabled={!canAdmin || savingWorkspace || deletingWorkspace}
-            className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0] disabled:opacity-60"
+            className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text2 disabled:opacity-60"
             placeholder="Workspace name"
           />
           <div className="md:col-span-2 flex flex-wrap gap-2">
@@ -414,7 +414,7 @@ export default function TeamSettingsClient({
               type="button"
               disabled={!canAdmin || savingWorkspace || deletingWorkspace || !workspaceName.trim()}
               onClick={() => void saveWorkspaceName()}
-              className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm text-[#f0f0f8] hover:bg-white/5 disabled:opacity-60"
+              className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm text-heading hover:bg-surface2 disabled:opacity-60"
             >
               {savingWorkspace ? "Saving…" : "Save workspace"}
             </button>
@@ -424,7 +424,7 @@ export default function TeamSettingsClient({
         {isOwner ? (
           <div className="mt-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
             <div className="text-sm text-red-100">Danger zone</div>
-            <div className="mt-1 text-sm text-red-200/80">
+            <div className="mt-1 text-sm text-red/80">
               Deleting a workspace removes all products and associated data. This cannot be undone.
             </div>
             <div className="mt-3 grid gap-2 md:grid-cols-3">
@@ -432,7 +432,7 @@ export default function TeamSettingsClient({
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}
                 disabled={deletingWorkspace || savingWorkspace}
-                className="w-full rounded-xl border border-red-500/30 bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0] disabled:opacity-60"
+                className="w-full rounded-xl border border-red-500/30 bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text2 disabled:opacity-60"
                 placeholder={
                   initialCompanyName ? `Type "${initialCompanyName}" to confirm` : "Type workspace name to confirm"
                 }
@@ -456,9 +456,9 @@ export default function TeamSettingsClient({
         ) : null}
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-sm text-[#f0f0f8]">Invites</div>
-        <div className="mt-2 text-sm text-[#9090b0]">
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="text-sm text-heading">Invites</div>
+        <div className="mt-2 text-sm text-text2">
           Create a link invite. Email delivery can be added later; for now you can copy/paste the link.
         </div>
 
@@ -468,12 +468,12 @@ export default function TeamSettingsClient({
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="teammate@company.com"
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#9090b0]"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text2"
             />
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
             >
               <option value="member">member</option>
               <option value="admin">admin</option>
@@ -483,7 +483,7 @@ export default function TeamSettingsClient({
               type="button"
               disabled={inviteBusy}
               onClick={() => void createInvite()}
-              className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+              className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
             >
               {inviteBusy ? "Creating…" : "Create invite"}
             </button>
@@ -491,15 +491,15 @@ export default function TeamSettingsClient({
         ) : null}
 
         {lastInviteUrl ? (
-          <div className="mt-3 rounded-xl border border-[#2a2e3f] bg-black/20 p-3">
-            <div className="text-[10px] uppercase text-[#9090b0]">Invite link</div>
-            <div className="mt-1 break-all text-sm text-[#f0f0f8]">{lastInviteUrl}</div>
+          <div className="mt-3 rounded-xl border border-border bg-surface2 p-3">
+            <div className="text-[10px] uppercase text-text2">Invite link</div>
+            <div className="mt-1 break-all text-sm text-heading">{lastInviteUrl}</div>
           </div>
         ) : null}
 
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[680px] text-left text-sm">
-            <thead className="border-b border-[#2a2e3f] text-[10px] font-medium uppercase text-[#9090b0]">
+            <thead className="border-b border-border text-[10px] font-medium uppercase text-text2">
               <tr>
                 <th className="py-3 pr-4">Email</th>
                 <th className="py-3 pr-4">Role</th>
@@ -508,7 +508,7 @@ export default function TeamSettingsClient({
                 <th className="py-3">Actions</th>
               </tr>
             </thead>
-            <tbody className="text-[#f0f0f8]">
+            <tbody className="text-heading">
               {invites.map((i) => {
                 const status = i.revoked_at
                   ? "revoked"
@@ -519,11 +519,11 @@ export default function TeamSettingsClient({
                       : "pending";
                 const link = `${typeof window !== "undefined" ? window.location.origin : ""}/invite/${i.token}`;
                 return (
-                  <tr key={i.id} className="border-b border-[#2a2e3f] last:border-b-0">
+                  <tr key={i.id} className="border-b border-border last:border-b-0">
                     <td className="py-3 pr-4">{i.email}</td>
-                    <td className="py-3 pr-4 text-[#9090b0]">{i.role}</td>
-                    <td className="py-3 pr-4 text-[#9090b0]">{status}</td>
-                    <td className="py-3 pr-4 text-[#9090b0]">{new Date(i.created_at).toLocaleString()}</td>
+                    <td className="py-3 pr-4 text-text2">{i.role}</td>
+                    <td className="py-3 pr-4 text-text2">{status}</td>
+                    <td className="py-3 pr-4 text-text2">{new Date(i.created_at).toLocaleString()}</td>
                     <td className="py-3">
                       <div className="flex flex-wrap gap-2">
                         {!i.revoked_at && !i.accepted_at ? (
@@ -531,7 +531,7 @@ export default function TeamSettingsClient({
                             <button
                               type="button"
                               onClick={() => void navigator.clipboard.writeText(link)}
-                              className="rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-xs text-[#f0f0f8] hover:bg-white/5"
+                              className="rounded-lg border border-border bg-surface2 px-2 py-1 text-xs text-heading hover:bg-surface2"
                             >
                               Copy link
                             </button>
@@ -540,14 +540,14 @@ export default function TeamSettingsClient({
                                 type="button"
                                 disabled={inviteBusy}
                                 onClick={() => void revokeInvite(i.id)}
-                                className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-200 disabled:opacity-60"
+                                className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red disabled:opacity-60"
                               >
                                 Revoke
                               </button>
                             ) : null}
                           </>
                         ) : (
-                          <span className="text-xs text-[#5c6278]">—</span>
+                          <span className="text-xs text-text3">—</span>
                         )}
                       </div>
                     </td>
@@ -556,7 +556,7 @@ export default function TeamSettingsClient({
               })}
               {!invites.length ? (
                 <tr>
-                  <td className="py-3 text-sm text-[#9090b0]" colSpan={5}>
+                  <td className="py-3 text-sm text-text2" colSpan={5}>
                     No invites yet.
                   </td>
                 </tr>
@@ -566,13 +566,13 @@ export default function TeamSettingsClient({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+      <div className="rounded-2xl border border-border bg-surface p-6">
         <div className="flex items-center justify-between gap-3">
-          <div className="text-sm text-[#f0f0f8]">Members</div>
+          <div className="text-sm text-heading">Members</div>
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#f0f0f8] hover:bg-white/5"
+            className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-heading hover:bg-surface2"
           >
             Refresh
           </button>
@@ -580,21 +580,21 @@ export default function TeamSettingsClient({
 
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[560px] text-left text-sm">
-            <thead className="border-b border-[#2a2e3f] text-[10px] font-medium uppercase text-[#9090b0]">
+            <thead className="border-b border-border text-[10px] font-medium uppercase text-text2">
               <tr>
                 <th className="py-3 pr-4">Member</th>
                 <th className="py-3 pr-4">Role</th>
                 <th className="py-3">Actions</th>
               </tr>
             </thead>
-            <tbody className="text-[#f0f0f8]">
+            <tbody className="text-heading">
               {members.map((m) => {
                 const busy = busyId === m.user_id;
                 return (
-                  <tr key={m.user_id} className="border-b border-[#2a2e3f] last:border-b-0">
+                  <tr key={m.user_id} className="border-b border-border last:border-b-0">
                     <td className="py-3 pr-4">
                       <div className="text-sm">{m.name ?? m.user_id.slice(0, 8) + "…"}</div>
-                      <div className="text-xs text-[#9090b0]">{m.user_id}</div>
+                      <div className="text-xs text-text2">{m.user_id}</div>
                     </td>
                     <td className="py-3 pr-4">
                       {canAdmin ? (
@@ -602,7 +602,7 @@ export default function TeamSettingsClient({
                           value={m.role}
                           onChange={(e) => void setRole(m.user_id, e.target.value)}
                           disabled={busy}
-                          className="rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm text-[#f0f0f8] disabled:opacity-60"
+                          className="rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-heading disabled:opacity-60"
                         >
                           {ROLE_OPTIONS.map((r) => (
                             <option key={r} value={r}>
@@ -611,7 +611,7 @@ export default function TeamSettingsClient({
                           ))}
                         </select>
                       ) : (
-                        <span className="text-[#9090b0]">{m.role}</span>
+                        <span className="text-text2">{m.role}</span>
                       )}
                     </td>
                     <td className="py-3">
@@ -620,12 +620,12 @@ export default function TeamSettingsClient({
                           type="button"
                           disabled={busy}
                           onClick={() => void removeMember(m.user_id)}
-                          className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-200 disabled:opacity-60"
+                          className="rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red disabled:opacity-60"
                         >
                           Remove
                         </button>
                       ) : (
-                        <span className="text-xs text-[#5c6278]">—</span>
+                        <span className="text-xs text-text3">—</span>
                       )}
                     </td>
                   </tr>
@@ -635,7 +635,7 @@ export default function TeamSettingsClient({
           </table>
         </div>
 
-        <div className="mt-4 text-xs text-[#9090b0]">
+        <div className="mt-4 text-xs text-text2">
           Next: we can add invitations (by email) + approvals (review required / approved by reviewer) on content assets.
         </div>
       </div>

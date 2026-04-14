@@ -41,7 +41,7 @@ export function AiProgressBar({
   estimate,
   durationMs = 45_000,
   capPercent = DEFAULT_CAP,
-  variant = "dashboard",
+  variant: _variant = "dashboard",
   className = ""
 }: Props) {
   const [progress, setProgress] = useState(0);
@@ -71,18 +71,12 @@ export function AiProgressBar({
 
   if (!active) return null;
 
-  const shell =
-    variant === "dashboard"
-      ? "rounded-[var(--radius)] border border-border bg-surface p-4"
-      : "rounded-2xl border border-[#2a2e3f] bg-[#1e1e2e] p-4";
-
-  const textPrimary = variant === "dashboard" ? "text-text" : "text-[#f0f0f8]";
-  const textSecondary = variant === "dashboard" ? "text-text2" : "text-[#9090b0]";
-  const barBg =
-    variant === "dashboard"
-      ? "bg-surface2 ring-1 ring-inset ring-border/60"
-      : "bg-black/30 ring-1 ring-inset ring-[#2a2e3f]";
-  const barFill = variant === "dashboard" ? "bg-accent" : "bg-[#7c6cff]";
+  // Light shell only (legacy "dark" variant aligned to HubSpot-style dashboard tokens).
+  const shell = "rounded-lg border border-border bg-surface p-4 shadow-card";
+  const textPrimary = "text-text";
+  const textSecondary = "text-text2";
+  const barBg = "bg-surface3 ring-1 ring-inset ring-border/60";
+  const barFill = "bg-primary";
 
   return (
     <div

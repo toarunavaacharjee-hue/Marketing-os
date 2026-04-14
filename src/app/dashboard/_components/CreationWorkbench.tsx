@@ -472,7 +472,7 @@ export function CreationWorkbench({
       </div>
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
         </div>
       ) : null}
@@ -588,12 +588,12 @@ export function CreationWorkbench({
                         <span
                           className={`shrink-0 rounded-full border px-2 py-1 text-[10px] uppercase tracking-wide ${
                             r.reviewState === "approved"
-                              ? "border-[#b8ff6c]/40 bg-[#b8ff6c]/10 text-[#b8ff6c]"
+                              ? "border-teal/40 bg-teal/10 text-teal"
                               : r.reviewState === "requested"
-                                ? "border-[#7c6cff]/40 bg-[#7c6cff]/10 text-[#c4b8ff]"
+                                ? "border-primary/40 bg-primary/10 text-primary"
                                 : r.reviewState === "changes_requested"
                                   ? "border-yellow-500/40 bg-yellow-500/10 text-yellow-200"
-                                  : "border-[#2a2e3f] bg-black/20 text-[#9090b0]"
+                                  : "border-border bg-surface2 text-text2"
                           }`}
                         >
                           {r.reviewState === "approved"
@@ -608,18 +608,18 @@ export function CreationWorkbench({
                       <button
                         type="button"
                         onClick={() => removeQueue(r.id)}
-                        className="shrink-0 text-xs text-[#9090b0] hover:text-red-300"
+                        className="shrink-0 text-xs text-text2 hover:text-red-300"
                       >
                         Remove
                       </button>
                     </div>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Type</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Type</div>
                         <select
                           value={r.contentType}
                           onChange={(e) => updateQueue(r.id, { contentType: e.target.value })}
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                         >
                           <option value="">Select…</option>
                           {CONTENT_TYPES.map((t) => (
@@ -630,11 +630,11 @@ export function CreationWorkbench({
                         </select>
                       </div>
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Channel</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Channel</div>
                         <select
                           value={r.channel}
                           onChange={(e) => updateQueue(r.id, { channel: e.target.value })}
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                         >
                           <option value="">Select…</option>
                           {CHANNELS.map((c) => (
@@ -645,11 +645,11 @@ export function CreationWorkbench({
                         </select>
                       </div>
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Status</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Status</div>
                         <select
                           value={r.status}
                           onChange={(e) => updateQueue(r.id, { status: e.target.value })}
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                         >
                           {STATUS_OPTIONS.map((s) => (
                             <option key={s} value={s}>
@@ -659,21 +659,21 @@ export function CreationWorkbench({
                         </select>
                       </div>
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Due date</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Due date</div>
                         <input
                           type="date"
                           value={r.dueDate}
                           onChange={(e) => updateQueue(r.id, { dueDate: e.target.value })}
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                         />
                       </div>
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Owner</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Owner</div>
                         {contentStudio && team.length ? (
                           <select
                             value={r.owner}
                             onChange={(e) => updateQueue(r.id, { owner: e.target.value })}
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                           >
                             <option value="">Unassigned</option>
                             {team.map((m) => (
@@ -687,17 +687,17 @@ export function CreationWorkbench({
                             value={r.owner}
                             onChange={(e) => updateQueue(r.id, { owner: e.target.value })}
                             placeholder="Writer"
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
+                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
                           />
                         )}
                       </div>
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Reviewer</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Reviewer</div>
                         {contentStudio && team.length ? (
                           <select
                             value={r.reviewer}
                             onChange={(e) => updateQueue(r.id, { reviewer: e.target.value })}
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                           >
                             <option value="">None</option>
                             {team.map((m) => (
@@ -711,16 +711,16 @@ export function CreationWorkbench({
                             value={r.reviewer}
                             onChange={(e) => updateQueue(r.id, { reviewer: e.target.value })}
                             placeholder="Approver email or user id"
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
+                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
                           />
                         )}
                       </div>
                     </div>
 
                     {contentStudio ? (
-                      <div className="mt-2 rounded-lg border border-[#2a2e3f] bg-black/10 p-2">
+                      <div className="mt-2 rounded-lg border border-border bg-black/10 p-2">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="text-[10px] uppercase text-[#9090b0]">Approval workflow</div>
+                          <div className="text-[10px] uppercase text-text2">Approval workflow</div>
                           <div className="flex flex-wrap gap-1">
                             {(() => {
                               const reviewerKey = (r.reviewer ?? "").trim().toLowerCase();
@@ -762,7 +762,7 @@ export function CreationWorkbench({
                                     type="button"
                                     onClick={requestReview}
                                     disabled={!r.reviewer.trim()}
-                                    className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-2 py-1 text-xs text-[#c4b8ff] disabled:opacity-50"
+                                    className="rounded-lg border border-primary/40 bg-primary/10 px-2 py-1 text-xs text-primary disabled:opacity-50"
                                   >
                                     Request review
                                   </button>
@@ -770,7 +770,7 @@ export function CreationWorkbench({
                                     type="button"
                                     onClick={approve}
                                     disabled={!canApprove}
-                                    className="rounded-lg border border-[#b8ff6c]/40 bg-[#b8ff6c]/10 px-2 py-1 text-xs text-[#b8ff6c] disabled:opacity-50"
+                                    className="rounded-lg border border-teal/40 bg-teal/10 px-2 py-1 text-xs text-teal disabled:opacity-50"
                                     title={!canApprove ? "Only the assigned reviewer or an admin/owner can approve." : ""}
                                   >
                                     Approve
@@ -790,16 +790,16 @@ export function CreationWorkbench({
                           </div>
                         </div>
                         <div className="mt-2">
-                          <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Review notes</div>
+                          <div className="mb-0.5 text-[10px] uppercase text-text2">Review notes</div>
                           <textarea
                             value={r.reviewNotes}
                             onChange={(e) => updateQueue(r.id, { reviewNotes: e.target.value })}
                             rows={2}
                             placeholder="Feedback for the writer…"
-                            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                           />
                         </div>
-                        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#9090b0]">
+                        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text2">
                           {r.reviewRequestedAt ? (
                             <span>Requested: {new Date(r.reviewRequestedAt).toLocaleString()}</span>
                           ) : null}
@@ -809,30 +809,30 @@ export function CreationWorkbench({
                     ) : null}
 
                     <div className="mt-2">
-                      <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Audience / segment</div>
+                      <div className="mb-0.5 text-[10px] uppercase text-text2">Audience / segment</div>
                       <input
                         value={r.audience}
                         onChange={(e) => updateQueue(r.id, { audience: e.target.value })}
                         placeholder="e.g. Series A CMOs, enterprise IT"
-                        className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
+                        className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
                       />
                     </div>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Draft link</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Draft link</div>
                         <div className="flex gap-1">
                           <input
                             value={r.draftUrl}
                             onChange={(e) => updateQueue(r.id, { draftUrl: e.target.value })}
                             placeholder="Doc, Notion, CMS…"
-                            className="min-w-0 flex-1 rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
+                            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
                           />
                           {hrefForUserUrl(r.draftUrl) ? (
                             <a
                               href={hrefForUserUrl(r.draftUrl)!}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="shrink-0 rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-2 py-1.5 text-sm text-[#c4b8ff]"
+                              className="shrink-0 rounded-lg border border-primary/40 bg-primary/10 px-2 py-1.5 text-sm text-primary"
                             >
                               Open
                             </a>
@@ -840,20 +840,20 @@ export function CreationWorkbench({
                         </div>
                       </div>
                       <div>
-                        <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Published URL</div>
+                        <div className="mb-0.5 text-[10px] uppercase text-text2">Published URL</div>
                         <div className="flex gap-1">
                           <input
                             value={r.publishedUrl}
                             onChange={(e) => updateQueue(r.id, { publishedUrl: e.target.value })}
                             placeholder="Live URL"
-                            className="min-w-0 flex-1 rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm"
+                            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
                           />
                           {hrefForUserUrl(r.publishedUrl) ? (
                             <a
                               href={hrefForUserUrl(r.publishedUrl)!}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="shrink-0 rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-2 py-1.5 text-sm text-[#c4b8ff]"
+                              className="shrink-0 rounded-lg border border-primary/40 bg-primary/10 px-2 py-1.5 text-sm text-primary"
                             >
                               Open
                             </a>
@@ -862,13 +862,13 @@ export function CreationWorkbench({
                       </div>
                     </div>
                     <div className="mt-2">
-                      <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Brief / notes</div>
+                      <div className="mb-0.5 text-[10px] uppercase text-text2">Brief / notes</div>
                       <textarea
                         value={r.description}
                         onChange={(e) => updateQueue(r.id, { description: e.target.value })}
                         rows={2}
                         placeholder="Angle, hook, CTA, or link to Messaging & Artifacts"
-                        className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-1.5 text-sm text-[#f0f0f8]"
+                        className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
                       />
                     </div>
                   </div>
@@ -878,16 +878,16 @@ export function CreationWorkbench({
           )}
         </div>
 
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-          <div className="text-sm text-[#f0f0f8]">AI generator</div>
+        <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="text-sm text-heading">AI generator</div>
           {contentStudio ? (
             <div className="mt-2 grid grid-cols-2 gap-2">
               <div>
-                <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Tone</div>
+                <div className="mb-0.5 text-[10px] uppercase text-text2">Tone</div>
                 <select
                   value={ws.aiTone}
                   onChange={(e) => scheduleSave({ ...ws, aiTone: e.target.value })}
-                  className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
                 >
                   {AI_TONES.map((t) => (
                     <option key={t} value={t}>
@@ -897,11 +897,11 @@ export function CreationWorkbench({
                 </select>
               </div>
               <div>
-                <div className="mb-0.5 text-[10px] uppercase text-[#9090b0]">Length</div>
+                <div className="mb-0.5 text-[10px] uppercase text-text2">Length</div>
                 <select
                   value={ws.aiLength}
                   onChange={(e) => scheduleSave({ ...ws, aiLength: e.target.value })}
-                  className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1.5 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
                 >
                   {AI_LENGTHS.map(([val, label]) => (
                     <option key={val} value={val}>
@@ -915,73 +915,73 @@ export function CreationWorkbench({
           <textarea
             value={ws.prompt}
             onChange={(e) => scheduleSave({ ...ws, prompt: e.target.value })}
-            className="mt-2 min-h-[96px] w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+            className="mt-2 min-h-[96px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
             placeholder={placeholder}
           />
           <button
             type="button"
             onClick={() => generate()}
             disabled={generating}
-            className="mt-2 w-full rounded-xl bg-[#b8ff6c] p-2 text-sm font-medium text-black disabled:opacity-50"
+            className="mt-2 w-full rounded-xl bg-amber p-2 text-sm font-medium text-black disabled:opacity-50"
           >
             {generating ? "Generating…" : "Generate"}
           </button>
           {ws.lastOutput ? (
-            <div className="mt-3 rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-xs leading-relaxed text-[#9090b0]">
+            <div className="mt-3 rounded-xl border border-border bg-surface2 p-3 text-xs leading-relaxed text-text2">
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[10px] uppercase text-[#9090b0]">Output</span>
+                <span className="text-[10px] uppercase text-text2">Output</span>
                 {contentStudio ? (
                   <div className="flex flex-wrap gap-1">
                     <button
                       type="button"
                       onClick={addLastOutputToQueue}
-                      className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-2 py-0.5 text-[11px] text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                      className="rounded-lg border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/20"
                     >
                       Add draft to queue
                     </button>
                     <button
                       type="button"
                       onClick={appendOutputToNotes}
-                      className="rounded-lg border border-[#2a2e3f] px-2 py-0.5 text-[11px] text-[#f0f0f8] hover:bg-white/5"
+                      className="rounded-lg border border-border px-2 py-0.5 text-[11px] text-heading hover:bg-surface2"
                     >
                       Append to notes
                     </button>
                   </div>
                 ) : null}
               </div>
-              <pre className="max-h-[min(40vh,320px)] overflow-y-auto whitespace-pre-wrap font-sans text-[#f0f0f8]">
+              <pre className="max-h-[min(40vh,320px)] overflow-y-auto whitespace-pre-wrap font-sans text-heading">
                 {ws.lastOutput}
               </pre>
             </div>
           ) : null}
           {contentStudio && ws.aiHistory.length > 0 ? (
-            <details className="mt-3 rounded-lg border border-[#2a2e3f] bg-black/10 p-2">
-              <summary className="cursor-pointer text-xs font-medium text-[#c4b8ff]">
+            <details className="mt-3 rounded-lg border border-border bg-black/10 p-2">
+              <summary className="cursor-pointer text-xs font-medium text-primary">
                 Recent generations ({ws.aiHistory.length})
               </summary>
               <ul className="mt-2 max-h-48 space-y-2 overflow-y-auto text-[11px]">
                 {ws.aiHistory.map((h) => (
-                  <li key={h.id} className="rounded border border-[#2a2e3f]/80 bg-[#141420]/80 p-2">
-                    <div className="flex flex-wrap justify-between gap-2 text-[#9090b0]">
+                  <li key={h.id} className="rounded border border-border/80 bg-surface/80 p-2">
+                    <div className="flex flex-wrap justify-between gap-2 text-text2">
                       <span>{new Date(h.at).toLocaleString()}</span>
                       <span className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => restoreHistoryEntry(h)}
-                          className="text-[#c4b8ff] hover:text-[#ddd6ff]"
+                          className="text-primary hover:text-primary-dark"
                         >
                           Restore
                         </button>
                         <button
                           type="button"
                           onClick={() => removeHistoryEntry(h.id)}
-                          className="text-red-300/80 hover:text-red-200"
+                          className="text-red-300/80 hover:text-red"
                         >
                           Remove
                         </button>
                       </span>
                     </div>
-                    <div className="mt-1 line-clamp-2 text-[#f0f0f8]">{h.prompt}</div>
+                    <div className="mt-1 line-clamp-2 text-heading">{h.prompt}</div>
                   </li>
                 ))}
               </ul>
@@ -991,23 +991,23 @@ export function CreationWorkbench({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
-          <div className="text-sm text-[#f0f0f8]">Mini calendar / milestones</div>
+        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+          <div className="text-sm text-heading">Mini calendar / milestones</div>
           <textarea
             value={ws.calendar}
             onChange={(e) => scheduleSave({ ...ws, calendar: e.target.value })}
             rows={5}
-            className="mt-2 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
             placeholder="Tue: draft&#10;Wed: review"
           />
         </div>
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
-          <div className="text-sm text-[#f0f0f8]">Notes & performance</div>
+        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+          <div className="text-sm text-heading">Notes & performance</div>
           <textarea
             value={ws.notes}
             onChange={(e) => scheduleSave({ ...ws, notes: e.target.value })}
             rows={5}
-            className="mt-2 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
             placeholder="CTR, read time, top formats, learnings from Analytics…"
           />
         </div>

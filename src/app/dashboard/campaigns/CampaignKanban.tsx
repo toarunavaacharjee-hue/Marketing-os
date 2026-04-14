@@ -117,7 +117,7 @@ export function CampaignKanban({ environmentId }: { environmentId: string }) {
     <div className="space-y-3">
       {loading ? <div className="text-sm text-text2">Loading board…</div> : null}
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
         </div>
       ) : null}

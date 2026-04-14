@@ -499,7 +499,7 @@ export default function ProductProfileClient() {
           type="button"
           onClick={save}
           disabled={saving || !canSave || !canAdmin}
-          className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+          className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -555,7 +555,7 @@ export default function ProductProfileClient() {
             type="button"
             onClick={createProductInWorkspace}
             disabled={creatingProduct || !newProductName.trim() || !canAdmin}
-            className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+            className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
           >
             {creatingProduct ? "Creating…" : "Add product"}
           </button>

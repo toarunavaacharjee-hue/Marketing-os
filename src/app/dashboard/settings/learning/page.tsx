@@ -9,10 +9,10 @@ export default async function LearningSettingsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-4xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+        <div className="text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
           Learning & health
         </div>
-        <div className="mt-2 text-sm text-[#9090b0]">
+        <div className="mt-2 text-sm text-text2">
           Track sync status, asset ingestion, and whether each module has enough signal to be useful.
         </div>
       </div>

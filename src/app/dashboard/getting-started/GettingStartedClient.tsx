@@ -158,47 +158,47 @@ export function GettingStartedClient({ environmentId }: { environmentId: string 
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="text-sm text-[#9090b0]">
-            <Link href="/dashboard" className="text-[#7c6cff] hover:underline">
+          <div className="text-sm text-text2">
+            <Link href="/dashboard" className="text-primary hover:underline">
               ← Command Centre
             </Link>
           </div>
-          <h1 className="mt-2 text-4xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+          <h1 className="mt-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
             Getting started
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-[#9090b0]">
+          <p className="mt-2 max-w-2xl text-sm text-text2">
             A guided first run plus playbook templates. This stays PMM-native (strategy → launch → learn) and does not
             replace your CRM or automation tools.
           </p>
-          <div className="mt-2 text-xs text-[#707090]">
+          <div className="mt-2 text-xs text-text3">
             {loading ? "Loading…" : saving ? "Saving…" : "Saved per product."}
           </div>
         </div>
-        <div className="rounded-xl border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-sm text-[#9090b0]">
-          Templates applied: <span className="text-[#f0f0f8]">{state.applied_template_ids.length}</span>
+        <div className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text2">
+          Templates applied: <span className="text-heading">{state.applied_template_ids.length}</span>
         </div>
       </div>
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
         {steps.map((s) => {
           const done = state.completed_steps.includes(s.id);
           return (
-            <div key={s.id} className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-5">
+            <div key={s.id} className="rounded-2xl border border-border bg-surface p-5">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-sm font-medium text-[#f0f0f8]">{s.title}</div>
-                <span className={`text-xs ${done ? "text-emerald-200" : "text-[#9090b0]"}`}>
+                <div className="text-sm font-medium text-heading">{s.title}</div>
+                <span className={`text-xs ${done ? "text-emerald-200" : "text-text2"}`}>
                   {done ? "Done" : "—"}
                 </span>
               </div>
-              <div className="mt-2 text-sm text-[#9090b0]">{s.desc}</div>
+              <div className="mt-2 text-sm text-text2">{s.desc}</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   href={s.href}
-                  className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black"
+                  className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black"
                   onClick={() => markDone(s.id)}
                 >
                   {s.ctaLabel}
@@ -209,9 +209,9 @@ export function GettingStartedClient({ environmentId }: { environmentId: string 
         })}
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-lg text-[#f0f0f8]">Template Library</div>
-        <div className="mt-1 text-sm text-[#9090b0]">
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="text-lg text-heading">Template Library</div>
+        <div className="mt-1 text-sm text-text2">
           Apply a template to seed workbenches. You can edit everything afterwards.
         </div>
 
@@ -219,16 +219,16 @@ export function GettingStartedClient({ environmentId }: { environmentId: string 
           {GTM_TEMPLATES.map((t) => {
             const applied = state.applied_template_ids.includes(t.id);
             return (
-              <div key={t.id} className="rounded-2xl border border-[#2a2e3f] bg-black/20 p-5">
+              <div key={t.id} className="rounded-2xl border border-border bg-surface2 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-sm font-medium text-[#f0f0f8]">{t.name}</div>
-                    <div className="mt-1 text-sm text-[#9090b0]">{t.description}</div>
+                    <div className="text-sm font-medium text-heading">{t.name}</div>
+                    <div className="mt-1 text-sm text-text2">{t.description}</div>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {t.targets.map((x, i) => (
                         <span
                           key={`${t.id}-${i}`}
-                          className="rounded bg-black/30 px-2 py-1 text-[10px] uppercase text-[#9090b0]"
+                          className="rounded bg-surface3 px-2 py-1 text-[10px] uppercase text-text2"
                         >
                           {x.kind.replaceAll("_", " ")}
                         </span>
@@ -241,8 +241,8 @@ export function GettingStartedClient({ environmentId }: { environmentId: string 
                     onClick={() => void applyTemplate(t)}
                     className={`shrink-0 rounded-xl px-4 py-2 text-sm font-medium ${
                       applied
-                        ? "border border-[#2a2e3f] bg-transparent text-[#9090b0]"
-                        : "bg-[#7c6cff] text-white hover:bg-[#6c63ff] disabled:opacity-60"
+                        ? "border border-border bg-transparent text-text2"
+                        : "bg-primary text-white hover:bg-primary-dark disabled:opacity-60"
                     }`}
                   >
                     {applied ? "Applied" : "Apply"}
@@ -253,9 +253,9 @@ export function GettingStartedClient({ environmentId }: { environmentId: string 
           })}
         </div>
 
-        <div className="mt-5 text-xs text-[#707090]">
+        <div className="mt-5 text-xs text-text3">
           Tip: After applying templates, open{" "}
-          <Link href="/dashboard/work" className="text-[#c4b8ff] hover:underline">
+          <Link href="/dashboard/work" className="text-primary hover:underline">
             Marketing Workbench
           </Link>{" "}
           and run AI actions from ICP Segments and Positioning.

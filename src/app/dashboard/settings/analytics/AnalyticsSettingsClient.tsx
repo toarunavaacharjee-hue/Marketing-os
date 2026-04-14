@@ -93,27 +93,27 @@ export default function AnalyticsSettingsClient({
   }
 
   return (
-    <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-      <div className="text-lg text-[#f0f0f8]">Analytics connections</div>
-      <div className="mt-1 text-sm text-[#9090b0]">
+    <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="text-lg text-heading">Analytics connections</div>
+      <div className="mt-1 text-sm text-text2">
         Connect real GA4 data for this selected product.
       </div>
-      <div className="mt-2 rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-xs text-[#9090b0]">
+      <div className="mt-2 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
         Required for GA4: set `GA4_SERVICE_ACCOUNT_EMAIL` and `GA4_SERVICE_ACCOUNT_PRIVATE_KEY` in your environment,
         share GA4 property access with that service account in Google Analytics, then save the Property ID here.
       </div>
 
       {loading ? (
-        <div className="mt-4 text-sm text-[#9090b0]">Loading…</div>
+        <div className="mt-4 text-sm text-text2">Loading…</div>
       ) : null}
 
       {error ? (
-        <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
         </div>
       ) : null}
       {saved ? (
-        <div className="mt-4 rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">
+        <div className="mt-4 rounded-xl border border-teal/30 bg-amber/10 px-3 py-2 text-sm text-teal">
           {saved}
         </div>
       ) : null}
@@ -154,7 +154,7 @@ export default function AnalyticsSettingsClient({
       <button
         onClick={save}
         disabled={saving}
-        className="mt-5 rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+        className="mt-5 rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
       >
         {saving ? "Saving…" : "Save analytics settings"}
       </button>
@@ -164,7 +164,7 @@ export default function AnalyticsSettingsClient({
           type="button"
           onClick={testGa}
           disabled={testing}
-          className="rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm font-medium text-[#f0f0f8] transition hover:bg-white/5 disabled:opacity-60"
+          className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm font-medium text-heading transition hover:bg-surface2 disabled:opacity-60"
         >
           {testing ? "Testing..." : "Test GA connection"}
         </button>
@@ -172,8 +172,8 @@ export default function AnalyticsSettingsClient({
           <div
             className={`rounded-xl border px-3 py-2 text-sm ${
               testStatus === "ok"
-                ? "border-[#b8ff6c]/30 bg-[#b8ff6c]/10 text-[#b8ff6c]"
-                : "border-red-500/30 bg-red-500/10 text-red-200"
+                ? "border-teal/30 bg-amber/10 text-teal"
+                : "border-red-500/30 bg-red-500/10 text-red"
             }`}
           >
             {testMsg}
@@ -197,12 +197,12 @@ function Field({
 }) {
   return (
     <div>
-      <div className="mb-1 text-xs text-[#9090b0]">{label}</div>
+      <div className="mb-1 text-xs text-text2">{label}</div>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
       />
     </div>
   );

@@ -17,3 +17,4 @@ globs: "**/*.{tsx,ts,css}"
 - **No pure black** full-page content backgrounds; use `--bg-page` / surfaces.
 - **Modal backdrop**: class `aimw-modal-backdrop` (`rgba(0,0,0,0.4)`).
 - **Optional dark marketing**: `<html class="dark">` still maps tokens in `html.dark` — avoid unless a route explicitly needs it.
+- **Dashboard pages**: Prefer semantic classes above; avoid legacy `#[f0f0f8]` / `#[141420]` / lime-purple-only combos. Chart.js may use fixed hex that matches `globals.css` brand values when the API requires literals.

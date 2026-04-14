@@ -50,22 +50,22 @@ export default async function TeamSettingsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-[#9090b0]">
-            <Link href="/dashboard/settings" className="text-[#7c6cff] hover:underline">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-text2">
+            <Link href="/dashboard/settings" className="text-primary hover:underline">
               ← Settings
             </Link>
-            <span className="text-[#2a2e3f]">|</span>
+            <span className="text-text3">|</span>
             <span>Team governance</span>
           </div>
           <div className="mt-2 text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             Team & roles
           </div>
-          <div className="mt-2 text-sm text-[#9090b0]">
+          <div className="mt-2 text-sm text-text2">
             Owners/admins can change roles and remove members. This is the foundation for approvals and governance.
           </div>
         </div>
-        <div className="rounded-xl border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-sm text-[#9090b0]">
-          Your role: <span className="text-[#f0f0f8]">{myRole}</span>
+        <div className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text2">
+          Your role: <span className="text-heading">{myRole}</span>
         </div>
       </div>
 

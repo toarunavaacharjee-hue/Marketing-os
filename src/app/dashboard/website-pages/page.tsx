@@ -96,7 +96,7 @@ export default async function WebsitePagesPage() {
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <Link
                 href="/dashboard/market-research"
-                className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee]"
+                className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark"
               >
                 Run AI Scan
               </Link>
@@ -182,7 +182,7 @@ export default async function WebsitePagesPage() {
                 </span>
                 <Link
                   href="/dashboard/market-research"
-                  className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee]"
+                  className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark"
                 >
                   Open Market Research
                 </Link>

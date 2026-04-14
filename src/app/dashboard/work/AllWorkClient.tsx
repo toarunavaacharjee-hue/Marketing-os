@@ -468,30 +468,30 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
           Marketing Workbench
         </h1>
-        <p className="mt-1 text-sm text-[#9090b0]">
+        <p className="mt-1 text-sm text-text2">
           One view of tasks, queues, campaigns, and milestones from across modules for this product. Edit in each module
           — this page is read-only aggregation.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#2a2e3f] bg-[#141420] p-3">
-        <span className="text-xs text-[#9090b0]">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface p-3">
+        <span className="text-xs text-text2">
           {loading ? "Loading…" : `${items.length} rows · ${openCount} open`}
         </span>
         <button
           type="button"
           onClick={() => void load()}
-          className="rounded-lg border border-[#2a2e3f] px-2 py-1 text-xs text-[#f0f0f8] hover:bg-white/5"
+          className="rounded-lg border border-border px-2 py-1 text-xs text-heading hover:bg-surface2"
         >
           Refresh
         </button>
       </div>
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
       ) : null}
 
       <AiProgressBar
@@ -504,20 +504,20 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="min-w-[200px] flex-1">
-          <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Search</div>
+          <div className="mb-1 text-[10px] uppercase text-text2">Search</div>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Title, owner, module, tag…"
-            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-sm text-[#f0f0f8]"
+            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-heading"
           />
         </div>
         <div className="min-w-[160px]">
-          <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Module</div>
+          <div className="mb-1 text-[10px] uppercase text-text2">Module</div>
           <select
             value={source}
             onChange={(e) => setSource(e.target.value)}
-            className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-sm text-[#f0f0f8]"
+            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-heading"
           >
             <option value="all">All modules</option>
             {summary.map((s) => (
@@ -527,33 +527,33 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
             ))}
           </select>
         </div>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-[#9090b0]">
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-text2">
           <input
             type="checkbox"
             checked={hideDone}
             onChange={(e) => setHideDone(e.target.checked)}
-            className="rounded border-[#2a2e3f]"
+            className="rounded border-border"
           />
           Hide done / live
         </label>
       </div>
 
       {!loading && filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[#2a2e3f] bg-[#141420]/60 p-8 text-center text-sm text-[#9090b0]">
+        <div className="rounded-2xl border border-dashed border-border bg-surface2 p-8 text-center text-sm text-text2">
           No matching items. Add work in{" "}
-          <Link href="/dashboard/gtm-planner" className="text-[#c4b8ff] hover:underline">
+          <Link href="/dashboard/gtm-planner" className="text-primary hover:underline">
             GTM
           </Link>
           ,{" "}
-          <Link href="/dashboard/events" className="text-[#c4b8ff] hover:underline">
+          <Link href="/dashboard/events" className="text-primary hover:underline">
             Events
           </Link>
           ,{" "}
-          <Link href="/dashboard/content-studio" className="text-[#c4b8ff] hover:underline">
+          <Link href="/dashboard/content-studio" className="text-primary hover:underline">
             Content Studio
           </Link>
           , or{" "}
-          <Link href="/dashboard/campaigns" className="text-[#c4b8ff] hover:underline">
+          <Link href="/dashboard/campaigns" className="text-primary hover:underline">
             Campaigns
           </Link>
           .
@@ -563,12 +563,12 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       {/* Mobile list */}
       <div className="space-y-3 md:hidden">
         {filtered.map((it) => (
-          <div key={it.id} className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
+          <div key={it.id} className="rounded-2xl border border-border bg-surface p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-[#f0f0f8]">{it.title}</div>
-                {it.subtitle ? <div className="mt-0.5 text-xs text-[#9090b0]">{it.subtitle}</div> : null}
-                <div className="mt-1 text-xs text-[#c4b8ff]">{it.sourceLabel}</div>
+                <div className="truncate font-medium text-heading">{it.title}</div>
+                {it.subtitle ? <div className="mt-0.5 text-xs text-text2">{it.subtitle}</div> : null}
+                <div className="mt-1 text-xs text-primary">{it.sourceLabel}</div>
               </div>
               <div className="shrink-0 text-right text-xs">
                 <div
@@ -576,19 +576,19 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                     it.done
                       ? "text-emerald-300/90"
                       : it.status === "Reference"
-                        ? "text-[#9090b0]"
-                        : "text-[#f0f0f8]"
+                        ? "text-text2"
+                        : "text-heading"
                   }
                 >
                   {it.status ?? "—"}
                 </div>
-                <div className="mt-1 text-[11px] text-[#707090]">{it.due ?? "—"}</div>
+                <div className="mt-1 text-[11px] text-text3">{it.due ?? "—"}</div>
               </div>
             </div>
 
-            {it.timeline ? <div className="mt-2 line-clamp-3 text-xs text-[#707090]">{it.timeline}</div> : null}
+            {it.timeline ? <div className="mt-2 line-clamp-3 text-xs text-text3">{it.timeline}</div> : null}
             {outcomes[it.id]?.notes ? (
-              <div className="mt-2 line-clamp-2 text-[11px] text-[#c4b8ff]">Update: {outcomes[it.id]!.notes}</div>
+              <div className="mt-2 line-clamp-2 text-[11px] text-primary">Update: {outcomes[it.id]!.notes}</div>
             ) : null}
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -604,7 +604,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                       }
                     })();
                   }}
-                  className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                  className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
                 >
                   Seed messaging
                 </button>
@@ -616,7 +616,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                     void aiGenerateMessagingFromSegment(it.title, it.id);
                   }}
                   disabled={isBusy(it.id)}
-                  className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
+                  className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
                 >
                   {isBusy(it.id) ? "Generating…" : "AI draft"}
                 </button>
@@ -626,7 +626,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                   type="button"
                   onClick={() => void openPitchModal(it.id)}
                   disabled={isBusy(it.id)}
-                  className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
+                  className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
                 >
                   {isBusy(it.id) ? "Generating…" : "AI pitch"}
                 </button>
@@ -638,11 +638,11 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                   setEditingOutcomeId(it.id);
                   setEditingOutcomeNotes(outcomes[it.id]?.notes ?? "");
                 }}
-                className="rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-1 text-xs font-medium text-[#9090b0] hover:bg-white/5"
+                className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
               >
                 Update
               </button>
-              <Link href={it.href} className="text-xs font-medium text-[#7c6cff] hover:text-[#a39cff] hover:underline">
+              <Link href={it.href} className="text-xs font-medium text-primary hover:text-primary-dark hover:underline">
                 Open
               </Link>
             </div>
@@ -654,13 +654,13 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                   onChange={(e) => setEditingOutcomeNotes(e.target.value)}
                   rows={3}
                   placeholder="Update / outcome notes (what changed, numbers, wins, next step)…"
-                  className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-2 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-lg border border-border bg-surface px-2 py-2 text-sm text-heading"
                 />
                 <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => void saveOutcomeFor(it.id)}
-                    className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                    className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
                   >
                     Save
                   </button>
@@ -670,7 +670,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                       setEditingOutcomeId(null);
                       setEditingOutcomeNotes("");
                     }}
-                    className="rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-1 text-xs font-medium text-[#9090b0] hover:bg-white/5"
+                    className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
                   >
                     Cancel
                   </button>
@@ -682,9 +682,9 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       </div>
 
       {/* Desktop table */}
-      <div className="hidden overflow-x-auto rounded-2xl border border-[#2a2e3f] bg-[#141420] md:block">
+      <div className="hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-[#2a2e3f] text-[10px] font-medium uppercase text-[#9090b0]">
+          <thead className="border-b border-border text-[10px] font-medium uppercase text-text2">
             <tr>
               <th className="px-3 py-2">Item</th>
               <th className="px-3 py-2">Module</th>
@@ -695,47 +695,47 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
               <th className="px-3 py-2 w-24" />
             </tr>
           </thead>
-          <tbody className="text-[#f0f0f8]">
+          <tbody className="text-heading">
             {filtered.map((it) => (
-              <tr key={it.id} className="border-t border-[#2a2e3f] align-top">
+              <tr key={it.id} className="border-t border-border align-top">
                 <td className="px-3 py-2">
                   <div className="font-medium">{it.title}</div>
-                  {it.subtitle ? <div className="mt-0.5 text-xs text-[#9090b0]">{it.subtitle}</div> : null}
+                  {it.subtitle ? <div className="mt-0.5 text-xs text-text2">{it.subtitle}</div> : null}
                   {it.timeline ? (
-                    <div className="mt-1 line-clamp-2 text-xs text-[#707090]">{it.timeline}</div>
+                    <div className="mt-1 line-clamp-2 text-xs text-text3">{it.timeline}</div>
                   ) : null}
                   {outcomes[it.id]?.notes ? (
-                    <div className="mt-1 line-clamp-2 text-[11px] text-[#c4b8ff]">
+                    <div className="mt-1 line-clamp-2 text-[11px] text-primary">
                       Update: {outcomes[it.id]!.notes}
                     </div>
                   ) : null}
                   {it.tags?.length ? (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {it.tags.map((t) => (
-                        <span key={t} className="rounded bg-black/30 px-1.5 py-0.5 text-[10px] text-[#9090b0]">
+                        <span key={t} className="rounded bg-surface3 px-1.5 py-0.5 text-[10px] text-text2">
                           {t}
                         </span>
                       ))}
                     </div>
                   ) : null}
                 </td>
-                <td className="px-3 py-2 text-xs text-[#c4b8ff]">{it.sourceLabel}</td>
-                <td className="px-3 py-2 text-xs text-[#9090b0]">{it.category}</td>
+                <td className="px-3 py-2 text-xs text-primary">{it.sourceLabel}</td>
+                <td className="px-3 py-2 text-xs text-text2">{it.category}</td>
                 <td className="px-3 py-2">
                   <span
                     className={
                       it.done
                         ? "text-emerald-300/90"
                         : it.status === "Reference"
-                          ? "text-[#9090b0]"
-                          : "text-[#f0f0f8]"
+                          ? "text-text2"
+                          : "text-heading"
                     }
                   >
                     {it.status ?? "—"}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-xs text-[#9090b0]">{it.owner ?? "—"}</td>
-                <td className="px-3 py-2 text-xs text-[#9090b0]">{it.due ?? "—"}</td>
+                <td className="px-3 py-2 text-xs text-text2">{it.owner ?? "—"}</td>
+                <td className="px-3 py-2 text-xs text-text2">{it.due ?? "—"}</td>
                 <td className="px-3 py-2">
                   <div className="flex flex-col items-end gap-2">
                     {editingOutcomeId === it.id ? (
@@ -745,13 +745,13 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                           onChange={(e) => setEditingOutcomeNotes(e.target.value)}
                           rows={3}
                           placeholder="Update / outcome notes (what changed, numbers, wins, next step)…"
-                          className="w-full rounded-lg border border-[#2a2e3f] bg-[#141420] px-2 py-2 text-sm text-[#f0f0f8]"
+                          className="w-full rounded-lg border border-border bg-surface px-2 py-2 text-sm text-heading"
                         />
                         <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
                           <button
                             type="button"
                             onClick={() => void saveOutcomeFor(it.id)}
-                            className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
                           >
                             Save
                           </button>
@@ -761,7 +761,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                               setEditingOutcomeId(null);
                               setEditingOutcomeNotes("");
                             }}
-                            className="rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-1 text-xs font-medium text-[#9090b0] hover:bg-white/5"
+                            className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
                           >
                             Cancel
                           </button>
@@ -781,7 +781,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                                 }
                               })();
                             }}
-                            className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20"
+                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
                           >
                             Seed messaging
                           </button>
@@ -793,7 +793,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                               void aiGenerateMessagingFromSegment(it.title, it.id);
                             }}
                             disabled={isBusy(it.id)}
-                            className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
+                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
                           >
                             {isBusy(it.id) ? "Generating…" : "AI generate draft"}
                           </button>
@@ -803,7 +803,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                             type="button"
                             onClick={() => void openPitchModal(it.id)}
                             disabled={isBusy(it.id)}
-                            className="rounded-lg border border-[#7c6cff]/40 bg-[#7c6cff]/10 px-3 py-1 text-xs font-medium text-[#c4b8ff] hover:bg-[#7c6cff]/20 disabled:opacity-60"
+                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
                           >
                             {isBusy(it.id) ? "Generating…" : "AI generate pitch"}
                           </button>
@@ -814,13 +814,13 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                             setEditingOutcomeId(it.id);
                             setEditingOutcomeNotes(outcomes[it.id]?.notes ?? "");
                           }}
-                          className="rounded-lg border border-[#2a2e3f] bg-[#141420] px-3 py-1 text-xs font-medium text-[#9090b0] hover:bg-white/5"
+                          className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
                         >
                           Update
                         </button>
                         <Link
                           href={it.href}
-                          className="text-xs font-medium text-[#7c6cff] hover:text-[#a39cff] hover:underline"
+                          className="text-xs font-medium text-primary hover:text-primary-dark hover:underline"
                         >
                           Open
                         </Link>
@@ -834,17 +834,17 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         </table>
       </div>
 
-      <details className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-        <summary className="cursor-pointer text-sm font-medium text-[#f0f0f8]">
-          Workflow runs <span className="text-xs text-[#9090b0]">({runLogs.length})</span>
+      <details className="rounded-2xl border border-border bg-surface p-4">
+        <summary className="cursor-pointer text-sm font-medium text-heading">
+          Workflow runs <span className="text-xs text-text2">({runLogs.length})</span>
         </summary>
         <div className="mt-3 space-y-2">
           {runLogs.length === 0 ? (
-            <div className="text-sm text-[#9090b0]">No workflow runs yet.</div>
+            <div className="text-sm text-text2">No workflow runs yet.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-[#2a2e3f] text-[10px] font-medium uppercase text-[#9090b0]">
+                <thead className="border-b border-border text-[10px] font-medium uppercase text-text2">
                   <tr>
                     <th className="py-2 pr-4">When</th>
                     <th className="py-2 pr-4">Action</th>
@@ -853,14 +853,14 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                     <th className="py-2">Message</th>
                   </tr>
                 </thead>
-                <tbody className="text-[#f0f0f8]">
+                <tbody className="text-heading">
                   {runLogs.slice(0, 30).map((r) => (
-                    <tr key={r.id} className="border-t border-[#2a2e3f] align-top">
-                      <td className="py-2 pr-4 text-xs text-[#9090b0]">
+                    <tr key={r.id} className="border-t border-border align-top">
+                      <td className="py-2 pr-4 text-xs text-text2">
                         {r.at ? new Date(r.at).toLocaleString() : "—"}
                       </td>
-                      <td className="py-2 pr-4 text-xs text-[#c4b8ff]">{r.action}</td>
-                      <td className="py-2 pr-4 text-xs text-[#9090b0]">
+                      <td className="py-2 pr-4 text-xs text-primary">{r.action}</td>
+                      <td className="py-2 pr-4 text-xs text-text2">
                         {r.targetLabel || r.targetId}
                       </td>
                       <td className="py-2 pr-4 text-xs">
@@ -870,18 +870,18 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                               ? "text-emerald-300/90"
                               : r.status === "error"
                                 ? "text-red-300/90"
-                                : "text-[#fbbf24]"
+                                : "text-amber"
                           }
                         >
                           {r.status}
                         </span>
                       </td>
-                      <td className="py-2 text-xs text-[#9090b0]">{r.message ?? "—"}</td>
+                      <td className="py-2 text-xs text-text2">{r.message ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="mt-2 text-[11px] text-[#707090]">
+              <div className="mt-2 text-[11px] text-text3">
                 Showing the most recent 30 runs. Stored per product in <span className="font-mono">module_settings</span>{" "}
                 (<span className="font-mono">work/workflow_runs</span>).
               </div>
@@ -892,25 +892,25 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       {pitchModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-[#2a2e3f] bg-[#141420] p-5">
-            <div className="text-lg font-medium text-[#f0f0f8]">Generate pitch battlecard</div>
-            <div className="mt-1 text-sm text-[#9090b0]">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-5">
+            <div className="text-lg font-medium text-heading">Generate pitch battlecard</div>
+            <div className="mt-1 text-sm text-text2">
               Pick a competitor. We’ll generate an ICP persona from your Positioning canvas, then create a pitch
               battlecard.
             </div>
 
             {pitchError ? (
-              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
                 {pitchError}
               </div>
             ) : null}
 
             <div className="mt-4">
-              <div className="mb-1 text-[10px] uppercase text-[#9090b0]">Competitor</div>
+              <div className="mb-1 text-[10px] uppercase text-text2">Competitor</div>
               <select
                 value={pitchCompetitorId}
                 onChange={(e) => setPitchCompetitorId(e.target.value)}
-                className="w-full rounded-lg border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                 disabled={!pitchCompetitors.length}
               >
                 {pitchCompetitors.map((c) => (
@@ -925,7 +925,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
               <button
                 type="button"
                 onClick={() => setPitchModalOpen(false)}
-                className="rounded-lg border border-[#2a2e3f] bg-black/20 px-4 py-2 text-sm font-medium text-[#9090b0] hover:bg-white/5"
+                className="rounded-lg border border-border bg-surface2 px-4 py-2 text-sm font-medium text-text2 hover:bg-surface2"
               >
                 Cancel
               </button>
@@ -933,7 +933,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                 type="button"
                 onClick={() => void confirmPitchModal()}
                 disabled={!pitchCompetitorId || !pitchCompetitors.length}
-                className="rounded-lg bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                className="rounded-lg bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
               >
                 Continue
               </button>

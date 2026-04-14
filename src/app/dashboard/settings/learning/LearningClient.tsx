@@ -129,18 +129,18 @@ export default function LearningClient({ environmentId }: { environmentId: strin
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+      <div className="rounded-2xl border border-border bg-surface p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-lg text-[#f0f0f8]">Learning & Health</div>
-            <div className="mt-1 text-sm text-[#9090b0]">
+            <div className="text-lg text-heading">Learning & Health</div>
+            <div className="mt-1 text-sm text-text2">
               See whether the system has enough signal to power each module.
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={clearLegacyDemoData}
-              className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200 hover:bg-red-500/15"
+              className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red hover:bg-red-500/15"
             >
               Clear legacy demo data
             </button>
@@ -148,18 +148,18 @@ export default function LearningClient({ environmentId }: { environmentId: strin
         </div>
 
         {syncRuns.some((s) => s.is_demo) || assets.some((a) => a.is_demo) ? (
-          <div className="mt-4 rounded-xl border border-[#7c6cff]/30 bg-[#7c6cff]/10 px-3 py-2 text-sm text-[#f0f0f8]">
+          <div className="mt-4 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-heading">
             Demo data is currently enabled for this product’s Default environment.
           </div>
         ) : null}
 
         {error ? (
-          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
             {error}
           </div>
         ) : null}
 
-        {loading ? <div className="mt-4 text-sm text-[#9090b0]">Loading…</div> : null}
+        {loading ? <div className="mt-4 text-sm text-text2">Loading…</div> : null}
 
         <div className="mt-5 grid gap-3 md:grid-cols-4">
           <Stat label="Sources connected (enabled)" value={String(enabledCount(syncRuns))} />
@@ -170,22 +170,22 @@ export default function LearningClient({ environmentId }: { environmentId: strin
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-          <div className="text-sm text-[#f0f0f8]">Sync status</div>
+        <div className="rounded-2xl border border-border bg-surface p-6">
+          <div className="text-sm text-heading">Sync status</div>
           <div className="mt-3 space-y-2">
             {(["ga4", "hubspot", "linkedin_ads", "meta_ads"] as const).map((c) => {
               const latest = syncRuns.find((s) => s.connector === c) ?? null;
               return (
-                <div key={c} className="rounded-xl border border-[#2a2e3f] bg-black/20 p-4">
+                <div key={c} className="rounded-xl border border-border bg-surface2 p-4">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-[#f0f0f8]">{labelConnector(c)}</div>
+                    <div className="text-sm text-heading">{labelConnector(c)}</div>
                     <Chip tone={latest?.status ?? "unknown"} text={latest?.status ?? "unknown"} />
                   </div>
-                  <div className="mt-1 text-sm text-[#9090b0]">
+                  <div className="mt-1 text-sm text-text2">
                     {latest?.message ?? "No sync run yet."}
                   </div>
-                  <div className="mt-2 text-xs text-[#9090b0]">
-                    Ingested: <span className="text-[#f0f0f8]">{latest?.assets_ingested ?? 0}</span> •{" "}
+                  <div className="mt-2 text-xs text-text2">
+                    Ingested: <span className="text-heading">{latest?.assets_ingested ?? 0}</span> •{" "}
                     {formatLast(latest?.started_at)}
                   </div>
                 </div>
@@ -194,40 +194,40 @@ export default function LearningClient({ environmentId }: { environmentId: strin
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-          <div className="text-sm text-[#f0f0f8]">Asset ingestion (last seen)</div>
+        <div className="rounded-2xl border border-border bg-surface p-6">
+          <div className="text-sm text-heading">Asset ingestion (last seen)</div>
           <div className="mt-3 grid gap-2 md:grid-cols-2">
             {Object.entries(countsByType)
               .sort((a, b) => b[1] - a[1])
               .slice(0, 8)
               .map(([type, n]) => (
-                <div key={type} className="rounded-xl border border-[#2a2e3f] bg-black/20 p-3">
-                  <div className="text-xs uppercase tracking-wider text-[#9090b0]">{type}</div>
-                  <div className="mt-1 text-sm text-[#f0f0f8]">{n}</div>
+                <div key={type} className="rounded-xl border border-border bg-surface2 p-3">
+                  <div className="text-xs uppercase tracking-wider text-text2">{type}</div>
+                  <div className="mt-1 text-sm text-heading">{n}</div>
                 </div>
               ))}
           </div>
           {assets.length === 0 ? (
-            <div className="mt-3 text-sm text-[#9090b0]">
+            <div className="mt-3 text-sm text-text2">
               No assets indexed yet. Connect integrations and run sync to ingest real data.
             </div>
           ) : null}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-sm text-[#f0f0f8]">Module coverage</div>
-        <div className="mt-1 text-sm text-[#9090b0]">
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="text-sm text-heading">Module coverage</div>
+        <div className="mt-1 text-sm text-text2">
           This is a simple “do we have enough signal?” view. We’ll replace this with real coverage rules once connectors are live.
         </div>
         <div className="mt-4 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
           {MODULES.map((m) => (
-            <div key={m} className="rounded-xl border border-[#2a2e3f] bg-black/20 p-4">
+            <div key={m} className="rounded-xl border border-border bg-surface2 p-4">
               <div className="flex items-center justify-between gap-3">
-                <div className="text-sm text-[#f0f0f8]">{m}</div>
+                <div className="text-sm text-heading">{m}</div>
                 <CoveragePill level={coverageScore(m)} />
               </div>
-              <div className="mt-2 text-xs text-[#9090b0]">
+              <div className="mt-2 text-xs text-text2">
                 Signals: pages {countsByType["page"] ?? 0} • creatives {countsByType["creative"] ?? 0} • deals {countsByType["deal"] ?? 0}
               </div>
             </div>
@@ -269,9 +269,9 @@ function labelConnector(c: string) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-[#2a2e3f] bg-black/20 p-4">
-      <div className="text-xs uppercase tracking-wider text-[#9090b0]">{label}</div>
-      <div className="mt-2 text-2xl text-[#f0f0f8]">{value}</div>
+    <div className="rounded-2xl border border-border bg-surface2 p-4">
+      <div className="text-xs uppercase tracking-wider text-text2">{label}</div>
+      <div className="mt-2 text-2xl text-heading">{value}</div>
     </div>
   );
 }
@@ -279,12 +279,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Chip({ tone, text }: { tone: string; text: string }) {
   const cls =
     tone === "success"
-      ? "border-[#b8ff6c]/30 bg-[#b8ff6c]/10 text-[#b8ff6c]"
+      ? "border-teal/30 bg-teal/10 text-teal"
       : tone === "warning"
-        ? "border-[#7c6cff]/30 bg-[#7c6cff]/10 text-[#7c6cff]"
+        ? "border-primary/30 bg-primary/10 text-primary"
         : tone === "error"
-          ? "border-red-500/30 bg-red-500/10 text-red-200"
-          : "border-[#2a2e3f] bg-black/20 text-[#9090b0]";
+          ? "border-red-500/30 bg-red-500/10 text-red"
+          : "border-border bg-surface2 text-text2";
   return (
     <span className={`rounded-full border px-2 py-1 text-xs ${cls}`}>{text}</span>
   );
@@ -293,10 +293,10 @@ function Chip({ tone, text }: { tone: string; text: string }) {
 function CoveragePill({ level }: { level: "good" | "ok" | "low" }) {
   const cls =
     level === "good"
-      ? "bg-[#b8ff6c]/15 text-[#b8ff6c] border-[#b8ff6c]/30"
+      ? "bg-teal/15 text-teal border-teal/30"
       : level === "ok"
-        ? "bg-[#7c6cff]/15 text-[#7c6cff] border-[#7c6cff]/30"
-        : "bg-white/5 text-[#9090b0] border-[#2a2e3f]";
+        ? "bg-primary/15 text-primary border-primary/30"
+        : "bg-white/5 text-text2 border-border";
   const label = level === "good" ? "Good" : level === "ok" ? "OK" : "Low";
   return <span className={`rounded-full border px-2 py-1 text-xs ${cls}`}>{label}</span>;
 }

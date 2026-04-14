@@ -178,30 +178,30 @@ export function OnboardingWizard() {
       <div className="mx-auto max-w-xl">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-xs text-[#9090b0]">Onboarding</div>
-            <div className="mt-2 text-4xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+            <div className="text-xs text-text2">Onboarding</div>
+            <div className="mt-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
               Let’s get you to value fast
             </div>
-            <div className="mt-2 text-sm text-[#9090b0]">A 5-minute setup to generate your first ICP + positioning draft.</div>
+            <div className="mt-2 text-sm text-text2">A 5-minute setup to generate your first ICP + positioning draft.</div>
           </div>
-          <div className="shrink-0 rounded-xl border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-xs text-[#9090b0]">
-            Step <span className="text-[#f0f0f8]">{progressIdx}</span> / 5
+          <div className="shrink-0 rounded-xl border border-border bg-surface px-3 py-2 text-xs text-text2">
+            Step <span className="text-heading">{progressIdx}</span> / 5
           </div>
         </div>
 
-        <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-black/30">
-          <div className="h-full rounded-full bg-[#7c6cff] transition-all" style={{ width: `${(progressIdx / 5) * 100}%` }} />
+        <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-surface3">
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(progressIdx / 5) * 100}%` }} />
         </div>
 
         {error ? (
-          <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</div>
+          <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
         ) : null}
 
-        <div className="mt-6 rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+        <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
           {step === "role" ? (
             <div className="space-y-5">
               <div>
-                <div className="text-sm text-[#f0f0f8]">Which best describes your role?</div>
+                <div className="text-sm text-heading">Which best describes your role?</div>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {(
                     [
@@ -221,8 +221,8 @@ export function OnboardingWizard() {
                       onClick={() => setRole(id)}
                       className={`rounded-xl border px-3 py-2 text-sm ${
                         role === id
-                          ? "border-[#7c6cff] bg-[#7c6cff]/10 text-[#f0f0f8]"
-                          : "border-[#2a2e3f] bg-black/10 text-[#9090b0] hover:bg-white/5"
+                          ? "border-primary bg-primary/10 text-heading"
+                          : "border-border bg-black/10 text-text2 hover:bg-surface2"
                       }`}
                     >
                       {label}
@@ -232,7 +232,7 @@ export function OnboardingWizard() {
               </div>
 
               <div>
-                <div className="text-sm text-[#f0f0f8]">What do you want to achieve first?</div>
+                <div className="text-sm text-heading">What do you want to achieve first?</div>
                 <div className="mt-2 grid gap-2">
                   {(
                     [
@@ -249,8 +249,8 @@ export function OnboardingWizard() {
                       onClick={() => setGoal(id)}
                       className={`w-full rounded-xl border px-3 py-2 text-left text-sm ${
                         goal === id
-                          ? "border-[#7c6cff] bg-[#7c6cff]/10 text-[#f0f0f8]"
-                          : "border-[#2a2e3f] bg-black/10 text-[#9090b0] hover:bg-white/5"
+                          ? "border-primary bg-primary/10 text-heading"
+                          : "border-border bg-black/10 text-text2 hover:bg-surface2"
                       }`}
                     >
                       {label}
@@ -260,14 +260,14 @@ export function OnboardingWizard() {
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <button type="button" className="text-sm text-[#9090b0] hover:text-[#f0f0f8]" onClick={() => setStep("details")}>
+                <button type="button" className="text-sm text-text2 hover:text-heading" onClick={() => setStep("details")}>
                   Skip for now →
                 </button>
                 <button
                   type="button"
                   disabled={!canContinueRole}
                   onClick={() => setStep("details")}
-                  className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                  className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
                 >
                   Continue
                 </button>
@@ -277,51 +277,51 @@ export function OnboardingWizard() {
 
           {step === "details" ? (
             <div className="space-y-4">
-              <div className="text-sm text-[#f0f0f8]">Does this look right?</div>
-              <div className="text-sm text-[#9090b0]">
+              <div className="text-sm text-heading">Does this look right?</div>
+              <div className="text-sm text-text2">
                 Add your workspace and product details. If you provide a website, we’ll auto-generate your first drafts.
               </div>
 
               <div>
-                <div className="mb-1 text-xs text-[#9090b0]">Workspace name</div>
+                <div className="mb-1 text-xs text-text2">Workspace name</div>
                 <input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                   placeholder="Your company / workspace"
                 />
               </div>
 
               <div>
-                <div className="mb-1 text-xs text-[#9090b0]">Product name</div>
+                <div className="mb-1 text-xs text-text2">Product name</div>
                 <input
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                   placeholder="Your product"
                 />
               </div>
 
               <div>
-                <div className="mb-1 text-xs text-[#9090b0]">Product website (recommended)</div>
+                <div className="mb-1 text-xs text-text2">Product website (recommended)</div>
                 <input
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
-                  className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+                  className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                   placeholder="https://yourcompany.com"
                 />
-                {websiteHost ? <div className="mt-1 text-xs text-[#707090]">Detected: {websiteHost}</div> : null}
+                {websiteHost ? <div className="mt-1 text-xs text-text3">Detected: {websiteHost}</div> : null}
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <button type="button" className="text-sm text-[#9090b0] hover:text-[#f0f0f8]" onClick={() => setStep("role")}>
+                <button type="button" className="text-sm text-text2 hover:text-heading" onClick={() => setStep("role")}>
                   ← Back
                 </button>
                 <button
                   type="button"
                   disabled={!canContinueDetails}
                   onClick={() => setStep("confirm")}
-                  className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                  className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
                 >
                   Continue
                 </button>
@@ -331,14 +331,14 @@ export function OnboardingWizard() {
 
           {step === "confirm" ? (
             <div className="space-y-4">
-              <div className="text-sm text-[#f0f0f8]">Confirm & create</div>
-              <div className="rounded-xl border border-[#2a2e3f] bg-black/10 p-4 text-sm">
-                <div className="text-[#9090b0]">Workspace</div>
-                <div className="mt-1 text-[#f0f0f8]">{companyName.trim() || "—"}</div>
-                <div className="mt-3 text-[#9090b0]">Product</div>
-                <div className="mt-1 text-[#f0f0f8]">{productName.trim() || "—"}</div>
-                <div className="mt-3 text-[#9090b0]">Website</div>
-                <div className="mt-1 break-words text-[#f0f0f8]">{websiteUrl.trim() ? normalizeUrl(websiteUrl) : "—"}</div>
+              <div className="text-sm text-heading">Confirm & create</div>
+              <div className="rounded-xl border border-border bg-black/10 p-4 text-sm">
+                <div className="text-text2">Workspace</div>
+                <div className="mt-1 text-heading">{companyName.trim() || "—"}</div>
+                <div className="mt-3 text-text2">Product</div>
+                <div className="mt-1 text-heading">{productName.trim() || "—"}</div>
+                <div className="mt-3 text-text2">Website</div>
+                <div className="mt-1 break-words text-heading">{websiteUrl.trim() ? normalizeUrl(websiteUrl) : "—"}</div>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -346,7 +346,7 @@ export function OnboardingWizard() {
                   type="button"
                   disabled={loading}
                   onClick={() => setStep("details")}
-                  className="rounded-xl border border-[#2a2e3f] bg-black/10 px-4 py-2 text-sm text-[#f0f0f8] hover:bg-white/5 disabled:opacity-60"
+                  className="rounded-xl border border-border bg-black/10 px-4 py-2 text-sm text-heading hover:bg-surface2 disabled:opacity-60"
                 >
                   Edit
                 </button>
@@ -354,7 +354,7 @@ export function OnboardingWizard() {
                   type="button"
                   disabled={loading}
                   onClick={() => void create({ skipAutofill: true })}
-                  className="rounded-xl border border-[#2a2e3f] bg-transparent px-4 py-2 text-sm text-[#9090b0] hover:bg-white/5 disabled:opacity-60"
+                  className="rounded-xl border border-border bg-transparent px-4 py-2 text-sm text-text2 hover:bg-surface2 disabled:opacity-60"
                 >
                   Create without auto-fill
                 </button>
@@ -362,7 +362,7 @@ export function OnboardingWizard() {
                   type="button"
                   disabled={loading}
                   onClick={() => void create({ skipAutofill: false })}
-                  className="ml-auto rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                  className="ml-auto rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
                 >
                   {websiteUrl.trim() ? "Create & generate drafts" : "Create workspace"}
                 </button>
@@ -372,27 +372,27 @@ export function OnboardingWizard() {
 
           {step === "creating" ? (
             <div className="space-y-3">
-              <div className="text-sm text-[#f0f0f8]">Setting things up…</div>
-              <div className="text-sm text-[#9090b0]">{status || "Working…"}</div>
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-black/30">
-                <div className="h-full w-2/3 animate-pulse rounded-full bg-[#7c6cff]" />
+              <div className="text-sm text-heading">Setting things up…</div>
+              <div className="text-sm text-text2">{status || "Working…"}</div>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface3">
+                <div className="h-full w-2/3 animate-pulse rounded-full bg-primary" />
               </div>
-              <div className="pt-1 text-xs text-[#707090]">
-                You’ll land on <span className="text-[#f0f0f8]">Getting started</span> next.
+              <div className="pt-1 text-xs text-text3">
+                You’ll land on <span className="text-heading">Getting started</span> next.
               </div>
             </div>
           ) : null}
 
           {step === "done" ? (
             <div className="space-y-3">
-              <div className="text-sm text-[#f0f0f8]">You’re ready.</div>
-              <div className="text-sm text-[#9090b0]">Redirecting…</div>
+              <div className="text-sm text-heading">You’re ready.</div>
+              <div className="text-sm text-text2">Redirecting…</div>
             </div>
           ) : null}
         </div>
 
-        <div className="mt-4 text-xs text-[#707090]">
-          You can always change workspace/product details later in <span className="text-[#f0f0f8]">Settings</span>.
+        <div className="mt-4 text-xs text-text3">
+          You can always change workspace/product details later in <span className="text-heading">Settings</span>.
         </div>
       </div>
     </div>

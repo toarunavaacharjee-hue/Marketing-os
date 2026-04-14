@@ -10,10 +10,10 @@ export function ChannelBars({
       {items.map((it) => (
         <div key={it.label}>
           <div className="mb-2 flex items-center justify-between text-sm">
-            <div className="text-[#f0f0f8]">{it.label}</div>
-            <div className="text-[#9090b0]">{it.value}%</div>
+            <div className="text-heading">{it.label}</div>
+            <div className="text-text2">{it.value}%</div>
           </div>
-          <div className="h-2 w-full rounded-full bg-black/30 ring-1 ring-[#2a2e3f]">
+          <div className="h-2 w-full rounded-full bg-surface3 ring-1 ring-border">
             <div
               className="h-2 rounded-full"
               style={{

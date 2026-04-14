@@ -249,7 +249,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
             </div>
 
             {error ? (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
                 {error}
               </div>
             ) : null}
@@ -262,7 +262,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
             <button
               onClick={saveProfile}
               disabled={saving}
-              className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+              className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
             >
               {saving ? "Saving..." : "Save profile"}
             </button>
@@ -348,7 +348,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               <div className="mb-1 flex items-center justify-between">
                 <div className="text-xs text-text2">Anthropic API key</div>
                 <div
-                  className={`h-2 w-2 rounded-full ${anthropicReady ? "bg-[#b8ff6c]" : "bg-white/20"}`}
+                  className={`h-2 w-2 rounded-full ${anthropicReady ? "bg-amber" : "bg-white/20"}`}
                 />
               </div>
               {configured ? (
@@ -374,7 +374,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
                   type="button"
                   onClick={() => void saveWorkspaceKey()}
                   disabled={savingKey || !keyLooksValid || !byokStorageReady}
-                  className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                  className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
                 >
                   {savingKey ? "Saving…" : configured ? "Replace key" : "Save key"}
                 </button>
@@ -391,7 +391,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               </div>
 
               {keyError ? (
-                <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red">
                   {keyError}
                 </div>
               ) : null}
@@ -406,9 +406,9 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
                   {aiStatus === "checking" ? (
                     <span>Checking connection…</span>
                   ) : aiStatus === "connected" ? (
-                    <span className="text-[#b8ff6c]">Connected to Anthropic</span>
+                    <span className="text-teal">Connected to Anthropic</span>
                   ) : aiStatus === "error" ? (
-                    <span className="text-red-200">
+                    <span className="text-red">
                       Not connected{aiError ? ` — ${aiError}` : ""}
                     </span>
                   ) : (
@@ -446,7 +446,7 @@ function SetupItem({
         </div>
         <div
           className={`mt-1 h-2.5 w-2.5 rounded-full ${
-            ok ? "bg-[#b8ff6c]" : "bg-border"
+            ok ? "bg-amber" : "bg-border"
           }`}
           aria-label={ok ? "OK" : "Not set"}
         />

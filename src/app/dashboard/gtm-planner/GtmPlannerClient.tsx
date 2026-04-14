@@ -98,30 +98,30 @@ export function GtmPlannerClient({ environmentId }: { environmentId: string }) {
 
   return (
     <div className="space-y-4">
-      {loading ? <div className="text-sm text-[#9090b0]">Loading…</div> : null}
+      {loading ? <div className="text-sm text-text2">Loading…</div> : null}
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
         </div>
       ) : null}
-      <p className="text-xs text-[#9090b0]">{saving ? "Saving…" : "Saved per product environment."}</p>
+      <p className="text-xs text-text2">{saving ? "Saving…" : "Saved per product environment."}</p>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-        <div className="mb-2 flex justify-between text-sm text-[#9090b0]">
+      <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="mb-2 flex justify-between text-sm text-text2">
           <span>Launch readiness</span>
           <span>{pct}%</span>
         </div>
-        <div className="h-2 rounded-full bg-black/30">
-          <div className="h-2 rounded-full bg-[#7c6cff]" style={{ width: `${pct}%` }} />
+        <div className="h-2 rounded-full bg-surface3">
+          <div className="h-2 rounded-full bg-primary" style={{ width: `${pct}%` }} />
         </div>
         <div className="mt-4 space-y-2">
           {data.tasks.map((t, i) => (
-            <label key={t.id} className="flex items-center gap-2 text-sm text-[#f0f0f8]">
+            <label key={t.id} className="flex items-center gap-2 text-sm text-heading">
               <input
                 type="checkbox"
                 checked={t.done}
                 onChange={() => toggle(i)}
-                className="rounded border-[#2a2e3f]"
+                className="rounded border-border"
               />
               <input
                 value={t.label}
@@ -131,7 +131,7 @@ export function GtmPlannerClient({ environmentId }: { environmentId: string }) {
                   );
                   schedule({ ...data, tasks });
                 }}
-                className="flex-1 rounded-lg border border-[#2a2e3f] bg-black/20 px-2 py-1 text-sm"
+                className="flex-1 rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
               />
             </label>
           ))}
@@ -139,22 +139,22 @@ export function GtmPlannerClient({ environmentId }: { environmentId: string }) {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
-          <div className="text-sm text-[#f0f0f8]">Launch timeline</div>
+        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+          <div className="text-sm text-heading">Launch timeline</div>
           <textarea
             value={data.timeline}
             onChange={(e) => schedule({ ...data, timeline: e.target.value })}
             rows={6}
-            className="mt-2 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
           />
         </div>
-        <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm">
-          <div className="text-sm text-[#f0f0f8]">Stakeholders</div>
+        <div className="rounded-2xl border border-border bg-surface p-4 text-sm">
+          <div className="text-sm text-heading">Stakeholders</div>
           <textarea
             value={data.stakeholders}
             onChange={(e) => schedule({ ...data, stakeholders: e.target.value })}
             rows={6}
-            className="mt-2 w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#9090b0]"
+            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-text2"
           />
         </div>
       </div>

@@ -50,47 +50,47 @@ export default function OnboardingPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className="mb-2 text-4xl text-[#f0f0f8]" style={{ fontFamily: "var(--font-heading)" }}>
+      <div className="mb-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
         Set up your workspace
       </div>
-      <div className="mb-6 text-sm text-[#9090b0]">
+      <div className="mb-6 text-sm text-text2">
         Create a company, then create your first product. Each product gets its own Default environment.
       </div>
 
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
+      <div className="rounded-2xl border border-border bg-surface p-6">
         <div className="space-y-4">
           <div>
-            <div className="mb-1 text-xs text-[#9090b0]">Company name</div>
+            <div className="mb-1 text-xs text-text2">Company name</div>
             <input
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
               placeholder="AI Marketing Workbench"
             />
           </div>
 
           <div>
-            <div className="mb-1 text-xs text-[#9090b0]">Product name</div>
+            <div className="mb-1 text-xs text-text2">Product name</div>
             <input
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
               placeholder="AI Marketing Workbench"
             />
           </div>
 
           <div>
-            <div className="mb-1 text-xs text-[#9090b0]">Product website (optional)</div>
+            <div className="mb-1 text-xs text-text2">Product website (optional)</div>
             <input
               value={websiteUrl}
               onChange={(e) => setWebsiteUrl(e.target.value)}
-              className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-sm text-[#f0f0f8]"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
               placeholder="https://aimarketingworkbench.com"
             />
           </div>
 
           {error ? (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
               {error}
             </div>
           ) : null}
@@ -98,7 +98,7 @@ export default function OnboardingPage() {
           <button
             disabled={loading || !companyName || !productName}
             onClick={create}
-            className="w-full rounded-xl bg-[#b8ff6c] px-4 py-3 text-sm font-medium text-black disabled:opacity-60"
+            className="w-full rounded-xl bg-amber px-4 py-3 text-sm font-medium text-black disabled:opacity-60"
           >
             {loading ? "Creating..." : "Create workspace"}
           </button>

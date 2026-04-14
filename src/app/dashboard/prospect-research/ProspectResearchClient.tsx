@@ -658,7 +658,7 @@ export default function ProspectResearchClient() {
                   type="button"
                   onClick={autofillFromPublicInfo}
                   disabled={publicAutofilling || (!companyName.trim() && !websiteUrl.trim())}
-                  className="rounded-[var(--radius2)] bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                  className="rounded-[var(--radius2)] bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
                 >
                   {publicAutofilling ? "Auto-filling…" : "Auto-fill from public info"}
                 </button>
@@ -787,7 +787,7 @@ export default function ProspectResearchClient() {
                 type="button"
                 onClick={runResearch}
                 disabled={generating}
-                className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
               >
                 {generating ? "Generating memo…" : "Generate intelligence memo"}
               </button>

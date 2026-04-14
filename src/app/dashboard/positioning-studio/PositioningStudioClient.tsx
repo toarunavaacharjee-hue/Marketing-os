@@ -269,14 +269,14 @@ export default function PositioningStudioClient({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h1
-            className="text-3xl text-[#f0f0f8]"
+            className="text-3xl text-heading"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Positioning Studio
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-[#9090b0]">
+          <p className="mt-1 max-w-2xl text-sm text-text2">
             Canvas and health scores are generated from your saved ICP segments (from an uploaded document in{" "}
-            <Link href="/dashboard/icp-segmentation" className="text-[#7c6cff] hover:underline">
+            <Link href="/dashboard/icp-segmentation" className="text-primary hover:underline">
               ICP Segmentation
             </Link>
             ). Regenerate after you change segments, or edit the text yourself and save.
@@ -287,7 +287,7 @@ export default function PositioningStudioClient({
             type="button"
             onClick={() => generateFromSegments()}
             disabled={generating || loading}
-            className="rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+            className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
           >
             {generating ? "Generating…" : "Regenerate from ICP segments"}
           </button>
@@ -295,7 +295,7 @@ export default function PositioningStudioClient({
             type="button"
             onClick={() => saveManualEdits()}
             disabled={saving || !canvas || loading}
-            className="rounded-xl border border-[#2a2e3f] bg-[#141420] px-4 py-2 text-sm text-[#f0f0f8] hover:bg-white/5 disabled:opacity-50"
+            className="rounded-xl border border-border bg-surface px-4 py-2 text-sm text-heading hover:bg-surface2 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save edits"}
           </button>
@@ -303,7 +303,7 @@ export default function PositioningStudioClient({
       </div>
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
         </div>
       ) : null}
@@ -315,7 +315,7 @@ export default function PositioningStudioClient({
       {versionError ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
           {versionError}{" "}
-          <span className="text-[#9090b0]">
+          <span className="text-text2">
             (If this mentions a missing table, run <code className="font-mono text-[11px]">supabase/positioning_versions_spine.sql</code> in Supabase.)
           </span>
         </div>
@@ -330,36 +330,36 @@ export default function PositioningStudioClient({
       />
 
       {loading ? (
-        <div className="text-sm text-[#9090b0]">Loading…</div>
+        <div className="text-sm text-text2">Loading…</div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-3 lg:col-span-2">
             {(Object.keys(FIELD_LABELS) as (keyof PositioningCanvasValue["doc"])[]).map((k) => (
-              <div key={k} className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-                <div className="mb-2 text-xs uppercase text-[#9090b0]">{FIELD_LABELS[k]}</div>
+              <div key={k} className="rounded-2xl border border-border bg-surface p-4">
+                <div className="mb-2 text-xs uppercase text-text2">{FIELD_LABELS[k]}</div>
                 <textarea
                   value={doc[k]}
                   onChange={(e) => setDoc((d) => ({ ...d, [k]: e.target.value }))}
-                  className="min-h-[72px] w-full rounded-xl border border-[#2a2e3f] bg-black/20 p-3 text-sm text-[#f0f0f8]"
+                  className="min-h-[72px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
                   placeholder="—"
                 />
               </div>
             ))}
           </div>
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-              <div className="text-sm text-[#f0f0f8]">Health Scores</div>
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <div className="text-sm text-heading">Health Scores</div>
               {HEALTH_LABELS.map(([key, label]) => {
                 const v = health[key];
                 return (
                   <div className="mt-3" key={key}>
-                    <div className="mb-1 flex justify-between text-xs text-[#9090b0]">
+                    <div className="mb-1 flex justify-between text-xs text-text2">
                       <span>{label}</span>
                       <span>{v}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-black/30">
+                    <div className="h-2 rounded-full bg-surface3">
                       <div
-                        className="h-2 rounded-full bg-[#7c6cff]"
+                        className="h-2 rounded-full bg-primary"
                         style={{ width: `${v}%` }}
                       />
                     </div>
@@ -367,13 +367,13 @@ export default function PositioningStudioClient({
                 );
               })}
             </div>
-            <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4 text-sm text-[#9090b0]">
-              <div className="mb-2 text-sm text-[#f0f0f8]">AI version history</div>
+            <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+              <div className="mb-2 text-sm text-heading">AI version history</div>
               {canvas?.history?.length ? (
                 <div className="space-y-2">
                   {canvas.history.map((h, i) => (
                     <div key={`${h.version}-${i}`}>
-                      <span className="text-[#f0f0f8]">{h.version}</span>
+                      <span className="text-heading">{h.version}</span>
                       {" — "}
                       {h.label}
                     </div>
@@ -384,9 +384,9 @@ export default function PositioningStudioClient({
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-4">
-              <div className="mb-2 text-sm text-[#f0f0f8]">Governed positioning versions</div>
-              <p className="text-xs text-[#9090b0]">
+            <div className="rounded-2xl border border-border bg-surface p-4">
+              <div className="mb-2 text-sm text-heading">Governed positioning versions</div>
+              <p className="text-xs text-text2">
                 Snapshots become your approved spine. Battlecards save against the latest approved version.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -394,7 +394,7 @@ export default function PositioningStudioClient({
                   type="button"
                   onClick={() => snapshotDraftVersion()}
                   disabled={loading || versionBusy !== null}
-                  className="rounded-xl bg-[#7c6cff] px-3 py-2 text-xs font-semibold text-white hover:bg-[#8b7cff] disabled:opacity-50"
+                  className="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
                 >
                   {versionBusy === "snapshot" ? "Saving…" : "Save snapshot (draft)"}
                 </button>
@@ -404,19 +404,19 @@ export default function PositioningStudioClient({
                   Approved spine: <span className="font-mono text-[11px]">{approvedVersionId.slice(0, 8)}…</span>
                 </div>
               ) : (
-                <div className="mt-3 text-xs text-[#9090b0]">No approved positioning version yet.</div>
+                <div className="mt-3 text-xs text-text2">No approved positioning version yet.</div>
               )}
               <div className="mt-4 space-y-2">
                 {versions.length ? (
                   versions.map((v) => (
                     <div
                       key={v.id}
-                      className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2 text-[12px]"
+                      className="rounded-xl border border-border bg-surface2 px-3 py-2 text-[12px]"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="text-[#f0f0f8]">
+                        <div className="text-heading">
                           v{v.version_number}{" "}
-                          <span className="text-[#9090b0]">({v.status})</span>
+                          <span className="text-text2">({v.status})</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {v.status === "draft" ? (
@@ -434,7 +434,7 @@ export default function PositioningStudioClient({
                               type="button"
                               onClick={() => approveVersion(v.id)}
                               disabled={versionBusy !== null}
-                              className="rounded-lg bg-[#b8ff6c] px-2 py-1 text-[11px] font-semibold text-black hover:bg-[#c8ff7c] disabled:opacity-50"
+                              className="rounded-lg bg-amber px-2 py-1 text-[11px] font-semibold text-black hover:bg-amber-hover disabled:opacity-50"
                             >
                               {versionBusy === `${v.id}-approve` ? "…" : "Approve"}
                             </button>
@@ -444,7 +444,7 @@ export default function PositioningStudioClient({
                     </div>
                   ))
                 ) : (
-                  <div className="text-xs text-[#9090b0]">No governed versions yet. Save a snapshot to start.</div>
+                  <div className="text-xs text-text2">No governed versions yet. Save a snapshot to start.</div>
                 )}
               </div>
             </div>

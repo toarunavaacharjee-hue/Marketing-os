@@ -105,20 +105,20 @@ export default function IntegrationsClient({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-[#2a2e3f] bg-[#141420] p-6">
-        <div className="text-lg text-[#f0f0f8]">Integrations</div>
-        <div className="mt-1 text-sm text-[#9090b0]">
+      <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="text-lg text-heading">Integrations</div>
+        <div className="mt-1 text-sm text-text2">
           Configure platform connections for this selected product (Default environment).
         </div>
 
-        {loading ? <div className="mt-4 text-sm text-[#9090b0]">Loading…</div> : null}
+        {loading ? <div className="mt-4 text-sm text-text2">Loading…</div> : null}
         {error ? (
-          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
             {error}
           </div>
         ) : null}
         {saved ? (
-          <div className="mt-4 rounded-xl border border-[#b8ff6c]/30 bg-[#b8ff6c]/10 px-3 py-2 text-sm text-[#b8ff6c]">
+          <div className="mt-4 rounded-xl border border-teal/30 bg-amber/10 px-3 py-2 text-sm text-teal">
             {saved}
           </div>
         ) : null}
@@ -153,7 +153,7 @@ export default function IntegrationsClient({
         <button
           onClick={save}
           disabled={saving}
-          className="mt-5 rounded-xl bg-[#b8ff6c] px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+          className="mt-5 rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
         >
           {saving ? "Saving..." : "Save integrations"}
         </button>
@@ -174,10 +174,10 @@ function ConnectorCard({
   placeholder: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#2a2e3f] bg-black/20 p-4">
+    <div className="rounded-2xl border border-border bg-surface2 p-4">
       <div className="flex items-center justify-between">
-        <div className="text-sm text-[#f0f0f8]">{title}</div>
-        <label className="flex items-center gap-2 text-xs text-[#9090b0]">
+        <div className="text-sm text-heading">{title}</div>
+        <label className="flex items-center gap-2 text-xs text-text2">
           <input
             type="checkbox"
             checked={value.enabled}
@@ -191,13 +191,13 @@ function ConnectorCard({
           value={value.account_id}
           onChange={(e) => onChange({ account_id: e.target.value })}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-sm text-[#f0f0f8]"
+          className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading"
         />
         <input
           value={value.notes}
           onChange={(e) => onChange({ notes: e.target.value })}
           placeholder="Notes / token reference"
-          className="w-full rounded-xl border border-[#2a2e3f] bg-[#141420] px-3 py-2 text-sm text-[#f0f0f8]"
+          className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading"
         />
       </div>
     </div>

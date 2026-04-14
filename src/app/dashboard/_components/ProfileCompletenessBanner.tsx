@@ -31,11 +31,11 @@ export function ProfileCompletenessBanner() {
   if (score === null || score >= 80 || dismissed) return null;
 
   return (
-    <div className="mb-6 rounded-2xl border border-[#7c6cff]/35 bg-[#7c6cff]/10 px-4 py-3 text-sm text-[#e8e6ff]">
+    <div className="mb-6 rounded-lg border border-primary/30 bg-primary-light/50 px-4 py-3 text-sm shadow-card">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="font-semibold text-white">Complete your product spine ({score}%)</div>
-          <p className="mt-1 text-[13px] text-[#c4b8ff]">
+          <div className="font-semibold text-heading">Complete your product spine ({score}%)</div>
+          <p className="mt-1 text-[13px] text-text2">
             A stronger profile improves AI quality and keeps your team aligned. Still needed:{" "}
             {missing.slice(0, 3).join("; ")}
             {missing.length > 3 ? "…" : ""}
@@ -43,13 +43,13 @@ export function ProfileCompletenessBanner() {
           <div className="mt-2 flex flex-wrap gap-2">
             <Link
               href="/dashboard/settings/product"
-              className="inline-flex rounded-lg bg-[#b8ff6c] px-3 py-1.5 text-[12px] font-semibold text-[#0a0a0c] hover:bg-[#c8ff7c]"
+              className="inline-flex rounded-sm bg-amber px-3 py-1.5 text-[12px] font-semibold text-heading shadow-sm hover:bg-amber-hover"
             >
               Product settings
             </Link>
             <Link
               href="/dashboard/positioning-studio"
-              className="inline-flex rounded-lg border border-white/15 bg-black/20 px-3 py-1.5 text-[12px] font-medium text-white hover:bg-white/5"
+              className="inline-flex rounded-sm border border-input-border bg-surface px-3 py-1.5 text-[12px] font-medium text-text hover:bg-surface2"
             >
               Positioning Studio
             </Link>
@@ -58,7 +58,7 @@ export function ProfileCompletenessBanner() {
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="shrink-0 rounded-lg px-2 py-1 text-[12px] text-[#9090b0] hover:text-white"
+          className="shrink-0 rounded-lg px-2 py-1 text-[12px] text-text3 hover:text-heading"
           aria-label="Dismiss"
         >
           Dismiss

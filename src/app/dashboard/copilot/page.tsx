@@ -104,10 +104,10 @@ export default function CopilotPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] min-h-[580px] flex-col rounded-2xl border border-[#2a2e3f] bg-[#141420]">
-      <div className="border-b border-[#2a2e3f] px-5 py-4">
-        <div className="text-lg text-[#f0f0f8]">AI Copilot</div>
-        <div className="text-sm text-[#9090b0]">
+    <div className="flex h-[calc(100vh-120px)] min-h-[580px] flex-col rounded-2xl border border-border bg-surface">
+      <div className="border-b border-border px-5 py-4">
+        <div className="text-lg text-heading">AI Copilot</div>
+        <div className="text-sm text-text2">
           Strategy, diagnostics, and next actions for your growth team
         </div>
       </div>
@@ -137,13 +137,13 @@ export default function CopilotPage() {
         </div>
       </div>
 
-      <div className="border-t border-[#2a2e3f] px-4 py-4 md:px-6">
+      <div className="border-t border-border px-4 py-4 md:px-6">
         <div className="mb-3 grid grid-cols-2 gap-2 md:grid-cols-4">
           {HINTS.map((hint) => (
             <button
               key={hint}
               onClick={() => sendMessage(hint)}
-              className="rounded-xl border border-[#2a2e3f] bg-[#1e1e2e] px-3 py-2 text-xs text-[#f0f0f8] hover:bg-white/5"
+              className="rounded-xl border border-border bg-primary-light px-3 py-2 text-xs text-heading hover:bg-surface2"
             >
               {hint}
             </button>
@@ -151,7 +151,7 @@ export default function CopilotPage() {
         </div>
 
         {error ? (
-          <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
             {error}
           </div>
         ) : null}
@@ -167,12 +167,12 @@ export default function CopilotPage() {
               }
             }}
             placeholder="Ask Copilot anything..."
-            className="w-full rounded-xl border border-[#2a2e3f] bg-black/20 px-4 py-3 text-sm text-[#f0f0f8] placeholder:text-[#9090b0] focus:border-[#7c6cff] focus:outline-none focus:ring-2 focus:ring-[#7c6cff]/30"
+            className="w-full rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-heading placeholder:text-text2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <button
             onClick={() => sendMessage(input)}
             disabled={loading}
-            className="rounded-xl bg-[#b8ff6c] px-4 py-3 text-sm font-medium text-black disabled:opacity-60"
+            className="rounded-xl bg-amber px-4 py-3 text-sm font-medium text-black disabled:opacity-60"
           >
             Send
           </button>
@@ -184,11 +184,11 @@ export default function CopilotPage() {
 
 function Avatar({ role }: { role: ChatRole }) {
   return role === "assistant" ? (
-    <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#7c6cff]/25 text-xs text-[#f0f0f8] ring-1 ring-[#7c6cff]/40">
+    <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-primary/25 text-xs text-heading ring-1 ring-primary/40">
       AI
     </div>
   ) : (
-    <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-[#b8ff6c]/20 text-xs text-[#f0f0f8] ring-1 ring-[#b8ff6c]/40">
+    <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-amber/20 text-xs text-heading ring-1 ring-teal/40">
       You
     </div>
   );
@@ -210,8 +210,8 @@ function MessageBubble({
       <div
         className={`max-w-[88%] rounded-2xl border px-4 py-3 text-sm leading-6 ${
           isAI
-            ? "border-[#2a2e3f] bg-[#1e1e2e] text-[#f0f0f8]"
-            : "border-[#2a2e3f] bg-[#141420] text-[#f0f0f8]"
+            ? "border-border bg-primary-light text-heading"
+            : "border-border bg-surface text-heading"
         }`}
       >
         <div className="whitespace-pre-wrap">{message.text}</div>
@@ -221,12 +221,12 @@ function MessageBubble({
             {message.metrics.map((m) => (
               <div
                 key={`${m.label}-${m.value}`}
-                className="rounded-xl border border-[#2a2e3f] bg-black/20 px-3 py-2"
+                className="rounded-xl border border-border bg-surface2 px-3 py-2"
               >
-                <div className="text-[11px] uppercase tracking-wider text-[#9090b0]">
+                <div className="text-[11px] uppercase tracking-wider text-text2">
                   {m.label}
                 </div>
-                <div className="mt-1 text-sm text-[#f0f0f8]">{m.value}</div>
+                <div className="mt-1 text-sm text-heading">{m.value}</div>
               </div>
             ))}
           </div>
@@ -238,7 +238,7 @@ function MessageBubble({
               <button
                 key={s}
                 onClick={() => onSuggestion(s)}
-                className="rounded-full border border-[#2a2e3f] bg-black/20 px-3 py-1.5 text-xs text-[#f0f0f8] hover:bg-white/5"
+                className="rounded-full border border-border bg-surface2 px-3 py-1.5 text-xs text-heading hover:bg-surface2"
               >
                 {s}
               </button>

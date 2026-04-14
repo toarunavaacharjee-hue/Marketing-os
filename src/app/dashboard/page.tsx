@@ -267,7 +267,7 @@ async function CommandCentrePage() {
           </a>
           <Link
             href="/dashboard/copilot"
-            className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#5b52ee]"
+            className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-primary-dark"
           >
             🤖 <span>Ask AI</span>
           </Link>
@@ -310,7 +310,7 @@ async function CommandCentrePage() {
           </div>
           <Link
             href="/dashboard/getting-started"
-            className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#5b52ee]"
+            className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark"
           >
             Open Getting started
           </Link>
@@ -593,7 +593,7 @@ function WorkspaceHealthChecklist({
             {!item.ok ? (
               <Link
                 href={item.fixHref}
-                className="shrink-0 rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#5b52ee]"
+                className="shrink-0 rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-primary-dark"
               >
                 {item.fixLabel}
               </Link>
@@ -814,7 +814,7 @@ function AttentionRow({
                 href={a.href}
                 className={`inline-flex items-center gap-2 rounded-[var(--radius2)] px-4 py-2 text-[12px] font-semibold transition ${
                   a.primary
-                    ? "bg-accent text-white hover:bg-[#5b52ee]"
+                    ? "bg-accent text-white hover:bg-primary-dark"
                     : "border border-border bg-surface text-text hover:bg-surface3 hover:border-border2"
                 }`}
               >

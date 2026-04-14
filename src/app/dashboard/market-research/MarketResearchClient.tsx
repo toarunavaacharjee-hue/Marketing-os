@@ -234,7 +234,7 @@ export default function MarketResearchClient() {
           <button
             onClick={runScan}
             disabled={running || loading}
-            className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
           >
             🧠 {running ? "Running AI Scan…" : "Run AI Scan"}
           </button>
@@ -366,7 +366,7 @@ export default function MarketResearchClient() {
               <button
                 onClick={ask}
                 disabled={asking}
-                className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-60"
+                className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
               >
                 Ask
               </button>
@@ -488,7 +488,7 @@ export default function MarketResearchClient() {
                     });
                   }}
                   disabled={!summary}
-                  className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#5b52ee] disabled:opacity-50"
+                  className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-50"
                 >
                   Download PDF
                 </button>
