@@ -92,6 +92,33 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const ent = useMemo(() => getEntitlements(companyPlan ?? "starter"), [companyPlan]);
 
+  // Ensure the server-side selected context is persisted into tenant cookies.
+  // Without this, deep links like /dashboard/settings/* can redirect to onboarding when cookies are missing.
+  useEffect(() => {
+    const companyId = selectedCompanyId ?? "";
+    const productId = selectedProductId ?? "";
+    if (!companyId || !productId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        await fetch("/api/context/select", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ companyId, productId })
+        });
+      } catch {
+        // Ignore — worst case, some pages will redirect to onboarding until user selects context.
+      } finally {
+        if (cancelled) return;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCompanyId, selectedProductId]);
+
   const SIDEBAR_SECTIONS_KEY = "aimw-sidebar-sections";
   const [sectionOpen, setSectionOpen] = useState<Record<string, boolean>>({});
 
