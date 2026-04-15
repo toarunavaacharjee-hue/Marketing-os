@@ -74,21 +74,34 @@ export default function TeamSettingsClient({
     setOk(null);
     const { data, error } = await supabase
       .from("company_members")
-      .select("company_id,user_id,role,profiles(name)")
+      .select("company_id,user_id,role")
       .eq("company_id", companyId)
       .order("role", { ascending: true });
     if (error) {
       setError(error.message);
       return;
     }
-    const next =
+
+    const rows =
       (data ?? []).map((m: any) => ({
         company_id: m.company_id,
         user_id: m.user_id,
-        role: m.role ?? "member",
-        name: m.profiles?.name ?? null
+        role: m.role ?? "member"
       })) ?? [];
-    setMembers(next);
+
+    const userIds = rows.map((r) => r.user_id).filter(Boolean);
+    const { data: profileRows, error: pErr } = userIds.length
+      ? await supabase.from("profiles").select("id,name").in("id", userIds)
+      : { data: [], error: null as any };
+    if (pErr) {
+      setError(pErr.message);
+      setMembers(rows.map((r) => ({ ...r, name: null })));
+      return;
+    }
+
+    const byId = new Map<string, string | null>();
+    (profileRows ?? []).forEach((p: any) => byId.set(String(p.id), (p.name ?? null) as string | null));
+    setMembers(rows.map((r) => ({ ...r, name: byId.get(String(r.user_id)) ?? null })));
   }
 
   async function loadInvites() {

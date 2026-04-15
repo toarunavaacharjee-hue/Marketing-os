@@ -9,9 +9,6 @@ export default function ProfileSettingsClient({
   initialCompany,
   initialJobTitle,
   initialPhone,
-  initialTimezone,
-  initialLocale,
-  initialAvatarUrl,
   email
 }: {
   initialName: string;
@@ -19,9 +16,6 @@ export default function ProfileSettingsClient({
   initialCompany: string;
   initialJobTitle: string;
   initialPhone: string;
-  initialTimezone: string;
-  initialLocale: string;
-  initialAvatarUrl: string;
   email: string;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
@@ -30,9 +24,6 @@ export default function ProfileSettingsClient({
   const [company, setCompany] = useState(initialCompany);
   const [jobTitle, setJobTitle] = useState(initialJobTitle);
   const [phone, setPhone] = useState(initialPhone);
-  const [timezone, setTimezone] = useState(initialTimezone);
-  const [locale, setLocale] = useState(initialLocale);
-  const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,10 +47,7 @@ export default function ProfileSettingsClient({
         display_name: displayName,
         company,
         job_title: jobTitle,
-        phone,
-        timezone,
-        locale,
-        avatar_url: avatarUrl
+        phone
       })
       .eq("id", user.id);
 
@@ -122,34 +110,6 @@ export default function ProfileSettingsClient({
             className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
             placeholder="Optional"
           />
-        </div>
-        <div>
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text3">Timezone</div>
-          <input
-            value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
-            placeholder="e.g. Asia/Kolkata"
-          />
-        </div>
-        <div>
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text3">Language / locale</div>
-          <input
-            value={locale}
-            onChange={(e) => setLocale(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
-            placeholder="e.g. en-IN"
-          />
-        </div>
-        <div className="md:col-span-2">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text3">Avatar URL</div>
-          <input
-            value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
-            placeholder="https://… (optional)"
-          />
-          <div className="mt-1 text-xs text-text3">Optional. Used for account menus and future team surfaces.</div>
         </div>
       </div>
 

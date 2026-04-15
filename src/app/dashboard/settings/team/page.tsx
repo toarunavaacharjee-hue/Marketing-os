@@ -40,11 +40,37 @@ export default async function TeamSettingsPage() {
   const canAdmin = myRole === "owner" || myRole === "admin";
   const isOwner = myRole === "owner";
 
-  const { data: members } = await supabase
-    .from("company_members")
-    .select("company_id,user_id,role,profiles(name,company)")
-    .eq("company_id", companyId)
-    .order("role", { ascending: true });
+  // Migration/constraint tolerant: some deployments may not have an FK relationship for PostgREST joins.
+  // If the `profiles` relationship isn't available, we fall back to a separate profiles query.
+  let members: MemberRow[] = [];
+  {
+    const res = await supabase
+      .from("company_members")
+      .select("company_id,user_id,role,profiles(name,company)")
+      .eq("company_id", companyId)
+      .order("role", { ascending: true });
+
+    if (!res.error && res.data) {
+      members = res.data as MemberRow[];
+    } else {
+      const fallback = await supabase
+        .from("company_members")
+        .select("company_id,user_id,role")
+        .eq("company_id", companyId)
+        .order("role", { ascending: true });
+      const rows = ((fallback.data ?? []) as Omit<MemberRow, "profiles">[]) as MemberRow[];
+      const userIds = rows.map((r) => r.user_id);
+      const { data: profileRows } = userIds.length
+        ? await supabase.from("profiles").select("id,name,company").in("id", userIds)
+        : { data: [] as any[] };
+      const byId = new Map<string, { name?: string | null; company?: string | null }>();
+      (profileRows ?? []).forEach((p: any) => byId.set(String(p.id), { name: p.name ?? null, company: p.company ?? null }));
+      members = rows.map((r) => ({
+        ...r,
+        profiles: byId.get(String(r.user_id)) ?? null
+      })) as MemberRow[];
+    }
+  }
 
   return (
     <div className="space-y-4">

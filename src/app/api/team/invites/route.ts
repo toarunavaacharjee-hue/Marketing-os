@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getEntitlements, normalizePlan } from "@/lib/planEntitlements";
+import { env } from "@/lib/env";
 
 type InviteRow = {
   id: string;
@@ -119,8 +120,10 @@ export async function POST(req: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  const origin = req.headers.get("origin") ?? "";
-  const inviteUrl = origin ? `${origin}/invite/${token}` : `/invite/${token}`;
+  // IMPORTANT: never build invite links off the request Origin, because on Vercel it can be a protected
+  // *.vercel.app deployment URL. Invitees should land on the public app domain.
+  const base = String(env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/+$/, "");
+  const inviteUrl = base ? `${base}/invite/${token}` : `/invite/${token}`;
   return NextResponse.json({ invite: row as InviteRow, invite_url: inviteUrl });
 }
 
