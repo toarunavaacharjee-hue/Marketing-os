@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getDashboardBreadcrumb } from "@/lib/dashboardBreadcrumb";
 import type { CompanyOption, ProductOption } from "@/app/dashboard/TenantSwitcher";
@@ -29,8 +29,8 @@ export function DashboardTopBar({
   const pathname = usePathname();
   const router = useRouter();
   const [q, setQ] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement | null>(null);
 
   const crumbs = useMemo(() => getDashboardBreadcrumb(pathname), [pathname]);
 
@@ -49,6 +49,20 @@ export function DashboardTopBar({
     else router.push("/dashboard/copilot");
   }
 
+  const closeAccount = useCallback(() => setAccountOpen(false), []);
+
+  const onAccountAction = useCallback(
+    (href: string) => {
+      closeAccount();
+      if (href === "/logout") {
+        window.location.assign("/logout");
+        return;
+      }
+      router.push(href);
+    },
+    [closeAccount, router]
+  );
+
   const initials = useMemo(() => {
     const name = profile?.name?.trim() || "";
     if (!name) return "AA";
@@ -59,16 +73,16 @@ export function DashboardTopBar({
   }, [profile?.name]);
 
   useEffect(() => {
-    if (!menuOpen) return;
-    function onDocPointerDown(e: MouseEvent | PointerEvent) {
-      const el = menuRef.current;
+    if (!accountOpen) return;
+    function onDocPointerDown(e: PointerEvent) {
+      const el = accountRef.current;
       if (!el) return;
       if (e.target instanceof Node && el.contains(e.target)) return;
-      setMenuOpen(false);
+      closeAccount();
     }
-    document.addEventListener("pointerdown", onDocPointerDown);
-    return () => document.removeEventListener("pointerdown", onDocPointerDown);
-  }, [menuOpen]);
+    document.addEventListener("pointerdown", onDocPointerDown, { capture: true });
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, { capture: true } as any);
+  }, [accountOpen, closeAccount]);
 
   return (
     <header className="relative z-20 hidden h-[52px] shrink-0 border-b border-[var(--sidebar-divider)] bg-sidebar px-4 text-on-dark md:flex md:px-6">
@@ -133,13 +147,13 @@ export function DashboardTopBar({
             Copilot
           </Link>
 
-          <div className="relative" ref={menuRef}>
+          <div className="relative" ref={accountRef}>
             <button
               type="button"
-              onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              className="flex cursor-pointer list-none items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark"
+              aria-expanded={accountOpen}
+              onClick={() => setAccountOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark"
             >
               <span
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-sidebar-active text-[11px] font-bold text-on-dark"
@@ -152,60 +166,62 @@ export function DashboardTopBar({
               </span>
             </button>
 
-            {menuOpen ? (
+            {accountOpen ? (
               <div
                 role="menu"
+                aria-label="Account"
                 className="absolute right-0 top-[calc(100%+8px)] w-[220px] overflow-hidden rounded-lg border border-border bg-surface text-text shadow-dropdown"
               >
-              <div className="border-b border-border px-3 py-2">
-                <div className="truncate text-sm font-semibold text-heading">{profile?.name ?? "Account"}</div>
-                <div className="mt-0.5 truncate text-xs text-text2">{contextLabel ?? "Workspace"}</div>
-              </div>
+                <div className="border-b border-border px-3 py-2">
+                  <div className="truncate text-sm font-semibold text-heading">{profile?.name ?? "Account"}</div>
+                  <div className="mt-0.5 truncate text-xs text-text2">{contextLabel ?? "Workspace"}</div>
+                </div>
 
-              <div className="p-1">
-                <Link
-                  href="/dashboard/settings/profile"
-                  prefetch={false}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                >
-                  <span>My profile</span>
-                </Link>
-                <Link
-                  href="/dashboard/settings/team"
-                  prefetch={false}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                >
-                  <span>My team</span>
-                </Link>
-                <Link
-                  href="/dashboard/settings/integrations"
-                  prefetch={false}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                >
-                  <span>Integrations</span>
-                </Link>
-                <Link
-                  href="/dashboard/settings"
-                  prefetch={false}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                >
-                  <span>Settings</span>
-                </Link>
-              </div>
+                <div className="p-1">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                    onClick={() => onAccountAction("/dashboard/settings/profile")}
+                  >
+                    <span>My profile</span>
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                    onClick={() => onAccountAction("/dashboard/settings/team")}
+                  >
+                    <span>My team</span>
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                    onClick={() => onAccountAction("/dashboard/settings/integrations")}
+                  >
+                    <span>Integrations</span>
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                    onClick={() => onAccountAction("/dashboard/settings")}
+                  >
+                    <span>Settings</span>
+                  </button>
+                </div>
 
-              <div className="border-t border-border p-1">
-                <Link
-                  href="/logout"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm font-semibold text-red transition-colors hover:bg-red/10"
-                >
-                  <span>Logout</span>
-                </Link>
-              </div>
+                <div className="border-t border-border p-1">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm font-semibold text-red transition-colors hover:bg-red/10"
+                    onClick={() => onAccountAction("/logout")}
+                  >
+                    <span>Logout</span>
+                  </button>
+                </div>
               </div>
             ) : null}
           </div>
