@@ -46,7 +46,7 @@ export default function LoginClient() {
     setLoading(false);
 
     if (user?.email && !user.email_confirmed_at) {
-      router.push(`/verify-email?email=${encodeURIComponent(user.email)}`);
+      router.push(`/verify-email?email=${encodeURIComponent(user.email)}&next=${encodeURIComponent(next)}`);
       return;
     }
 
