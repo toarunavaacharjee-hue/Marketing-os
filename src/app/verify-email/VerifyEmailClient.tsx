@@ -121,7 +121,7 @@ export function VerifyEmailClient({ initialEmail, hasSession, next }: Props) {
 
           <div className="flex flex-col gap-3">
             <Button type="button" disabled={busy} className={primaryCta} onClick={() => void resend()}>
-              {busy ? "Sending…" : "Resend verification email"}
+              {busy ? "Sending..." : "Resend verification email"}
             </Button>
             {hasSession ? (
               <>
@@ -132,7 +132,7 @@ export function VerifyEmailClient({ initialEmail, hasSession, next }: Props) {
                   className="w-full"
                   onClick={() => void refreshAndContinue()}
                 >
-                  I&apos;ve verified — continue
+                  I&apos;ve verified - continue
                 </Button>
                 <button
                   type="button"

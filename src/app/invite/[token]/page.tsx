@@ -16,13 +16,14 @@ export default function InviteAcceptPage() {
 
   useEffect(() => {
     let cancelled = false;
+
     async function run() {
       try {
         const { data } = await supabase.auth.getUser();
         if (!data.user) {
           const next = `/invite/${token}`;
           setStatus("working");
-          setMessage("Redirecting you to sign in…");
+          setMessage("Redirecting you to sign in...");
           router.replace(`/login?next=${encodeURIComponent(next)}`);
           return;
         }
@@ -41,6 +42,7 @@ export default function InviteAcceptPage() {
         };
         if (!res.ok) throw new Error(dataRes.error ?? "Failed to accept invite.");
         if (cancelled) return;
+
         setStatus("ok");
         setMessage("Invite accepted. Redirecting...");
         const destination = dataRes.productId ? "/dashboard" : "/dashboard/settings/team";
@@ -53,6 +55,7 @@ export default function InviteAcceptPage() {
         setMessage(e instanceof Error ? e.message : "Failed to accept invite.");
       }
     }
+
     if (token) void run();
     return () => {
       cancelled = true;
@@ -84,7 +87,7 @@ export default function InviteAcceptPage() {
           ) : null}
           {status === "error" ? (
             <div className="mt-4 rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[#9090b0]">
-              Tip: make sure you&apos;re logged in with the same email the invite was created for.
+              Tip: make sure you are logged in with the same email the invite was created for.
             </div>
           ) : null}
         </div>
