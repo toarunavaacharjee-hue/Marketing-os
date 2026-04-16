@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 type Member = {
   company_id: string;
@@ -530,7 +531,7 @@ export default function TeamSettingsClient({
                     : new Date(i.expires_at).getTime() < Date.now()
                       ? "expired"
                       : "pending";
-                const link = `${typeof window !== "undefined" ? window.location.origin : ""}/invite/${i.token}`;
+                const link = `${getSiteUrl()}/invite/${i.token}`;
                 return (
                   <tr key={i.id} className="border-b border-border last:border-b-0">
                     <td className="py-3 pr-4">{i.email}</td>
