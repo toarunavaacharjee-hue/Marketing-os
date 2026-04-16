@@ -12,7 +12,7 @@ export default function InviteAcceptPage() {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
   const [status, setStatus] = useState<"working" | "ok" | "error">("working");
-  const [message, setMessage] = useState<string>("Accepting invite…");
+  const [message, setMessage] = useState<string>("Accepting invite...");
 
   useEffect(() => {
     let cancelled = false;
@@ -20,8 +20,10 @@ export default function InviteAcceptPage() {
       try {
         const { data } = await supabase.auth.getUser();
         if (!data.user) {
-          setStatus("error");
-          setMessage("Please sign in first, then open the invite link again.");
+          const next = `/invite/${token}`;
+          setStatus("working");
+          setMessage("Redirecting you to sign in�");
+          router.replace(`/login?next=${encodeURIComponent(next)}`);
           return;
         }
 
@@ -30,12 +32,21 @@ export default function InviteAcceptPage() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ token })
         });
-        const dataRes = (await res.json()) as { ok?: boolean; error?: string; code?: string };
+        const dataRes = (await res.json()) as {
+          ok?: boolean;
+          error?: string;
+          code?: string;
+          companyId?: string | null;
+          productId?: string | null;
+        };
         if (!res.ok) throw new Error(dataRes.error ?? "Failed to accept invite.");
         if (cancelled) return;
         setStatus("ok");
-        setMessage("Invite accepted. Redirecting…");
-        setTimeout(() => router.push("/dashboard"), 700);
+        setMessage("Invite accepted. Redirecting...");
+        const destination = dataRes.productId ? "/dashboard" : "/dashboard/settings/team";
+        setTimeout(() => {
+          window.location.href = destination;
+        }, 700);
       } catch (e) {
         if (cancelled) return;
         setStatus("error");

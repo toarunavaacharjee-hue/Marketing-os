@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getEntitlements, normalizePlan } from "@/lib/planEntitlements";
 import { env } from "@/lib/env";
+import { TENANT_COOKIE } from "@/lib/tenant";
 
 type InviteRow = {
   id: string;
@@ -29,12 +30,16 @@ async function getCompanyPlan(companyId: string) {
 
   const { data: owner } = await supabase
     .from("company_members")
-    .select("user_id, role, profiles(plan)")
+    .select("user_id, role")
     .eq("company_id", companyId)
     .in("role", ["owner"])
     .limit(1)
     .maybeSingle();
-  const plan = (owner as any)?.profiles?.plan ?? "starter";
+  const ownerId = (owner as any)?.user_id as string | undefined;
+  if (!ownerId) return "starter";
+
+  const { data: ownerProfile } = await supabase.from("profiles").select("plan").eq("id", ownerId).maybeSingle();
+  const plan = (ownerProfile as any)?.plan ?? "starter";
   return normalizePlan(plan);
 }
 
@@ -188,6 +193,41 @@ export async function PUT(req: Request) {
 
   const { data, error } = await supabase.rpc("accept_company_invite", { invite_token: token });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-  return NextResponse.json(data ?? { ok: true });
+
+  const acceptedCompanyId = companyId ?? null;
+  let productId: string | null = null;
+  if (acceptedCompanyId) {
+    const { data: firstProduct } = await supabase
+      .from("products")
+      .select("id")
+      .eq("company_id", acceptedCompanyId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    productId = ((firstProduct as any)?.id as string | undefined) ?? null;
+  }
+
+  const res = NextResponse.json({
+    ...(typeof data === "object" && data ? data : { ok: true }),
+    companyId: acceptedCompanyId,
+    productId
+  });
+
+  const cookieBase = {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30
+  };
+
+  if (acceptedCompanyId) {
+    res.cookies.set(TENANT_COOKIE.companyId, acceptedCompanyId, cookieBase);
+  }
+  if (productId) {
+    res.cookies.set(TENANT_COOKIE.productId, productId, cookieBase);
+  }
+
+  return res;
 }
 

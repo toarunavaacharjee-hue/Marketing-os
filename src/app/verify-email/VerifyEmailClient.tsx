@@ -12,9 +12,10 @@ const primaryCta =
 type Props = {
   initialEmail: string;
   hasSession: boolean;
+  next: string;
 };
 
-export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
+export function VerifyEmailClient({ initialEmail, hasSession, next }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [email, setEmail] = useState(initialEmail);
@@ -36,7 +37,7 @@ export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
       type: "signup",
       email: trimmed,
       options: {
-        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`
+        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`
       }
     });
     setBusy(false);
@@ -50,7 +51,7 @@ export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
   async function signOut() {
     setBusy(true);
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push(`/login?next=${encodeURIComponent(next)}`);
   }
 
   async function refreshAndContinue() {
@@ -61,8 +62,7 @@ export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
     } = await supabase.auth.getUser();
     setBusy(false);
     if (user?.email_confirmed_at) {
-      // Full navigation ensures the app sees updated auth cookies everywhere.
-      window.location.href = "/dashboard";
+      window.location.href = next;
       return;
     }
     setError("Not verified yet. Open the link in your email, then try again.");
@@ -121,7 +121,7 @@ export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
 
           <div className="flex flex-col gap-3">
             <Button type="button" disabled={busy} className={primaryCta} onClick={() => void resend()}>
-              {busy ? "Sendingâ€¦" : "Resend verification email"}
+              {busy ? "Sending…" : "Resend verification email"}
             </Button>
             {hasSession ? (
               <>
@@ -132,7 +132,7 @@ export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
                   className="w-full"
                   onClick={() => void refreshAndContinue()}
                 >
-                  I&apos;ve verified â€” continue
+                  I&apos;ve verified — continue
                 </Button>
                 <button
                   type="button"
@@ -145,7 +145,7 @@ export function VerifyEmailClient({ initialEmail, hasSession }: Props) {
               </>
             ) : (
               <div className="text-center text-sm text-[#9090b0]">
-                Already verified? <TextLink href="/login">Log in</TextLink>
+                Already verified? <TextLink href={`/login?next=${encodeURIComponent(next)}`}>Log in</TextLink>
               </div>
             )}
           </div>

@@ -25,6 +25,7 @@ export default function SignupClient() {
   const router = useRouter();
   const sp = useSearchParams();
   const plan = normalizePlan(sp.get("plan"));
+  const next = sp.get("next") ?? "/dashboard";
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const signupListPrices = useMemo(() => listPriceForWorkspacePlan(plan), [plan]);
@@ -48,7 +49,7 @@ export default function SignupClient() {
         email,
         password,
         options: {
-          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
           data: { name, company, plan }
         }
       });
@@ -76,12 +77,12 @@ export default function SignupClient() {
       // If email confirmations are disabled, Supabase can immediately create a session.
       // In that case, go straight into the app with a full navigation so server components see cookies.
       if (data.session && data.user?.email_confirmed_at) {
-        window.location.href = "/dashboard";
+        window.location.href = next;
         return;
       }
 
       // Email confirmation is required before /dashboard.
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(`/verify-email?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`);
     } catch (e) {
       setLoading(false);
       setError(e instanceof Error ? e.message : "Sign up failed.");
@@ -171,7 +172,7 @@ export default function SignupClient() {
           </form>
 
           <div className="mt-6 border-t border-white/[0.06] pt-6 text-sm text-[#9090b0]">
-            Already have an account? <TextLink href="/login">Log in</TextLink>
+            Already have an account? <TextLink href={`/login?next=${encodeURIComponent(next)}`}>Log in</TextLink>
           </div>
         </div>
       </div>

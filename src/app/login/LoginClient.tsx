@@ -105,7 +105,7 @@ export default function LoginClient() {
           </form>
 
           <div className="mt-6 border-t border-white/[0.06] pt-6 text-sm text-[#9090b0]">
-            Don&apos;t have an account? <TextLink href="/signup">Create one</TextLink>
+            Don&apos;t have an account? <TextLink href={`/signup?next=${encodeURIComponent(next)}`}>Create one</TextLink>
           </div>
         </div>
       </div>
