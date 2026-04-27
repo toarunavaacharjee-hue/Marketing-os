@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getDefaultEnvironmentIdForSelectedProduct, getSelectedProductId } from "@/lib/productContext";
+import { ensureDefaultEnvironmentIdForSelectedProduct, getSelectedProductId } from "@/lib/productContext";
 import { extractSameOriginLinks, isLikelyDistinctPage } from "@/lib/websiteAssetIngest";
 import { parseJsonObject } from "@/lib/extractJsonObject";
 import {
@@ -189,8 +189,15 @@ export async function POST(req: Request) {
     const productId = await getSelectedProductId();
     if (!productId) return NextResponse.json({ error: "No product selected." }, { status: 400 });
 
-    const env = await getDefaultEnvironmentIdForSelectedProduct();
-    if (!env) return NextResponse.json({ error: "No default environment for selected product." }, { status: 400 });
+    let env: { productId: string; environmentId: string };
+    try {
+      env = await ensureDefaultEnvironmentIdForSelectedProduct();
+    } catch (e) {
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "No default environment for selected product." },
+        { status: 400 }
+      );
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let body: any = {};

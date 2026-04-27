@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
+import { ensureDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { computeProfileCompleteness } from "@/lib/profileCompleteness";
 import { POSITIONING_KEY, POSITIONING_MODULE, type PositioningCanvasValue } from "@/lib/positioningStudio";
 
@@ -12,8 +12,15 @@ export async function GET() {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
-    const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-    if (!ctx) return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    let ctx: { productId: string; environmentId: string };
+    try {
+      ctx = await ensureDefaultEnvironmentIdForSelectedProduct();
+    } catch (e) {
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "No default environment for selected product." },
+        { status: 400 }
+      );
+    }
 
     const { productId, environmentId } = ctx;
 

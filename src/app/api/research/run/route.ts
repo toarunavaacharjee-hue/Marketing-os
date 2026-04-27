@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
+import { ensureDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { runResearchScanJob } from "@/lib/research/runResearchScanJob";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 
@@ -24,8 +24,15 @@ export async function POST() {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
-    const selected = await getDefaultEnvironmentIdForSelectedProduct();
-    if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    let selected: { productId: string; environmentId: string };
+    try {
+      selected = await ensureDefaultEnvironmentIdForSelectedProduct();
+    } catch (e) {
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "No default environment for selected product." },
+        { status: 400 }
+      );
+    }
     const productId = selected.productId;
     const environmentId = selected.environmentId;
 

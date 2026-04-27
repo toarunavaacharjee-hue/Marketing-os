@@ -7,18 +7,18 @@ export async function getSelectedProductId(): Promise<string | null> {
   return cookieStore.get(TENANT_COOKIE.productId)?.value ?? null;
 }
 
-export async function getDefaultEnvironmentIdForSelectedProduct(): Promise<{
+export async function ensureDefaultEnvironmentIdForSelectedProduct(): Promise<{
   productId: string;
   environmentId: string;
-} | null> {
+}> {
   const supabase = createSupabaseServerClient();
   const {
     data: { user }
   } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) throw new Error("Not authenticated.");
 
   const productId = await getSelectedProductId();
-  if (!productId) return null;
+  if (!productId) throw new Error("No product selected.");
 
   const { data: envRow } = await supabase
     .from("product_environments")
@@ -41,7 +41,9 @@ export async function getDefaultEnvironmentIdForSelectedProduct(): Promise<{
 
   const role = String(membership?.role ?? "").toLowerCase();
   const canCreateEnvironment = !membershipError && (role === "owner" || role === "admin");
-  if (!canCreateEnvironment) return null;
+  if (!canCreateEnvironment) {
+    throw new Error("You don't have permission to create environments for this product.");
+  }
 
   const { data: createdEnv, error: createError } = await supabase
     .from("product_environments")
@@ -52,6 +54,26 @@ export async function getDefaultEnvironmentIdForSelectedProduct(): Promise<{
     .select("id")
     .maybeSingle<{ id: string }>();
 
-  if (createError || !createdEnv?.id) return null;
+  if (createError) {
+    throw new Error(
+      createError.message ||
+        "Could not create product environment. If this is an RLS error, apply supabase/product_environments_policies.sql."
+    );
+  }
+  if (!createdEnv?.id) {
+    throw new Error("Could not create product environment.");
+  }
+
   return { productId, environmentId: createdEnv.id };
+}
+
+export async function getDefaultEnvironmentIdForSelectedProduct(): Promise<{
+  productId: string;
+  environmentId: string;
+} | null> {
+  try {
+    return await ensureDefaultEnvironmentIdForSelectedProduct();
+  } catch {
+    return null;
+  }
 }

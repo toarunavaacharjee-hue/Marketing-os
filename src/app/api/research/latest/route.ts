@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
+import { ensureDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 
 export async function GET() {
   try {
@@ -10,8 +10,15 @@ export async function GET() {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
 
-    const selected = await getDefaultEnvironmentIdForSelectedProduct();
-    if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
+    let selected: { productId: string; environmentId: string };
+    try {
+      selected = await ensureDefaultEnvironmentIdForSelectedProduct();
+    } catch (e) {
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "No default environment for selected product." },
+        { status: 400 }
+      );
+    }
     const { productId, environmentId } = selected;
 
     const { data: rows, error } = await supabase
