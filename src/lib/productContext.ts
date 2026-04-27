@@ -12,6 +12,11 @@ export async function getDefaultEnvironmentIdForSelectedProduct(): Promise<{
   environmentId: string;
 } | null> {
   const supabase = createSupabaseServerClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
   const productId = await getSelectedProductId();
   if (!productId) return null;
 
@@ -23,7 +28,30 @@ export async function getDefaultEnvironmentIdForSelectedProduct(): Promise<{
     .limit(1)
     .maybeSingle();
 
-  if (!envRow?.id) return null;
-  return { productId, environmentId: envRow.id as string };
-}
+  if (envRow?.id) {
+    return { productId, environmentId: envRow.id as string };
+  }
 
+  const { data: membership, error: membershipError } = await supabase
+    .from("product_members")
+    .select("role")
+    .eq("product_id", productId)
+    .eq("user_id", user.id)
+    .maybeSingle<{ role: string }>();
+
+  const role = String(membership?.role ?? "").toLowerCase();
+  const canCreateEnvironment = !membershipError && (role === "owner" || role === "admin");
+  if (!canCreateEnvironment) return null;
+
+  const { data: createdEnv, error: createError } = await supabase
+    .from("product_environments")
+    .insert({
+      product_id: productId,
+      name: "Default"
+    })
+    .select("id")
+    .maybeSingle<{ id: string }>();
+
+  if (createError || !createdEnv?.id) return null;
+  return { productId, environmentId: createdEnv.id };
+}
