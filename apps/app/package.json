@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fontsource/dm-sans": "^5.2.7",
+    "@fontsource/inter": "^5.2.6",
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.49.0",
     "@vercel/functions": "^2.2.13",

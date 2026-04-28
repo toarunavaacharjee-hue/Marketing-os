@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── AIMW brand tokens (aimarketingworkbench.com) — use via var() / Tailwind theme ─── */
+:root {
+  --color-primary: #7c4dff;
+  --color-primary-dark: #5e35b1;
+  --color-primary-light: #ede7ff;
+  --color-teal: #00bfa5;
+  --color-amber: #ff8f00;
+  --color-amber-hover: #ffa726;
+  --color-link: #0091ae;
+  --color-error: #f2545b;
+  --color-warning: #ff8f00;
+
+  --bg-page: #f5f8fa;
+  --bg-surface: #ffffff;
+  --bg-hover: #f0f3f8;
+  --bg-sidebar: #2d2d2d;
+  --bg-sidebar-active: #3d3d3d;
+  --bg-onboarding-left: #ebebeb;
+  --border-default: #dfe3eb;
+  --border-input: #cbd6e2;
+  --sidebar-divider: #444444;
+
+  --text-heading: #1a1a1a;
+  --text-body: #33475b;
+  --text-secondary: #516f90;
+  --text-muted: #99acc2;
+  --text-on-dark: #ffffff;
+
+  --btn-neutral-bg: #1a1a1a;
+  --btn-neutral-hover: #333333;
+
+  /* Kanban / pipeline stage pills */
+  --badge-blue-bg: #ebf5ff;
+  --badge-blue-text: #0066cc;
+  --badge-red-bg: #fee9e7;
+  --badge-red-text: #c0392b;
+  --badge-pink-bg: #fce4f3;
+  --badge-pink-text: #ad1a72;
+  --badge-purple-bg: #f0e6ff;
+  --badge-purple-text: #6b21a8;
+  --badge-yellow-bg: #fff8e1;
+  --badge-yellow-text: #b45309;
+  --badge-green-bg: #e6f9f7;
+  --badge-green-text: #00796b;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+  --radius: var(--radius-lg);
+  --radius2: var(--radius-sm);
+
+  --shadow-card: 0 1px 2px rgba(45, 62, 80, 0.06), 0 2px 8px rgba(45, 62, 80, 0.08);
+  --shadow-card-hover: 0 2px 8px rgba(45, 62, 80, 0.1), 0 8px 24px rgba(45, 62, 80, 0.08);
+  --transition-fast: 150ms;
+  --transition-base: 200ms;
+  --ease-out-smooth: cubic-bezier(0.33, 1, 0.68, 1);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.18);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(124, 77, 255, 0.2);
+
+  --font-heading: "DM Sans", "Helvetica Neue", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "DM Sans", "Helvetica Neue", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Inter", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Legacy semantic aliases (existing components use bg-bg, text-text, border-border, …) */
+  --bg: var(--bg-page);
+  --surface: var(--bg-surface);
+  --surface2: var(--bg-hover);
+  --surface3: #e8ecf0;
+  --border: var(--border-default);
+  --border2: var(--border-input);
+  --accent: var(--color-primary);
+  --accent2: var(--color-primary);
+  --accent3: var(--color-link);
+  --green: var(--color-teal);
+  --yellow: var(--color-amber);
+  --red: var(--color-error);
+  --pink: var(--badge-pink-text);
+  --text: var(--text-body);
+  --text2: var(--text-secondary);
+  --text3: var(--text-muted);
+
+  --saas-cta: var(--color-amber);
+  /* Decorative (browser chrome mock — not brand tokens) */
+  --decorative-traffic-red: #ff5f57;
+  --decorative-traffic-yellow: #febc2e;
+  --decorative-traffic-green: #28c840;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(51, 71, 91, 0.28);
+  --scrollbar-thumb-hover: rgba(51, 71, 91, 0.4);
+}
+
+/* Optional dark theme (marketing or legacy screens may set <html class="dark">) */
+html.dark {
+  --bg-page: #08080c;
+  --bg-surface: #141420;
+  --bg-hover: #1a1d26;
+  --bg-sidebar: #141420;
+  --bg-sidebar-active: #222533;
+  --bg: #08080c;
+  --surface: #141420;
+  --surface2: #1a1d26;
+  --surface3: #222533;
+  --border: #2a2e3f;
+  --border2: #353a52;
+  --text-heading: #f0f0f8;
+  --text-body: #f0f0f8;
+  --text-secondary: #9ca3b8;
+  --text-muted: #5c6278;
+  --text: #f0f0f8;
+  --text2: #9ca3b8;
+  --text3: #5c6278;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.18);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.26);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
