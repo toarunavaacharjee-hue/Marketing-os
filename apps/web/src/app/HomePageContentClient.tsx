@@ -252,20 +252,93 @@ export default function HomePageContentClient({
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
             A workflow that stays connected from insight to action
           </h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-4">
-            {[
-              "Understand the market with shared research, customer signals, and competitive context",
-              "Define where to focus with ICPs, segment priorities, and strategic choices",
-              "Build the strategic layer with positioning, messaging, and reusable artifacts",
-              "Execute with continuity across campaigns, GTM plans, and analytics"
-            ].map((s, i) => (
-              <div key={s} className="saas-card saas-card-hover p-5">
-                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-light font-mono text-sm font-semibold text-primary-dark">
-                  {i + 1}
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-text2 sm:text-[15px]">
+            Each step builds on shared workspace context, so the strategy layer stays connected to execution and measurement
+            instead of resetting across tools.
+          </p>
+
+          <div className="mt-8">
+            <div className="grid gap-3 md:hidden">
+              {[
+                ["01", "Research the market", "Capture signals, competitors, and customer context in one workspace."],
+                ["02", "Define the ICP focus", "Prioritize segments and strategic choices you can execute on."],
+                ["03", "Build positioning + messaging", "Create reusable artifacts grounded in shared context."],
+                ["04", "Execute and measure", "Run campaigns and review outcomes without losing the thread."]
+              ].map(([n, t, d]) => (
+                <div key={n} className="saas-card saas-card-hover p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary-light font-mono text-[12px] font-semibold text-primary-dark">
+                      {n}
+                    </div>
+                    <div>
+                      <div className="text-[15px] font-semibold text-text" style={{ fontFamily: "var(--font-heading)" }}>
+                        {t}
+                      </div>
+                      <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm leading-relaxed text-text2">{s}</p>
+              ))}
+            </div>
+
+            <div className="hidden md:block">
+              <div className="saas-card p-6">
+                <div className="relative grid grid-cols-4 gap-4">
+                  {[
+                    ["01", "Research", "Signals, competitors, and customer context"],
+                    ["02", "ICP focus", "Segment priorities and strategic choices"],
+                    ["03", "Strategy layer", "Positioning, messaging, reusable artifacts"],
+                    ["04", "Execution", "Campaigns, planning, analytics, outcomes"]
+                  ].map(([n, t, d], idx) => (
+                    <div key={n} className="relative">
+                      <div className="rounded-xl border border-border bg-surface2 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-light font-mono text-[12px] font-semibold text-primary-dark">
+                            {n}
+                          </div>
+                          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Step</div>
+                        </div>
+                        <div className="mt-3 text-[15px] font-semibold text-text" style={{ fontFamily: "var(--font-heading)" }}>
+                          {t}
+                        </div>
+                        <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
+                      </div>
+
+                      {idx < 3 ? (
+                        <svg
+                          className="pointer-events-none absolute -right-3 top-1/2 hidden h-6 w-6 -translate-y-1/2 text-border lg:block"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden
+                        >
+                          <path d="M5 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <path
+                            d="M13 7l5 5-5 5"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                  {[
+                    ["Continuity by design", "Decisions and context stay connected across modules."],
+                    ["Reusable strategic layer", "Positioning and messaging compound across launches."],
+                    ["Execution stays aligned", "Campaigns and outcomes remain tied to the strategy."]
+                  ].map(([t, d]) => (
+                    <div key={t} className="rounded-xl border border-border bg-surface p-4">
+                      <div className="text-[13px] font-semibold text-text">{t}</div>
+                      <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
@@ -458,3 +531,4 @@ export default function HomePageContentClient({
     </div>
   );
 }
+
