@@ -1,5 +1,9 @@
 import { redirect } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
+
+type VerifiableUser = {
+  email?: string | null;
+  email_confirmed_at?: string | null;
+};
 
 export const VERIFY_EMAIL_PATH = "/verify-email";
 
@@ -7,7 +11,7 @@ export const VERIFY_EMAIL_PATH = "/verify-email";
  * If the user signed up with email/password, Supabase may leave `email_confirmed_at` null
  * until they click the confirmation link. OAuth users typically have this set immediately.
  */
-export function redirectIfUnverifiedEmail(user: User) {
+export function redirectIfUnverifiedEmail(user: VerifiableUser) {
   if (user.email && !user.email_confirmed_at) {
     const q = new URLSearchParams();
     q.set("email", user.email);
