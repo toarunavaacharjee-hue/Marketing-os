@@ -1,0 +1,460 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { MarketingFooter, MarketingHeader } from "@/components/marketing/MarketingChrome";
+import { marketingPlanPrices, MAX_SELF_SERVE_LIST_PRICE_USD } from "@/lib/marketingPricing";
+
+const modules = [
+  ["Command Centre", "Core"],
+  ["Market Research", "Strategy"],
+  ["ICP Segmentation", "Strategy"],
+  ["Positioning Studio", "Strategy"],
+  ["Messaging & Artifacts", "Content"],
+  ["Campaigns", "Execution"],
+  ["GTM Planner", "Execution"],
+  ["Events", "Execution"],
+  ["Content Studio", "Content"],
+  ["Social Media", "Content"],
+  ["Design & Assets", "Content"],
+  ["Presentations", "Content"],
+  ["Website & Pages", "Execution"],
+  ["Analytics", "Insights"],
+  ["Battlecards", "Sales"],
+  ["Sales Intelligence", "Sales"],
+  ["Customer Insights", "Insights"],
+  ["AI Copilot", "Core"]
+] as const;
+
+const faq = [
+  ["How long does setup take?", "Most teams are live in under 2 hours with demo data, then connect real channels module by module."],
+  ["Do I need a technical team?", "No. AI Marketing Workbench is designed for operators and founders first. A developer helps only for deeper integrations."],
+  ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
+  [
+    "Does AI usage have limits?",
+    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes the full module set — tiers differ by products, AI volume, seats, and support."
+  ],
+  ["Can we use our own Anthropic key?", "Yes. Each user can store their API key and run AI features in Copilot and module generators."],
+  ["Is there a contract?", "Starter and Growth are month-to-month. Enterprise can be monthly or annual with custom terms."]
+];
+
+type ContentPreview = {
+  slug: string;
+  title: string;
+  description: string;
+  date: string | null;
+  tags: string[];
+  audience: string | null;
+};
+
+export default function HomePageContentClient({
+  latestPosts,
+  featuredUseCases
+}: {
+  latestPosts: ContentPreview[];
+  featuredUseCases: ContentPreview[];
+}) {
+  const [annual, setAnnual] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
+
+  useEffect(() => {
+    const nodes = Array.from(document.querySelectorAll("[data-reveal]"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, []);
+
+  const pricing = useMemo(
+    () => [
+      {
+        name: "Starter",
+        m: marketingPlanPrices.starter.monthly,
+        a: marketingPlanPrices.starter.annualMonthlyEquivalent,
+        bullets: ["All modules included — full platform", "100 AI workflow runs / month", "1 seat · up to 2 products"]
+      },
+      {
+        name: "Growth",
+        m: marketingPlanPrices.growth.monthly,
+        a: marketingPlanPrices.growth.annualMonthlyEquivalent,
+        bullets: ["Unlimited AI workflow runs", "3 seats · up to 10 products", "All modules", "Priority support"]
+      },
+      {
+        name: "Enterprise",
+        m: marketingPlanPrices.enterprise.monthly,
+        a: marketingPlanPrices.enterprise.annualMonthlyEquivalent,
+        bullets: [
+          "Unlimited AI in-app; BYOK required (AI usage on your Anthropic bill)",
+          "5 seats · up to 30 products · dedicated success",
+          "Higher limits & procurement — talk to sales"
+        ]
+      }
+    ],
+    []
+  );
+
+  return (
+    <div className="min-h-screen bg-page text-text antialiased" style={{ fontFamily: "var(--font-body)" }}>
+      <style jsx global>{`
+        [data-reveal] {
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 600ms ease, transform 600ms ease;
+        }
+        [data-reveal].is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      `}</style>
+
+      <MarketingHeader />
+
+      <div className="pointer-events-none absolute inset-x-0 top-[60px] h-[520px] saas-hero-glow" aria-hidden />
+
+      <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-[5.5rem] sm:px-6">
+        <section data-reveal className="grid gap-10 pt-8 lg:grid-cols-2 lg:items-center lg:gap-12">
+          <div>
+            <div className="saas-pill">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber shadow-[0_0_8px_var(--color-amber)]" />
+              Connected marketing workspace
+            </div>
+            <h1 className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-text md:text-5xl lg:text-[3.25rem]" style={{ fontFamily: "var(--font-heading)" }}>
+              AI Marketing Workbench
+            </h1>
+            <p className="mt-4 max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-text md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
+              The Marketing Operating System for Teams That Need Clarity and Execution
+            </p>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-text2">
+              Run market research, ICP definition, positioning, messaging, campaigns, planning, and analytics in one
+              connected workspace, so your strategy does not get lost across docs, prompts, and disconnected tools.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/contact" className="inline-flex items-center justify-center rounded-lg bg-amber px-5 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card transition hover:bg-amber-hover">
+                Book a Demo
+              </Link>
+              <Link href="/#how-it-works" className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-5 py-3 text-[15px] font-medium text-text transition hover:bg-surface3">
+                See How It Works
+              </Link>
+            </div>
+            <div className="saas-card mt-8 px-5 py-4 text-sm text-text2">
+              Built for product marketing teams, founders, GTM leaders, and multi-product companies that need one system
+              for strategic marketing work.
+            </div>
+          </div>
+          <div className="saas-card saas-card-hover p-6 sm:p-7">
+            <div className="mb-4 flex items-center gap-2 border-b border-border pb-4 font-mono text-[11px] text-text3">
+              <span className="flex gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-red)]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-yellow)]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-green)]" />
+              </span>
+              <span className="ml-2 truncate">workspace - AI Marketing Workbench</span>
+            </div>
+            <div className="rounded-xl border border-border bg-surface2 p-4 shadow-inner">
+              <div className="text-sm font-medium text-text">What the system keeps connected</div>
+              <div className="mt-3 grid gap-2 text-sm text-text2">
+                {[
+                  "Market research, ICPs, and positioning built on shared context",
+                  "Campaigns, planning, and analytics connected to the same workspace",
+                  "Cross-module actions that turn strategy into execution",
+                  "A system teams can reuse instead of rebuilding from scratch"
+                ].map((x) => (
+                  <div key={x} className="rounded-lg border border-border bg-surface px-3 py-2.5 text-[13px] leading-snug">
+                    {x}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link href="/dashboard/work" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
+                  View the workspace
+                </Link>
+                <Link href="/pricing" className="rounded-lg border border-border bg-surface2 px-4 py-2 text-sm font-medium text-text transition hover:bg-surface3">
+                  Explore plans
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" data-reveal className="mt-24">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Platform</div>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+            Most marketing teams do the work. Very few have a system.
+          </h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="saas-card saas-card-hover p-6 md:col-span-2">
+              <div className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wider text-primary">Why teams lose clarity</div>
+              <div className="mt-2 text-lg font-medium text-text">Strategy breaks when context, execution, and ownership drift apart</div>
+              <p className="mt-2 text-sm leading-relaxed text-text2">
+                Research lives in one place. Positioning lives somewhere else. Campaigns, plans, and analytics end up
+                scattered across docs, prompts, and disconnected tools. That makes marketing harder to trust, harder to
+                reuse, and harder to scale.
+              </p>
+              <div className="mt-5 grid grid-cols-3 gap-2 text-center text-[12px]">
+                {["Context gets lost", "Execution drifts", "Teams duplicate work"].map((m) => (
+                  <div key={m} className="rounded-lg border border-border bg-surface2 px-2 py-3 font-mono text-text2">
+                    {m}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {[
+              "Research and decisions reset from zero",
+              "Positioning and campaigns fall out of sync",
+              "Teams recreate the same inputs repeatedly",
+              "Insights live in too many tools",
+              "AI outputs become one-off artifacts"
+            ].map((f) => (
+              <div key={f} className="saas-card saas-card-hover p-5">
+                <div className="text-[15px] font-medium text-text">{f}</div>
+                <p className="mt-2 text-sm leading-relaxed text-text2">
+                  AI Marketing Workbench keeps the thread intact across the work, not just the output.
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="modules" data-reveal className="saas-card mt-24 p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold tracking-tight text-text md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
+            All 18 modules
+          </h2>
+          <div className="mt-5 grid gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {modules.map(([name, cat]) => (
+              <div
+                key={name}
+                className={`rounded-xl border p-3 text-sm transition ${
+                  cat === "Core"
+                    ? "border-accent/25 bg-accent/10"
+                    : cat === "Sales"
+                      ? "border-[rgba(184,255,108,0.35)] bg-[rgba(184,255,108,0.10)]"
+                      : "border-border bg-surface2"
+                } hover:border-accent/25 hover:shadow-sm`}
+              >
+                <div className="font-medium text-text">{name}</div>
+                <div className="mt-1 text-xs text-text2">{cat}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="how-it-works" data-reveal className="mt-24">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Workflow</div>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+            A workflow that stays connected from insight to action
+          </h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-4">
+            {[
+              "Understand the market with shared research, customer signals, and competitive context",
+              "Define where to focus with ICPs, segment priorities, and strategic choices",
+              "Build the strategic layer with positioning, messaging, and reusable artifacts",
+              "Execute with continuity across campaigns, GTM plans, and analytics"
+            ].map((s, i) => (
+              <div key={s} className="saas-card saas-card-hover p-5">
+                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-light font-mono text-sm font-semibold text-primary-dark">
+                  {i + 1}
+                </div>
+                <p className="text-sm leading-relaxed text-text2">{s}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section data-reveal className="mt-24">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Use Cases</div>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+            Built for teams running real marketing systems
+          </h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {featuredUseCases.map((entry) => (
+              <div key={entry.slug} className="saas-card saas-card-hover p-5">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">{entry.audience ?? "Use Case"}</div>
+                <div className="mt-2 text-[15px] font-semibold text-text" style={{ fontFamily: "var(--font-heading)" }}>
+                  <Link href={`/use-cases/${entry.slug}`} className="transition hover:text-primary">
+                    {entry.title}
+                  </Link>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-text2">{entry.description}</p>
+                <div className="mt-4">
+                  <Link href={`/use-cases/${entry.slug}`} className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-3.5 py-2 text-[13px] font-medium text-text transition hover:bg-surface3">
+                    View use case
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="agent-workers" data-reveal className="mt-24">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Automation</div>
+          <div className="mt-2 grid gap-4 lg:grid-cols-2 lg:items-start">
+            <div>
+              <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+                Agent workers that run work in the background
+              </h2>
+              <p className="mt-4 max-w-xl text-lg leading-relaxed text-text2">
+                Not everything should be a button-click. Agent workers run long tasks like research runs, drafts, and
+                structured outputs, so your team stays unblocked while the system does the heavy lifting.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Link href="/docs#agent-workers" className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3">
+                  Read how it works
+                </Link>
+                <Link href="/dashboard/work" className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
+                  View workbench
+                </Link>
+              </div>
+            </div>
+            <div className="saas-card saas-card-hover p-6 sm:p-7">
+              <div className="text-sm font-semibold text-text">What agent workers do</div>
+              <div className="mt-4 grid gap-3">
+                {[
+                  ["Run long workflows", "Queue research and generation tasks without blocking the UI."],
+                  ["Produce structured outputs", "Turn inputs into briefs, segments, battlecards, and action plans."],
+                  ["Keep teams aligned", "Log progress and results so everyone sees what changed and why."],
+                  ["Guardrails by design", "Prefer explicit context; avoid inventing facts and unknown URLs."]
+                ].map(([t, d]) => (
+                  <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+                    <div className="text-[13px] font-semibold text-text">{t}</div>
+                    <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" data-reveal className="mt-24">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Pricing</div>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+                Simple plans
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAnnual((v) => !v)}
+              className="rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3"
+            >
+              {annual ? "Annual billing (~20% off)" : "Monthly billing"}
+            </button>
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {pricing.map((p) => (
+              <div key={p.name} className="saas-card saas-card-hover flex flex-col p-6">
+                <div className="text-base font-semibold text-text">{p.name}</div>
+                <div className="mt-3 flex items-baseline gap-1" style={{ fontFamily: "var(--font-heading)" }}>
+                  <span className="text-4xl font-semibold tracking-tight text-text">${annual ? p.a : p.m}</span>
+                  <span className="text-sm text-text2">/mo</span>
+                </div>
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-text2">
+                  {p.bullets.map((b) => (
+                    <li key={b} className="flex gap-2">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-6 grid gap-2">
+                  <Link href={`/signup?plan=${p.name.toLowerCase()}`} className="inline-flex w-full items-center justify-center rounded-lg bg-amber px-4 py-3 text-sm font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover">
+                    Choose {p.name}
+                  </Link>
+                  <Link href="/pricing" className="inline-flex w-full items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-3 text-sm font-medium text-text hover:bg-surface3">
+                    Compare plans
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-text2">
+            {`List prices top out at $${MAX_SELF_SERVE_LIST_PRICE_USD}/mo on this page. Beyond that — `}
+            <Link href="/contact" className="font-medium text-link hover:underline">
+              talk to sales
+            </Link>
+            .
+          </p>
+        </section>
+
+        <section data-reveal className="mt-24">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Resources</div>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+            Latest from the blog
+          </h2>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {latestPosts.map((p) => (
+              <div key={p.slug} className="saas-card saas-card-hover p-5">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">{p.date ?? "Latest"}</div>
+                <div className="mt-2 text-[15px] font-semibold text-text" style={{ fontFamily: "var(--font-heading)" }}>
+                  <Link href={`/blog/${p.slug}`} className="transition hover:text-primary">
+                    {p.title}
+                  </Link>
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-text2">{p.description}</p>
+                <div className="mt-4">
+                  <Link href={`/blog/${p.slug}`} className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-3.5 py-2 text-[13px] font-medium text-text transition hover:bg-surface3">
+                    Read post
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Link href="/blog" className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
+              View all posts
+            </Link>
+            <Link href="/use-cases" className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3">
+              Explore use cases
+            </Link>
+          </div>
+        </section>
+
+        <section id="faq" data-reveal className="mt-24">
+          <h2 className="text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+            FAQ
+          </h2>
+          <div className="mt-6 space-y-2">
+            {faq.map(([q, a], idx) => (
+              <div key={q} className="overflow-hidden rounded-xl border border-border bg-surface">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq((v) => (v === idx ? -1 : idx))}
+                  className="flex w-full items-center justify-between px-4 py-4 text-left text-[15px] font-medium text-text transition hover:bg-surface2"
+                >
+                  <span>{q}</span>
+                  <span className="ml-2 font-mono text-text2">{openFaq === idx ? "−" : "+"}</span>
+                </button>
+                {openFaq === idx ? <div className="border-t border-border px-4 pb-4 pt-1 text-sm leading-relaxed text-text2">{a}</div> : null}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section data-reveal className="saas-card mt-24 border-primary/25 bg-gradient-to-br from-primary/10 via-surface to-surface p-8 text-center sm:p-10">
+          <h3 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+            Build a marketing system that compounds
+          </h3>
+          <p className="mt-3 text-text2">
+            Bring your research, ICPs, positioning, planning, and execution into one connected workspace built for modern marketing teams.
+          </p>
+          <div className="mt-6">
+            <Link href="/contact" className="inline-flex rounded-lg bg-amber px-6 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover">
+              Book a Demo
+            </Link>
+          </div>
+        </section>
+      </main>
+
+      <MarketingFooter />
+    </div>
+  );
+}

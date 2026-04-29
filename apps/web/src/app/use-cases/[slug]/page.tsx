@@ -6,30 +6,30 @@ import { Markdown } from "@/lib/Markdown";
 import { getAllContent, getContentEntry } from "@/lib/content";
 
 export async function generateStaticParams() {
-  const posts = await getAllContent("blog");
-  return posts.map((p) => ({ slug: p.slug }));
+  const useCases = await getAllContent("use-cases");
+  return useCases.map((entry) => ({ slug: entry.slug }));
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await getContentEntry("blog", params.slug);
-  if (!post) return {};
+  const useCase = await getContentEntry("use-cases", params.slug);
+  if (!useCase) return {};
 
   return {
-    title: `${post.title} | AI Marketing Workbench`,
-    description: post.description,
-    alternates: { canonical: `/blog/${post.slug}` },
+    title: `${useCase.title} | AI Marketing Workbench`,
+    description: useCase.description,
+    alternates: { canonical: `/use-cases/${useCase.slug}` },
     openGraph: {
-      title: post.title,
-      description: post.description,
+      title: useCase.title,
+      description: useCase.description,
       type: "article",
-      url: `/blog/${post.slug}`
+      url: `/use-cases/${useCase.slug}`
     }
   };
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = await getContentEntry("blog", params.slug);
-  if (!post) notFound();
+export default async function UseCasePage({ params }: { params: { slug: string } }) {
+  const useCase = await getContentEntry("use-cases", params.slug);
+  if (!useCase) notFound();
 
   return (
     <div className="min-h-screen bg-bg text-text antialiased" style={{ fontFamily: "var(--font-body)" }}>
@@ -39,54 +39,58 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
       <main className="relative mx-auto max-w-3xl px-4 pb-24 pt-[5.5rem] sm:px-6">
         <div className="mt-10">
-          <Link href="/blog" className="text-sm text-text2 transition hover:text-text">
-            ← Back to Blog
+          <Link href="/use-cases" className="text-sm text-text2 transition hover:text-text">
+            ← Back to Use Cases
           </Link>
         </div>
 
         <article className="mt-6 saas-card p-6 sm:p-8">
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-text3">
-            <span>{post.date}</span>
-            <span className="text-text3">•</span>
-            <span className="text-[#c4b8ff]">PMM / GTM</span>
+            <span>Use Case</span>
+            {useCase.audience ? (
+              <>
+                <span className="text-text3">•</span>
+                <span className="text-[#c4b8ff]">{useCase.audience}</span>
+              </>
+            ) : null}
           </div>
           <h1
             className="mt-3 text-3xl font-semibold leading-[1.12] tracking-tight text-text sm:text-4xl"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            {post.title}
+            {useCase.title}
           </h1>
-          <p className="mt-4 text-sm leading-relaxed text-text2 sm:text-[15px]">{post.description}</p>
+          <p className="mt-4 text-sm leading-relaxed text-text2 sm:text-[15px]">{useCase.description}</p>
           <div className="mt-5 flex flex-wrap gap-2">
-            {post.tags.map((t) => (
-              <span key={t} className="rounded-full border border-border bg-surface2 px-2.5 py-1 text-[11px] text-text2">
-                {t}
+            {useCase.tags.map((tag) => (
+              <span key={tag} className="rounded-full border border-border bg-surface2 px-2.5 py-1 text-[11px] text-text2">
+                {tag}
               </span>
             ))}
           </div>
 
           <div className="mt-8 border-t border-border pt-6">
-            <Markdown content={post.content} />
+            <Markdown content={useCase.content} />
           </div>
         </article>
 
         <section className="mt-6 saas-card p-6">
-          <div className="text-sm font-semibold text-text">Want to implement this inside the product?</div>
+          <div className="text-sm font-semibold text-text">Want to see this workflow in action?</div>
           <p className="mt-2 text-sm leading-relaxed text-text2">
-            AI Marketing Workbench connects ICP → Positioning → Messaging → Campaigns, then tracks outcomes weekly.
+            AI Marketing Workbench connects research, ICPs, positioning, campaigns, and analytics in one workspace.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
-              href="/signup?plan=starter"
+              href={useCase.heroCtaHref ?? "/contact"}
               className="inline-flex items-center justify-center rounded-lg bg-[#b8ff6c] px-4 py-2 text-[13px] font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 transition hover:bg-[#c8ff7c]"
             >
-              Start free
+              {useCase.heroCtaLabel ?? "Book a Demo"}
             </Link>
             <Link
-              href="/pricing"
+              href="/blog"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
             >
-              See pricing
+              Read the blog
             </Link>
           </div>
         </section>

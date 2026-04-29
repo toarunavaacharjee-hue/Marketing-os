@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import HomePageClient from "@/app/HomePageClient";
+import HomePageContentClient from "@/app/HomePageContentClient";
+import { getFeaturedUseCases, getLatestBlogPosts } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Marketing OS | Connected Marketing Operating System",
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
   }
 };
 
-export default function HomePage() {
-  return <HomePageClient />;
+export default async function HomePage() {
+  const [latestPosts, featuredUseCases] = await Promise.all([getLatestBlogPosts(3), getFeaturedUseCases(3)]);
+
+  return <HomePageContentClient latestPosts={latestPosts} featuredUseCases={featuredUseCases} />;
 }
 

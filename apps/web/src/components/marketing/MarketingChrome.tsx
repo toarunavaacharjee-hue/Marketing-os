@@ -3,6 +3,7 @@ import Link from "next/link";
 const nav = [
   { href: "/#features", label: "Features" },
   { href: "/#how-it-works", label: "How it works" },
+  { href: "/use-cases", label: "Use Cases" },
   { href: "/#modules", label: "Modules" },
   { href: "/blog", label: "Blog" },
   { href: "/pricing", label: "Pricing" },
@@ -81,6 +82,11 @@ export function MarketingFooter() {
               <li>
                 <Link href="/#modules" className="transition hover:text-text">
                   Modules
+                </Link>
+              </li>
+              <li>
+                <Link href="/use-cases" className="transition hover:text-text">
+                  Use Cases
                 </Link>
               </li>
               <li>
