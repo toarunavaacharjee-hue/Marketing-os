@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import HomePageClient from "@/app/HomePageClient";
 
 export const metadata: Metadata = {
-  title: "AI Marketing Workbench | PMM & GTM Operating System",
+  title: "Marketing OS | Connected Marketing Operating System",
   description:
-    "The operating system for product marketing and GTM teams. Connect ICP, positioning, messaging, campaigns, and measurement loops—then ship weekly workflows.",
+    "The marketing operating system for teams that need clarity and execution. Run research, ICPs, positioning, messaging, campaigns, planning, and analytics in one connected workspace.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "AI Marketing Workbench",
-    description: "Connect ICP, positioning, messaging, campaigns, and measurement loops—then ship weekly workflows.",
+    title: "Marketing OS",
+    description:
+      "Run research, ICP definition, positioning, messaging, campaigns, planning, and analytics in one connected workspace.",
     type: "website",
     url: "/"
   }

@@ -29,7 +29,7 @@ const modules = [
 
 const faq = [
   ["How long does setup take?", "Most teams are live in under 2 hours with demo data, then connect real channels module by module."],
-  ["Do I need a technical team?", "No. AI Marketing Workbench is designed for operators and founders first. A developer helps only for deeper integrations."],
+  ["Do I need a technical team?", "No. Marketing OS is designed for operators and founders first. A developer helps only for deeper integrations."],
   ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
   [
     "Does AI usage have limits?",
@@ -122,52 +122,35 @@ export default function HomePageClient() {
           <div>
             <div className="saas-pill">
               <span className="h-1.5 w-1.5 rounded-full bg-amber shadow-[0_0_8px_var(--color-amber)]" />
-              PMM &amp; GTM platform
+              Connected marketing workspace
             </div>
             <h1
               className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-text md:text-5xl lg:text-[3.25rem]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              AI Marketing Workbench
+              The Marketing Operating System for Teams That Need Clarity and Execution
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-text2">
-              The operating system for product marketing and GTM teams. Connect ICP, positioning, messaging, campaigns, and
-              measurement loops — then turn them into repeatable weekly workflows.
+              Run market research, ICP definition, positioning, messaging, campaigns, planning, and analytics in one
+              connected workspace, so your strategy does not get lost across docs, prompts, and disconnected tools.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/signup?plan=starter"
+                href="/contact"
                 className="inline-flex items-center justify-center rounded-lg bg-amber px-5 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card transition hover:bg-amber-hover"
               >
-                Start free
+                Book a Demo
               </Link>
               <Link
-                href="/pricing"
+                href="/#how-it-works"
                 className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-5 py-3 text-[15px] font-medium text-text transition hover:bg-surface3"
               >
-                See pricing
-              </Link>
-              <Link
-                href="/blog"
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-5 py-3 text-[15px] font-medium text-text2 transition hover:bg-surface3 hover:text-text"
-              >
-                Read the blog
+                See How It Works
               </Link>
             </div>
-            <div className="saas-card mt-8 flex flex-wrap items-center gap-5 px-5 py-4 text-sm">
-              <div className="flex -space-x-2">
-                <div className="h-9 w-9 rounded-full border-2 border-border bg-gradient-to-br from-primary to-primary-dark" />
-                <div className="h-9 w-9 rounded-full border-2 border-border bg-amber" />
-                <div className="h-9 w-9 rounded-full border-2 border-border bg-surface3" />
-              </div>
-              <div className="h-8 w-px bg-border" />
-              <div className="text-text2">
-                Trusted by <span className="font-medium text-text">120+ growth teams</span>
-              </div>
-              <div className="hidden h-8 w-px bg-border sm:block" />
-              <div className="text-text2">
-                Avg setup <span className="font-mono text-text">1.8h</span>
-              </div>
+            <div className="saas-card mt-8 px-5 py-4 text-sm text-text2">
+              Built for product marketing teams, founders, GTM leaders, and multi-product companies that need one system
+              for strategic marketing work.
             </div>
           </div>
           <div className="saas-card saas-card-hover p-6 sm:p-7">
@@ -177,16 +160,16 @@ export default function HomePageClient() {
                 <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-yellow)]" />
                 <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-green)]" />
               </span>
-              <span className="ml-2 truncate">app — Marketing Workbench</span>
+              <span className="ml-2 truncate">workspace - Marketing OS</span>
             </div>
             <div className="rounded-xl border border-border bg-surface2 p-4 shadow-inner">
-              <div className="text-sm font-medium text-text">What you get on day 1</div>
+              <div className="text-sm font-medium text-text">What the system keeps connected</div>
               <div className="mt-3 grid gap-2 text-sm text-text2">
                 {[
-                  "Templates to seed launch plans and event playbooks",
-                  "Marketing Workbench: your unified cross-module view",
-                  "AI actions: Segment → Messaging draft, Positioning → Pitch battlecard",
-                  "Workflow run logs + updates so teams stay aligned"
+                  "Market research, ICPs, and positioning built on shared context",
+                  "Campaigns, planning, and analytics connected to the same workspace",
+                  "Cross-module actions that turn strategy into execution",
+                  "A system teams can reuse instead of rebuilding from scratch"
                 ].map((x) => (
                   <div key={x} className="rounded-lg border border-border bg-surface px-3 py-2.5 text-[13px] leading-snug">
                     {x}
@@ -198,13 +181,13 @@ export default function HomePageClient() {
                   href="/dashboard/work"
                   className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
                 >
-                  Open Marketing Workbench
+                  View the workspace
                 </Link>
                 <Link
-                  href="/dashboard/getting-started"
+                  href="/pricing"
                   className="rounded-lg border border-border bg-surface2 px-4 py-2 text-sm font-medium text-text transition hover:bg-surface3"
                 >
-                  Apply templates
+                  Explore plans
                 </Link>
               </div>
             </div>
@@ -214,17 +197,19 @@ export default function HomePageClient() {
         <section id="features" data-reveal className="mt-24">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Platform</div>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
-            Built for modern GTM teams
+            Most marketing teams do the work. Very few have a system.
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             <div className="saas-card saas-card-hover p-6 md:col-span-2">
-              <div className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wider text-primary">AI Copilot</div>
-              <div className="mt-2 text-lg font-medium text-text">Strategic answers, shipped as actions</div>
+              <div className="flex items-center gap-2 text-[13px] font-medium uppercase tracking-wider text-primary">Why teams lose clarity</div>
+              <div className="mt-2 text-lg font-medium text-text">Strategy breaks when context, execution, and ownership drift apart</div>
               <p className="mt-2 text-sm leading-relaxed text-text2">
-                Ask strategic questions, get tactical action plans, and run follow-ups instantly.
+                Research lives in one place. Positioning lives somewhere else. Campaigns, plans, and analytics end up
+                scattered across docs, prompts, and disconnected tools. That makes marketing harder to trust, harder to
+                reuse, and harder to scale.
               </p>
               <div className="mt-5 grid grid-cols-3 gap-2 text-center text-[12px]">
-                {["Response ~8s", "Weekly plans: 24", "Success: 96%"].map((m) => (
+                {["Context gets lost", "Execution drifts", "Teams duplicate work"].map((m) => (
                   <div key={m} className="rounded-lg border border-border bg-surface2 px-2 py-3 font-mono text-text2">
                     {m}
                   </div>
@@ -232,16 +217,16 @@ export default function HomePageClient() {
               </div>
             </div>
             {[
-              "Unified analytics",
-              "Battlecards & objection handling",
-              "Campaign workflow orchestration",
-              "Content + social engine",
-              "Customer insight loops"
+              "Research and decisions reset from zero",
+              "Positioning and campaigns fall out of sync",
+              "Teams recreate the same inputs repeatedly",
+              "Insights live in too many tools",
+              "AI outputs become one-off artifacts"
             ].map((f) => (
               <div key={f} className="saas-card saas-card-hover p-5">
                 <div className="text-[15px] font-medium text-text">{f}</div>
                 <p className="mt-2 text-sm leading-relaxed text-text2">
-                  Built for high-velocity GTM teams that need clarity and execution speed.
+                  Marketing OS keeps the thread intact across the work, not just the output.
                 </p>
               </div>
             ))}
@@ -274,14 +259,14 @@ export default function HomePageClient() {
         <section id="how-it-works" data-reveal className="mt-24">
           <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Workflow</div>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
-            How it works
+            A workflow that stays connected from insight to action
           </h2>
           <div className="mt-8 grid gap-4 md:grid-cols-4">
             {[
-              "Define ICP segments and priorities",
-              "Generate and refine positioning + messaging",
-              "Seed plans using templates + workflows",
-              "Track work + outcomes weekly"
+              "Understand the market with shared research, customer signals, and competitive context",
+              "Define where to focus with ICPs, segment priorities, and strategic choices",
+              "Build the strategic layer with positioning, messaging, and reusable artifacts",
+              "Execute with continuity across campaigns, GTM plans, and analytics"
             ].map((s, i) => (
               <div key={s} className="saas-card saas-card-hover p-5">
                 <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-light font-mono text-sm font-semibold text-primary-dark">
@@ -460,15 +445,17 @@ export default function HomePageClient() {
 
         <section data-reveal className="saas-card mt-24 border-primary/25 bg-gradient-to-br from-primary/10 via-surface to-surface p-8 text-center sm:p-10">
           <h3 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
-            Ready to run smarter marketing?
+            Build a marketing system that compounds
           </h3>
-          <p className="mt-3 text-text2">Start free and launch your first weekly operating loop today.</p>
+          <p className="mt-3 text-text2">
+            Bring your research, ICPs, positioning, planning, and execution into one connected workspace built for modern marketing teams.
+          </p>
           <div className="mt-6">
             <Link
-              href="/signup?plan=starter"
+              href="/contact"
               className="inline-flex rounded-lg bg-amber px-6 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover"
             >
-              Start free trial
+              Book a Demo
             </Link>
           </div>
         </section>
