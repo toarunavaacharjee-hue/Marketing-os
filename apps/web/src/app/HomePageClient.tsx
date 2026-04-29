@@ -29,7 +29,7 @@ const modules = [
 
 const faq = [
   ["How long does setup take?", "Most teams are live in under 2 hours with demo data, then connect real channels module by module."],
-  ["Do I need a technical team?", "No. Marketing OS is designed for operators and founders first. A developer helps only for deeper integrations."],
+  ["Do I need a technical team?", "No. AI Marketing Workbench is designed for operators and founders first. A developer helps only for deeper integrations."],
   ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
   [
     "Does AI usage have limits?",
@@ -128,8 +128,14 @@ export default function HomePageClient() {
               className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-text md:text-5xl lg:text-[3.25rem]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
-              The Marketing Operating System for Teams That Need Clarity and Execution
+              AI Marketing Workbench
             </h1>
+            <p
+              className="mt-4 max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-text md:text-3xl"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              The Marketing Operating System for Teams That Need Clarity and Execution
+            </p>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-text2">
               Run market research, ICP definition, positioning, messaging, campaigns, planning, and analytics in one
               connected workspace, so your strategy does not get lost across docs, prompts, and disconnected tools.
@@ -160,7 +166,7 @@ export default function HomePageClient() {
                 <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-yellow)]" />
                 <span className="h-2.5 w-2.5 rounded-full bg-[var(--decorative-traffic-green)]" />
               </span>
-              <span className="ml-2 truncate">workspace - Marketing OS</span>
+              <span className="ml-2 truncate">workspace - AI Marketing Workbench</span>
             </div>
             <div className="rounded-xl border border-border bg-surface2 p-4 shadow-inner">
               <div className="text-sm font-medium text-text">What the system keeps connected</div>
@@ -226,7 +232,7 @@ export default function HomePageClient() {
               <div key={f} className="saas-card saas-card-hover p-5">
                 <div className="text-[15px] font-medium text-text">{f}</div>
                 <p className="mt-2 text-sm leading-relaxed text-text2">
-                  Marketing OS keeps the thread intact across the work, not just the output.
+                  AI Marketing Workbench keeps the thread intact across the work, not just the output.
                 </p>
               </div>
             ))}
