@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { APP_URL } from "@/lib/appUrl";
 
 const nav = [
   { href: "/#features", label: "Features" },
@@ -43,13 +44,13 @@ export function MarketingHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <Link
-            href="/dashboard"
+            href={`${APP_URL}/dashboard`}
             className="hidden rounded-lg border border-border bg-surface2 px-3 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3 sm:inline-flex"
           >
             View demo
           </Link>
           <Link
-            href="/signup?plan=starter"
+            href={`${APP_URL}/signup?plan=starter`}
             className="rounded-sm bg-amber px-3.5 py-2 text-[13px] font-semibold text-heading shadow-card transition hover:bg-amber-hover"
           >
             Start free
@@ -150,3 +151,4 @@ export function MarketingFooter() {
     </footer>
   );
 }
+

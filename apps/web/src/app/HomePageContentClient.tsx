@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { MarketingFooter, MarketingHeader } from "@/components/marketing/MarketingChrome";
+import { AgentFlowShowcase } from "@/components/marketing/AgentFlowShowcase";
+import { APP_URL } from "@/lib/appUrl";
 import { marketingPlanPrices, MAX_SELF_SERVE_LIST_PRICE_USD } from "@/lib/marketingPricing";
 
 const modules = [
@@ -174,7 +176,7 @@ export default function HomePageContentClient({
                 ))}
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Link href="/dashboard/work" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
+                <Link href={`${APP_URL}/dashboard`} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
                   View the workspace
                 </Link>
                 <Link href="/pricing" className="rounded-lg border border-border bg-surface2 px-4 py-2 text-sm font-medium text-text transition hover:bg-surface3">
@@ -406,6 +408,10 @@ export default function HomePageContentClient({
           </div>
         </section>
 
+        <section data-reveal className="mt-10">
+          <AgentFlowShowcase />
+        </section>
+
         <section id="pricing" data-reveal className="mt-24">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -439,7 +445,7 @@ export default function HomePageContentClient({
                   ))}
                 </ul>
                 <div className="mt-6 grid gap-2">
-                  <Link href={`/signup?plan=${p.name.toLowerCase()}`} className="inline-flex w-full items-center justify-center rounded-lg bg-amber px-4 py-3 text-sm font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover">
+                  <Link href={`${APP_URL}/signup?plan=${p.name.toLowerCase()}`} className="inline-flex w-full items-center justify-center rounded-lg bg-amber px-4 py-3 text-sm font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover">
                     Choose {p.name}
                   </Link>
                   <Link href="/pricing" className="inline-flex w-full items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-3 text-sm font-medium text-text hover:bg-surface3">
@@ -531,4 +537,5 @@ export default function HomePageContentClient({
     </div>
   );
 }
+
 
