@@ -37,13 +37,15 @@ const NAV: NavSection[] = [
       { label: "Market Research", slug: "market-research", icon: "🔭", badge: "NEW" },
       { label: "ICP Segmentation", slug: "icp-segmentation", icon: "🎯", badge: "NEW" },
       { label: "Positioning Studio", slug: "positioning-studio", icon: "💎", badge: "NEW" },
-      { label: "Messaging & Artifacts", slug: "messaging-artifacts", icon: "✨", badge: "NEW" }
+      { label: "Messaging & Artifacts", slug: "messaging-artifacts", icon: "✨", badge: "NEW" },
+      { label: "Artifact Library", slug: "artifacts", icon: "📚", badge: "NEW" }
     ]
   },
   {
     label: "Planning",
     items: [
       { label: "Marketing Workbench", slug: "work", icon: "🗂️" },
+      { label: "Launch Playbook", slug: "launch-playbook", icon: "🧩", badge: "NEW" },
       { label: "Campaigns", slug: "campaigns", icon: "📋" },
       { label: "GTM Planner", slug: "gtm-planner", icon: "🚀" },
       { label: "Events", slug: "events", icon: "📅" }
