@@ -147,6 +147,12 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
           >
             Artifact Library
           </Link>
+          <Link
+            href={`/dashboard/launch-playbook/${kind}/final`}
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+          >
+            Final pack
+          </Link>
           <button
             type="button"
             onClick={runAgents}
@@ -251,4 +257,6 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
     </div>
   );
 }
+
+
 
