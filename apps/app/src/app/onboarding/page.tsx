@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 function BrandMark({ className = "" }: { className?: string }) {
   return (
@@ -14,6 +14,28 @@ function BrandMark({ className = "" }: { className?: string }) {
   );
 }
 
+function normalizeWebsiteInput(raw: string): string | null {
+  const t = raw.trim();
+  if (!t) return null;
+  if (t.startsWith("http://") || t.startsWith("https://")) return t;
+  return `https://${t}`;
+}
+
+function isValidProductWebsite(raw: string): boolean {
+  const n = normalizeWebsiteInput(raw);
+  if (!n) return false;
+  try {
+    const u = new URL(n);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    const h = u.hostname;
+    if (!h) return false;
+    if (h === "localhost") return true;
+    return h.includes(".") || /^[\d.]+$/.test(h);
+  } catch {
+    return false;
+  }
+}
+
 export default function OnboardingPage() {
   const [companyName, setCompanyName] = useState("");
   const [productName, setProductName] = useState("");
@@ -21,6 +43,8 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+
+  const websiteOk = useMemo(() => isValidProductWebsite(websiteUrl), [websiteUrl]);
 
   async function create() {
     setLoading(true);
@@ -31,7 +55,11 @@ export default function OnboardingPage() {
       const bootstrapRes = await fetch("/api/onboarding/create", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ companyName, productName, websiteUrl })
+        body: JSON.stringify({
+          companyName,
+          productName,
+          websiteUrl: normalizeWebsiteInput(websiteUrl) ?? websiteUrl.trim()
+        })
       });
       const bootstrapData = (await bootstrapRes.json().catch(() => null)) as
         | {
@@ -71,37 +99,33 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Auto-fill ICP + initial segment drafts from the product website URL (best-effort).
-      // Important: Never block onboarding on this request. Time out quickly and continue.
-      if (websiteUrl.trim()) {
-        const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), 12_000);
-        try {
-          setStatus("Generating your first drafts from your website (optional)…");
-          const autoRes = await fetch("/api/product/profile/generate-from-website", {
-            method: "POST",
-            headers: {
-              "content-type": "application/json"
-            },
-            body: JSON.stringify({}),
-            signal: controller.signal
-          });
-          if (!autoRes.ok) {
-            const data = (await autoRes.json().catch(() => null)) as { error?: string } | null;
-            const msg = data?.error ?? (await autoRes.text());
-            window.localStorage.setItem("marketing_os_autofill_error", msg || "Auto-fill failed.");
-          }
-        } catch (e) {
-          const msg =
-            e instanceof DOMException && e.name === "AbortError"
-              ? "Auto-fill timed out."
-              : e instanceof Error
-                ? e.message
-                : "Auto-fill failed.";
-          window.localStorage.setItem("marketing_os_autofill_error", msg);
-        } finally {
-          window.clearTimeout(timeout);
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 12_000);
+      try {
+        setStatus("Generating your first drafts from your website…");
+        const autoRes = await fetch("/api/product/profile/generate-from-website", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({}),
+          signal: controller.signal
+        });
+        if (!autoRes.ok) {
+          const data = (await autoRes.json().catch(() => null)) as { error?: string } | null;
+          const msg = data?.error ?? (await autoRes.text());
+          window.localStorage.setItem("marketing_os_autofill_error", msg || "Auto-fill failed.");
         }
+      } catch (e) {
+        const msg =
+          e instanceof DOMException && e.name === "AbortError"
+            ? "Auto-fill timed out."
+            : e instanceof Error
+              ? e.message
+              : "Auto-fill failed.";
+        window.localStorage.setItem("marketing_os_autofill_error", msg);
+      } finally {
+        window.clearTimeout(timeout);
       }
 
       setStatus("Opening your workspace…");
@@ -151,14 +175,24 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text3">Product website (optional)</div>
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text3">Product website</div>
               <input
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
                 disabled={loading}
-                className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus disabled:cursor-not-allowed"
-                placeholder="https://"
+                className={`w-full rounded-sm border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:outline-none focus:shadow-focus disabled:cursor-not-allowed ${
+                  websiteUrl.trim() && !websiteOk
+                    ? "border-red/40 focus:border-red/55 focus:shadow-none"
+                    : "border-input-border focus:border-primary focus:shadow-focus"
+                }`}
+                placeholder="https://your-product.com"
+                inputMode="url"
+                autoComplete="url"
               />
+              <p className="mt-1.5 text-xs leading-relaxed text-text3">
+                Required so we can crawl your public site and auto-fill product context (onboarding continues even if
+                generation fails).
+              </p>
             </div>
 
             {error ? (
@@ -168,7 +202,7 @@ export default function OnboardingPage() {
             ) : null}
 
             <button
-              disabled={loading || !companyName || !productName}
+              disabled={loading || !companyName.trim() || !productName.trim() || !websiteOk}
               onClick={create}
               className="w-full rounded-sm bg-[var(--btn-neutral-bg)] px-4 py-3 text-sm font-semibold text-on-dark transition-[background-color,box-shadow,transform] duration-200 ease-aimw-out hover:bg-[var(--btn-neutral-hover)] active:scale-[0.99] disabled:opacity-60 motion-reduce:active:scale-100"
             >
@@ -198,4 +232,3 @@ export default function OnboardingPage() {
     </div>
   );
 }
-

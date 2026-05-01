@@ -13,6 +13,15 @@ function normalizeUrl(u: string): string | null {
   return `https://${raw}`;
 }
 
+function isProbablyValidHttpUrl(normalized: string): boolean {
+  try {
+    const u = new URL(normalized);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = createSupabaseServerClient();
@@ -33,6 +42,13 @@ export async function POST(req: Request) {
 
     if (!companyName || !productName) {
       return NextResponse.json({ error: "Workspace name and product name are required." }, { status: 400 });
+    }
+
+    if (!websiteUrl || !isProbablyValidHttpUrl(websiteUrl)) {
+      return NextResponse.json(
+        { error: "A valid product website URL (https) is required for auto-fill and context." },
+        { status: 400 }
+      );
     }
 
     // Prefer service role to avoid RLS edge cases during bootstrap,

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import SignupClient from "@/app/signup/SignupClient";
+import SignupEnhanced from "@/app/signup/SignupEnhanced";
 
 export default function SignupPage() {
   return (
@@ -10,7 +10,7 @@ export default function SignupPage() {
         </div>
       }
     >
-      <SignupClient />
+      <SignupEnhanced />
     </Suspense>
   );
 }
