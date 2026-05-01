@@ -277,3 +277,108 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
+
+/* ─── Marketing site modern utilities (bento / gradient borders) ─── */
+.saas-section {
+  position: relative;
+  padding-top: 5.5rem;
+}
+
+@media (min-width: 640px) {
+  .saas-section {
+    padding-top: 6.5rem;
+  }
+}
+
+.saas-subtle-ring {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+    0 0 0 1px rgba(223, 227, 235, 0.9);
+}
+
+html.dark .saas-subtle-ring {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 0 0 1px rgba(42, 46, 63, 0.95);
+}
+
+.saas-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(14px);
+}
+
+html.dark .saas-glass {
+  background: rgba(20, 20, 32, 0.65);
+}
+
+.saas-gradient-border {
+  position: relative;
+  border-radius: calc(var(--radius-lg) + 2px);
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.35), rgba(0, 145, 174, 0.18), rgba(255, 143, 0, 0.2));
+}
+
+.saas-gradient-border > .saas-gradient-inner {
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid rgba(223, 227, 235, 0.75);
+}
+
+html.dark .saas-gradient-border > .saas-gradient-inner {
+  border-color: rgba(42, 46, 63, 0.9);
+}
+
+.saas-bento {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .saas-bento {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+.saas-bento-card {
+  border-radius: 18px;
+  border: 1px solid rgba(223, 227, 235, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.7));
+  box-shadow: var(--shadow-card);
+}
+
+html.dark .saas-bento-card {
+  border-color: rgba(42, 46, 63, 0.9);
+  background: linear-gradient(180deg, rgba(20, 20, 32, 0.92), rgba(20, 20, 32, 0.72));
+}
+
+.saas-bento-card-hover {
+  transition:
+    transform var(--transition-fast) var(--ease-out-smooth),
+    box-shadow var(--transition-base) var(--ease-out-smooth),
+    border-color var(--transition-base) var(--ease-out-smooth);
+}
+
+.saas-bento-card-hover:hover {
+  transform: translateY(-1px);
+  border-color: rgba(124, 77, 255, 0.28);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.saas-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.saas-kicker-dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 999px;
+  background: rgba(124, 77, 255, 0.9);
+  box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.14);
+}

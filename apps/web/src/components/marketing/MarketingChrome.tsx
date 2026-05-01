@@ -51,7 +51,7 @@ export function MarketingHeader() {
           </Link>
           <Link
             href={`${APP_URL}/signup?plan=starter`}
-            className="rounded-sm bg-amber px-3.5 py-2 text-[13px] font-semibold text-heading shadow-card transition hover:bg-amber-hover"
+            className="rounded-lg bg-amber px-3.5 py-2 text-[13px] font-semibold text-heading shadow-card transition hover:bg-amber-hover"
           >
             Start free
           </Link>
@@ -151,4 +151,5 @@ export function MarketingFooter() {
     </footer>
   );
 }
+
 
