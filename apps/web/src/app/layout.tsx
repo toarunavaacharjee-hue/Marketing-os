@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   },
   description: "The operating system for product marketing and GTM teams.",
   applicationName: "AI Marketing Workbench",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }]
+  },
   robots: { index: true, follow: true },
   openGraph: {
     title: "AI Marketing Workbench",
