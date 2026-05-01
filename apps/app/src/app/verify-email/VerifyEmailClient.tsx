@@ -7,7 +7,10 @@ import { AuthShell } from "@/components/marketing/AuthShell";
 import { Button, TextLink } from "@/lib/ui";
 
 const primaryCta =
-  "w-full !bg-[#b8ff6c] !text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 hover:!bg-[#c8ff7c]";
+  "w-full !bg-amber !text-heading shadow-card hover:!bg-amber-hover disabled:pointer-events-none disabled:opacity-60";
+
+const inputClass =
+  "w-full rounded-lg border border-input-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] focus:border-primary focus:outline-none focus:shadow-focus";
 
 type Props = {
   initialEmail: string;
@@ -70,51 +73,49 @@ export function VerifyEmailClient({ initialEmail, hasSession, next }: Props) {
 
   return (
     <AuthShell>
-      <div className="mx-auto w-full max-w-md">
+      <div className="relative z-10 mx-auto w-full max-w-md">
         <div className="saas-pill mb-4">Verify your email</div>
         <h1
-          className="text-3xl font-semibold tracking-tight text-[#fafafc] sm:text-4xl"
+          className="text-3xl font-semibold tracking-tight text-heading sm:text-4xl"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           Check your inbox
         </h1>
-        <p className="mt-2 text-sm text-[#9090b0]">
+        <p className="mt-2 text-sm text-text2">
           We sent a confirmation link to finish setting up your account. You need to verify before you can open the
           dashboard.
         </p>
 
         <div className="saas-card mt-8 space-y-5 p-6 sm:p-8">
           {hasSession ? (
-            <p className="text-sm text-[#c4c4d8]">
-              Signed in as <span className="font-mono text-[#f0f0f8]">{initialEmail || email}</span>
+            <p className="text-sm text-text2">
+              Signed in as <span className="font-mono text-text">{initialEmail || email}</span>
             </p>
           ) : (
-            <p className="text-sm text-[#9090b0]">
+            <p className="text-sm text-text2">
               If you closed the tab before confirming, enter your email below to resend the link.
             </p>
           )}
 
           {!hasSession ? (
             <div>
-              <label className="mb-1 block text-xs text-[#9090b0]">Email</label>
+              <label className="mb-1 block text-xs font-semibold text-text2">Email</label>
               <input
                 type="email"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="w-full rounded-xl border border-white/[0.08] bg-[#0c0c12] px-3 py-2 text-sm text-[#f0f0f8] placeholder:text-[#5c6278] focus:border-[#7c6cff]/50 focus:outline-none focus:ring-2 focus:ring-[#7c6cff]/25"
+                className={inputClass}
               />
             </div>
           ) : null}
 
           {error ? (
-            <div className="rounded-lg border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {error}
-            </div>
+            <div className="rounded-lg border border-red/30 bg-red/10 px-4 py-3 text-sm text-red">{error}</div>
           ) : null}
           {status ? (
-            <div className="rounded-lg border border-[#7c6cff]/30 bg-[#7c6cff]/10 px-4 py-3 text-sm text-[#e8e4ff]">
+            <div className="rounded-lg border border-primary/25 bg-primary-light/40 px-4 py-3 text-sm text-primary-dark">
               {status}
             </div>
           ) : null}
@@ -138,19 +139,19 @@ export function VerifyEmailClient({ initialEmail, hasSession, next }: Props) {
                   type="button"
                   disabled={busy}
                   onClick={() => void signOut()}
-                  className="text-center text-sm text-[#9090b0] underline-offset-4 hover:text-[#f0f0f8] hover:underline"
+                  className="text-center text-sm text-text2 underline-offset-4 hover:text-text hover:underline"
                 >
                   Sign out
                 </button>
               </>
             ) : (
-              <div className="text-center text-sm text-[#9090b0]">
+              <div className="text-center text-sm text-text2">
                 Already verified? <TextLink href={`/login?next=${encodeURIComponent(next)}`}>Log in</TextLink>
               </div>
             )}
           </div>
 
-          <p className="text-center text-xs text-[#6c7088]">
+          <p className="text-center text-xs text-text3">
             Wrong inbox? Use resend, or sign out and sign up again with the correct email.
           </p>
         </div>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { VerifyEmailClient } from "@/app/verify-email/VerifyEmailClient";
+import { sanitizeAppNextPath } from "@/lib/auth/safeRedirect";
 
 export default async function VerifyEmailPage({
   searchParams
@@ -12,7 +13,7 @@ export default async function VerifyEmailPage({
     data: { user }
   } = await supabase.auth.getUser();
 
-  const next = typeof searchParams.next === "string" && searchParams.next.trim() ? searchParams.next.trim() : "/dashboard";
+  const next = sanitizeAppNextPath(searchParams.next, "/dashboard");
 
   if (user?.email_confirmed_at) {
     redirect(next);

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirectIfUnverifiedEmail } from "@/lib/auth/emailVerification";
+import { sanitizeAppNextPath } from "@/lib/auth/safeRedirect";
 
 export default async function AuthCallbackPage({
   searchParams
@@ -9,7 +10,7 @@ export default async function AuthCallbackPage({
 }) {
   const supabase = createSupabaseServerClient();
   const code = searchParams.code;
-  const next = searchParams.next ?? "/dashboard/settings";
+  const next = sanitizeAppNextPath(searchParams.next, "/dashboard");
 
   if (code) {
     await supabase.auth.exchangeCodeForSession(code);

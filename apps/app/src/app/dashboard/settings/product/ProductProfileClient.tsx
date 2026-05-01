@@ -47,6 +47,10 @@ export default function ProductProfileClient() {
   const [newProductName, setNewProductName] = useState("");
   const [newProductWebsite, setNewProductWebsite] = useState("");
   const [creatingProduct, setCreatingProduct] = useState(false);
+  const [autoFillNotice, setAutoFillNotice] = useState<{
+    kind: "warning" | "error";
+    message: string;
+  } | null>(null);
   const [competitors, setCompetitors] = useState<Competitor[]>([
     { name: "", website_url: "" }
   ]);
@@ -308,10 +312,19 @@ export default function ProductProfileClient() {
   // Auto-fill runs during onboarding/product creation and may store an error message here.
   useEffect(() => {
     const msg = window.localStorage.getItem("marketing_os_autofill_error");
-    if (msg) {
-      window.localStorage.removeItem("marketing_os_autofill_error");
-      setError(msg);
-    }
+    if (!msg) return;
+    window.localStorage.removeItem("marketing_os_autofill_error");
+    const trimmed = msg.trim();
+    const isTimeout =
+      /timed out/i.test(trimmed) ||
+      /timeout/i.test(trimmed) ||
+      (/abort/i.test(trimmed) && /auto-fill/i.test(trimmed));
+    setAutoFillNotice({
+      kind: isTimeout ? "warning" : "error",
+      message: isTimeout
+        ? "Auto-fill timed out. Your workspace was created successfully - you can retry from here."
+        : trimmed
+    });
   }, []);
 
   return (
@@ -329,6 +342,39 @@ export default function ProductProfileClient() {
       {error ? (
         <div className="mt-4 rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] px-4 py-3 text-sm text-red">
           {error}
+        </div>
+      ) : null}
+
+      {autoFillNotice ? (
+        <div
+          className={`mt-4 rounded-[var(--radius)] border px-4 py-3 text-sm ${
+            autoFillNotice.kind === "warning"
+              ? "border-[rgba(245,158,11,0.45)] bg-[rgba(245,158,11,0.12)] text-text"
+              : "border-red bg-[rgba(248,113,113,0.12)] text-red"
+          }`}
+          role="status"
+        >
+          <div>{autoFillNotice.message}</div>
+          {canAdmin ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => void autoFillFromWebsite()}
+                disabled={autoFilling || saving || loading}
+                className="rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
+              >
+                Retry auto-fill
+              </button>
+              <button
+                type="button"
+                onClick={() => setAutoFillNotice(null)}
+                disabled={autoFilling}
+                className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-60"
+              >
+                Dismiss
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : null}
 

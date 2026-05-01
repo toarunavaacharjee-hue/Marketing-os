@@ -100,7 +100,7 @@ export default function OnboardingPage() {
       }
 
       const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 12_000);
+      const timeout = window.setTimeout(() => controller.abort(), 30_000);
       try {
         setStatus("Generating your first drafts from your website…");
         const autoRes = await fetch("/api/product/profile/generate-from-website", {

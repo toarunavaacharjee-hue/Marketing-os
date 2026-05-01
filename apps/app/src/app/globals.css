@@ -119,6 +119,63 @@ html.dark {
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.26);
 }
 
+/* Shared marketing-style shells (login/signup/auth use these class names) */
+.saas-grid {
+  background-image:
+    linear-gradient(rgba(124, 77, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 77, 255, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 85%);
+}
+
+html.dark .saas-grid {
+  background-image:
+    linear-gradient(rgba(124, 108, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 108, 255, 0.07) 1px, transparent 1px);
+}
+
+.saas-hero-glow {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(124, 77, 255, 0.12), transparent 52%),
+    radial-gradient(ellipse 50% 35% at 95% 5%, rgba(255, 143, 0, 0.06), transparent 50%),
+    radial-gradient(ellipse 45% 30% at 5% 15%, rgba(0, 145, 174, 0.05), transparent 45%);
+}
+
+html.dark .saas-hero-glow {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(124, 108, 255, 0.18), transparent 52%),
+    radial-gradient(ellipse 50% 35% at 95% 5%, rgba(184, 255, 108, 0.08), transparent 50%),
+    radial-gradient(ellipse 45% 30% at 5% 15%, rgba(56, 189, 248, 0.07), transparent 45%);
+}
+
+.saas-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.saas-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(124, 77, 255, 0.22);
+  background: var(--color-primary-light);
+  padding: 0.35rem 0.85rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary-dark);
+}
+
+html.dark .saas-pill {
+  border-color: rgba(124, 108, 255, 0.25);
+  background: rgba(124, 108, 255, 0.08);
+  color: #c4b8ff;
+}
+
 html,
 body {
   height: 100%;

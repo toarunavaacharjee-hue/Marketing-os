@@ -4,11 +4,14 @@ import { MarketingLogo } from "@/components/marketing/MarketingChrome";
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative min-h-screen overflow-hidden bg-page text-text antialiased"
+      className="relative isolate min-h-screen overflow-hidden bg-page text-text antialiased"
       style={{ fontFamily: "var(--font-body)" }}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[min(55vh,480px)] saas-hero-glow" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.35] saas-grid" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[min(55vh,480px)] saas-hero-glow"
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.35] saas-grid" aria-hidden />
 
       <header className="relative z-10 border-b border-border bg-bg/80 backdrop-blur-xl">
         <div className="mx-auto flex h-[56px] max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -30,7 +33,9 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:px-6 sm:py-16">{children}</main>
+      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 py-12 text-[color:var(--text-body)] sm:px-6 sm:py-16">
+        {children}
+      </main>
 
       <footer className="relative z-10 border-t border-border bg-bg/70 py-8 text-center">
         <p className="mx-auto max-w-md px-4 text-[12px] leading-relaxed text-text3">
