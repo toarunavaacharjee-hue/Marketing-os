@@ -10,6 +10,9 @@ import {
   type PositioningCanvasValue,
   type PositioningHealth
 } from "@/lib/positioningStudio";
+import { buildPricingNarrativePrompt, PRICING_NARRATIVE_SYSTEM } from "@/lib/pmmPrompts";
+
+const PRICING_NARRATIVE_STORAGE_KEY = "pricing_narrative";
 
 const FIELD_LABELS: Record<keyof PositioningCanvasValue["doc"], string> = {
   category: "Category",
@@ -76,16 +79,36 @@ export default function PositioningStudioClient({
   const [versionBusy, setVersionBusy] = useState<string | null>(null);
   const [versionError, setVersionError] = useState<string | null>(null);
 
+  const [pricingText, setPricingText] = useState("");
+  const [pricingPlan, setPricingPlan] = useState("");
+  const [pricingPrice, setPricingPrice] = useState("");
+  const [pricingPersona, setPricingPersona] = useState("");
+  const [pricingProof, setPricingProof] = useState("");
+  const [pricingGenerating, setPricingGenerating] = useState(false);
+  const [pricingSaving, setPricingSaving] = useState(false);
+  const [pricingError, setPricingError] = useState<string | null>(null);
+  const [pricingSaved, setPricingSaved] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const { data, error: qErr } = await supabase
-      .from("module_settings")
-      .select("value_json")
-      .eq("environment_id", environmentId)
-      .eq("module", POSITIONING_MODULE)
-      .eq("key", POSITIONING_KEY)
-      .maybeSingle();
+    const [canvasRes, pricingRes] = await Promise.all([
+      supabase
+        .from("module_settings")
+        .select("value_json")
+        .eq("environment_id", environmentId)
+        .eq("module", POSITIONING_MODULE)
+        .eq("key", POSITIONING_KEY)
+        .maybeSingle(),
+      supabase
+        .from("module_settings")
+        .select("value_json")
+        .eq("environment_id", environmentId)
+        .eq("module", POSITIONING_MODULE)
+        .eq("key", PRICING_NARRATIVE_STORAGE_KEY)
+        .maybeSingle()
+    ]);
+    const { data, error: qErr } = canvasRes;
 
     if (qErr) setError(qErr.message);
     const raw = data?.value_json as Partial<PositioningCanvasValue> | null;
@@ -102,6 +125,10 @@ export default function PositioningStudioClient({
       setCanvas(null);
       setDoc(emptyDoc());
     }
+
+    const pv = pricingRes.data?.value_json as { text?: string } | null;
+    setPricingText(typeof pv?.text === "string" ? pv.text : "");
+
     setLoading(false);
   }, [environmentId, supabase]);
 
@@ -262,6 +289,62 @@ export default function PositioningStudioClient({
     }
   }
 
+  function formatCanvasForPricing(d: PositioningCanvasValue["doc"]): string {
+    return (Object.keys(FIELD_LABELS) as (keyof PositioningCanvasValue["doc"])[])
+      .map((k) => `${FIELD_LABELS[k]}: ${d[k]}`)
+      .join("\n");
+  }
+
+  async function savePricingNarrative() {
+    setPricingSaving(true);
+    setPricingError(null);
+    setPricingSaved(null);
+    const { error: upErr } = await supabase.from("module_settings").upsert({
+      environment_id: environmentId,
+      module: POSITIONING_MODULE,
+      key: PRICING_NARRATIVE_STORAGE_KEY,
+      value_json: { text: pricingText }
+    });
+    setPricingSaving(false);
+    if (upErr) {
+      setPricingError(upErr.message);
+      return;
+    }
+    setPricingSaved("Pricing narrative saved.");
+  }
+
+  async function generatePricingNarrative() {
+    setPricingGenerating(true);
+    setPricingError(null);
+    setPricingSaved(null);
+    const positioningCanvasText = formatCanvasForPricing(doc);
+    const prompt = buildPricingNarrativePrompt({
+      planName: pricingPlan.trim() || "Your plan",
+      price: pricingPrice.trim() || "—",
+      persona: pricingPersona.trim() || "Economic buyer / champion",
+      proof: pricingProof.trim() || undefined,
+      positioningCanvasText
+    });
+    try {
+      const res = await fetch("/api/ai/module-generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+          system: PRICING_NARRATIVE_SYSTEM,
+          length: "medium"
+        })
+      });
+      const data = (await res.json()) as { text?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Generation failed.");
+      setPricingText(data.text ?? "");
+    } catch (e) {
+      setPricingError(e instanceof Error ? e.message : "Generation failed.");
+    } finally {
+      setPricingGenerating(false);
+    }
+  }
+
   const health = canvas?.health ?? defaultHealth();
 
   return (
@@ -322,16 +405,25 @@ export default function PositioningStudioClient({
       ) : null}
 
       <AiProgressBar
-        active={generating}
+        active={generating || pricingGenerating}
         variant="dark"
-        title="Regenerating positioning from ICP segments…"
-        estimate={AI_PROGRESS_ESTIMATE.positioning}
-        durationMs={90_000}
+        title={
+          pricingGenerating
+            ? "Generating pricing narrative…"
+            : generating
+              ? "Regenerating positioning from ICP segments…"
+              : "Working…"
+        }
+        estimate={
+          pricingGenerating ? AI_PROGRESS_ESTIMATE.short : AI_PROGRESS_ESTIMATE.positioning
+        }
+        durationMs={pricingGenerating ? 50_000 : 90_000}
       />
 
       {loading ? (
         <div className="text-sm text-text2">Loading…</div>
       ) : (
+        <>
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-3 lg:col-span-2">
             {(Object.keys(FIELD_LABELS) as (keyof PositioningCanvasValue["doc"])[]).map((k) => (
@@ -450,6 +542,89 @@ export default function PositioningStudioClient({
             </div>
           </div>
         </div>
+
+        <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="mb-1 text-sm font-medium text-heading">Pricing narrative</div>
+          <p className="mb-4 text-xs text-text2">
+            Value-based talking points for a price point. Generation uses the positioning canvas above — save edits to the
+            canvas first if you want them included.
+          </p>
+          {pricingError ? (
+            <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+              {pricingError}
+            </div>
+          ) : null}
+          {pricingSaved ? (
+            <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+              {pricingSaved}
+            </div>
+          ) : null}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <label className="mb-1 block text-[11px] uppercase text-text2">Plan or SKU</label>
+              <input
+                value={pricingPlan}
+                onChange={(e) => setPricingPlan(e.target.value)}
+                placeholder="e.g. Growth"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-[11px] uppercase text-text2">Price</label>
+              <input
+                value={pricingPrice}
+                onChange={(e) => setPricingPrice(e.target.value)}
+                placeholder="e.g. $299/mo"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-[11px] uppercase text-text2">Persona</label>
+              <input
+                value={pricingPersona}
+                onChange={(e) => setPricingPersona(e.target.value)}
+                placeholder="e.g. VP Marketing"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-[11px] uppercase text-text2">Proof (optional)</label>
+              <input
+                value={pricingProof}
+                onChange={(e) => setPricingProof(e.target.value)}
+                placeholder="Metrics, outcomes"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              />
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => void generatePricingNarrative()}
+              disabled={pricingGenerating}
+              className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+            >
+              {pricingGenerating ? "Generating…" : "Generate"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void savePricingNarrative()}
+              disabled={pricingSaving}
+              className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm text-heading hover:bg-surface3 disabled:opacity-50"
+            >
+              {pricingSaving ? "Saving…" : "Save narrative"}
+            </button>
+          </div>
+          <label className="mt-4 mb-1 block text-xs text-text2">Output</label>
+          <textarea
+            value={pricingText}
+            onChange={(e) => setPricingText(e.target.value)}
+            rows={12}
+            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            placeholder="Generated pricing narrative appears here."
+          />
+        </div>
+        </>
       )}
     </div>
   );

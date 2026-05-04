@@ -124,7 +124,7 @@ Lines 3+: 2–4 sentences of copy suitable for marketing.`;
       const res = await fetch("/api/ai/module-generate", {
         method: "POST",
         headers: {
-          "content-type": "application/json",
+          "content-type": "application/json"
         },
         body: JSON.stringify({
           prompt,

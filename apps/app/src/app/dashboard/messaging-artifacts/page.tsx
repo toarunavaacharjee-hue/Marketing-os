@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { MessagingArtifactsClient } from "@/app/dashboard/messaging-artifacts/MessagingArtifactsClient";
+import { SalesEnablementBriefBlock } from "@/app/dashboard/messaging-artifacts/SalesEnablementBriefBlock";
 
 export default async function MessagingArtifactsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
@@ -15,6 +16,7 @@ export default async function MessagingArtifactsPage() {
         Track messaging assets per segment. Generator uses your saved ICP segments.
       </p>
       <MessagingArtifactsClient environmentId={ctx.environmentId} />
+      <SalesEnablementBriefBlock environmentId={ctx.environmentId} />
     </div>
   );
 }
