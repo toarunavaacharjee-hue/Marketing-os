@@ -1,7 +1,5 @@
 # Marketing OS — User Guide
 
-> **Maintainers:** Keep in sync with [`docs/USER_GUIDE.md`](../../../docs/USER_GUIDE.md). This file is what the app serves on `/dashboard/help`.
-
 This guide describes **AI Marketing Workbench / Marketing OS**: what each area is for, how to use it, why it matters, how modules connect, and **industry best practices** product marketers follow.
 
 ---
