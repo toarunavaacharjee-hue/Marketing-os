@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Initiative = {
   id: string;
@@ -20,6 +21,10 @@ function initials(name: string) {
 }
 
 export function LaunchPlaybookClient({ environmentId }: { environmentId: string }) {
+  const router = useRouter();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement | null>(null);
+
   const initiatives = useMemo<Initiative[]>(
     () => [
       {
@@ -46,6 +51,18 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
     []
   );
 
+  useEffect(() => {
+    if (!pickerOpen) return;
+    function onDocPointerDown(e: PointerEvent) {
+      const el = pickerRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && el.contains(e.target)) return;
+      setPickerOpen(false);
+    }
+    document.addEventListener("pointerdown", onDocPointerDown, { capture: true });
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, { capture: true } as any);
+  }, [pickerOpen]);
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -67,15 +84,66 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
           >
             Artifact Library
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              void environmentId;
-            }}
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
-          >
-            New initiative
-          </button>
+
+          <div className="relative" ref={pickerRef}>
+            <button
+              type="button"
+              onClick={() => setPickerOpen((v) => !v)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
+              aria-haspopup="menu"
+              aria-expanded={pickerOpen}
+            >
+              New initiative <span aria-hidden>▾</span>
+            </button>
+
+            {pickerOpen ? (
+              <div
+                role="menu"
+                aria-label="Create initiative"
+                className="absolute right-0 top-[calc(100%+8px)] w-[240px] overflow-hidden rounded-xl border border-border bg-surface text-text shadow-dropdown"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-surface2"
+                  onClick={() => {
+                    setPickerOpen(false);
+                    void environmentId;
+                    router.push("/dashboard/launch-playbook/product-launch");
+                  }}
+                >
+                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-xs font-bold text-white">
+                    P
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-heading">Product launch</span>
+                    <span className="mt-0.5 block text-xs text-text2">Positioning + message map + launch plan.</span>
+                  </span>
+                </button>
+
+                <div className="h-px bg-border" />
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-surface2"
+                  onClick={() => {
+                    setPickerOpen(false);
+                    void environmentId;
+                    router.push("/dashboard/launch-playbook/feature-launch");
+                  }}
+                >
+                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#2563eb] text-xs font-bold text-white">
+                    F
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-heading">Feature launch</span>
+                    <span className="mt-0.5 block text-xs text-text2">Rollout plan + enablement materials.</span>
+                  </span>
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -89,7 +157,11 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
             <div className="border-b border-border bg-surface2 px-5 py-3">
               <div className="flex items-center justify-between gap-3 text-[13px] font-medium text-text2">
                 <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-xs">{i.dueLabel}</span>
-                <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl text-white ${i.accent === "blue" ? "bg-[#2563eb]" : "bg-primary"}`}>
+                <span
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-xl text-white ${
+                    i.accent === "blue" ? "bg-[#2563eb]" : "bg-primary"
+                  }`}
+                >
                   {i.title.slice(0, 1)}
                 </span>
               </div>
