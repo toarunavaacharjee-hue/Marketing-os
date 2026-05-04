@@ -141,6 +141,12 @@ export function DashboardTopBar({
           </span>
 
           <Link
+            href="/dashboard/help"
+            className="shrink-0 rounded-sm px-2 py-1.5 text-xs font-semibold text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark"
+          >
+            Help
+          </Link>
+          <Link
             href="/dashboard/copilot"
             className="shrink-0 rounded-sm px-2 py-1.5 text-xs font-semibold text-primary-light transition-colors hover:bg-sidebar-active"
           >
@@ -178,6 +184,14 @@ export function DashboardTopBar({
                 </div>
 
                 <div className="p-1">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
+                    onClick={() => onAccountAction("/dashboard/help")}
+                  >
+                    <span>Help & documentation</span>
+                  </button>
                   <button
                     type="button"
                     role="menuitem"

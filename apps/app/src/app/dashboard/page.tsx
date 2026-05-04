@@ -258,13 +258,19 @@ async function CommandCentrePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <a
             href="#daily-digest"
             className="inline-flex items-center gap-2 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-[13px] font-semibold text-text transition hover:bg-surface3 hover:border-border2"
           >
             📋 <span>Daily Brief</span>
           </a>
+          <Link
+            href="/dashboard/help"
+            className="inline-flex items-center gap-2 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-[13px] font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+          >
+            📖 <span>Help</span>
+          </Link>
           <Link
             href="/dashboard/copilot"
             className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-primary-dark"

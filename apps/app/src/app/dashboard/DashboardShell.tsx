@@ -29,7 +29,10 @@ type NavSection = {
 const NAV: NavSection[] = [
   {
     label: "Home",
-    items: [{ label: "Command Centre", slug: "", icon: "⚡" }]
+    items: [
+      { label: "Command Centre", slug: "", icon: "⚡" },
+      { label: "Help & documentation", slug: "help", icon: "📖" }
+    ]
   },
   {
     label: "Strategy",

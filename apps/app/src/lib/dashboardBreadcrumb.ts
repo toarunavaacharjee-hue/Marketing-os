@@ -4,6 +4,7 @@
 
 const ROUTES: { prefix: string; title: string }[] = [
   { prefix: "/dashboard/onboarding", title: "Onboarding" },
+  { prefix: "/dashboard/help", title: "Help & documentation" },
   { prefix: "/dashboard/settings", title: "Settings" },
   { prefix: "/dashboard/upgrade", title: "Upgrade" },
   { prefix: "/dashboard/market-research", title: "Market Research" },
