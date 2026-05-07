@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { type GenInput } from "@/lib/prospectResearch/generateProspectMemo";
 import { processProspectResearchQueue } from "@/lib/prospectResearch/prospectResearchWorker";
+import { type EnrichedStakeholder } from "@/lib/prospectResearch/stakeholderTypes";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
       preparedFor?: string;
       demoOrMeetingDate?: string;
       sellerName?: string;
+      stakeholders?: EnrichedStakeholder[];
       additionalContext?: string;
     };
 
@@ -35,6 +37,8 @@ export async function POST(req: Request) {
     if (!accountName) {
       return NextResponse.json({ error: "Account name (or opportunity name) is required." }, { status: 400 });
     }
+
+    const stakeholders = Array.isArray(body.stakeholders) ? body.stakeholders : undefined;
 
     const input: GenInput = {
       accountName,
@@ -44,6 +48,7 @@ export async function POST(req: Request) {
       preparedFor: body.preparedFor?.trim(),
       demoOrMeetingDate: body.demoOrMeetingDate?.trim(),
       sellerName: body.sellerName?.trim(),
+      stakeholders,
       additionalContext: body.additionalContext?.trim()
     };
 
@@ -79,3 +84,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
+

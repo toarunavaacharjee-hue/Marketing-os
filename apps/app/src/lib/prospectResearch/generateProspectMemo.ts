@@ -5,6 +5,7 @@ import {
   normalizeProspectMemo,
   type ProspectIntelligenceMemo
 } from "@/lib/prospectIntelligenceTypes";
+import { type EnrichedStakeholder } from "@/lib/prospectResearch/stakeholderTypes";
 
 const MODEL = process.env.ANTHROPIC_MARKET_RESEARCH_MODEL?.trim() || "claude-sonnet-4-6";
 // Generation runs via worker/waitUntil, so we can allow longer than client-facing HTTP timeouts.
@@ -30,6 +31,8 @@ export type GenInput = {
   demoOrMeetingDate?: string;
   /** Seller / AE name for "Sales Strategy Notes for {seller}" framing */
   sellerName?: string;
+  /** Optional enriched attendee list (email → person/company/title). */
+  stakeholders?: EnrichedStakeholder[];
   additionalContext?: string;
 };
 
@@ -49,7 +52,8 @@ const MEMO_TOOL_SCHEMA = {
     what_theyre_looking_for: { type: "string", description: "Bullets on pains, outcomes, buying triggers." },
     key_decision_makers: {
       type: "string",
-      description: "2–4 stakeholder groups with small markdown tables; TBD names if unknown."
+      description:
+        "2–4 stakeholder groups with small markdown tables; use the Enriched attendees input for names/titles when present; TBD names if unknown."
     },
     organizational_context: { type: "string", description: "Structure, priorities, constraints." },
     sales_strategy_notes: { type: "string", description: "How to win; tailored to seller/AE if named." },
@@ -70,6 +74,26 @@ function buildUserMessage(input: GenInput): string {
   const seller = input.sellerName?.trim() || "(not provided — use generic seller-facing notes)";
   const additional = (input.additionalContext ?? "").trim();
   const clippedAdditional = additional.length > 1200 ? `${additional.slice(0, 1200)}…(truncated)` : additional;
+
+  const stakeholders = Array.isArray(input.stakeholders) ? input.stakeholders : [];
+  const stakeholderLines =
+    stakeholders.length === 0
+      ? "(none)"
+      : stakeholders
+          .map((s) => {
+            const bits = [
+              `email=${s.email}`,
+              s.fullName ? `name=${s.fullName}` : "",
+              s.title ? `title=${s.title}` : "",
+              s.companyName ? `company=${s.companyName}` : "",
+              s.department ? `dept=${s.department}` : "",
+              s.linkedinUrl ? `linkedin=${s.linkedinUrl}` : "",
+              `status=${s.matchStatus}`
+            ].filter(Boolean);
+            return `- ${bits.join(" | ")}`;
+          })
+          .join("\n");
+
   return `# PROSPECT INTELLIGENCE MEMO (inputs)
 
 Account / opportunity name: ${input.accountName}
@@ -79,6 +103,9 @@ Deal stage: ${input.dealStage?.trim() || "(not provided)"}
 Prepared for: ${preparedFor}
 Demo / meeting: ${demo}
 Seller / AE name (for sales notes section): ${seller}
+
+Enriched attendees (structured):
+${stakeholderLines}
 
 Additional context from seller:
 ${clippedAdditional || "(none)"}`;
@@ -91,7 +118,7 @@ Each section is concise GitHub-flavored Markdown (bullets/tables OK).
 
 Guidance:
 - executive_summary: short title block + 2–3 paragraphs + tiny deal-meta table.
-- key_decision_makers: 2–4 stakeholder groups with small tables (use TBD names).
+- key_decision_makers: Use Enriched attendees first for names/titles/domains; group into 2–4 stakeholder groups with small tables (use TBD only if not present).
 - open_intelligence_gaps: table Gap | Why | How to close.
 - meeting_demo_prep: demo agenda + discovery questions.
 - research_sources: be honest; no fake URLs.`;
@@ -316,3 +343,4 @@ export function memoToMarkdownContext(memo: ProspectIntelligenceMemo): string {
     "## Research Sources\n\n" + m.research_sources
   ].join("\n\n---\n\n");
 }
+
