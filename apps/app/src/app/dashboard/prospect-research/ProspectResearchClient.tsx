@@ -118,7 +118,7 @@ export default function ProspectResearchClient() {
   const [fundingOwnership, setFundingOwnership] = useState("");
   const [recentNewsEvents, setRecentNewsEvents] = useState("");
 
-  const [attendeeEmailsRaw, setAttendeeEmailsRaw] = useState("");
+  const [attendeeRaw, setAttendeeRaw] = useState("");
   const [stakeholders, setStakeholders] = useState<EnrichedStakeholder[]>([]);
   const [enrichingAttendees, setEnrichingAttendees] = useState(false);
 
@@ -353,9 +353,9 @@ export default function ProspectResearchClient() {
   }
 
   async function enrichAttendees() {
-    const emails = normalizeEmailList(attendeeEmailsRaw);
-    if (!emails.length) {
-      setError("Paste attendee emails (one per line, or comma-separated) first.");
+    const raw = attendeeRaw.trim();
+    if (!raw) {
+      setError("Paste attendee names/emails/LinkedIn URLs first.");
       return;
     }
     setEnrichingAttendees(true);
@@ -364,7 +364,7 @@ export default function ProspectResearchClient() {
       const res = await fetch("/api/prospects/research/enrich-attendees", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ emails })
+        body: JSON.stringify({ raw, companyName: companyName.trim() || undefined, websiteUrl: websiteUrl.trim() || undefined })
       });
       const data = await readApiJson<{ ok?: boolean; stakeholders?: EnrichedStakeholder[]; error?: string }>(
         res
@@ -504,7 +504,7 @@ export default function ProspectResearchClient() {
     setTechStack("");
     setFundingOwnership("");
     setRecentNewsEvents("");
-    setAttendeeEmailsRaw("");
+    setAttendeeRaw("");
     setStakeholders([]);
     setChatA(null);
     setChatQ("");
@@ -756,21 +756,21 @@ export default function ProspectResearchClient() {
               <div className="md:col-span-2 rounded-[var(--radius2)] border border-border bg-surface2 p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="text-xs text-text3">
-                    Paste meeting attendee emails. We’ll enrich names/titles/company and feed them to the memo (reduces
-                    TBDs).
+                    Paste attendee names/emails/LinkedIn URLs (one per line). We’ll enrich names/titles/company and feed
+                    them to the memo (reduces TBDs).
                   </div>
                   <button
                     type="button"
                     onClick={enrichAttendees}
-                    disabled={enrichingAttendees || normalizeEmailList(attendeeEmailsRaw).length === 0}
+                    disabled={enrichingAttendees || attendeeRaw.trim().length === 0}
                     className="rounded-[var(--radius2)] bg-accent px-3 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
                   >
                     {enrichingAttendees ? "Enriching…" : "Enrich attendees"}
                   </button>
                 </div>
                 <textarea
-                  value={attendeeEmailsRaw}
-                  onChange={(e) => setAttendeeEmailsRaw(e.target.value)}
+                  value={attendeeRaw}
+                  onChange={(e) => setAttendeeRaw(e.target.value)}
                   className="mt-2 h-[84px] w-full resize-y rounded-[var(--radius2)] border border-border bg-surface px-3 py-2 text-sm text-text"
                   placeholder={"e.g.\nwilliam.nunn@us.qbe.com\nhema.rajan@qbe.com\nmichelle.morey@qbe.com"}
                 />

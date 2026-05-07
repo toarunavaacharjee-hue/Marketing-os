@@ -1,12 +1,52 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
-import { enrichAttendeesWithPdl } from "@/lib/prospectResearch/attendeeEnrichment";
-import { normalizeEmailList } from "@/lib/prospectResearch/stakeholderTypes";
+import { enrichAttendeesWithPdlInputs } from "@/lib/prospectResearch/attendeeEnrichment";
+import { normalizeEmailList, type AttendeeEnrichmentInput } from "@/lib/prospectResearch/stakeholderTypes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
+
+function asStr(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "string") return v.trim();
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  return "";
+}
+
+function parseRawAttendees(raw: string): AttendeeEnrichmentInput[] {
+  const lines = raw
+    .split(/\r?\n/g)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const out: AttendeeEnrichmentInput[] = [];
+
+  for (const line of lines) {
+    const email = normalizeEmailList(line)[0];
+    const linkedin = (line.match(/https?:\/\/[^\s)]+/g) || []).find((u) => u.toLowerCase().includes("linkedin.com"));
+    const cleaned = line
+      .replace(email ?? "", "")
+      .replace(linkedin ?? "", "")
+      .replace(/[()<>]/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
+    // crude split: "Name — Title" / "Name - Title" / "Name, Title"
+    const parts = cleaned.split(/\s[-—–]\s|,\s+/g).map((p) => p.trim()).filter(Boolean);
+    const fullName = parts[0] ?? "";
+    const title = parts.length > 1 ? parts.slice(1).join(" — ") : "";
+
+    if (!email && !linkedin && !fullName) continue;
+    out.push({
+      email: email || undefined,
+      linkedinUrl: linkedin || undefined,
+      fullName: fullName || undefined,
+      title: title || undefined
+    });
+  }
+  return out;
+}
 
 export async function POST(req: Request) {
   try {
@@ -19,16 +59,42 @@ export async function POST(req: Request) {
     const ctx = await getDefaultEnvironmentIdForSelectedProduct();
     if (!ctx) return NextResponse.json({ error: "No product selected." }, { status: 400 });
 
-    const body = (await req.json()) as { emails?: string[]; raw?: string };
-    const emails =
-      Array.isArray(body.emails) && body.emails.length
-        ? body.emails.map((e) => String(e).trim().toLowerCase()).filter(Boolean)
-        : normalizeEmailList(String(body.raw ?? ""));
+    const body = (await req.json()) as {
+      attendees?: AttendeeEnrichmentInput[];
+      raw?: string;
+      companyName?: string;
+      websiteUrl?: string;
+    };
 
-    if (!emails.length) return NextResponse.json({ error: "Provide at least one attendee email." }, { status: 400 });
-    if (emails.length > 20) return NextResponse.json({ error: "Max 20 attendee emails at a time." }, { status: 400 });
+    const attendees: AttendeeEnrichmentInput[] = Array.isArray(body.attendees)
+      ? body.attendees
+          .filter((a) => a && typeof a === "object")
+          .map((a: any) => ({
+            fullName: asStr(a.fullName) || undefined,
+            email: asStr(a.email).toLowerCase() || undefined,
+            title: asStr(a.title) || undefined,
+            companyName: asStr(a.companyName) || undefined,
+            companyDomain: asStr(a.companyDomain) || undefined,
+            linkedinUrl: asStr(a.linkedinUrl) || undefined
+          }))
+      : parseRawAttendees(asStr(body.raw));
 
-    const stakeholders = await enrichAttendeesWithPdl(emails);
+    const companyName = asStr(body.companyName);
+    const websiteUrl = asStr(body.websiteUrl);
+
+    if (!attendees.length) {
+      return NextResponse.json(
+        { error: "Paste attendee names/emails/LinkedIn URLs (one per line), or send attendees[]." },
+        { status: 400 }
+      );
+    }
+    if (attendees.length > 20) return NextResponse.json({ error: "Max 20 attendees at a time." }, { status: 400 });
+
+    const stakeholders = await enrichAttendeesWithPdlInputs({
+      attendees,
+      companyHint: companyName || undefined,
+      websiteHint: websiteUrl || undefined
+    });
     return NextResponse.json({ ok: true, stakeholders });
   } catch (e) {
     return NextResponse.json(

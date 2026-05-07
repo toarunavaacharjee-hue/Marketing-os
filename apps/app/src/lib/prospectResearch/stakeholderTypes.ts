@@ -1,6 +1,15 @@
+export type AttendeeEnrichmentInput = {
+  fullName?: string;
+  email?: string;
+  title?: string;
+  companyName?: string;
+  companyDomain?: string;
+  linkedinUrl?: string;
+};
+
 export type EnrichedStakeholder = {
-  /** Input email (may be personal or work). */
-  email: string;
+  /** Input email if available (may be personal or work). */
+  email?: string;
   /** Provider that returned this record. */
   source: "pdl" | "manual";
   /** If provider matched a person record. */
@@ -47,7 +56,7 @@ export function stakeholdersToMarkdown(stakeholders: EnrichedStakeholder[]): str
       .filter(Boolean)
       .join(" · ");
 
-    return `| ${name} | ${s.email} | ${title} | ${company} | ${status}${extra ? ` — ${extra}` : ""} |`;
+    return `| ${name} | ${s.email?.trim() || "—"} | ${title} | ${company} | ${status}${extra ? ` — ${extra}` : ""} |`;
   });
 
   return [
