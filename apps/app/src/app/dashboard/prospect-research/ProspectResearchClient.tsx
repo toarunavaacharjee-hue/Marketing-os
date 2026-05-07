@@ -772,7 +772,7 @@ export default function ProspectResearchClient() {
                   value={attendeeRaw}
                   onChange={(e) => setAttendeeRaw(e.target.value)}
                   className="mt-2 h-[84px] w-full resize-y rounded-[var(--radius2)] border border-border bg-surface px-3 py-2 text-sm text-text"
-                  placeholder={"e.g.\nwilliam.nunn@us.qbe.com\nhema.rajan@qbe.com\nmichelle.morey@qbe.com"}
+                  placeholder={"e.g.\nAlex Johnson — VP, Procurement\nalex.johnson@example.com\nhttps://www.linkedin.com/in/alexjohnson/"}
                 />
                 {stakeholders.length ? (
                   <div className="mt-2 text-[11px] text-text3">
