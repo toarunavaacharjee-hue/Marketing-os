@@ -25,7 +25,8 @@ export async function POST(req: Request) {
       generatedAtIso: new Date().toISOString()
     });
 
-    return new NextResponse(buf, {
+    // NextResponse expects a web BodyInit; use Uint8Array instead of Node Buffer.
+    return new NextResponse(new Uint8Array(buf), {
       status: 200,
       headers: {
         "content-type": "application/pdf",

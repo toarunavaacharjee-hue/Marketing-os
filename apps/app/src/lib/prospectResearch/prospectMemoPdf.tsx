@@ -101,7 +101,7 @@ function MetaPill({ label, value }: { label: string; value?: string }) {
 
 function StakeholderTable({ stakeholders }: { stakeholders: EnrichedStakeholder[] }) {
   if (!stakeholders.length) return null;
-  const rows = stakeholders.filter((s) => s.email);
+  const rows = stakeholders.filter((s) => (s.email ?? "").trim().length > 0);
 
   return (
     <View style={styles.section}>
@@ -120,11 +120,14 @@ function StakeholderTable({ stakeholders }: { stakeholders: EnrichedStakeholder[
           const company = s.companyName?.trim() || "TBD";
           const dim = s.matchStatus !== "matched";
           return (
-            <View key={`${s.email}-${idx}`} style={[styles.tr, idx === rows.length - 1 ? { borderBottomWidth: 0 } : null]}>
-              <Text style={[styles.td, styles.colName, dim ? styles.muted : null]}>{name}</Text>
-              <Text style={[styles.td, styles.colEmail, dim ? styles.muted : null]}>{s.email}</Text>
-              <Text style={[styles.td, styles.colTitle, dim ? styles.muted : null]}>{title}</Text>
-              <Text style={[styles.td, styles.colCompany, dim ? styles.muted : null]}>{company}</Text>
+            <View
+              key={`${s.email}-${idx}`}
+              style={[styles.tr, ...(idx === rows.length - 1 ? [{ borderBottomWidth: 0 }] : [])]}
+            >
+              <Text style={[styles.td, styles.colName, ...(dim ? [styles.muted] : [])]}>{name}</Text>
+              <Text style={[styles.td, styles.colEmail, ...(dim ? [styles.muted] : [])]}>{s.email}</Text>
+              <Text style={[styles.td, styles.colTitle, ...(dim ? [styles.muted] : [])]}>{title}</Text>
+              <Text style={[styles.td, styles.colCompany, ...(dim ? [styles.muted] : [])]}>{company}</Text>
             </View>
           );
         })}

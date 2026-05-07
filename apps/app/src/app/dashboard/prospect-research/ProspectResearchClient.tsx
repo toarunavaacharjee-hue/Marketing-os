@@ -578,8 +578,8 @@ export default function ProspectResearchClient() {
         })
       });
       if (!res.ok) {
-        const data = await readApiJson(res);
-        throw new Error((data && data.error) || "Could not build PDF.");
+        const data = await readApiJson<{ error?: string }>(res);
+        throw new Error(data?.error || "Could not build PDF.");
       }
       const ab = await res.arrayBuffer();
       const blob = new Blob([ab], { type: "application/pdf" });
