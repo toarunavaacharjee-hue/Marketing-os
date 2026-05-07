@@ -15,6 +15,18 @@ function asStr(v: unknown): string {
   return "";
 }
 
+function deriveNameFromEmail(email: string): string {
+  const local = email.split("@")[0] ?? "";
+  const parts = local
+    .replace(/[_-]+/g, ".")
+    .split(".")
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .slice(0, 4);
+  const name = parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(" ");
+  return name.trim();
+}
+
 function parseRawAttendees(raw: string): AttendeeEnrichmentInput[] {
   const lines = raw
     .split(/\r?\n/g)
@@ -43,10 +55,13 @@ function parseRawAttendees(raw: string): AttendeeEnrichmentInput[] {
     const title = parts.length > 1 ? parts.slice(1).join(" — ") : "";
 
     if (!email && !linkedin && !fullName) continue;
+
+    const derivedName = !fullName && email ? deriveNameFromEmail(email) : "";
+
     out.push({
       email: email || undefined,
       linkedinUrl: linkedin || undefined,
-      fullName: fullName || undefined,
+      fullName: (fullName || derivedName) || undefined,
       title: title || undefined
     });
   }
@@ -74,14 +89,18 @@ export async function POST(req: Request) {
     const attendees: AttendeeEnrichmentInput[] = Array.isArray(body.attendees)
       ? body.attendees
           .filter((a) => a && typeof a === "object")
-          .map((a: any) => ({
-            fullName: asStr(a.fullName) || undefined,
-            email: asStr(a.email).toLowerCase() || undefined,
-            title: asStr(a.title) || undefined,
-            companyName: asStr(a.companyName) || undefined,
-            companyDomain: asStr(a.companyDomain) || undefined,
-            linkedinUrl: asStr(a.linkedinUrl) || undefined
-          }))
+          .map((a: any) => {
+            const email = asStr(a.email).toLowerCase();
+            const fullName = asStr(a.fullName);
+            return {
+              fullName: (fullName || (email ? deriveNameFromEmail(email) : "")) || undefined,
+              email: email || undefined,
+              title: asStr(a.title) || undefined,
+              companyName: asStr(a.companyName) || undefined,
+              companyDomain: asStr(a.companyDomain) || undefined,
+              linkedinUrl: asStr(a.linkedinUrl) || undefined
+            };
+          })
       : parseRawAttendees(asStr(body.raw));
 
     const companyName = asStr(body.companyName);

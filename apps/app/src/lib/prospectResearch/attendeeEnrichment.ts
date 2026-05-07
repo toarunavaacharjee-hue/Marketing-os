@@ -18,6 +18,18 @@ function asStr(v: unknown): string {
   return "";
 }
 
+function deriveNameFromEmail(email: string): string {
+  const local = email.split("@")[0] ?? "";
+  const parts = local
+    .replace(/[_-]+/g, ".")
+    .split(".")
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .slice(0, 4);
+  const name = parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(" ");
+  return name.trim();
+}
+
 function compactResults(results: GoogleOrganicResult[], limit = 6): string {
   const rows = results.slice(0, limit).map((r, idx) => {
     const title = asStr(r.title) || "(no title)";
@@ -99,8 +111,9 @@ export async function enrichAttendeesWithGoogle(args: {
 
   const out: EnrichedStakeholder[] = [];
   for (const attendee of args.attendees) {
-    const name = asStr(attendee.fullName);
+    const rawName = asStr(attendee.fullName);
     const email = asStr(attendee.email).toLowerCase();
+    const name = rawName || (email ? deriveNameFromEmail(email) : "");
     const company = asStr(attendee.companyName) || asStr(args.companyHint) || asStr(args.websiteHint);
     const titleHint = asStr(attendee.title);
 
@@ -116,26 +129,31 @@ export async function enrichAttendeesWithGoogle(args: {
     }
 
     const emailDomain = email.includes("@") ? email.split("@")[1] : "";
-    const base = [name || email, company || emailDomain].filter(Boolean).join(" ");
+    const orgHint = company || emailDomain;
+    const base = [name || email, orgHint].filter(Boolean).join(" ");
 
     // Queries roughly mimic “Google + LinkedIn search”.
     const queries = [
-      `site:linkedin.com/in ${base}`.trim(),
-      `"${name || email}" ${company || emailDomain}`.trim(),
-      `"${name || email}" "${company || emailDomain}" LinkedIn`.trim()
+      // LinkedIn patterns (Google results often show linkedin.com/in or /pub)
+      `site:linkedin.com (${name || email}) ${orgHint} ${titleHint}`.trim(),
+      `site:linkedin.com/in "${name || email}" ${orgHint}`.trim(),
+      `site:linkedin.com/pub "${name || email}" ${orgHint}`.trim(),
+      `"${name || email}" ${orgHint} LinkedIn`.trim(),
+      // Non-LinkedIn corroboration (company pages, press releases, etc.)
+      `"${name || email}" ${orgHint} ${titleHint}`.trim()
     ].filter(Boolean);
 
     const allResults: GoogleOrganicResult[] = [];
     for (const q of queries) {
-      const res = await googleSearchViaSerpApi({ query: q, num: 5 });
+      const res = await googleSearchViaSerpApi({ query: q, num: 10 });
       if (res.ok) allResults.push(...res.results);
     }
 
     // Prefer linkedin links, then everything else.
     const ranked = [
-      ...allResults.filter((r) => (r.link || "").toLowerCase().includes("linkedin.com/in/")),
-      ...allResults.filter((r) => !(r.link || "").toLowerCase().includes("linkedin.com/in/"))
-    ].slice(0, 8);
+      ...allResults.filter((r) => (r.link || "").toLowerCase().includes("linkedin.com/")),
+      ...allResults.filter((r) => !(r.link || "").toLowerCase().includes("linkedin.com/"))
+    ].slice(0, 10);
 
     if (ranked.length === 0) {
       out.push({
