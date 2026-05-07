@@ -11,7 +11,7 @@ export type EnrichedStakeholder = {
   /** Input email if available (may be personal or work). */
   email?: string;
   /** Provider that returned this record. */
-  source: "pdl" | "manual";
+  source: "google" | "manual";
   /** If provider matched a person record. */
   matchStatus: "matched" | "not_found" | "error";
   /** Confidence / match score if available. */

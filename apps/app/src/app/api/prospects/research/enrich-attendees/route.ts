@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
-import { enrichAttendeesWithPdlInputs } from "@/lib/prospectResearch/attendeeEnrichment";
+import { enrichAttendeesWithGoogle } from "@/lib/prospectResearch/attendeeEnrichment";
 import { normalizeEmailList, type AttendeeEnrichmentInput } from "@/lib/prospectResearch/stakeholderTypes";
 
 export const runtime = "nodejs";
@@ -24,7 +24,9 @@ function parseRawAttendees(raw: string): AttendeeEnrichmentInput[] {
 
   for (const line of lines) {
     const email = normalizeEmailList(line)[0];
-    const linkedin = (line.match(/https?:\/\/[^\s)]+/g) || []).find((u) => u.toLowerCase().includes("linkedin.com"));
+    const linkedin = (line.match(/https?:\/\/[^\s)]+/g) || []).find((u) =>
+      u.toLowerCase().includes("linkedin.com")
+    );
     const cleaned = line
       .replace(email ?? "", "")
       .replace(linkedin ?? "", "")
@@ -33,7 +35,10 @@ function parseRawAttendees(raw: string): AttendeeEnrichmentInput[] {
       .trim();
 
     // crude split: "Name — Title" / "Name - Title" / "Name, Title"
-    const parts = cleaned.split(/\s[-—–]\s|,\s+/g).map((p) => p.trim()).filter(Boolean);
+    const parts = cleaned
+      .split(/\s[-—–]\s|,\s+/g)
+      .map((p) => p.trim())
+      .filter(Boolean);
     const fullName = parts[0] ?? "";
     const title = parts.length > 1 ? parts.slice(1).join(" — ") : "";
 
@@ -90,11 +95,12 @@ export async function POST(req: Request) {
     }
     if (attendees.length > 20) return NextResponse.json({ error: "Max 20 attendees at a time." }, { status: 400 });
 
-    const stakeholders = await enrichAttendeesWithPdlInputs({
+    const stakeholders = await enrichAttendeesWithGoogle({
       attendees,
       companyHint: companyName || undefined,
       websiteHint: websiteUrl || undefined
     });
+
     return NextResponse.json({ ok: true, stakeholders });
   } catch (e) {
     return NextResponse.json(
