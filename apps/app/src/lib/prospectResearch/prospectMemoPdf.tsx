@@ -24,10 +24,8 @@ function normalizeMd(md: string): string {
   if (!md.trim()) return "";
   let s = md.replace(/\r\n/g, "\n");
   s = s.replace(/```[\s\S]*?```/g, "\n[code block omitted]\n");
-  // Keep pipes so we can render tables, but strip headings and inline formatting.
   s = s.replace(/^#{1,6}\s+/gm, "");
   // Emoji / pictographs can render as garbage blocks in many PDF fonts.
-  // Replace common ones with simple ASCII so section labels don't corrupt.
   s = s
     .replace(/🔑/g, "Key: ")
     .replace(/🖥️/g, "App: ")
@@ -159,6 +157,32 @@ function asStr(v: unknown): string {
   return "";
 }
 
+function softWrapText(s: string): string {
+  const t = (s || "").trim();
+  if (!t) return "";
+  // Insert zero-width breakpoints so long URLs/emails can wrap.
+  return t
+    .replace(/([/@._?&=#-])/g, "$1\u200b")
+    .replace(/\u200b{2,}/g, "\u200b");
+}
+
+function isLikelySubheading(text: string): boolean {
+  const t = text.trim();
+  if (!t) return false;
+  if (t.length > 90) return false;
+  if (/[.!?]$/.test(t)) return false;
+  if (/^stakeholder group/i.test(t)) return true;
+  if (
+    /^(what they'?re looking for|key decision makers|organizational context|sales strategy notes|open intelligence gaps|meeting \/ demo prep|research sources)\b/i.test(
+      t
+    )
+  )
+    return true;
+  const letters = (t.match(/[A-Za-z]/g) ?? []).length;
+  const non = (t.match(/[^A-Za-z0-9\s—–-]/g) ?? []).length;
+  return letters >= 6 && non <= 1 && /[A-Za-z]/.test(t);
+}
+
 const styles = StyleSheet.create({
   page: {
     paddingTop: 36,
@@ -202,6 +226,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF"
   },
   sectionTitle: { fontSize: 11.5, fontWeight: 700, marginBottom: 6, color: "#111827" },
+  subTitle: { fontSize: 10.6, fontWeight: 700, marginTop: 10, color: "#111827" },
   body: { fontSize: 10.2, lineHeight: 1.35, color: "#111827" },
   paragraph: { marginTop: 2 },
   bullets: { marginTop: 2 },
@@ -220,6 +245,21 @@ const styles = StyleSheet.create({
   th: { padding: 6, fontSize: 8.5, fontWeight: 700, color: "#111827" },
   td: { padding: 6, fontSize: 9, color: "#111827" },
 
+  // “SaaS-y” cards for wide tables (stakeholders, agendas, etc.)
+  cardsWrap: { marginTop: 6, gap: 8 },
+  rowCard: {
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    padding: 8,
+    backgroundColor: "#FFFFFF"
+  },
+  rowCardTitle: { fontSize: 10.4, fontWeight: 700, color: "#111827" },
+  kvGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 6 },
+  kvItem: { width: "50%", paddingRight: 10, marginTop: 4 },
+  kvLabel: { fontSize: 8.2, color: "#6B7280" },
+  kvValue: { fontSize: 9.2, color: "#111827", marginTop: 1 },
+
   muted: { color: "#6B7280" }
 });
 
@@ -228,15 +268,14 @@ function MetaPill({ label, value }: { label: string; value?: string }) {
   return (
     <View style={styles.metaPill}>
       <Text style={styles.metaLabel}>{label}</Text>
-      <Text style={styles.metaValue}>{value.trim()}</Text>
+      <Text style={styles.metaValue}>{softWrapText(value.trim())}</Text>
     </View>
   );
 }
 
-function StakeholderTable({ stakeholders }: { stakeholders: EnrichedStakeholder[] }) {
+function StakeholderSummary({ stakeholders }: { stakeholders: EnrichedStakeholder[] }) {
   if (!stakeholders.length) return null;
-  const rows = stakeholders.slice(0, 10); // keep header tidy; details are in memo sections
-
+  const rows = stakeholders.slice(0, 12);
   const header = ["Name", "Email", "Title", "Company"];
   const data = rows.map((s) => [
     asStr(s.fullName) || [asStr(s.firstName), asStr(s.lastName)].filter(Boolean).join(" ") || "TBD",
@@ -257,33 +296,69 @@ function StakeholderTable({ stakeholders }: { stakeholders: EnrichedStakeholder[
 
 function MarkdownTable({ header, rows }: { header: string[]; rows: string[][] }) {
   const cols = Math.max(1, header.length || (rows[0]?.length ?? 1));
+  const safeHeader = header.slice(0, cols).map((h) => softWrapText(h));
+  const safeRows = rows.map((r) => Array.from({ length: cols }, (_, ci) => softWrapText((r[ci] ?? "").trim() || "—")));
+
+  // Wide tables don’t read well in PDFs. Convert them into “cards” so nothing overflows.
+  if (cols >= 6) {
+    const clean = (s: string) => (s || "").toLowerCase().replace(/[^a-z]/g, "");
+    const labelFor = (i: number) => (safeHeader[i] ?? `Field ${i + 1}`).replace(/\u200b/g, "");
+    const nameIdx = safeHeader.findIndex((h) => clean(h).includes("name"));
+    const titleIdx = safeHeader.findIndex((h) => clean(h).includes("title"));
+
+    return (
+      <View style={styles.cardsWrap}>
+        {safeRows.map((r, ri) => {
+          const primaryTitle = [r[nameIdx >= 0 ? nameIdx : 0], r[titleIdx >= 0 ? titleIdx : 1]]
+            .filter(Boolean)
+            .join(" — ")
+            .trim();
+          return (
+            <View key={ri} style={styles.rowCard}>
+              <Text style={styles.rowCardTitle}>{primaryTitle || `Row ${ri + 1}`}</Text>
+              <View style={styles.kvGrid}>
+                {r.map((val, ci) => (
+                  <View key={ci} style={styles.kvItem}>
+                    <Text style={styles.kvLabel}>{labelFor(ci)}</Text>
+                    <Text style={styles.kvValue}>{val || "—"}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          );
+        })}
+      </View>
+    );
+  }
+
   const clean = (s: string) => (s || "").toLowerCase().replace(/[^a-z]/g, "");
-  const weights = header.slice(0, cols).map((h) => {
+  const weights = safeHeader.slice(0, cols).map((h) => {
     const k = clean(h);
-    if (k.includes("role") || k.includes("notes")) return 3.2;
-    if (k.includes("linkedin") || k.includes("url")) return 2.2;
-    if (k.includes("email")) return 2.0;
-    if (k.includes("dept") || k.includes("department")) return 1.6;
+    if (k.includes("role") || k.includes("notes")) return 3.0;
+    if (k.includes("linkedin") || k.includes("url")) return 2.0;
+    if (k.includes("email")) return 1.9;
     if (k.includes("title")) return 1.8;
     if (k.includes("company")) return 1.8;
-    return 1.4; // name / default
+    return 1.4;
   });
   const total = weights.reduce((a, b) => a + b, 0) || cols;
-  const cellStyleFor = (ci: number) => ({ width: `${Math.round((weights[ci] / total) * 1000) / 10}%` as const });
-  const tdStyle = cols >= 6 ? [styles.td, { fontSize: 8.5 }] : [styles.td];
-  const thStyle = cols >= 6 ? [styles.th, { fontSize: 8 }] : [styles.th];
+  const cellStyleFor = (ci: number) => ({
+    width: `${Math.round((weights[ci] / total) * 1000) / 10}%` as const
+  });
+  const tdStyle = cols >= 5 ? [styles.td, { fontSize: 8.6 }] : [styles.td];
+  const thStyle = cols >= 5 ? [styles.th, { fontSize: 8.0 }] : [styles.th];
 
   return (
     <View style={styles.table}>
       <View style={styles.trHead}>
-        {header.slice(0, cols).map((h, i) => (
+        {safeHeader.slice(0, cols).map((h, i) => (
           <Text key={i} style={[...thStyle, cellStyleFor(i)]}>
             {h}
           </Text>
         ))}
       </View>
-      {rows.map((r, ri) => (
-        <View key={ri} style={[styles.tr, ...(ri === rows.length - 1 ? [{ borderBottomWidth: 0 }] : [])]}>
+      {safeRows.map((r, ri) => (
+        <View key={ri} style={[styles.tr, ...(ri === safeRows.length - 1 ? [{ borderBottomWidth: 0 }] : [])]}>
           {Array.from({ length: cols }, (_, ci) => (
             <Text key={ci} style={[...tdStyle, cellStyleFor(ci)]}>
               {(r[ci] ?? "").trim() || "—"}
@@ -301,9 +376,17 @@ function MarkdownBlocks({ md }: { md: string }) {
     <View>
       {blocks.map((b, idx) => {
         if (b.type === "paragraph") {
+          const text = softWrapText(b.text);
+          if (isLikelySubheading(b.text)) {
+            return (
+              <Text key={idx} style={styles.subTitle}>
+                {text}
+              </Text>
+            );
+          }
           return (
             <Text key={idx} style={[styles.body, styles.paragraph]}>
-              {b.text}
+              {text}
             </Text>
           );
         }
@@ -326,7 +409,7 @@ function MarkdownBlocks({ md }: { md: string }) {
               {b.items.map((it, j) => (
                 <View key={j} style={styles.bulletRow}>
                   <Text style={[styles.body, styles.bulletDot]}>•</Text>
-                  <Text style={[styles.body, styles.bulletText]}>{it}</Text>
+                  <Text style={[styles.body, styles.bulletText]}>{softWrapText(it)}</Text>
                 </View>
               ))}
             </View>
@@ -350,7 +433,7 @@ function ProspectMemoPdfDocument({ ctx }: { ctx: ProspectMemoPdfContext }) {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Text style={styles.title}>PROSPECT INTELLIGENCE MEMO</Text>
-            <Text style={styles.subtitle}>{ctx.accountName}</Text>
+            <Text style={styles.subtitle}>{softWrapText(ctx.accountName)}</Text>
           </View>
 
           <Text style={[styles.subtitle, { marginTop: 4 }]}>
@@ -367,7 +450,7 @@ function ProspectMemoPdfDocument({ ctx }: { ctx: ProspectMemoPdfContext }) {
           </View>
         </View>
 
-        <StakeholderTable stakeholders={stakeholders} />
+        <StakeholderSummary stakeholders={stakeholders} />
 
         {PROSPECT_MEMO_KEYS.map((k) => {
           const raw = memo[k] ?? "";

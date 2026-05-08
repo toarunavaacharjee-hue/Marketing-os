@@ -99,7 +99,7 @@ function normalizeMd(md: string): string {
   let s = md.replace(/\r\n/g, "\n");
   s = s.replace(/```[\s\S]*?```/g, "\n[code block omitted]\n");
   s = s.replace(/^#{1,6}\s+/gm, "");
-  // Emoji / pictographs often don’t render correctly in DOCX/PDF exports.
+  // Emoji / pictographs often don’t render correctly in DOCX exports.
   s = s
     .replace(/🔑/g, "Key: ")
     .replace(/🖥️/g, "App: ")
@@ -227,8 +227,71 @@ function docxHr(): Paragraph {
   });
 }
 
+function docxWideTableAsCards(header: string[], rows: string[][]): Table {
+  const cols = Math.max(1, header.length || (rows[0]?.length ?? 1));
+  const headerClean = header.slice(0, cols).map((h) => (h || "").trim());
+  const clean = (s: string) => (s || "").toLowerCase().replace(/[^a-z]/g, "");
+  const nameIdx = headerClean.findIndex((h) => clean(h).includes("name"));
+  const titleIdx = headerClean.findIndex((h) => clean(h).includes("title"));
+
+  const cardRows: TableRow[] = [];
+  for (const r of rows) {
+    const rr = Array.from({ length: cols }, (_, i) => (r[i] ?? "").trim());
+    const title = [rr[nameIdx >= 0 ? nameIdx : 0], rr[titleIdx >= 0 ? titleIdx : 1]].filter(Boolean).join(" — ").trim() || "Stakeholder";
+
+    // Header row.
+    cardRows.push(
+      new TableRow({
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            shading: { type: ShadingType.SOLID, color: "EEF2FF" },
+            children: [new Paragraph({ children: [new TextRun({ text: title, bold: true })] })]
+          })
+        ]
+      })
+    );
+
+    // Key/value rows (2 columns).
+    for (let i = 0; i < cols; i++) {
+      const k = headerClean[i] || `Field ${i + 1}`;
+      const v = rr[i] || "—";
+      cardRows.push(
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 30, type: WidthType.PERCENTAGE },
+              shading: { type: ShadingType.SOLID, color: "F9FAFB" },
+              children: [new Paragraph({ children: [new TextRun({ text: k, bold: true })] })]
+            }),
+            new TableCell({
+              width: { size: 70, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ text: v })]
+            })
+          ]
+        })
+      );
+    }
+
+    // Spacer row.
+    cardRows.push(
+      new TableRow({
+        children: [new TableCell({ columnSpan: 2, children: [new Paragraph({ text: " " })] })]
+      })
+    );
+  }
+
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: cardRows
+  });
+}
+
 function docxTable(header: string[], rows: string[][]): Table {
   const cols = Math.max(1, header.length || (rows[0]?.length ?? 1));
+  // Wide tables are what makes the DOCX feel “intern pasted a spreadsheet”.
+  if (cols >= 6) return docxWideTableAsCards(header, rows);
+
   const colW = Math.floor(100 / cols);
   const cell = (text: string, opts?: { header?: boolean }) =>
     new TableCell({
