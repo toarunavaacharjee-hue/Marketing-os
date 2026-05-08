@@ -30,6 +30,22 @@ function deriveNameFromEmail(email: string): string {
   return name.trim();
 }
 
+function normalizeOrgHint(raw: string): string {
+  const t = raw.trim();
+  if (!t) return "";
+  // If a URL is passed (e.g. https://qbe.com), prefer hostname.
+  if (/^https?:\/\//i.test(t)) {
+    try {
+      const u = new URL(t);
+      const host = u.hostname.replace(/^www\./i, "").trim();
+      return host || t;
+    } catch {
+      return t;
+    }
+  }
+  return t.replace(/^www\./i, "").trim();
+}
+
 function compactResults(results: GoogleOrganicResult[], limit = 6): string {
   const rows = results.slice(0, limit).map((r, idx) => {
     const title = asStr(r.title) || "(no title)";
@@ -114,7 +130,7 @@ export async function enrichAttendeesWithGoogle(args: {
     const rawName = asStr(attendee.fullName);
     const email = asStr(attendee.email).toLowerCase();
     const name = rawName || (email ? deriveNameFromEmail(email) : "");
-    const company = asStr(attendee.companyName) || asStr(args.companyHint) || asStr(args.websiteHint);
+    const company = normalizeOrgHint(asStr(attendee.companyName) || asStr(args.companyHint) || asStr(args.websiteHint));
     const titleHint = asStr(attendee.title);
 
     if (!name && !email) {
@@ -129,7 +145,7 @@ export async function enrichAttendeesWithGoogle(args: {
     }
 
     const emailDomain = email.includes("@") ? email.split("@")[1] : "";
-    const orgHint = company || emailDomain;
+    const orgHint = normalizeOrgHint(company || emailDomain);
     const base = [name || email, orgHint].filter(Boolean).join(" ");
 
     // Queries roughly mimic “Google + LinkedIn search”.
@@ -144,9 +160,11 @@ export async function enrichAttendeesWithGoogle(args: {
     ].filter(Boolean);
 
     const allResults: GoogleOrganicResult[] = [];
+    let firstSearchError: string | null = null;
     for (const q of queries) {
       const res = await googleSearchViaSerpApi({ query: q, num: 10 });
       if (res.ok) allResults.push(...res.results);
+      else if (!firstSearchError) firstSearchError = res.error;
     }
 
     // Prefer linkedin links, then everything else.
@@ -158,10 +176,10 @@ export async function enrichAttendeesWithGoogle(args: {
     if (ranked.length === 0) {
       out.push({
         email: attendee.email,
-        fullName: attendee.fullName,
+        fullName: attendee.fullName || name,
         source: "google",
-        matchStatus: "not_found",
-        note: "No search results."
+        matchStatus: firstSearchError ? "error" : "not_found",
+        note: firstSearchError ? `Search failed: ${firstSearchError}` : "No search results."
       });
       continue;
     }
