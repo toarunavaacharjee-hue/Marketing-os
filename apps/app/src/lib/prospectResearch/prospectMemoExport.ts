@@ -94,6 +94,78 @@ type DocxBlock =
   | { type: "table"; header: string[]; rows: string[][] }
   | { type: "hr" };
 
+type StageBucket = "intro" | "evaluation" | "pov" | "procurement" | "close" | "unknown";
+
+function stageBucketFromDealStage(dealStageRaw?: string): StageBucket {
+  const s = (dealStageRaw || "").toLowerCase().trim();
+  if (!s || s === "tbd" || s === "unknown") return "unknown";
+  if (/(intro|first|discovery|qualif)/.test(s)) return "intro";
+  if (/(evaluat|compare|shortlist|consider)/.test(s)) return "evaluation";
+  if (/(pilot|pov|proof|trial|technical validation)/.test(s)) return "pov";
+  if (/(procure|security|legal|msa|dpa|so?c ?2|infosec)/.test(s)) return "procurement";
+  if (/(close|sign|contract|final|implementation|kickoff)/.test(s)) return "close";
+  return "unknown";
+}
+
+function nextStepsMarkdown(ctx: ProspectMemoExportContext): string {
+  const bucket = stageBucketFromDealStage(ctx.dealStage);
+  const account = (ctx.accountName || "the account").trim();
+  const stageLabel =
+    bucket === "intro"
+      ? "Stage 1 — Intro / First meeting (Discovery)"
+      : bucket === "evaluation"
+        ? "Stage 2 — Active evaluation (Comparing options)"
+        : bucket === "pov"
+          ? "Stage 3 — Solution validation (Pilot / POV)"
+          : bucket === "procurement"
+            ? "Stage 4 — Procurement / Security (Commercial + legal gates)"
+            : bucket === "close"
+              ? "Stage 5 — Close / Implementation planning"
+              : "Stage — Unknown / TBD";
+
+  const recommended =
+    bucket === "unknown"
+      ? `Recommended focus for ${account}: confirm evaluation stage + decision process, then pick the right next step from the playbook below.`
+      : `Recommended focus for ${account}: ${stageLabel}.`;
+
+  return [
+    recommended,
+    "---",
+    "Stage 1 — Intro / First meeting (Discovery)",
+    "- Objective: confirm problem, stakeholders, and success metrics.",
+    "- Next steps: schedule a 60‑min deep-dive discovery; confirm decision process + timeline; identify evaluation criteria.",
+    "- Communication: recap email within 2 hours + calendar invite.",
+    "",
+    "Stage 2 — Active evaluation (Comparing options)",
+    "- Objective: prove fit + create a champion.",
+    "- Next steps: tailored demo/workshop; technical validation session (integration + security model); share a 1‑page business case draft.",
+    "- Communication: email + shared doc; short Slack/Teams note if appropriate.",
+    "",
+    "Stage 3 — Solution validation (Pilot / POV)",
+    "- Objective: de-risk adoption and quantify value.",
+    "- Next steps: define a 2–4 week POV plan (scope, success metrics, owners, timeline); confirm integrations + data access; agree a go/no-go date.",
+    "- Communication: working session + POV plan in writing.",
+    "",
+    "Stage 4 — Procurement / Security (Commercial + legal gates)",
+    "- Objective: remove friction and keep momentum.",
+    "- Next steps: send security pack (SOC2, DPA, subprocessors, architecture); align on terms; confirm legal workflow + signature target date.",
+    "- Communication: checklist-driven email + 15‑min procurement alignment call.",
+    "",
+    "Stage 5 — Close / Implementation planning",
+    "- Objective: operationalize the decision.",
+    "- Next steps: kickoff plan (timeline, admins, training); define 30/60/90‑day success checkpoints; set exec sponsor cadence.",
+    "- Communication: kickoff invite + implementation plan doc; weekly updates.",
+    "",
+    "Follow-up email template (copy/paste)",
+    "- Subject: Next steps for " + account,
+    "- 1) What we heard (top 3 priorities)",
+    "- 2) Decisions made today",
+    "- 3) Risks / blockers (and who owns each)",
+    "- 4) Next step (with owner + date/time)",
+    "- 5) Open questions (3 max)"
+  ].join("\n");
+}
+
 function normalizeMd(md: string): string {
   if (!md.trim()) return "";
   let s = md.replace(/\r\n/g, "\n");
@@ -453,6 +525,14 @@ function buildDocumentChildren(ctx: ProspectMemoExportContext): Array<Paragraph 
   if (ctx.additionalContext?.trim()) children.push(new Paragraph({ text: "" }));
   children.push(new Paragraph({ text: "Memo sections", heading: HeadingLevel.HEADING_1 }));
   children.push(...memoSectionChildren(ctx.memo));
+  children.push(new Paragraph({ text: "Recommended Next Steps (by stage)", heading: HeadingLevel.HEADING_1 }));
+  for (const b of parseDocxBlocks(nextStepsMarkdown(ctx))) {
+    if (b.type === "paragraph") children.push(new Paragraph({ text: b.text || " " }));
+    else if (b.type === "hr") children.push(docxHr());
+    else if (b.type === "bullets") {
+      for (const it of b.items) children.push(new Paragraph({ text: it || " ", bullet: { level: 0 } }));
+    } else if (b.type === "table") children.push(docxTable(b.header, b.rows));
+  }
   children.push(...agentSectionParagraphs(ctx));
   return children;
 }

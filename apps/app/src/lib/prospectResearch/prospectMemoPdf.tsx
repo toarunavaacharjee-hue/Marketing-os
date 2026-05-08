@@ -175,7 +175,7 @@ function isLikelySubheading(text: string): boolean {
   if (/[.!?]$/.test(t)) return false;
   if (/^stakeholder group/i.test(t)) return true;
   if (
-    /^(what they'?re looking for|key decision makers|organizational context|sales strategy notes|open intelligence gaps|meeting \/ demo prep|research sources)\b/i.test(
+    /^(what they'?re looking for|key decision makers|organizational context|sales strategy notes|open intelligence gaps|meeting \/ demo prep|research sources|follow-up email template)\b/i.test(
       t
     )
   )
@@ -183,6 +183,78 @@ function isLikelySubheading(text: string): boolean {
   const letters = (t.match(/[A-Za-z]/g) ?? []).length;
   const non = (t.match(/[^A-Za-z0-9\s—–-]/g) ?? []).length;
   return letters >= 6 && non <= 1 && /[A-Za-z]/.test(t);
+}
+
+type StageBucket = "intro" | "evaluation" | "pov" | "procurement" | "close" | "unknown";
+
+function stageBucketFromDealStage(dealStageRaw?: string): StageBucket {
+  const s = (dealStageRaw || "").toLowerCase().trim();
+  if (!s || s === "tbd" || s === "unknown") return "unknown";
+  if (/(intro|first|discovery|qualif)/.test(s)) return "intro";
+  if (/(evaluat|compare|shortlist|consider)/.test(s)) return "evaluation";
+  if (/(pilot|pov|proof|trial|technical validation)/.test(s)) return "pov";
+  if (/(procure|security|legal|msa|dpa|so?c ?2|infosec)/.test(s)) return "procurement";
+  if (/(close|sign|contract|final|implementation|kickoff)/.test(s)) return "close";
+  return "unknown";
+}
+
+function nextStepsMarkdown(ctx: ProspectMemoPdfContext): string {
+  const bucket = stageBucketFromDealStage(ctx.dealStage);
+  const account = (ctx.accountName || "the account").trim();
+  const stageLabel =
+    bucket === "intro"
+      ? "Stage 1 — Intro / First meeting (Discovery)"
+      : bucket === "evaluation"
+        ? "Stage 2 — Active evaluation (Comparing options)"
+        : bucket === "pov"
+          ? "Stage 3 — Solution validation (Pilot / POV)"
+          : bucket === "procurement"
+            ? "Stage 4 — Procurement / Security (Commercial + legal gates)"
+            : bucket === "close"
+              ? "Stage 5 — Close / Implementation planning"
+              : "Stage — Unknown / TBD";
+
+  const recommended =
+    bucket === "unknown"
+      ? `Recommended focus for ${account}: confirm evaluation stage + decision process, then pick the right next step from the playbook below.`
+      : `Recommended focus for ${account}: ${stageLabel}.`;
+
+  return [
+    recommended,
+    "---",
+    "Stage 1 — Intro / First meeting (Discovery)",
+    "- Objective: confirm problem, stakeholders, and success metrics.",
+    "- Next steps: schedule a 60‑min deep-dive discovery; confirm decision process + timeline; identify evaluation criteria.",
+    "- Communication: recap email within 2 hours + calendar invite.",
+    "",
+    "Stage 2 — Active evaluation (Comparing options)",
+    "- Objective: prove fit + create a champion.",
+    "- Next steps: tailored demo/workshop; technical validation session (integration + security model); share a 1‑page business case draft.",
+    "- Communication: email + shared doc; short Slack/Teams note if appropriate.",
+    "",
+    "Stage 3 — Solution validation (Pilot / POV)",
+    "- Objective: de-risk adoption and quantify value.",
+    "- Next steps: define a 2–4 week POV plan (scope, success metrics, owners, timeline); confirm integrations + data access; agree a go/no-go date.",
+    "- Communication: working session + POV plan in writing.",
+    "",
+    "Stage 4 — Procurement / Security (Commercial + legal gates)",
+    "- Objective: remove friction and keep momentum.",
+    "- Next steps: send security pack (SOC2, DPA, subprocessors, architecture); align on terms; confirm legal workflow + signature target date.",
+    "- Communication: checklist-driven email + 15‑min procurement alignment call.",
+    "",
+    "Stage 5 — Close / Implementation planning",
+    "- Objective: operationalize the decision.",
+    "- Next steps: kickoff plan (timeline, admins, training); define 30/60/90‑day success checkpoints; set exec sponsor cadence.",
+    "- Communication: kickoff invite + implementation plan doc; weekly updates.",
+    "",
+    "Follow-up email template (copy/paste)",
+    "- Subject: Next steps for " + account,
+    "- 1) What we heard (top 3 priorities)",
+    "- 2) Decisions made today",
+    "- 3) Risks / blockers (and who owns each)",
+    "- 4) Next step (with owner + date/time)",
+    "- 5) Open questions (3 max)"
+  ].join("\n");
 }
 
 const styles = StyleSheet.create({
@@ -467,6 +539,13 @@ function ProspectMemoPdfDocument({ ctx }: { ctx: ProspectMemoPdfContext }) {
             </View>
           );
         })}
+
+        <View style={styles.section}>
+          <View style={styles.sectionCard}>
+            <Text style={styles.sectionTitle}>Recommended Next Steps (by stage)</Text>
+            <MarkdownBlocks md={nextStepsMarkdown(ctx)} />
+          </View>
+        </View>
 
         <Text
           fixed
