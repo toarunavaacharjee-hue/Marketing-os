@@ -459,6 +459,43 @@ function buildDocumentChildren(ctx: ProspectMemoExportContext): Array<Paragraph 
 
 export async function prospectMemoToDocxBlob(ctx: ProspectMemoExportContext): Promise<Blob> {
   const doc = new Document({
+    styles: {
+      default: {
+        document: {
+          run: { font: "Calibri", size: 22, color: "111827" }, // 11pt
+          paragraph: { spacing: { line: 276, after: 120 } } // ~1.15 line spacing, 6pt after
+        }
+      },
+      paragraphStyles: [
+        {
+          id: "Title",
+          name: "Title",
+          basedOn: "Normal",
+          next: "Normal",
+          quickFormat: true,
+          run: { font: "Calibri", size: 36, bold: true, color: "111827" }, // 18pt
+          paragraph: { spacing: { after: 240 } }
+        },
+        {
+          id: "Heading1",
+          name: "Heading 1",
+          basedOn: "Normal",
+          next: "Normal",
+          quickFormat: true,
+          run: { font: "Calibri", size: 28, bold: true, color: "111827" }, // 14pt
+          paragraph: { spacing: { before: 260, after: 120 } }
+        },
+        {
+          id: "Heading2",
+          name: "Heading 2",
+          basedOn: "Normal",
+          next: "Normal",
+          quickFormat: true,
+          run: { font: "Calibri", size: 24, bold: true, color: "111827" }, // 12pt
+          paragraph: { spacing: { before: 220, after: 100 } }
+        }
+      ]
+    },
     sections: [
       {
         properties: {},

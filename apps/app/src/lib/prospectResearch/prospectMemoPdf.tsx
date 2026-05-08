@@ -188,9 +188,9 @@ function isLikelySubheading(text: string): boolean {
 const styles = StyleSheet.create({
   page: {
     paddingTop: 36,
-    paddingBottom: 42,
+    paddingBottom: 44,
     paddingHorizontal: 42,
-    fontSize: 10.5,
+    fontSize: 10.75,
     color: "#111827",
     fontFamily: "Helvetica"
   },
@@ -206,8 +206,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 12
   },
-  title: { fontSize: 16, fontWeight: 700 },
-  subtitle: { fontSize: 9, color: "#6B7280" },
+  title: { fontSize: 18, fontWeight: 700, letterSpacing: 0.2 },
+  subtitle: { fontSize: 9.5, color: "#6B7280" },
   metaGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 10, gap: 6 },
   metaPill: {
     borderWidth: 1,
@@ -227,16 +227,16 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#FFFFFF"
   },
-  sectionTitle: { fontSize: 11.5, fontWeight: 700, marginBottom: 6, color: "#111827" },
-  subTitle: { fontSize: 10.6, fontWeight: 700, marginTop: 10, color: "#111827" },
-  body: { fontSize: 10.2, lineHeight: 1.35, color: "#111827" },
-  paragraph: { marginTop: 2 },
-  bullets: { marginTop: 2 },
-  bulletRow: { flexDirection: "row", gap: 6, marginTop: 2 },
+  sectionTitle: { fontSize: 12.5, fontWeight: 700, marginBottom: 6, color: "#111827" },
+  subTitle: { fontSize: 11.2, fontWeight: 700, marginTop: 10, color: "#111827" },
+  body: { fontSize: 10.6, lineHeight: 1.45, color: "#111827" },
+  paragraph: { marginTop: 4 },
+  bullets: { marginTop: 4 },
+  bulletRow: { flexDirection: "row", gap: 6, marginTop: 3 },
   bulletDot: { width: 10, color: "#111827" },
   bulletText: { flex: 1 },
 
-  table: { borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, overflow: "hidden", marginTop: 6 },
+  table: { borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, overflow: "hidden", marginTop: 8 },
   trHead: {
     flexDirection: "row",
     backgroundColor: "#F3F4F6",
@@ -248,19 +248,19 @@ const styles = StyleSheet.create({
   td: { padding: 6, fontSize: 9, color: "#111827" },
 
   // “SaaS-y” cards for wide tables (stakeholders, agendas, etc.)
-  cardsWrap: { marginTop: 6, gap: 8 },
+  cardsWrap: { marginTop: 8, gap: 10 },
   rowCard: {
     borderWidth: 1,
     borderColor: "#E5E7EB",
     borderRadius: 10,
-    padding: 8,
+    padding: 9,
     backgroundColor: "#FFFFFF"
   },
-  rowCardTitle: { fontSize: 10.4, fontWeight: 700, color: "#111827" },
+  rowCardTitle: { fontSize: 10.9, fontWeight: 700, color: "#111827" },
   kvGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 6 },
-  kvItem: { width: "50%", paddingRight: 10, marginTop: 4 },
+  kvItem: { width: "50%", paddingRight: 10, marginTop: 5 },
   kvLabel: { fontSize: 8.2, color: "#6B7280" },
-  kvValue: { fontSize: 9.2, color: "#111827", marginTop: 1 },
+  kvValue: { fontSize: 9.4, color: "#111827", marginTop: 1 },
 
   muted: { color: "#6B7280" }
 });
@@ -299,7 +299,9 @@ function StakeholderSummary({ stakeholders }: { stakeholders: EnrichedStakeholde
 function MarkdownTable({ header, rows }: { header: string[]; rows: string[][] }) {
   const cols = Math.max(1, header.length || (rows[0]?.length ?? 1));
   const safeHeader = header.slice(0, cols).map((h) => softWrapText(h));
-  const safeRows = rows.map((r) => Array.from({ length: cols }, (_, ci) => softWrapText((r[ci] ?? "").trim() || "—")));
+  const safeRows = rows.map((r) =>
+    Array.from({ length: cols }, (_, ci) => softWrapText((r[ci] ?? "").trim() || "—"))
+  );
 
   // 5+ columns is already too cramped for a readable PDF. Convert into “cards”.
   if (cols >= 5) {
@@ -347,8 +349,8 @@ function MarkdownTable({ header, rows }: { header: string[]; rows: string[][] })
   const cellStyleFor = (ci: number) => ({
     width: `${Math.round((weights[ci] / total) * 1000) / 10}%` as const
   });
-  const tdStyle = cols >= 5 ? [styles.td, { fontSize: 8.6 }] : [styles.td];
-  const thStyle = cols >= 5 ? [styles.th, { fontSize: 8.0 }] : [styles.th];
+  const tdStyle = cols >= 5 ? [styles.td, { fontSize: 8.75 }] : [styles.td];
+  const thStyle = cols >= 5 ? [styles.th, { fontSize: 8.1 }] : [styles.th];
 
   return (
     <View style={styles.table}>
@@ -397,8 +399,8 @@ function MarkdownBlocks({ md }: { md: string }) {
             <View
               key={idx}
               style={{
-                marginTop: 6,
-                marginBottom: 6,
+                marginTop: 8,
+                marginBottom: 8,
                 borderBottomWidth: 1,
                 borderBottomColor: "#E5E7EB"
               }}
@@ -465,6 +467,19 @@ function ProspectMemoPdfDocument({ ctx }: { ctx: ProspectMemoPdfContext }) {
             </View>
           );
         })}
+
+        <Text
+          fixed
+          style={{
+            position: "absolute",
+            left: 42,
+            right: 42,
+            bottom: 18,
+            fontSize: 8.5,
+            color: "#9CA3AF"
+          }}
+          render={({ pageNumber, totalPages }) => `Prospect Intelligence Memo  ·  Page ${pageNumber} / ${totalPages}`}
+        />
       </Page>
     </Document>
   );
