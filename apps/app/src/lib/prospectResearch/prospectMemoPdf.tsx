@@ -26,6 +26,13 @@ function normalizeMd(md: string): string {
   s = s.replace(/```[\s\S]*?```/g, "\n[code block omitted]\n");
   // Keep pipes so we can render tables, but strip headings and inline formatting.
   s = s.replace(/^#{1,6}\s+/gm, "");
+  // Emoji / pictographs can render as garbage blocks in many PDF fonts.
+  // Replace common ones with simple ASCII so section labels don't corrupt.
+  s = s
+    .replace(/🔑/g, "Key: ")
+    .replace(/🖥️/g, "App: ")
+    .replace(/🔍/g, "Research: ");
+  s = s.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
   s = s.replace(/\*\*([^*]+)\*\*/g, "$1");
   s = s.replace(/\*([^*]+)\*/g, "$1");
   s = s.replace(/__([^_]+)__/g, "$1");
@@ -37,7 +44,8 @@ function normalizeMd(md: string): string {
 type MdBlock =
   | { type: "paragraph"; text: string }
   | { type: "bullets"; items: string[] }
-  | { type: "table"; header: string[]; rows: string[][] };
+  | { type: "table"; header: string[]; rows: string[][] }
+  | { type: "hr" };
 
 function isTableSeparatorLine(line: string): boolean {
   const t = line.trim();
@@ -74,6 +82,32 @@ function parseMarkdownBlocks(md: string): MdBlock[] {
     if (!t) {
       flushPara();
       i++;
+      continue;
+    }
+
+    if (/^---+$/.test(t)) {
+      flushPara();
+      blocks.push({ type: "hr" });
+      i++;
+      continue;
+    }
+
+    // TSV-ish tables (Claude often emits these, which look like "Field<TAB>Detail").
+    const nextRaw = lines[i + 1] ?? "";
+    const nextTrim = nextRaw.trim();
+    if (t.includes("\t") && nextTrim.includes("\t")) {
+      flushPara();
+      const header = t.split("\t").map((c) => c.trim()).filter(Boolean);
+      i++;
+      const rows: string[][] = [];
+      while (i < lines.length) {
+        const rowLine = (lines[i] ?? "").trim();
+        if (!rowLine || !rowLine.includes("\t")) break;
+        const row = rowLine.split("\t").map((c) => c.trim());
+        if (row.some((c) => c.trim().length > 0)) rows.push(row);
+        i++;
+      }
+      blocks.push({ type: "table", header, rows });
       continue;
     }
 
@@ -223,14 +257,27 @@ function StakeholderTable({ stakeholders }: { stakeholders: EnrichedStakeholder[
 
 function MarkdownTable({ header, rows }: { header: string[]; rows: string[][] }) {
   const cols = Math.max(1, header.length || (rows[0]?.length ?? 1));
-  const widthPct = `${Math.floor(100 / cols)}%` as const;
-  const cellStyle = { width: widthPct };
+  const clean = (s: string) => (s || "").toLowerCase().replace(/[^a-z]/g, "");
+  const weights = header.slice(0, cols).map((h) => {
+    const k = clean(h);
+    if (k.includes("role") || k.includes("notes")) return 3.2;
+    if (k.includes("linkedin") || k.includes("url")) return 2.2;
+    if (k.includes("email")) return 2.0;
+    if (k.includes("dept") || k.includes("department")) return 1.6;
+    if (k.includes("title")) return 1.8;
+    if (k.includes("company")) return 1.8;
+    return 1.4; // name / default
+  });
+  const total = weights.reduce((a, b) => a + b, 0) || cols;
+  const cellStyleFor = (ci: number) => ({ width: `${Math.round((weights[ci] / total) * 1000) / 10}%` as const });
+  const tdStyle = cols >= 6 ? [styles.td, { fontSize: 8.5 }] : [styles.td];
+  const thStyle = cols >= 6 ? [styles.th, { fontSize: 8 }] : [styles.th];
 
   return (
     <View style={styles.table}>
       <View style={styles.trHead}>
         {header.slice(0, cols).map((h, i) => (
-          <Text key={i} style={[styles.th, cellStyle]}>
+          <Text key={i} style={[...thStyle, cellStyleFor(i)]}>
             {h}
           </Text>
         ))}
@@ -238,7 +285,7 @@ function MarkdownTable({ header, rows }: { header: string[]; rows: string[][] })
       {rows.map((r, ri) => (
         <View key={ri} style={[styles.tr, ...(ri === rows.length - 1 ? [{ borderBottomWidth: 0 }] : [])]}>
           {Array.from({ length: cols }, (_, ci) => (
-            <Text key={ci} style={[styles.td, cellStyle]}>
+            <Text key={ci} style={[...tdStyle, cellStyleFor(ci)]}>
               {(r[ci] ?? "").trim() || "—"}
             </Text>
           ))}
@@ -258,6 +305,19 @@ function MarkdownBlocks({ md }: { md: string }) {
             <Text key={idx} style={[styles.body, styles.paragraph]}>
               {b.text}
             </Text>
+          );
+        }
+        if (b.type === "hr") {
+          return (
+            <View
+              key={idx}
+              style={{
+                marginTop: 6,
+                marginBottom: 6,
+                borderBottomWidth: 1,
+                borderBottomColor: "#E5E7EB"
+              }}
+            />
           );
         }
         if (b.type === "bullets") {

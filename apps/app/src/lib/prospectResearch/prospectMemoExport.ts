@@ -1,4 +1,16 @@
-import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
+import {
+  BorderStyle,
+  Document,
+  HeadingLevel,
+  Packer,
+  Paragraph,
+  ShadingType,
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  WidthType
+} from "docx";
 import { jsPDF } from "jspdf";
 import {
   PROSPECT_MEMO_KEYS,
@@ -76,6 +88,180 @@ export function markdownToPlainText(md: string): string {
   return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+type DocxBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "bullets"; items: string[] }
+  | { type: "table"; header: string[]; rows: string[][] }
+  | { type: "hr" };
+
+function normalizeMd(md: string): string {
+  if (!md.trim()) return "";
+  let s = md.replace(/\r\n/g, "\n");
+  s = s.replace(/```[\s\S]*?```/g, "\n[code block omitted]\n");
+  s = s.replace(/^#{1,6}\s+/gm, "");
+  // Emoji / pictographs often don’t render correctly in DOCX/PDF exports.
+  s = s
+    .replace(/🔑/g, "Key: ")
+    .replace(/🖥️/g, "App: ")
+    .replace(/🔍/g, "Research: ");
+  s = s.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
+  s = s.replace(/\*\*([^*]+)\*\*/g, "$1");
+  s = s.replace(/\*([^*]+)\*/g, "$1");
+  s = s.replace(/__([^_]+)__/g, "$1");
+  s = s.replace(/_([^_]+)_/g, "$1");
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  return s.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function isTableSeparatorLine(line: string): boolean {
+  const t = line.trim();
+  if (!t.includes("|")) return false;
+  return /^[\s|:-]+$/.test(t.replace(/\|/g, ""));
+}
+
+function parseTableRow(line: string): string[] {
+  return line
+    .split("|")
+    .map((c) => c.trim())
+    .filter((c) => c.length > 0);
+}
+
+function parseDocxBlocks(md: string): DocxBlock[] {
+  const s = normalizeMd(md);
+  if (!s) return [{ type: "paragraph", text: "—" }];
+  const lines = s.split("\n");
+  const blocks: DocxBlock[] = [];
+  let paraBuf: string[] = [];
+
+  const flushPara = () => {
+    const t = paraBuf.join(" ").replace(/\s{2,}/g, " ").trim();
+    if (t) blocks.push({ type: "paragraph", text: t });
+    paraBuf = [];
+  };
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    const t = line.trim();
+    if (!t) {
+      flushPara();
+      i++;
+      continue;
+    }
+
+    if (/^---+$/.test(t)) {
+      flushPara();
+      blocks.push({ type: "hr" });
+      i++;
+      continue;
+    }
+
+    // TSV-like tables (Claude often emits these).
+    const nextRaw = lines[i + 1] ?? "";
+    const nextTrim = nextRaw.trim();
+    if (t.includes("\t") && nextTrim.includes("\t")) {
+      flushPara();
+      const header = t.split("\t").map((c) => c.trim()).filter(Boolean);
+      i++;
+      const rows: string[][] = [];
+      while (i < lines.length) {
+        const rowLine = (lines[i] ?? "").trim();
+        if (!rowLine || !rowLine.includes("\t")) break;
+        const row = rowLine.split("\t").map((c) => c.trim());
+        if (row.some((c) => c.trim().length > 0)) rows.push(row);
+        i++;
+      }
+      blocks.push({ type: "table", header, rows });
+      continue;
+    }
+
+    // Pipe tables.
+    const next = (lines[i + 1] ?? "").trim();
+    if (t.includes("|") && isTableSeparatorLine(next)) {
+      flushPara();
+      const header = parseTableRow(t);
+      i += 2;
+      const rows: string[][] = [];
+      while (i < lines.length) {
+        const rowLine = (lines[i] ?? "").trim();
+        if (!rowLine || !rowLine.includes("|")) break;
+        const row = parseTableRow(rowLine);
+        if (row.length) rows.push(row);
+        i++;
+      }
+      blocks.push({ type: "table", header, rows });
+      continue;
+    }
+
+    // Bullets.
+    const bulletMatch = t.match(/^([-*+]|•)\s+(.*)$/);
+    const numberedMatch = t.match(/^\d+\.\s+(.*)$/);
+    if (bulletMatch || numberedMatch) {
+      flushPara();
+      const items: string[] = [];
+      while (i < lines.length) {
+        const tt = (lines[i] ?? "").trim();
+        const bm = tt.match(/^([-*+]|•)\s+(.*)$/);
+        const nm = tt.match(/^\d+\.\s+(.*)$/);
+        if (!bm && !nm) break;
+        items.push((bm?.[2] ?? nm?.[1] ?? "").trim());
+        i++;
+      }
+      blocks.push({ type: "bullets", items: items.filter(Boolean) });
+      continue;
+    }
+
+    paraBuf.push(t);
+    i++;
+  }
+  flushPara();
+  return blocks.length ? blocks : [{ type: "paragraph", text: "—" }];
+}
+
+function docxHr(): Paragraph {
+  return new Paragraph({
+    border: {
+      bottom: { style: BorderStyle.SINGLE, size: 6, color: "E5E7EB" }
+    },
+    spacing: { after: 120, before: 120 }
+  });
+}
+
+function docxTable(header: string[], rows: string[][]): Table {
+  const cols = Math.max(1, header.length || (rows[0]?.length ?? 1));
+  const colW = Math.floor(100 / cols);
+  const cell = (text: string, opts?: { header?: boolean }) =>
+    new TableCell({
+      width: { size: colW, type: WidthType.PERCENTAGE },
+      shading: opts?.header ? { type: ShadingType.SOLID, color: "F3F4F6" } : undefined,
+      children: [
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: (text || "—").trim() || "—",
+              bold: !!opts?.header
+            })
+          ]
+        })
+      ]
+    });
+
+  const head = new TableRow({
+    children: Array.from({ length: cols }, (_, i) => cell(header[i] ?? "", { header: true }))
+  });
+  const body = rows.map(
+    (r) =>
+      new TableRow({
+        children: Array.from({ length: cols }, (_, i) => cell(r[i] ?? ""))
+      })
+  );
+
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: [head, ...body]
+  });
+}
+
 function pushMetaParagraphs(children: Paragraph[], ctx: ProspectMemoExportContext): void {
   const rows: Array<[string, string]> = [
     ["Account / opportunity", ctx.accountName.trim()],
@@ -90,10 +276,7 @@ function pushMetaParagraphs(children: Paragraph[], ctx: ProspectMemoExportContex
     if (!val) continue;
     children.push(
       new Paragraph({
-        children: [
-          new TextRun({ text: `${label}: `, bold: true }),
-          new TextRun({ text: val })
-        ]
+        children: [new TextRun({ text: `${label}: `, bold: true }), new TextRun({ text: val })]
       })
     );
   }
@@ -110,20 +293,12 @@ function pushMetaParagraphs(children: Paragraph[], ctx: ProspectMemoExportContex
     ];
     const any = pub.some(([, v]) => v.length > 0);
     if (any) {
-      children.push(
-        new Paragraph({
-          text: "Public info (autofill)",
-          heading: HeadingLevel.HEADING_2
-        })
-      );
+      children.push(new Paragraph({ text: "Public info (autofill)", heading: HeadingLevel.HEADING_2 }));
       for (const [label, val] of pub) {
         if (!val) continue;
         children.push(
           new Paragraph({
-            children: [
-              new TextRun({ text: `${label}: `, bold: true }),
-              new TextRun({ text: val })
-            ]
+            children: [new TextRun({ text: `${label}: `, bold: true }), new TextRun({ text: val })]
           })
         );
       }
@@ -149,26 +324,23 @@ function additionalContextParagraphs(ctx: ProspectMemoExportContext): Paragraph[
   return children;
 }
 
-function memoSectionParagraphs(memo: ProspectIntelligenceMemo): Paragraph[] {
-  const children: Paragraph[] = [];
+function memoSectionChildren(memo: ProspectIntelligenceMemo): Array<Paragraph | Table> {
+  const children: Array<Paragraph | Table> = [];
   for (const key of PROSPECT_MEMO_KEYS) {
     const body = memo[key]?.trim();
-    children.push(
-      new Paragraph({
-        text: PROSPECT_MEMO_LABELS[key],
-        heading: HeadingLevel.HEADING_2
-      })
-    );
+    children.push(new Paragraph({ text: PROSPECT_MEMO_LABELS[key], heading: HeadingLevel.HEADING_2 }));
     if (!body) {
       children.push(new Paragraph({ text: "—" }));
       continue;
     }
-    const plain = markdownToPlainText(body);
-    for (const block of plain.split(/\n{2,}/)) {
-      const lines = block.split("\n").map((l) => l.trimEnd());
-      for (const line of lines) {
-        children.push(new Paragraph({ text: line || " " }));
-      }
+
+    const blocks = parseDocxBlocks(body);
+    for (const b of blocks) {
+      if (b.type === "paragraph") children.push(new Paragraph({ text: b.text || " " }));
+      else if (b.type === "hr") children.push(docxHr());
+      else if (b.type === "bullets") {
+        for (const it of b.items) children.push(new Paragraph({ text: it || " ", bullet: { level: 0 } }));
+      } else if (b.type === "table") children.push(docxTable(b.header, b.rows));
     }
   }
   return children;
@@ -203,33 +375,17 @@ function agentSectionParagraphs(ctx: ProspectMemoExportContext): Paragraph[] {
   return children;
 }
 
-function buildDocumentChildren(ctx: ProspectMemoExportContext): Paragraph[] {
-  const children: Paragraph[] = [];
-  children.push(
-    new Paragraph({
-      text: "Prospect Intelligence Memo",
-      heading: HeadingLevel.TITLE
-    })
-  );
-  children.push(
-    new Paragraph({
-      children: [new TextRun({ text: `Generated: ${new Date().toLocaleString()}` })]
-    })
-  );
+function buildDocumentChildren(ctx: ProspectMemoExportContext): Array<Paragraph | Table> {
+  const children: Array<Paragraph | Table> = [];
+  children.push(new Paragraph({ text: "Prospect Intelligence Memo", heading: HeadingLevel.TITLE }));
+  children.push(new Paragraph({ children: [new TextRun({ text: `Generated: ${new Date().toLocaleString()}` })] }));
   children.push(new Paragraph({ text: "" }));
-  pushMetaParagraphs(children, ctx);
+  pushMetaParagraphs(children as Paragraph[], ctx);
   children.push(new Paragraph({ text: "" }));
   children.push(...additionalContextParagraphs(ctx));
-  if (ctx.additionalContext?.trim()) {
-    children.push(new Paragraph({ text: "" }));
-  }
-  children.push(
-    new Paragraph({
-      text: "Memo sections",
-      heading: HeadingLevel.HEADING_1
-    })
-  );
-  children.push(...memoSectionParagraphs(ctx.memo));
+  if (ctx.additionalContext?.trim()) children.push(new Paragraph({ text: "" }));
+  children.push(new Paragraph({ text: "Memo sections", heading: HeadingLevel.HEADING_1 }));
+  children.push(...memoSectionChildren(ctx.memo));
   children.push(...agentSectionParagraphs(ctx));
   return children;
 }
@@ -365,3 +521,4 @@ export function downloadBlob(blob: Blob, filename: string): void {
   a.remove();
   URL.revokeObjectURL(url);
 }
+
