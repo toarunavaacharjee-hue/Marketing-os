@@ -30,6 +30,8 @@ function normalizeMd(md: string): string {
     .replace(/🔑/g, "Key: ")
     .replace(/🖥️/g, "App: ")
     .replace(/🔍/g, "Research: ");
+  // Also strip common “dingbat” symbols (e.g. ⏱) that can render poorly.
+  s = s.replace(/[\u2600-\u27BF]/g, "");
   s = s.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
   s = s.replace(/\*\*([^*]+)\*\*/g, "$1");
   s = s.replace(/\*([^*]+)\*/g, "$1");
@@ -299,8 +301,8 @@ function MarkdownTable({ header, rows }: { header: string[]; rows: string[][] })
   const safeHeader = header.slice(0, cols).map((h) => softWrapText(h));
   const safeRows = rows.map((r) => Array.from({ length: cols }, (_, ci) => softWrapText((r[ci] ?? "").trim() || "—")));
 
-  // Wide tables don’t read well in PDFs. Convert them into “cards” so nothing overflows.
-  if (cols >= 6) {
+  // 5+ columns is already too cramped for a readable PDF. Convert into “cards”.
+  if (cols >= 5) {
     const clean = (s: string) => (s || "").toLowerCase().replace(/[^a-z]/g, "");
     const labelFor = (i: number) => (safeHeader[i] ?? `Field ${i + 1}`).replace(/\u200b/g, "");
     const nameIdx = safeHeader.findIndex((h) => clean(h).includes("name"));

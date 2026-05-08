@@ -104,6 +104,8 @@ function normalizeMd(md: string): string {
     .replace(/🔑/g, "Key: ")
     .replace(/🖥️/g, "App: ")
     .replace(/🔍/g, "Research: ");
+  // Strip “dingbat” symbols too (e.g. ⏱) to avoid font glitches.
+  s = s.replace(/[\u2600-\u27BF]/g, "");
   s = s.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
   s = s.replace(/\*\*([^*]+)\*\*/g, "$1");
   s = s.replace(/\*([^*]+)\*/g, "$1");
@@ -237,7 +239,9 @@ function docxWideTableAsCards(header: string[], rows: string[][]): Table {
   const cardRows: TableRow[] = [];
   for (const r of rows) {
     const rr = Array.from({ length: cols }, (_, i) => (r[i] ?? "").trim());
-    const title = [rr[nameIdx >= 0 ? nameIdx : 0], rr[titleIdx >= 0 ? titleIdx : 1]].filter(Boolean).join(" — ").trim() || "Stakeholder";
+    const title =
+      [rr[nameIdx >= 0 ? nameIdx : 0], rr[titleIdx >= 0 ? titleIdx : 1]].filter(Boolean).join(" — ").trim() ||
+      "Stakeholder";
 
     // Header row.
     cardRows.push(
@@ -290,7 +294,7 @@ function docxWideTableAsCards(header: string[], rows: string[][]): Table {
 function docxTable(header: string[], rows: string[][]): Table {
   const cols = Math.max(1, header.length || (rows[0]?.length ?? 1));
   // Wide tables are what makes the DOCX feel “intern pasted a spreadsheet”.
-  if (cols >= 6) return docxWideTableAsCards(header, rows);
+  if (cols >= 5) return docxWideTableAsCards(header, rows);
 
   const colW = Math.floor(100 / cols);
   const cell = (text: string, opts?: { header?: boolean }) =>
