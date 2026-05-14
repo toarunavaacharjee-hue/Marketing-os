@@ -14,14 +14,20 @@ export const env = {
   NEXT_PUBLIC_SITE_URL:
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
 
-  NEXT_PUBLIC_SUPABASE_URL: requirePublicEnv(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    "NEXT_PUBLIC_SUPABASE_URL"
-  ),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: requirePublicEnv(
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY"
-  ),
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
+  get NEXT_PUBLIC_SUPABASE_URL() {
+    return requirePublicEnv(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      "NEXT_PUBLIC_SUPABASE_URL"
+    );
+  },
+  get NEXT_PUBLIC_SUPABASE_ANON_KEY() {
+    return requirePublicEnv(
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+    );
+  },
+  get SUPABASE_SERVICE_ROLE_KEY() {
+    return process.env.SUPABASE_SERVICE_ROLE_KEY;
+  },
 };
 

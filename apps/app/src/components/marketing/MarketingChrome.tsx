@@ -138,7 +138,17 @@ export function MarketingFooter() {
         </div>
         <div className="mt-12 flex flex-col gap-2 border-t border-border pt-8 text-center text-[12px] text-text3 sm:flex-row sm:justify-between sm:text-left">
           <span>© {new Date().getFullYear()} AI Marketing Workbench</span>
-          <span className="font-mono text-[11px] text-text3">Built for product marketing &amp; GTM teams</span>
+          <span className="font-mono text-[11px] text-text3">
+            Built by{" "}
+            <a
+              href="https://orahtechandmarketing.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition hover:text-text"
+            >
+              Orah Tech and Marketing
+            </a>
+          </span>
         </div>
       </div>
     </footer>

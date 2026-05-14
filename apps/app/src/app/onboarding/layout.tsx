@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { redirectIfUnverifiedEmail } from "@/lib/auth/emailVerification";
 import { redirect } from "next/navigation";
