@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import SignupEnhanced from "@/app/signup/SignupEnhanced";
 
