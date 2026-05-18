@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import {
@@ -522,6 +523,14 @@ export function CampaignPlanner({
                       >
                         Campaign brief
                       </button>
+                      {hasNarrative ? (
+                        <Link
+                          href={`/dashboard/gtm-planner?product=${encodeURIComponent(card.campaignSegment ? `${card.title} — ${card.campaignSegment}` : card.title)}&segment=${encodeURIComponent(card.campaignSegment ?? "")}`}
+                          className="rounded-lg border border-teal/40 bg-teal/10 px-2 py-1 text-[11px] font-medium text-teal hover:bg-teal/20"
+                        >
+                          Plan launch →
+                        </Link>
+                      ) : null}
                       <div className="flex items-center gap-1.5">
                         <span
                           className={`inline-block h-1.5 w-1.5 rounded-full ${hasNarrative ? "bg-emerald-500" : "bg-border"}`}

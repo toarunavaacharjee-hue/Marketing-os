@@ -7,6 +7,7 @@ import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/da
 import { DashboardTopBar } from "@/app/dashboard/_components/DashboardTopBar";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
 import { ProfileCompletenessBanner } from "@/app/dashboard/_components/ProfileCompletenessBanner";
+import { NextStepNudge } from "@/app/dashboard/_components/NextStepNudge";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
 
 type Profile = {
@@ -552,6 +553,7 @@ export function DashboardShell({
               <ModuleFlowBar />
               <ProfileCompletenessBanner />
               {children}
+              <NextStepNudge />
             </div>
           </main>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { buildGtmPlanPrompt, GTM_PLAN_SYSTEM } from "@/lib/pmmPrompts";
@@ -174,9 +175,13 @@ export function GtmPlannerClient({
   productName?: string;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const searchParams = useSearchParams();
+  const qProduct = searchParams.get("product") ?? "";
+  const qSegment = searchParams.get("segment") ?? "";
   const [plan, setPlan] = useState<PlanValue>(() => ({
     ...DEFAULT_PLAN,
-    productOrFeature: productName
+    productOrFeature: qProduct || productName,
+    segment: qSegment
   }));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -212,10 +217,12 @@ export function GtmPlannerClient({
       const phases = Array.isArray(v.phases) && v.phases.length
         ? v.phases.map(normalizePhase).filter(Boolean) as Phase[]
         : DEFAULT_PHASES;
+      const savedProduct = typeof v.productOrFeature === "string" ? v.productOrFeature : "";
+      const savedSegment = typeof v.segment === "string" ? v.segment : "";
       setPlan({
         launchDate: typeof v.launchDate === "string" ? v.launchDate : "",
-        productOrFeature: typeof v.productOrFeature === "string" ? v.productOrFeature : productName,
-        segment: typeof v.segment === "string" ? v.segment : "",
+        productOrFeature: savedProduct || qProduct || productName,
+        segment: savedSegment || qSegment,
         goals: typeof v.goals === "string" ? v.goals : "",
         phases,
         stakeholders: typeof v.stakeholders === "string" ? v.stakeholders : DEFAULT_PLAN.stakeholders,
@@ -226,7 +233,7 @@ export function GtmPlannerClient({
       setExpandedPhases(initExpand);
     }
     setLoading(false);
-  }, [environmentId, supabase, productName]);
+  }, [environmentId, supabase, productName, qProduct, qSegment]);
 
   useEffect(() => { load(); }, [load]);
 
