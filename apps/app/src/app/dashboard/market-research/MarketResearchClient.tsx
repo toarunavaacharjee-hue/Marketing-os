@@ -459,6 +459,33 @@ export default function MarketResearchClient() {
         </div>
       </div>
 
+      {/* ICP handoff */}
+      {resultJson?.opportunity_map?.length ? (
+        <div className="rounded-xl border border-teal/30 bg-[color-mix(in_srgb,var(--color-teal)_8%,transparent)] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="text-sm font-semibold text-text">
+                Ready to define your ICP?
+              </div>
+              <p className="mt-1 text-xs text-text2">
+                Your top opportunity segments:{" "}
+                {resultJson.opportunity_map
+                  .slice(0, 3)
+                  .map((r) => r.segment)
+                  .join(", ")}
+                . Take these signals into ICP Segmentation to build precise customer profiles.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/icp-segmentation"
+              className="shrink-0 rounded-xl border border-teal/40 bg-[color-mix(in_srgb,var(--color-teal)_15%,transparent)] px-4 py-2 text-sm font-semibold text-teal transition-colors hover:bg-[color-mix(in_srgb,var(--color-teal)_25%,transparent)] whitespace-nowrap"
+            >
+              Build ICP Segments →
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       {/* Report modal */}
       {showReport ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

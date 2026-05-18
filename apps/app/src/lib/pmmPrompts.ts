@@ -413,3 +413,40 @@ No extra text before or after.`;
 
 export const GTM_PLAN_SYSTEM =
   "You are a B2B product marketing and GTM launch specialist. Generate specific, actionable launch checklists tailored to the product and segment. Follow the output format exactly. Plain text only.";
+
+// ─── Positioning health re-score ─────────────────────────────────────────────
+
+export type PositioningHealthInput = {
+  category: string;
+  target: string;
+  problem: string;
+  solution: string;
+  diff: string;
+  wedge: string;
+};
+
+export function buildPositioningHealthPrompt(input: PositioningHealthInput): string {
+  return `Score this B2B positioning canvas on four dimensions. Each score is 0–100.
+
+Category: ${input.category || "(not set)"}
+Target: ${input.target || "(not set)"}
+Problem: ${input.problem || "(not set)"}
+Solution: ${input.solution || "(not set)"}
+Differentiation: ${input.diff || "(not set)"}
+Wedge: ${input.wedge || "(not set)"}
+
+Scoring criteria:
+- Clarity (0-100): Is each field specific and jargon-free? Can a prospect instantly understand it?
+- Differentiation (0-100): Is the differentiation claim concrete and defensible vs. the likely alternatives?
+- Credibility (0-100): Does the solution/wedge statement feel grounded and believable, or vague and aspirational?
+- Message-market fit (0-100): Does the target + problem + solution form a coherent story for a real buyer segment?
+
+Return exactly four lines, nothing else:
+Clarity: [number]
+Differentiation: [number]
+Credibility: [number]
+Message-market fit: [number]`;
+}
+
+export const POSITIONING_HEALTH_SYSTEM =
+  "You are a B2B positioning evaluator. Score objectively based on specificity, credibility, and market fit. Return only the four score lines in the exact format requested.";
