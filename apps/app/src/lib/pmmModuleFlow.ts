@@ -16,7 +16,7 @@ export const PMM_JOURNEY: JourneyStep[] = [
   { href: "/dashboard/market-research", label: "Market Research", phase: "Strategy" },
   { href: "/dashboard/icp-segmentation", label: "ICP Segmentation", phase: "Strategy" },
   { href: "/dashboard/positioning-studio", label: "Positioning Studio", phase: "Strategy" },
-  { href: "/dashboard/messaging-artifacts", label: "Messaging & Artifacts", phase: "Strategy" },
+  { href: "/dashboard/messaging-artifacts", label: "Messaging Pillars", phase: "Strategy" },
   { href: "/dashboard/work", label: "Marketing Workbench", phase: "Planning" },
   { href: "/dashboard/campaigns", label: "Campaigns", phase: "Planning" },
   { href: "/dashboard/gtm-planner", label: "GTM Planner", phase: "Planning" },

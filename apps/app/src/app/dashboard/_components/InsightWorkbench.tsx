@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import {
+  buildEventCampaignPrompt,
+  EVENT_CAMPAIGN_SYSTEM,
+  buildStrategyFeedbackPrompt,
+  STRATEGY_FEEDBACK_SYSTEM
+} from "@/lib/pmmPrompts";
 
 type Variant = "events" | "customer" | "sales";
 
@@ -194,6 +200,20 @@ export function InsightWorkbench({
   const [generating, setGenerating] = useState(false);
   const [importing, setImporting] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Event campaign generation (per event)
+  const [eventCampaignProduct, setEventCampaignProduct] = useState("");
+  const [eventCampaignSegment, setEventCampaignSegment] = useState("");
+  const [eventCampaignOutputs, setEventCampaignOutputs] = useState<Record<string, string>>({});
+  const [generatingCampaignFor, setGeneratingCampaignFor] = useState<string | null>(null);
+  const [campaignOpenFor, setCampaignOpenFor] = useState<string | null>(null);
+
+  // Strategy feedback (sales + customer)
+  const [strategyInsight, setStrategyInsight] = useState("");
+  const [strategyProduct, setStrategyProduct] = useState("");
+  const [strategyOutput, setStrategyOutput] = useState("");
+  const [generatingStrategy, setGeneratingStrategy] = useState(false);
+  const [strategyError, setStrategyError] = useState<string | null>(null);
 
   const [events, setEvents] = useState<EventsValue>(() => seedEventsDefault());
 
@@ -414,6 +434,136 @@ export function InsightWorkbench({
       setError(e instanceof Error ? e.message : "Generation failed.");
     } finally {
       setGenerating(false);
+    }
+  }
+
+  function renderStrategyFeedbackPanel() {
+    return (
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="text-sm font-semibold text-heading">Send to Strategy</span>
+          <span className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+            AI
+          </span>
+        </div>
+        <p className="mb-3 text-xs text-text2">
+          Paste a specific insight and AI will extract ICP updates, messaging signals, and a
+          suggested action to feed back into your strategy.
+        </p>
+
+        {strategyError ? (
+          <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+            {strategyError}
+          </div>
+        ) : null}
+
+        <div className="space-y-2">
+          <div>
+            <label className="mb-1 block text-xs text-text2">
+              Product or feature (context)
+            </label>
+            <input
+              value={strategyProduct}
+              onChange={(e) => setStrategyProduct(e.target.value)}
+              placeholder="e.g. AI Marketing Workbench — Campaigns module"
+              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-text2">Insight to analyse</label>
+            <textarea
+              value={strategyInsight}
+              onChange={(e) => setStrategyInsight(e.target.value)}
+              rows={4}
+              placeholder={
+                variant === "sales"
+                  ? "e.g. Reps are hearing 'we already have HubSpot for this' on 60% of calls this quarter…"
+                  : "e.g. NPS detractors mention onboarding friction as the top reason in 3 consecutive quarters…"
+              }
+              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+            />
+          </div>
+        </div>
+
+        <AiProgressBar
+          active={generatingStrategy}
+          variant="dark"
+          title="Extracting strategy signals…"
+          estimate={AI_PROGRESS_ESTIMATE.short}
+          durationMs={45_000}
+        />
+
+        <button
+          type="button"
+          onClick={() => void generateStrategyFeedback()}
+          disabled={generatingStrategy || !strategyInsight.trim()}
+          className="mt-3 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+        >
+          {generatingStrategy ? "Analysing…" : "Extract strategy signals"}
+        </button>
+
+        {strategyOutput ? (
+          <div className="mt-3">
+            <div className="mb-1 text-xs text-text2">Strategy signals</div>
+            <pre className="whitespace-pre-wrap rounded-xl border border-border bg-surface p-3 text-sm text-heading">
+              {strategyOutput}
+            </pre>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  async function generateEventCampaign(ev: EventRow) {
+    setGeneratingCampaignFor(ev.id);
+    setStrategyError(null);
+    const prompt = buildEventCampaignPrompt({
+      eventName: ev.name || "Upcoming event",
+      eventDate: ev.eventDate,
+      location: ev.location,
+      productOrFeature: eventCampaignProduct.trim() || "our product",
+      segment: eventCampaignSegment.trim() || "event attendees",
+      goals: ev.goals
+    });
+    try {
+      const res = await fetch("/api/ai/module-generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt, system: EVENT_CAMPAIGN_SYSTEM, length: "medium" })
+      });
+      const data = (await res.json()) as { text?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Generation failed.");
+      setEventCampaignOutputs((prev) => ({ ...prev, [ev.id]: data.text ?? "" }));
+      setCampaignOpenFor(ev.id);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Generation failed.");
+    } finally {
+      setGeneratingCampaignFor(null);
+    }
+  }
+
+  async function generateStrategyFeedback() {
+    if (!strategyInsight.trim()) return;
+    setGeneratingStrategy(true);
+    setStrategyError(null);
+    const prompt = buildStrategyFeedbackPrompt({
+      variant: variant as "sales" | "customer",
+      insight: strategyInsight.trim(),
+      productOrFeature: strategyProduct.trim() || "this product"
+    });
+    try {
+      const res = await fetch("/api/ai/module-generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt, system: STRATEGY_FEEDBACK_SYSTEM, length: "medium" })
+      });
+      const data = (await res.json()) as { text?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Generation failed.");
+      setStrategyOutput(data.text ?? "");
+    } catch (e) {
+      setStrategyError(e instanceof Error ? e.message : "Generation failed.");
+    } finally {
+      setGeneratingStrategy(false);
     }
   }
 
@@ -778,6 +928,88 @@ export function InsightWorkbench({
                   className="max-w-full flex-1 accent-[var(--color-primary)] sm:max-w-[240px]"
                 />
               </div>
+
+              {/* Event campaign asset generator */}
+              <div className="mt-3 border-t border-border pt-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-text3">
+                    Campaign assets
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCampaignOpenFor(campaignOpenFor === ev.id ? null : ev.id)
+                    }
+                    className="text-[11px] text-primary hover:underline"
+                  >
+                    {campaignOpenFor === ev.id ? "Hide" : "Show"}
+                  </button>
+                </div>
+
+                {campaignOpenFor === ev.id ? (
+                  <div className="mt-2 space-y-2">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-[10px] uppercase text-text3">
+                          Product to promote
+                        </label>
+                        <input
+                          value={eventCampaignProduct}
+                          onChange={(e) => setEventCampaignProduct(e.target.value)}
+                          placeholder="e.g. AI Marketing Workbench"
+                          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] uppercase text-text3">
+                          Target segment at event
+                        </label>
+                        <input
+                          value={eventCampaignSegment}
+                          onChange={(e) => setEventCampaignSegment(e.target.value)}
+                          placeholder="e.g. VP Marketing, Series B SaaS"
+                          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                        />
+                      </div>
+                    </div>
+
+                    <AiProgressBar
+                      active={generatingCampaignFor === ev.id}
+                      variant="dark"
+                      title="Generating event campaign assets…"
+                      estimate={AI_PROGRESS_ESTIMATE.short}
+                      durationMs={60_000}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => void generateEventCampaign(ev)}
+                      disabled={Boolean(generatingCampaignFor)}
+                      className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+                    >
+                      {generatingCampaignFor === ev.id
+                        ? "Generating…"
+                        : eventCampaignOutputs[ev.id]
+                          ? "Regenerate campaign assets"
+                          : "Generate campaign assets"}
+                    </button>
+
+                    {eventCampaignOutputs[ev.id] ? (
+                      <textarea
+                        value={eventCampaignOutputs[ev.id]}
+                        onChange={(e) =>
+                          setEventCampaignOutputs((prev) => ({
+                            ...prev,
+                            [ev.id]: e.target.value
+                          }))
+                        }
+                        rows={18}
+                        className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+                      />
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
             </div>
           ))}
         </div>
@@ -898,6 +1130,7 @@ export function InsightWorkbench({
             />
           </div>
         </div>
+        {renderStrategyFeedbackPanel()}
       </>
     );
   }
@@ -969,6 +1202,7 @@ export function InsightWorkbench({
             className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
           />
         </div>
+        {renderStrategyFeedbackPanel()}
       </>
     );
   }
