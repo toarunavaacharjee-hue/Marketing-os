@@ -58,6 +58,7 @@ type Card = {
   id: string;
   title: string;
   tags: string[];
+  campaignProduct?: string;
   campaignSegment?: string;
   campaignSeason?: string;
   campaignTension?: string;
@@ -111,6 +112,7 @@ function normalizeCard(raw: unknown): Card | null {
     id,
     title,
     tags: tags.length ? tags : ["General"],
+    campaignProduct: typeof o.campaignProduct === "string" ? o.campaignProduct : undefined,
     campaignNarrative:
       typeof o.campaignNarrative === "string" ? o.campaignNarrative : undefined,
     campaignSegment: typeof o.campaignSegment === "string" ? o.campaignSegment : undefined,
@@ -318,7 +320,7 @@ export function CampaignPlanner({
     if (!c) return;
     setModalCardId(cardId);
     setActiveTab("brief");
-    setModalProduct((productName || c.title).trim());
+    setModalProduct((c.campaignProduct || productName || c.title).trim());
     setModalSegment(c.campaignSegment ?? "");
     setModalSeason(c.campaignSeason ?? "");
     setModalTension(c.campaignTension ?? "");
@@ -420,6 +422,7 @@ export function CampaignPlanner({
   function saveModal() {
     if (!modalCardId) return;
     updateCardById(modalCardId, {
+      campaignProduct: modalProduct,
       campaignSegment: modalSegment,
       campaignSeason: modalSeason,
       campaignTension: modalTension,
@@ -539,7 +542,7 @@ export function CampaignPlanner({
                       </button>
                       {hasNarrative ? (
                         <Link
-                          href={`/dashboard/gtm-planner?product=${encodeURIComponent(card.campaignSegment ? `${card.title} — ${card.campaignSegment}` : card.title)}&segment=${encodeURIComponent(card.campaignSegment ?? "")}`}
+                          href={`/dashboard/gtm-planner?product=${encodeURIComponent(card.campaignProduct || productName || card.title)}&segment=${encodeURIComponent(card.campaignSegment ?? "")}&from=${encodeURIComponent(card.title)}`}
                           className="rounded-lg border border-teal/40 bg-teal/10 px-2 py-1 text-[11px] font-medium text-teal hover:bg-teal/20"
                         >
                           Plan launch →

@@ -180,6 +180,7 @@ export function GtmPlannerClient({
   const searchParams = useSearchParams();
   const qProduct = searchParams.get("product") ?? "";
   const qSegment = searchParams.get("segment") ?? "";
+  const qFrom = searchParams.get("from") ?? "";
   const [plan, setPlan] = useState<PlanValue>(() => ({
     ...DEFAULT_PLAN,
     productOrFeature: qProduct || productName,
@@ -221,10 +222,11 @@ export function GtmPlannerClient({
         : DEFAULT_PHASES;
       const savedProduct = typeof v.productOrFeature === "string" ? v.productOrFeature : "";
       const savedSegment = typeof v.segment === "string" ? v.segment : "";
+      // Query params from "Plan launch →" always win — user deliberately navigated from a campaign card
       setPlan({
         launchDate: typeof v.launchDate === "string" ? v.launchDate : "",
-        productOrFeature: savedProduct || qProduct || productName,
-        segment: savedSegment || qSegment,
+        productOrFeature: qProduct || savedProduct || productName,
+        segment: qSegment || savedSegment,
         goals: typeof v.goals === "string" ? v.goals : "",
         phases,
         stakeholders: typeof v.stakeholders === "string" ? v.stakeholders : DEFAULT_PLAN.stakeholders,
@@ -336,6 +338,15 @@ export function GtmPlannerClient({
     <div className="space-y-5">
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
+      ) : null}
+
+      {qFrom ? (
+        <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-2.5 text-sm">
+          <span className="text-primary">←</span>
+          <span className="text-text2">
+            Pre-filled from campaign: <span className="font-semibold text-text">{qFrom}</span>
+          </span>
+        </div>
       ) : null}
 
       {/* Context inputs + AI generate */}
