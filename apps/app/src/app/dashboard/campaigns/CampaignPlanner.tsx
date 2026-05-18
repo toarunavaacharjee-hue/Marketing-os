@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { EmptyState } from "@/app/dashboard/_components/EmptyState";
+import { SkeletonKanban } from "@/app/dashboard/_components/Skeleton";
+import { useToast } from "@/app/dashboard/_components/Toast";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import {
   buildCampaignNarrativePrompt,
@@ -181,6 +184,7 @@ export function CampaignPlanner({
   productName?: string;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const toast = useToast();
   const [board, setBoard] = useState<Record<ColumnKey, Card[]>>(() => emptyBoard());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -364,8 +368,11 @@ export function CampaignPlanner({
       const { theme, hero } = parseNarrativeForThemeHero(text);
       setModalTheme((prev) => prev || theme);
       setModalHero((prev) => prev || hero);
+      toast("✓ Campaign brief generated");
     } catch (e) {
-      setModalError(e instanceof Error ? e.message : "Generation failed.");
+      const msg = e instanceof Error ? e.message : "Generation failed.";
+      setModalError(msg);
+      toast(msg, "error");
     } finally {
       setGeneratingNarrative(false);
     }
@@ -400,8 +407,11 @@ export function CampaignPlanner({
         ...prev,
         [channel]: { content: data.text ?? "", approved: false }
       }));
+      toast(`✓ ${CHANNEL_LABELS[channel]} generated`);
     } catch (e) {
-      setModalError(e instanceof Error ? e.message : "Generation failed.");
+      const msg = e instanceof Error ? e.message : "Generation failed.";
+      setModalError(msg);
+      toast(msg, "error");
     } finally {
       setGeneratingChannel(null);
     }
@@ -419,6 +429,7 @@ export function CampaignPlanner({
       channels: modalChannels,
       assets: modalAssets
     });
+    toast("✓ Campaign card saved");
     closeModal();
   }
 
@@ -443,7 +454,7 @@ export function CampaignPlanner({
 
   return (
     <div className="space-y-3">
-      {loading ? <div className="text-sm text-text2">Loading board…</div> : null}
+      {loading ? <SkeletonKanban /> : null}
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
@@ -492,10 +503,13 @@ export function CampaignPlanner({
                     key={card.id}
                     draggable
                     onDragStart={(e) => e.dataTransfer.setData("text/plain", card.id)}
-                    className="cursor-move rounded-xl border border-border bg-surface2 p-3"
+                    className="cursor-grab rounded-xl border border-border bg-surface2 p-3 active:cursor-grabbing active:shadow-md"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="text-sm font-medium text-text">{card.title}</div>
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <span className="shrink-0 select-none text-[14px] leading-none text-text3" title="Drag to move">⠿</span>
+                        <div className="truncate text-sm font-medium text-text">{card.title}</div>
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeCard(card.id)}

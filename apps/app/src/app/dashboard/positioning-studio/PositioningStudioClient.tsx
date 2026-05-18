@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { useToast } from "@/app/dashboard/_components/Toast";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   POSITIONING_KEY,
@@ -69,6 +70,7 @@ export default function PositioningStudioClient({
   productId: string;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -192,6 +194,7 @@ export default function PositioningStudioClient({
     }
     setCanvas(next);
     setSaved("Saved.");
+    toast("✓ Positioning canvas saved");
   }
 
   function fullCanvasSnapshot(): PositioningCanvasValue {
@@ -288,10 +291,13 @@ export default function PositioningStudioClient({
       if (data.canvas) {
         setCanvas(data.canvas);
         setDoc(data.canvas.doc);
+        toast("✓ Positioning regenerated from ICP segments");
       }
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Request failed.");
+      const msg = e instanceof Error ? e.message : "Request failed.";
+      setError(msg);
+      toast(msg, "error");
     } finally {
       setGenerating(false);
     }
@@ -319,6 +325,7 @@ export default function PositioningStudioClient({
       return;
     }
     setPricingSaved("Pricing narrative saved.");
+    toast("✓ Pricing narrative saved");
   }
 
   async function generatePricingNarrative() {
@@ -402,8 +409,11 @@ export default function PositioningStudioClient({
       if (upErr) throw new Error(upErr.message);
       setCanvas(next);
       setSaved("Health scores recalculated and saved.");
+      toast("✓ Health scores updated");
     } catch (e) {
-      setHealthError(e instanceof Error ? e.message : "Recalculation failed.");
+      const msg = e instanceof Error ? e.message : "Recalculation failed.";
+      setHealthError(msg);
+      toast(msg, "error");
     } finally {
       setHealthRecalculating(false);
     }
@@ -565,9 +575,9 @@ export default function PositioningStudioClient({
             </div>
 
             <div className="rounded-2xl border border-border bg-surface p-4">
-              <div className="mb-2 text-sm text-heading">Governed positioning versions</div>
+              <div className="mb-2 text-sm text-heading">Version history</div>
               <p className="text-xs text-text2">
-                Snapshots become your approved spine. Battlecards save against the latest approved version.
+                Save a draft version at any point, then approve it to make it the live spine for battlecards and GTM assets.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
@@ -576,7 +586,7 @@ export default function PositioningStudioClient({
                   disabled={loading || versionBusy !== null}
                   className="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
                 >
-                  {versionBusy === "snapshot" ? "Saving…" : "Save snapshot (draft)"}
+                  {versionBusy === "snapshot" ? "Saving…" : "Save draft version"}
                 </button>
               </div>
               {approvedVersionId ? (

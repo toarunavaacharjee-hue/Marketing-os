@@ -8,6 +8,7 @@ import { DashboardTopBar } from "@/app/dashboard/_components/DashboardTopBar";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
 import { ProfileCompletenessBanner } from "@/app/dashboard/_components/ProfileCompletenessBanner";
 import { NextStepNudge } from "@/app/dashboard/_components/NextStepNudge";
+import { ToastProvider } from "@/app/dashboard/_components/Toast";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
 
 type Profile = {
@@ -492,6 +493,7 @@ export function DashboardShell({
   }
 
   return (
+    <ToastProvider>
     <div
       className="h-dvh overflow-hidden bg-page text-text"
       style={{ fontFamily: "var(--font-body)" }}
@@ -663,6 +665,7 @@ export function DashboardShell({
         </div>
       ) : null}
     </div>
+    </ToastProvider>
   );
 }
 

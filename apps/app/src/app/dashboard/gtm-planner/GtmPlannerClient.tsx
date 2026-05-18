@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { useToast } from "@/app/dashboard/_components/Toast";
 import { buildGtmPlanPrompt, GTM_PLAN_SYSTEM } from "@/lib/pmmPrompts";
 
 type Owner = "Marketing" | "Sales" | "Product" | "RevOps" | "Design" | "";
@@ -175,6 +176,7 @@ export function GtmPlannerClient({
   productName?: string;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const toast = useToast();
   const searchParams = useSearchParams();
   const qProduct = searchParams.get("product") ?? "";
   const qSegment = searchParams.get("segment") ?? "";
@@ -318,14 +320,17 @@ export function GtmPlannerClient({
       phases.forEach((p, i) => { expanded[p.id] = i === 0; });
       setExpandedPhases(expanded);
       schedule({ ...plan, phases });
+      toast("✓ GTM plan generated — review and adjust tasks");
     } catch (e) {
-      setGenError(e instanceof Error ? e.message : "Generation failed.");
+      const msg = e instanceof Error ? e.message : "Generation failed.";
+      setGenError(msg);
+      toast(msg, "error");
     } finally {
       setGenerating(false);
     }
   }
 
-  if (loading) return <div className="text-sm text-text2">Loading…</div>;
+  if (loading) return <div className="h-8 w-48 animate-pulse rounded-xl bg-surface3" />;
 
   return (
     <div className="space-y-5">

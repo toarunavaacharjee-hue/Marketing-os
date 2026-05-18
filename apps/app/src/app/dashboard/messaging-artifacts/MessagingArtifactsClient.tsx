@@ -1,7 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { EmptyState } from "@/app/dashboard/_components/EmptyState";
+import { SkeletonSegmentList } from "@/app/dashboard/_components/Skeleton";
+import { useToast } from "@/app/dashboard/_components/Toast";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   buildMessagingPillarsPrompt,
@@ -125,6 +129,7 @@ export function MessagingArtifactsClient({
   productName?: string;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const toast = useToast();
   const [segments, setSegments] = useState<{ id: string; name: string; pain_points?: string[] }[]>([]);
   const [segmentPillars, setSegmentPillars] = useState<Record<string, SegmentPillar>>({});
   const [positioningContext, setPositioningContext] = useState<string | undefined>(undefined);
@@ -281,8 +286,11 @@ export function MessagingArtifactsClient({
         [segId]: { ...sp, pillars: parsed }
       };
       schedule(next);
+      toast(`✓ Pillars generated for ${sp.segmentName}`);
     } catch (e) {
-      setGenError(e instanceof Error ? e.message : "Generation failed.");
+      const msg = e instanceof Error ? e.message : "Generation failed.";
+      setGenError(msg);
+      toast(msg, "error");
     } finally {
       setGeneratingId(null);
     }
@@ -292,7 +300,7 @@ export function MessagingArtifactsClient({
     return Boolean(p.headline || p.valueProp1 || p.objection1);
   }
 
-  if (loading) return <div className="text-sm text-text2">Loading…</div>;
+  if (loading) return <SkeletonSegmentList count={3} />;
 
   return (
     <div className="space-y-4">
@@ -320,13 +328,13 @@ export function MessagingArtifactsClient({
       </p>
 
       {segments.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-surface2 p-8 text-center text-sm text-text2">
-          No ICP segments yet. Add them in{" "}
-          <a href="/dashboard/settings/segments" className="font-medium text-primary hover:underline">
-            Settings → Segments
-          </a>{" "}
-          — each segment gets its own messaging pillar set.
-        </div>
+        <EmptyState
+          icon="✨"
+          headline="No ICP segments yet"
+          subheading="Each segment gets its own messaging pillar set — headlines, value props, and objection handling tailored to that buyer."
+          cta={{ label: "Add segments", href: "/dashboard/settings/segments" }}
+          secondaryCta={{ label: "Upload ICP document", href: "/dashboard/icp-segmentation" }}
+        />
       ) : (
         <div className="space-y-3">
           {segments.map((seg) => {
