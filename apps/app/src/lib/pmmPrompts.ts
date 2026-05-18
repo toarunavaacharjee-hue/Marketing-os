@@ -371,3 +371,45 @@ Keep it one page when printed. No JSON.`;
 
 export const ENABLEMENT_BRIEF_SYSTEM =
   "You are a B2B sales enablement writer. Crisp, confident, honest about scope. Plain text only.";
+
+// ─── GTM launch plan ──────────────────────────────────────────────────────────
+
+export type GtmPlanInput = {
+  productOrFeature: string;
+  segment: string;
+  launchDate?: string;
+  goals?: string;
+};
+
+export function buildGtmPlanPrompt(input: GtmPlanInput): string {
+  return `Generate a launch GTM checklist for this product or feature launch.
+
+Product / feature: ${input.productOrFeature}
+Primary ICP segment: ${input.segment}
+${input.launchDate ? `Target launch date: ${input.launchDate}\n` : ""}
+${input.goals ? `Launch goals: ${input.goals}\n` : ""}
+Return exactly this format. No markdown. Follow the format precisely.
+
+PHASE: Strategy & Prep | T-8 to T-4 weeks
+TASK: [Owner] | [specific task — 5-10 words, action-led]
+(6-8 tasks)
+
+PHASE: Production & Enablement | T-4 to T-1 week
+TASK: [Owner] | [specific task]
+(6-8 tasks)
+
+PHASE: Launch Week | T-0
+TASK: [Owner] | [specific task]
+(5-7 tasks)
+
+PHASE: Post-Launch | T+30
+TASK: [Owner] | [specific task]
+(4-6 tasks)
+
+Owner must be one of: Marketing, Sales, Product, RevOps, Design.
+Tasks must be specific to the product and segment, not generic placeholders.
+No extra text before or after.`;
+}
+
+export const GTM_PLAN_SYSTEM =
+  "You are a B2B product marketing and GTM launch specialist. Generate specific, actionable launch checklists tailored to the product and segment. Follow the output format exactly. Plain text only.";
