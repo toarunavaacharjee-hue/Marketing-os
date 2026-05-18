@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { SkeletonMarketResearch } from "@/app/dashboard/_components/Skeleton";
 import { Markdown } from "@/lib/Markdown";
 import { readMrCache, writeMrCache } from "@/lib/marketResearchCache";
 import { loadLatestScanOnce } from "@/lib/marketResearchRemote";
@@ -206,6 +207,8 @@ export default function MarketResearchClient() {
     load();
   }, []);
 
+  if (loading) return <SkeletonMarketResearch />;
+
   const baseUrl = profile?.product.website_url ?? "";
   const competitors = profile?.competitors ?? [];
 
@@ -251,8 +254,15 @@ export default function MarketResearchClient() {
       </div>
 
       {error ? (
-        <div className="rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
-          {error}
+        <div className="flex items-start justify-between gap-4 rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold text-red hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+          >
+            Try again
+          </button>
         </div>
       ) : null}
 
@@ -355,7 +365,7 @@ export default function MarketResearchClient() {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="e.g. What are buyers saying about onboarding?"
-                className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+                className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();

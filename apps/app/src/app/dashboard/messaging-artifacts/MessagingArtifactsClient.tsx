@@ -305,8 +305,15 @@ export function MessagingArtifactsClient({
   return (
     <div className="space-y-4">
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
-          {error}
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+          >
+            Try again
+          </button>
         </div>
       ) : null}
       {genError ? (

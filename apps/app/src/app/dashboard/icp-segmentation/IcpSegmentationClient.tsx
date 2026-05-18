@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { SkeletonIcpSegmentation } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type SegmentDetails = {
@@ -248,11 +249,11 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text2">
             Upload an ICP document to propose segments and a draft product profile; confirm to save segments and merge
             profile fields into{" "}
-            <Link href="/dashboard/settings/product" className="font-medium text-link hover:underline">
+            <Link href="/dashboard/settings/product" className="font-medium text-link underline underline-offset-2 hover:opacity-80">
               Settings → Product profile
             </Link>{" "}
             (empty extracted fields keep your current values). Segments match{" "}
-            <Link href="/dashboard/settings/segments" className="font-medium text-link hover:underline">
+            <Link href="/dashboard/settings/segments" className="font-medium text-link underline underline-offset-2 hover:opacity-80">
               Settings → Segments
             </Link>
             .
@@ -277,8 +278,15 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red/30 bg-red/10 px-3 py-2 text-sm text-red">
-          {error}
+        <div className="flex items-start justify-between gap-4 rounded-lg border border-red/30 bg-red/10 px-3 py-2 text-sm text-red">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+          >
+            Try again
+          </button>
         </div>
       ) : null}
       {positioningNote ? (
@@ -369,11 +377,11 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
       ) : null}
 
       {loading ? (
-        <div className="text-sm text-text2">Loading segments…</div>
+        <SkeletonIcpSegmentation />
       ) : segments.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border bg-surface2 p-8 text-center text-sm text-text2">
           No segments yet. Upload an ICP document above, or add segments manually in{" "}
-          <Link href="/dashboard/settings/segments" className="font-medium text-link hover:underline">
+          <Link href="/dashboard/settings/segments" className="font-medium text-link underline underline-offset-2">
             Settings
           </Link>
           .

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { useToast } from "@/app/dashboard/_components/Toast";
+import { SkeletonCard } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   POSITIONING_KEY,
@@ -499,22 +500,43 @@ export default function PositioningStudioClient({
       />
 
       {loading ? (
-        <div className="text-sm text-text2">Loading…</div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="space-y-3 lg:col-span-2">
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} rows={2} />)}
+          </div>
+          <div className="space-y-4">
+            <SkeletonCard rows={4} />
+            <SkeletonCard rows={3} />
+          </div>
+        </div>
       ) : (
         <>
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-3 lg:col-span-2">
-            {(Object.keys(FIELD_LABELS) as (keyof PositioningCanvasValue["doc"])[]).map((k) => (
-              <div key={k} className="rounded-2xl border border-border bg-surface p-4">
-                <div className="mb-2 text-xs uppercase text-text2">{FIELD_LABELS[k]}</div>
-                <textarea
-                  value={doc[k]}
-                  onChange={(e) => setDoc((d) => ({ ...d, [k]: e.target.value }))}
-                  className="min-h-[72px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
-                  placeholder="—"
-                />
-              </div>
-            ))}
+            {(Object.keys(FIELD_LABELS) as (keyof PositioningCanvasValue["doc"])[]).map((k) => {
+              const val = doc[k];
+              const max = 400;
+              const near = val.length > max * 0.8;
+              return (
+                <div key={k} className="rounded-2xl border border-border bg-surface p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-text3">
+                      {FIELD_LABELS[k]}
+                    </label>
+                    <span className={`text-[11px] tabular-nums ${near ? "text-amber" : "text-text3"}`}>
+                      {val.length}/{max}
+                    </span>
+                  </div>
+                  <textarea
+                    value={val}
+                    onChange={(e) => setDoc((d) => ({ ...d, [k]: e.target.value }))}
+                    maxLength={max}
+                    className="min-h-[72px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    placeholder="—"
+                  />
+                </div>
+              );
+            })}
           </div>
           <div className="space-y-4">
             <div className="rounded-2xl border border-border bg-surface p-4">
@@ -664,7 +686,7 @@ export default function PositioningStudioClient({
                 value={pricingPlan}
                 onChange={(e) => setPricingPlan(e.target.value)}
                 placeholder="e.g. Growth"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -673,7 +695,7 @@ export default function PositioningStudioClient({
                 value={pricingPrice}
                 onChange={(e) => setPricingPrice(e.target.value)}
                 placeholder="e.g. $299/mo"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -682,7 +704,7 @@ export default function PositioningStudioClient({
                 value={pricingPersona}
                 onChange={(e) => setPricingPersona(e.target.value)}
                 placeholder="e.g. VP Marketing"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -691,7 +713,7 @@ export default function PositioningStudioClient({
                 value={pricingProof}
                 onChange={(e) => setPricingProof(e.target.value)}
                 placeholder="Metrics, outcomes"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
           </div>

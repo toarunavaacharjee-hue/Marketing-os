@@ -574,13 +574,13 @@ export function CampaignPlanner({
                     if (e.key === "Escape") setAddingIn(null);
                   }}
                   placeholder="Campaign title"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
                 <input
                   value={addTags}
                   onChange={(e) => setAddTags(e.target.value)}
                   placeholder="Tags (comma-separated)"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
                 <div className="flex gap-2">
                   <button
@@ -688,7 +688,7 @@ export function CampaignPlanner({
                         value={modalSegment}
                         onChange={(e) => setModalSegment(e.target.value)}
                         placeholder="e.g. Series B SaaS marketing leaders"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -697,7 +697,7 @@ export function CampaignPlanner({
                         value={modalSeason}
                         onChange={(e) => setModalSeason(e.target.value)}
                         placeholder="e.g. Q1 planning, post-earnings"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -708,7 +708,7 @@ export function CampaignPlanner({
                         value={modalTension}
                         onChange={(e) => setModalTension(e.target.value)}
                         placeholder="e.g. noisy category, budget scrutiny"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                   </div>
@@ -731,13 +731,19 @@ export function CampaignPlanner({
                   </button>
 
                   <div>
-                    <label className="mb-1 block text-xs text-text2">Campaign narrative</label>
+                    <div className="mb-1 flex items-center justify-between">
+                      <label className="text-xs text-text2">Campaign narrative</label>
+                      <span className={`text-[11px] tabular-nums ${modalNarrative.length > 1800 ? "text-amber" : "text-text3"}`}>
+                        {modalNarrative.length}/2000
+                      </span>
+                    </div>
                     <textarea
                       value={modalNarrative}
                       onChange={(e) => setModalNarrative(e.target.value)}
                       rows={8}
+                      maxLength={2000}
                       placeholder="Generated narrative appears here. Edit as needed."
-                      className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3"
+                      className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                     />
                   </div>
 
@@ -751,7 +757,7 @@ export function CampaignPlanner({
                         value={modalTheme}
                         onChange={(e) => setModalTheme(e.target.value)}
                         placeholder="Used as input for channel assets"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -763,7 +769,7 @@ export function CampaignPlanner({
                         value={modalHero}
                         onChange={(e) => setModalHero(e.target.value)}
                         placeholder="Used as input for channel assets"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                   </div>

@@ -352,7 +352,7 @@ export function GtmPlannerClient({
               value={plan.productOrFeature}
               onChange={(e) => schedule({ ...plan, productOrFeature: e.target.value })}
               placeholder="e.g. AI Campaign Builder"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -361,7 +361,7 @@ export function GtmPlannerClient({
               value={plan.segment}
               onChange={(e) => schedule({ ...plan, segment: e.target.value })}
               placeholder="e.g. Series B SaaS PMMs"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -370,7 +370,7 @@ export function GtmPlannerClient({
               type="date"
               value={plan.launchDate}
               onChange={(e) => schedule({ ...plan, launchDate: e.target.value })}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -379,7 +379,7 @@ export function GtmPlannerClient({
               value={plan.goals}
               onChange={(e) => schedule({ ...plan, goals: e.target.value })}
               placeholder="e.g. 50 trials, $200k pipeline"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
         </div>
@@ -557,7 +557,12 @@ export function GtmPlannerClient({
       {/* Stakeholders + risk notes */}
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-          <div className="mb-2 text-sm font-semibold text-heading">Stakeholders (RACI)</div>
+          <div className="mb-1 flex items-center justify-between">
+            <div className="text-sm font-semibold text-heading">Stakeholders (RACI)</div>
+            <span className={`text-[11px] tabular-nums ${plan.stakeholders.length > 800 ? "text-amber" : "text-text3"}`}>
+              {plan.stakeholders.length}/1000
+            </span>
+          </div>
           <p className="mb-2 text-xs text-text2">
             R = Responsible, A = Accountable, C = Consulted, I = Informed
           </p>
@@ -565,11 +570,17 @@ export function GtmPlannerClient({
             value={plan.stakeholders}
             onChange={(e) => schedule({ ...plan, stakeholders: e.target.value })}
             rows={7}
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            maxLength={1000}
+            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
         <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-          <div className="mb-2 text-sm font-semibold text-heading">Risks & dependencies</div>
+          <div className="mb-1 flex items-center justify-between">
+            <div className="text-sm font-semibold text-heading">Risks & dependencies</div>
+            <span className={`text-[11px] tabular-nums ${plan.riskNotes.length > 800 ? "text-amber" : "text-text3"}`}>
+              {plan.riskNotes.length}/1000
+            </span>
+          </div>
           <p className="mb-2 text-xs text-text2">
             Flag blockers, external dependencies, or risks to the launch date.
           </p>
@@ -577,8 +588,9 @@ export function GtmPlannerClient({
             value={plan.riskNotes}
             onChange={(e) => schedule({ ...plan, riskNotes: e.target.value })}
             rows={7}
+            maxLength={1000}
             placeholder="e.g. Eng feature flag needs sign-off by T-2 weeks&#10;Legal review of pricing page required&#10;Competitor launching same week — monitor closely"
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3"
+            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>
