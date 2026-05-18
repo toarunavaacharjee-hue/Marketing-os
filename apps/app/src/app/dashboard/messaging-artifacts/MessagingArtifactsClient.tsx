@@ -127,6 +127,7 @@ export function MessagingArtifactsClient({
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [segments, setSegments] = useState<{ id: string; name: string; pain_points?: string[] }[]>([]);
   const [segmentPillars, setSegmentPillars] = useState<Record<string, SegmentPillar>>({});
+  const [positioningContext, setPositioningContext] = useState<string | undefined>(undefined);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -137,7 +138,7 @@ export function MessagingArtifactsClient({
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: segData }, { data: ms }] = await Promise.all([
+    const [{ data: segData }, { data: ms }, { data: posRow }] = await Promise.all([
       supabase
         .from("segments")
         .select("id,name,pain_points")
@@ -149,13 +150,33 @@ export function MessagingArtifactsClient({
         .eq("environment_id", environmentId)
         .eq("module", MODULE)
         .eq("key", KEY)
+        .maybeSingle(),
+      supabase
+        .from("module_settings")
+        .select("value_json")
+        .eq("environment_id", environmentId)
+        .eq("module", "positioning_studio")
+        .eq("key", "canvas")
         .maybeSingle()
     ]);
 
-    const segs = ((segData ?? []) as { id: string; name: string; pain_points?: string[] }[]);
+    // Build positioning context string from approved canvas
+    const posDoc = (posRow?.value_json as { doc?: Record<string, string> } | null)?.doc;
+    if (posDoc) {
+      const lines: string[] = [];
+      if (posDoc.category) lines.push(`Market category: ${posDoc.category}`);
+      if (posDoc.target) lines.push(`Target customer: ${posDoc.target}`);
+      if (posDoc.problem) lines.push(`Core problem: ${posDoc.problem}`);
+      if (posDoc.solution) lines.push(`Solution: ${posDoc.solution}`);
+      if (posDoc.diff) lines.push(`Differentiation: ${posDoc.diff}`);
+      if (posDoc.wedge) lines.push(`Wedge: ${posDoc.wedge}`);
+      if (lines.length) setPositioningContext(lines.join("\n"));
+    }
+
+    const segs = (segData ?? []) as { id: string; name: string; pain_points?: string[] }[];
     setSegments(segs);
 
-    const stored = (ms?.value_json ?? {}) as Record<string, unknown>;
+    const stored = ((ms as { value_json?: unknown } | null)?.value_json ?? {}) as Record<string, unknown>;
     const pillarsMap: Record<string, SegmentPillar> = {};
 
     for (const seg of segs) {
@@ -243,7 +264,8 @@ export function MessagingArtifactsClient({
     const prompt = buildMessagingPillarsPrompt({
       productOrFeature: productName || "this product",
       segmentName: sp.segmentName,
-      segmentPains: sp.painPoints.length ? sp.painPoints.join("; ") : undefined
+      segmentPains: sp.painPoints.length ? sp.painPoints.join("; ") : undefined,
+      positioningContext: positioningContext || undefined
     });
     try {
       const res = await fetch("/api/ai/module-generate", {
@@ -290,6 +312,11 @@ export function MessagingArtifactsClient({
         {segments.length === 0
           ? "Add segments in Settings → Segments to get started."
           : `${segments.length} segment${segments.length !== 1 ? "s" : ""} found.`}
+        {positioningContext ? (
+          <span className="ml-2 rounded-full border border-teal/30 bg-teal/10 px-2 py-0.5 text-[10px] font-medium text-teal">
+            ✓ Positioning loaded
+          </span>
+        ) : null}
       </p>
 
       {segments.length === 0 ? (
