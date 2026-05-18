@@ -10,6 +10,7 @@ type Nudge = {
 };
 
 const NUDGES: Record<string, Nudge> = {
+  // ── Strategy ──────────────────────────────────────────────────────────────
   "/dashboard/market-research": {
     label: "ICP Segmentation",
     href: "/dashboard/icp-segmentation",
@@ -30,6 +31,12 @@ const NUDGES: Record<string, Nudge> = {
     href: "/dashboard/campaigns",
     hint: "Brief your first campaign using your approved messaging."
   },
+  // ── Planning ──────────────────────────────────────────────────────────────
+  "/dashboard/work": {
+    label: "Campaigns",
+    href: "/dashboard/campaigns",
+    hint: "Move from workbench tasks to a structured campaign brief."
+  },
   "/dashboard/campaigns": {
     label: "GTM Planner",
     href: "/dashboard/gtm-planner",
@@ -45,15 +52,47 @@ const NUDGES: Record<string, Nudge> = {
     href: "/dashboard/content-studio",
     hint: "Create on-message content assets for your campaigns."
   },
+  // ── Creation ──────────────────────────────────────────────────────────────
   "/dashboard/content-studio": {
     label: "Social Media",
     href: "/dashboard/social-media",
     hint: "Schedule social content from your campaign brief."
   },
+  "/dashboard/social-media": {
+    label: "Battlecards",
+    href: "/dashboard/battlecards",
+    hint: "Create competitor battlecards and ICP-level pitches from your positioning."
+  },
+  "/dashboard/design-assets": {
+    label: "Presentations",
+    href: "/dashboard/presentations",
+    hint: "Turn your design assets into polished sales and marketing decks."
+  },
+  "/dashboard/presentations": {
+    label: "Website & Pages",
+    href: "/dashboard/website-pages",
+    hint: "Push your messaging and creative into landing pages."
+  },
+  "/dashboard/website-pages": {
+    label: "Analytics",
+    href: "/dashboard/analytics",
+    hint: "Track performance across your pages, ads, and social channels."
+  },
+  // ── Intelligence ──────────────────────────────────────────────────────────
+  "/dashboard/analytics": {
+    label: "Battlecards",
+    href: "/dashboard/battlecards",
+    hint: "Use performance data to sharpen your competitive positioning."
+  },
   "/dashboard/battlecards": {
     label: "Sales Intelligence",
     href: "/dashboard/sales-intelligence",
     hint: "Track objections and win/loss signals from the field."
+  },
+  "/dashboard/prospect-research": {
+    label: "Sales Intelligence",
+    href: "/dashboard/sales-intelligence",
+    hint: "Feed prospect insights into your win/loss and objection tracking."
   },
   "/dashboard/sales-intelligence": {
     label: "Customer Insights",

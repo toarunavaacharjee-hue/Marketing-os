@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -24,7 +25,9 @@ export default async function GTMPlannerPage() {
         Phase-by-phase launch checklist with owner tracking. AI generates a plan from your product,
         segment, and launch date.
       </p>
-      <GtmPlannerClient environmentId={ctx.environmentId} productName={productName} />
+      <Suspense fallback={<div className="text-sm text-text2">Loading plan…</div>}>
+        <GtmPlannerClient environmentId={ctx.environmentId} productName={productName} />
+      </Suspense>
     </div>
   );
 }
