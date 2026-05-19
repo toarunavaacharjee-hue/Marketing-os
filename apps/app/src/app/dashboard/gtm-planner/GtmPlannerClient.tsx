@@ -313,8 +313,13 @@ export function GtmPlannerClient({
       phases.forEach((p, i) => { initExpand[p.id] = i === 0; });
       setExpandedPhases(initExpand);
     } else {
-      // New plan — reset to defaults
-      setPlan({ ...DEFAULT_PLAN });
+      // New plan — reset to defaults but keep query-param prefill on the default plan
+      const isDefault = key === "plan";
+      setPlan({
+        ...DEFAULT_PLAN,
+        productOrFeature: (isDefault ? qProduct : "") || productName,
+        segment: isDefault ? qSegment : ""
+      });
       setExpandedPhases({ "phase-1": true, "phase-2": false, "phase-3": false, "phase-4": false });
     }
     setLoading(false);
@@ -431,7 +436,7 @@ export function GtmPlannerClient({
       const res = await fetch("/api/ai/module-generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ prompt, system: GTM_PLAN_SYSTEM, length: "medium" })
+        body: JSON.stringify({ prompt, system: GTM_PLAN_SYSTEM, length: "deep" })
       });
       const data = (await res.json()) as { text?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Generation failed.");
