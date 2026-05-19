@@ -9,9 +9,9 @@ const nav = [
   { href: "/#faq", label: "FAQ" }
 ] as const;
 
-export function MarketingLogo({ className = "" }: { className?: string }) {
-  return (
-    <Link href="/" className={`group flex items-center gap-2.5 ${className}`}>
+export function MarketingLogo({ className = "", href = "/" }: { className?: string; href?: string }) {
+  const inner = (
+    <>
       <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-primary to-primary-dark shadow-card ring-1 ring-border">
         <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,transparent_50%)]" />
         <span className="relative text-[11px] font-bold tracking-tight text-white">AI</span>
@@ -19,8 +19,14 @@ export function MarketingLogo({ className = "" }: { className?: string }) {
       <span className="text-[15px] font-semibold tracking-tight text-text group-hover:text-text">
         Marketing Workbench
       </span>
-    </Link>
+    </>
   );
+  const linkClass = `group flex items-center gap-2.5 ${className}`;
+  // Use <a> for absolute URLs (cross-domain), Link for relative paths
+  if (href.startsWith("http")) {
+    return <a href={href} className={linkClass}>{inner}</a>;
+  }
+  return <Link href={href} className={linkClass}>{inner}</Link>;
 }
 
 export function MarketingHeader() {
