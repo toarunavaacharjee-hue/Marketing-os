@@ -9,6 +9,7 @@ import { readMrCache, writeMrCache } from "@/lib/marketResearchCache";
 import { loadLatestScanOnce } from "@/lib/marketResearchRemote";
 import type { MarketResearchScanResult } from "@/lib/marketResearchTypes";
 import { downloadMarketResearchPdf } from "@/lib/marketResearchPdf";
+import { DataSourcesPanel } from "@/components/DataSourcesPanel";
 
 const POLL_INTERVAL_MS = 1500;
 const POLL_TIMEOUT_MS = 6 * 60 * 1000;
@@ -35,7 +36,7 @@ type LatestResearchApiBody = {
   };
 };
 
-export default function MarketResearchClient() {
+export default function MarketResearchClient({ environmentId }: { environmentId?: string | null }) {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -280,6 +281,9 @@ export default function MarketResearchClient() {
         estimate={AI_PROGRESS_ESTIMATE.short}
         durationMs={55_000}
       />
+
+      {/* Data sources panel */}
+      {environmentId ? <DataSourcesPanel environmentId={environmentId} /> : null}
 
       {/* Top row: signals + assistant */}
       <div className="grid gap-4 lg:grid-cols-3">
