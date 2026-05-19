@@ -33,6 +33,8 @@ export default async function OperatorPage() {
 
   const { stats, companies, subscribers } = data;
   const companyPlanEntries = Object.entries(stats.companyPlanBreakdown ?? {}).sort((a, b) => b[1] - a[1]);
+  const statusEntries = Object.entries(stats.mrr.statusBreakdown ?? {}).sort((a, b) => b[1] - a[1]);
+  const hasMrr = stats.mrr.total > 0 || stats.mrr.activePaidCompanies > 0;
 
   return (
     <div className="space-y-8">
@@ -65,19 +67,66 @@ export default async function OperatorPage() {
         />
       </div>
 
+      {/* MRR section */}
+      {hasMrr ? (
+        <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
+          <div className="text-sm font-semibold text-[var(--text)]">Estimated MRR</div>
+          <p className="mt-1 text-xs text-[var(--text2)]">
+            Based on active + trialing subscriptions at list prices ($99 Starter · $299 Growth · $999 Enterprise). Does
+            not reflect annual discounts, custom deals, or Stripe actuals.
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Total est. MRR" value={`$${stats.mrr.total.toLocaleString()}`} hint="Active + trialing" />
+            <StatCard label="Active paid workspaces" value={stats.mrr.activePaidCompanies} />
+            {stats.mrr.starter > 0 && <StatCard label="Starter MRR" value={`$${stats.mrr.starter.toLocaleString()}`} />}
+            {stats.mrr.growth > 0 && <StatCard label="Growth MRR" value={`$${stats.mrr.growth.toLocaleString()}`} />}
+            {stats.mrr.enterprise > 0 && <StatCard label="Enterprise MRR" value={`$${stats.mrr.enterprise.toLocaleString()}`} />}
+          </div>
+        </div>
+      ) : null}
+
       {companyPlanEntries.length ? (
         <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
-          <div className="text-sm font-semibold text-[var(--text)]">Plans (companies)</div>
-          <ul className="mt-2 flex flex-wrap gap-2">
-            {companyPlanEntries.map(([plan, n]) => (
-              <li
-                key={plan}
-                className="rounded-[var(--radius2)] border border-[var(--border)] bg-[var(--surface2)] px-3 py-1 text-xs text-[var(--text2)]"
-              >
-                <span className="text-[var(--text)]">{plan}</span> · {n}
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-wrap items-start gap-6">
+            <div>
+              <div className="text-sm font-semibold text-[var(--text)]">Plans (companies)</div>
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {companyPlanEntries.map(([plan, n]) => (
+                  <li
+                    key={plan}
+                    className="rounded-[var(--radius2)] border border-[var(--border)] bg-[var(--surface2)] px-3 py-1 text-xs text-[var(--text2)]"
+                  >
+                    <span className="text-[var(--text)]">{plan}</span> · {n}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {statusEntries.length > 0 && (
+              <div>
+                <div className="text-sm font-semibold text-[var(--text)]">Subscription status</div>
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {statusEntries.map(([st, n]) => {
+                    const color =
+                      st === "active"
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                        : st === "trialing"
+                          ? "border-blue-500/30 bg-blue-500/10 text-blue-300"
+                          : st === "past_due"
+                            ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
+                            : "border-[var(--border)] bg-[var(--surface2)] text-[var(--text2)]";
+                    return (
+                      <li
+                        key={st}
+                        className={`rounded-[var(--radius2)] border px-3 py-1 text-xs ${color}`}
+                      >
+                        <span className="font-semibold">{st}</span> · {n}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       ) : null}
 

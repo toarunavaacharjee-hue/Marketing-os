@@ -62,8 +62,25 @@ export default function OperatorCompaniesClient({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const byId = useMemo(() => new Map(rows.map((r) => [r.id, r])), [rows]);
+
+  const filteredRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((c) => {
+      const nameMatch = (c.name ?? "").toLowerCase().includes(q);
+      const idMatch = c.id.toLowerCase().includes(q);
+      const pubMatch = (c.public_id ?? "").toLowerCase().includes(q);
+      const memberMatch = c.members.some(
+        (m) =>
+          (m.email ?? "").toLowerCase().includes(q) ||
+          (m.name ?? "").toLowerCase().includes(q)
+      );
+      return nameMatch || idMatch || pubMatch || memberMatch;
+    });
+  }, [rows, search]);
 
   async function deleteCompany(c: CompanyRow) {
     const label = c.name?.trim() || c.id;
@@ -181,6 +198,19 @@ export default function OperatorCompaniesClient({
         <div className="border-b border-[var(--border)] bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">{ok}</div>
       ) : null}
 
+      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] px-3 py-2">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, ID, email, or member…"
+          className="w-full max-w-[400px] rounded-lg border border-[var(--border)] bg-[var(--surface2)] px-3 py-1.5 text-sm text-[var(--text)] placeholder:text-[var(--text3)]"
+        />
+        <span className="text-xs text-[var(--text3)]">
+          {filteredRows.length} of {rows.length}
+        </span>
+      </div>
+
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[1280px] text-left text-sm">
           <thead className="border-b border-[var(--border)] text-[10px] font-semibold uppercase text-[var(--text3)]">
@@ -208,7 +238,7 @@ export default function OperatorCompaniesClient({
                 </td>
               </tr>
             ) : null}
-            {rows.map((c) => {
+            {filteredRows.map((c) => {
               const busy = busyId === c.id;
               const plan = (c.plan ?? "starter").toLowerCase();
               const status = (c.status ?? "active").toLowerCase();
@@ -360,7 +390,7 @@ export default function OperatorCompaniesClient({
 
       {/* Mobile cards */}
       <div className="divide-y divide-[var(--border)] md:hidden">
-        {rows.map((c) => {
+        {filteredRows.map((c) => {
           const busy = busyId === c.id;
           const plan = (c.plan ?? "starter").toLowerCase();
           const status = (c.status ?? "active").toLowerCase();
