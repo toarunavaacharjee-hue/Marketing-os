@@ -5,7 +5,7 @@ import { CampaignPlanner } from "@/app/dashboard/campaigns/CampaignPlanner";
 
 export default async function CampaignsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   const supabase = createSupabaseServerClient();
   const { data: productRow } = await supabase

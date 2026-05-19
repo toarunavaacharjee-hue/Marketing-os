@@ -4,7 +4,7 @@ import IcpSegmentationClient from "@/app/dashboard/icp-segmentation/IcpSegmentat
 
 export default async function IcpSegmentationPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   return <IcpSegmentationClient environmentId={ctx.environmentId} />;
 }

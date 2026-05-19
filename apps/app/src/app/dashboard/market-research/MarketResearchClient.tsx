@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { SkeletonMarketResearch } from "@/app/dashboard/_components/Skeleton";
 import { Markdown } from "@/lib/Markdown";
 import { readMrCache, writeMrCache } from "@/lib/marketResearchCache";
 import { loadLatestScanOnce } from "@/lib/marketResearchRemote";
@@ -206,6 +207,8 @@ export default function MarketResearchClient() {
     load();
   }, []);
 
+  if (loading) return <SkeletonMarketResearch />;
+
   const baseUrl = profile?.product.website_url ?? "";
   const competitors = profile?.competitors ?? [];
 
@@ -251,8 +254,15 @@ export default function MarketResearchClient() {
       </div>
 
       {error ? (
-        <div className="rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
-          {error}
+        <div className="flex items-start justify-between gap-4 rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold text-red hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+          >
+            Try again
+          </button>
         </div>
       ) : null}
 
@@ -355,7 +365,7 @@ export default function MarketResearchClient() {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="e.g. What are buyers saying about onboarding?"
-                className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3"
+                className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -458,6 +468,33 @@ export default function MarketResearchClient() {
           </table>
         </div>
       </div>
+
+      {/* ICP handoff */}
+      {resultJson?.opportunity_map?.length ? (
+        <div className="rounded-xl border border-teal/30 bg-[color-mix(in_srgb,var(--color-teal)_8%,transparent)] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="text-sm font-semibold text-text">
+                Ready to define your ICP?
+              </div>
+              <p className="mt-1 text-xs text-text2">
+                Your top opportunity segments:{" "}
+                {resultJson.opportunity_map
+                  .slice(0, 3)
+                  .map((r) => r.segment)
+                  .join(", ")}
+                . Take these signals into ICP Segmentation to build precise customer profiles.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/icp-segmentation"
+              className="shrink-0 rounded-xl border border-teal/40 bg-[color-mix(in_srgb,var(--color-teal)_15%,transparent)] px-4 py-2 text-sm font-semibold text-teal transition-colors hover:bg-[color-mix(in_srgb,var(--color-teal)_25%,transparent)] whitespace-nowrap"
+            >
+              Build ICP Segments →
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       {/* Report modal */}
       {showReport ? (

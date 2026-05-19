@@ -16,6 +16,15 @@ export type OperatorSubscriberRow = {
   last_sign_in_at: string | null;
 };
 
+export type OperatorMrr = {
+  starter: number;
+  growth: number;
+  enterprise: number;
+  total: number;
+  activePaidCompanies: number;
+  statusBreakdown: Record<string, number>;
+};
+
 export type OperatorStats = {
   subscriberCount: number;
   newSubscribers7d: number;
@@ -26,6 +35,7 @@ export type OperatorStats = {
   syncRunCount: number | null;
   totalAiQueries: number;
   companyPlanBreakdown: Record<string, number>;
+  mrr: OperatorMrr;
 };
 
 export type OperatorCompanyMemberRow = {
@@ -159,7 +169,8 @@ export async function loadOperatorData(): Promise<OperatorData> {
     researchScanCount: researchScanCount ?? 0,
     syncRunCount: syncRunCount === null ? null : syncRunCount,
     totalAiQueries,
-    companyPlanBreakdown: {}
+    companyPlanBreakdown: {},
+    mrr: { starter: 0, growth: 0, enterprise: 0, total: 0, activePaidCompanies: 0, statusBreakdown: {} },
   };
 
   // Companies + subscriptions + member counts (best-effort; table may not exist yet)
@@ -187,13 +198,33 @@ export async function loadOperatorData(): Promise<OperatorData> {
       const subList = (sErr ? [] : subs ?? []) as any[];
       const subMap = new Map(subList.map((s: any) => [String(s.company_id), s]));
 
-      // Company plan breakdown from subscriptions
+      // Company plan breakdown + MRR estimate from subscriptions
       const companyPlanBreakdown: Record<string, number> = {};
+      const statusBreakdown: Record<string, number> = {};
+      let mrrStarter = 0, mrrGrowth = 0, mrrEnterprise = 0, activePaid = 0;
+      const PLAN_MONTHLY: Record<string, number> = { starter: 99, growth: 299, enterprise: 999 };
       subList.forEach((s: any) => {
         const key = String(s?.plan ?? "unknown").toLowerCase() || "unknown";
         companyPlanBreakdown[key] = (companyPlanBreakdown[key] ?? 0) + 1;
+        const st = String(s?.status ?? "unknown").toLowerCase();
+        statusBreakdown[st] = (statusBreakdown[st] ?? 0) + 1;
+        if (st === "active" || st === "trialing") {
+          const monthly = PLAN_MONTHLY[key] ?? 0;
+          if (key === "starter") mrrStarter += monthly;
+          else if (key === "growth") mrrGrowth += monthly;
+          else if (key === "enterprise") mrrEnterprise += monthly;
+          if (monthly > 0) activePaid++;
+        }
       });
       stats.companyPlanBreakdown = companyPlanBreakdown;
+      stats.mrr = {
+        starter: mrrStarter,
+        growth: mrrGrowth,
+        enterprise: mrrEnterprise,
+        total: mrrStarter + mrrGrowth + mrrEnterprise,
+        activePaidCompanies: activePaid,
+        statusBreakdown,
+      };
 
       const emailByUserId = new Map(allAuthUsers.map((u) => [u.id, u.email ?? null]));
 

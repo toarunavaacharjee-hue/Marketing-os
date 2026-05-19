@@ -4,7 +4,7 @@ import { LaunchPlaybookClient } from "@/app/dashboard/launch-playbook/LaunchPlay
 
 export default async function LaunchPlaybookIndexPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   return <LaunchPlaybookClient environmentId={ctx.environmentId} />;
 }

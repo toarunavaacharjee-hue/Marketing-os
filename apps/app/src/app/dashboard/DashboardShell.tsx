@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { TenantSwitcher, type CompanyOption, type ProductOption } from "@/app/dashboard/TenantSwitcher";
 import { DashboardTopBar } from "@/app/dashboard/_components/DashboardTopBar";
 import { ModuleFlowBar } from "@/app/dashboard/_components/ModuleFlowBar";
 import { ProfileCompletenessBanner } from "@/app/dashboard/_components/ProfileCompletenessBanner";
+import { NextStepNudge } from "@/app/dashboard/_components/NextStepNudge";
+import { ToastProvider } from "@/app/dashboard/_components/Toast";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
 
 type Profile = {
@@ -40,7 +42,7 @@ const NAV: NavSection[] = [
       { label: "Market Research", slug: "market-research", icon: "🔭", badge: "NEW" },
       { label: "ICP Segmentation", slug: "icp-segmentation", icon: "🎯", badge: "NEW" },
       { label: "Positioning Studio", slug: "positioning-studio", icon: "💎", badge: "NEW" },
-      { label: "Messaging & Artifacts", slug: "messaging-artifacts", icon: "✨", badge: "NEW" },
+      { label: "Messaging Pillars", slug: "messaging-artifacts", icon: "✨", badge: "NEW" },
       { label: "Artifact Library", slug: "artifacts", icon: "📚", badge: "NEW" }
     ]
   },
@@ -96,6 +98,49 @@ export function DashboardShell({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const ent = useMemo(() => getEntitlements(companyPlan ?? "starter"), [companyPlan]);
+
+  // Floating AI Copilot panel
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  const [copilotMessages, setCopilotMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
+  const [copilotInput, setCopilotInput] = useState("");
+  const [copilotLoading, setCopilotLoading] = useState(false);
+  const copilotMessagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (copilotOpen) {
+      copilotMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [copilotMessages, copilotOpen]);
+
+  async function sendCopilotMessage() {
+    const text = copilotInput.trim();
+    if (!text || copilotLoading) return;
+    setCopilotInput("");
+    setCopilotMessages((prev) => [...prev, { role: "user", text }]);
+    setCopilotLoading(true);
+    try {
+      const res = await fetch("/api/ai/module-generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          prompt: text,
+          system:
+            "You are a B2B product marketing assistant embedded in AI Marketing Workbench. Help the user with positioning, messaging, campaigns, and GTM strategy. Be concise and practical.",
+          length: "medium"
+        })
+      });
+      const data = (await res.json()) as { text?: string; error?: string };
+      const reply = data.text ?? data.error ?? "Sorry, something went wrong.";
+      setCopilotMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+    } catch {
+      setCopilotMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: "Connection error. Please try again." }
+      ]);
+    } finally {
+      setCopilotLoading(false);
+    }
+  }
 
   // Ensure the server-side selected context is persisted into tenant cookies.
   // Without this, deep links like /dashboard/settings/* can redirect to onboarding when cookies are missing.
@@ -448,6 +493,7 @@ export function DashboardShell({
   }
 
   return (
+    <ToastProvider>
     <div
       className="h-dvh overflow-hidden bg-page text-text"
       style={{ fontFamily: "var(--font-body)" }}
@@ -509,11 +555,117 @@ export function DashboardShell({
               <ModuleFlowBar />
               <ProfileCompletenessBanner />
               {children}
+              <NextStepNudge />
             </div>
           </main>
         </div>
       </div>
+
+      {/* Floating AI Copilot button */}
+      <button
+        type="button"
+        onClick={() => setCopilotOpen((o) => !o)}
+        className="fixed bottom-6 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 hover:bg-primary-dark"
+        title="AI Copilot"
+        aria-label="Toggle AI Copilot"
+      >
+        <span className="text-base font-bold leading-none">AI</span>
+      </button>
+
+      {/* Slide-in Copilot panel */}
+      {copilotOpen ? (
+        <div className="fixed bottom-0 right-0 z-50 flex h-[520px] w-[340px] flex-col rounded-tl-2xl border border-border bg-surface shadow-2xl">
+          {/* Panel header */}
+          <div className="flex items-center justify-between border-b border-border bg-sidebar px-4 py-3 rounded-tl-2xl">
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-[10px] font-bold text-white">
+                AI
+              </span>
+              <span className="text-sm font-semibold text-on-dark">AI Copilot</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard/copilot"
+                className="text-[11px] text-primary-light hover:underline"
+                onClick={() => setCopilotOpen(false)}
+              >
+                Full view
+              </Link>
+              <button
+                type="button"
+                onClick={() => setCopilotOpen(false)}
+                className="rounded-sm px-1 py-0.5 text-sm text-on-dark/70 hover:text-on-dark"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {copilotMessages.length === 0 ? (
+              <div className="pt-4 text-center text-xs text-text2">
+                <div className="text-2xl mb-2">✨</div>
+                Ask anything about positioning, messaging, campaigns, or GTM strategy.
+              </div>
+            ) : (
+              copilotMessages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-primary text-white"
+                        : "border border-border bg-surface2 text-heading"
+                    }`}
+                  >
+                    <pre className="whitespace-pre-wrap font-[inherit]">{msg.text}</pre>
+                  </div>
+                </div>
+              ))
+            )}
+            {copilotLoading ? (
+              <div className="flex justify-start">
+                <div className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
+                  Thinking…
+                </div>
+              </div>
+            ) : null}
+            <div ref={copilotMessagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="border-t border-border p-3">
+            <div className="flex gap-2">
+              <input
+                value={copilotInput}
+                onChange={(e) => setCopilotInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void sendCopilotMessage();
+                  }
+                }}
+                placeholder="Ask AI Copilot…"
+                disabled={copilotLoading}
+                className="min-w-0 flex-1 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-heading placeholder:text-text3 disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={() => void sendCopilotMessage()}
+                disabled={copilotLoading || !copilotInput.trim()}
+                className="shrink-0 rounded-xl bg-primary px-3 py-2 text-xs font-medium text-white disabled:opacity-40"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
+    </ToastProvider>
   );
 }
 

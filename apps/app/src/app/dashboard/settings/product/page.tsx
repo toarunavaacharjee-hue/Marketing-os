@@ -14,18 +14,18 @@ export default async function ProductProfilePage() {
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+        <div className="text-3xl font-semibold text-text">
           Product profile
         </div>
         <div className="mt-2 text-sm text-text2">
           Set your base product and competitors so Market Research can scan and compare automatically.
         </div>
         <div className="mt-3 flex flex-wrap gap-3 text-sm">
-          <Link href="/dashboard" className="text-accent hover:underline">
+          <Link href="/dashboard" className="text-primary hover:underline">
             ← Command Centre
           </Link>
           <span className="text-text3">|</span>
-          <Link href="/dashboard/market-research" className="font-semibold text-accent hover:underline">
+          <Link href="/dashboard/market-research" className="font-semibold text-primary hover:underline">
             Next: run Market Research →
           </Link>
         </div>

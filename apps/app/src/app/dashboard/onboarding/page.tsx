@@ -50,7 +50,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className="mb-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+      <div className="mb-2 text-3xl font-semibold text-text">
         Set up your workspace
       </div>
       <div className="mb-6 text-sm text-text2">

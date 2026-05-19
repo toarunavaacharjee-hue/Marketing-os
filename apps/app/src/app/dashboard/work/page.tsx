@@ -4,7 +4,7 @@ import { AllWorkClient } from "@/app/dashboard/work/AllWorkClient";
 
 export default async function AllWorkPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   return <AllWorkClient environmentId={ctx.environmentId} />;
 }

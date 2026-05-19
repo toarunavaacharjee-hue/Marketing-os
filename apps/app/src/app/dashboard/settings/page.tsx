@@ -56,7 +56,7 @@ export default async function SettingsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-sm text-text2">
-            <Link href="/dashboard" className="text-accent hover:underline">
+            <Link href="/dashboard" className="text-primary hover:underline">
               ← Command Centre
             </Link>
             <span className="text-text3">|</span>
@@ -65,7 +65,7 @@ export default async function SettingsPage() {
               switcher
             </span>
           </div>
-          <div className="mt-2 text-3xl sm:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="text-3xl font-semibold text-text">
             Settings
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text2">
@@ -75,7 +75,7 @@ export default async function SettingsPage() {
             {p?.is_platform_admin ? (
               <Link
                 href="/operator"
-                className="text-xs font-medium text-accent hover:underline"
+                className="text-xs font-medium text-primary hover:underline"
               >
                 Operator console
               </Link>
@@ -152,7 +152,7 @@ export default async function SettingsPage() {
             ) : (
               <p className="mt-2">No list price mapping for this plan label.</p>
             )}
-            <Link href="/pricing" className="mt-3 inline-block text-xs font-medium text-accent hover:underline">
+            <Link href="/pricing" className="mt-3 inline-block text-xs font-medium text-primary hover:underline">
               View pricing page →
             </Link>
           </div>

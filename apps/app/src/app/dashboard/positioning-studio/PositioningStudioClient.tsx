@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { useToast } from "@/app/dashboard/_components/Toast";
+import { SkeletonCard } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import {
   POSITIONING_KEY,
@@ -10,7 +12,12 @@ import {
   type PositioningCanvasValue,
   type PositioningHealth
 } from "@/lib/positioningStudio";
-import { buildPricingNarrativePrompt, PRICING_NARRATIVE_SYSTEM } from "@/lib/pmmPrompts";
+import {
+  buildPricingNarrativePrompt,
+  PRICING_NARRATIVE_SYSTEM,
+  buildPositioningHealthPrompt,
+  POSITIONING_HEALTH_SYSTEM
+} from "@/lib/pmmPrompts";
 
 const PRICING_NARRATIVE_STORAGE_KEY = "pricing_narrative";
 
@@ -64,6 +71,7 @@ export default function PositioningStudioClient({
   productId: string;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -88,6 +96,9 @@ export default function PositioningStudioClient({
   const [pricingSaving, setPricingSaving] = useState(false);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const [pricingSaved, setPricingSaved] = useState<string | null>(null);
+
+  const [healthRecalculating, setHealthRecalculating] = useState(false);
+  const [healthError, setHealthError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -184,6 +195,7 @@ export default function PositioningStudioClient({
     }
     setCanvas(next);
     setSaved("Saved.");
+    toast("✓ Positioning canvas saved");
   }
 
   function fullCanvasSnapshot(): PositioningCanvasValue {
@@ -280,10 +292,13 @@ export default function PositioningStudioClient({
       if (data.canvas) {
         setCanvas(data.canvas);
         setDoc(data.canvas.doc);
+        toast("✓ Positioning regenerated from ICP segments");
       }
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Request failed.");
+      const msg = e instanceof Error ? e.message : "Request failed.";
+      setError(msg);
+      toast(msg, "error");
     } finally {
       setGenerating(false);
     }
@@ -311,6 +326,7 @@ export default function PositioningStudioClient({
       return;
     }
     setPricingSaved("Pricing narrative saved.");
+    toast("✓ Pricing narrative saved");
   }
 
   async function generatePricingNarrative() {
@@ -332,7 +348,7 @@ export default function PositioningStudioClient({
         body: JSON.stringify({
           prompt,
           system: PRICING_NARRATIVE_SYSTEM,
-          length: "medium"
+          length: "short"
         })
       });
       const data = (await res.json()) as { text?: string; error?: string };
@@ -345,18 +361,72 @@ export default function PositioningStudioClient({
     }
   }
 
+  async function recalculateHealth() {
+    setHealthRecalculating(true);
+    setHealthError(null);
+    setSaved(null);
+    try {
+      const res = await fetch("/api/ai/module-generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          prompt: buildPositioningHealthPrompt(doc),
+          system: POSITIONING_HEALTH_SYSTEM,
+          length: "short"
+        })
+      });
+      const data = (await res.json()) as { text?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Recalculation failed.");
+      const text = data.text ?? "";
+      const parse = (label: string) => {
+        const m = text.match(new RegExp(`${label}:\\s*(\\d+)`, "i"));
+        return m ? Math.min(100, Math.max(0, parseInt(m[1], 10))) : null;
+      };
+      const clarity = parse("Clarity");
+      const differentiation = parse("Differentiation");
+      const credibility = parse("Credibility");
+      const mmf = parse("Message-market fit");
+      if (clarity === null || differentiation === null || credibility === null || mmf === null) {
+        throw new Error("Could not parse health scores from AI response.");
+      }
+      const newHealth = {
+        clarity,
+        differentiation,
+        credibility,
+        message_market_fit: mmf
+      };
+      const next: PositioningCanvasValue = {
+        doc: { ...doc },
+        health: newHealth,
+        revision: canvas?.revision ?? 0,
+        history: canvas?.history ?? []
+      };
+      const { error: upErr } = await supabase.from("module_settings").upsert({
+        environment_id: environmentId,
+        module: POSITIONING_MODULE,
+        key: POSITIONING_KEY,
+        value_json: next
+      });
+      if (upErr) throw new Error(upErr.message);
+      setCanvas(next);
+      setSaved("Health scores recalculated and saved.");
+      toast("✓ Health scores updated");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Recalculation failed.";
+      setHealthError(msg);
+      toast(msg, "error");
+    } finally {
+      setHealthRecalculating(false);
+    }
+  }
+
   const health = canvas?.health ?? defaultHealth();
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1
-            className="text-3xl text-heading"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Positioning Studio
-          </h1>
+          <h1 className="text-3xl font-semibold text-text">Positioning Studio</h1>
           <p className="mt-1 max-w-2xl text-sm text-text2">
             Canvas and health scores are generated from your saved ICP segments (from an uploaded document in{" "}
             <Link href="/dashboard/icp-segmentation" className="text-primary hover:underline">
@@ -405,53 +475,98 @@ export default function PositioningStudioClient({
       ) : null}
 
       <AiProgressBar
-        active={generating || pricingGenerating}
+        active={generating || pricingGenerating || healthRecalculating}
         variant="dark"
         title={
-          pricingGenerating
-            ? "Generating pricing narrative…"
-            : generating
-              ? "Regenerating positioning from ICP segments…"
-              : "Working…"
+          healthRecalculating
+            ? "Recalculating health scores…"
+            : pricingGenerating
+              ? "Generating pricing narrative…"
+              : generating
+                ? "Regenerating positioning from ICP segments…"
+                : "Working…"
         }
         estimate={
-          pricingGenerating ? AI_PROGRESS_ESTIMATE.short : AI_PROGRESS_ESTIMATE.positioning
+          healthRecalculating || pricingGenerating
+            ? AI_PROGRESS_ESTIMATE.short
+            : AI_PROGRESS_ESTIMATE.positioning
         }
-        durationMs={pricingGenerating ? 50_000 : 90_000}
+        durationMs={healthRecalculating || pricingGenerating ? 30_000 : 90_000}
       />
 
       {loading ? (
-        <div className="text-sm text-text2">Loading…</div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="space-y-3 lg:col-span-2">
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} rows={2} />)}
+          </div>
+          <div className="space-y-4">
+            <SkeletonCard rows={4} />
+            <SkeletonCard rows={3} />
+          </div>
+        </div>
       ) : (
         <>
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-3 lg:col-span-2">
-            {(Object.keys(FIELD_LABELS) as (keyof PositioningCanvasValue["doc"])[]).map((k) => (
-              <div key={k} className="rounded-2xl border border-border bg-surface p-4">
-                <div className="mb-2 text-xs uppercase text-text2">{FIELD_LABELS[k]}</div>
-                <textarea
-                  value={doc[k]}
-                  onChange={(e) => setDoc((d) => ({ ...d, [k]: e.target.value }))}
-                  className="min-h-[72px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
-                  placeholder="—"
-                />
-              </div>
-            ))}
+            {(Object.keys(FIELD_LABELS) as (keyof PositioningCanvasValue["doc"])[]).map((k) => {
+              const val = doc[k];
+              const max = 400;
+              const near = val.length > max * 0.8;
+              return (
+                <div key={k} className="rounded-2xl border border-border bg-surface p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-text3">
+                      {FIELD_LABELS[k]}
+                    </label>
+                    <span className={`text-[11px] tabular-nums ${near ? "text-amber" : "text-text3"}`}>
+                      {val.length}/{max}
+                    </span>
+                  </div>
+                  <textarea
+                    value={val}
+                    onChange={(e) => setDoc((d) => ({ ...d, [k]: e.target.value }))}
+                    maxLength={max}
+                    className="min-h-[72px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    placeholder="—"
+                  />
+                </div>
+              );
+            })}
           </div>
           <div className="space-y-4">
             <div className="rounded-2xl border border-border bg-surface p-4">
-              <div className="text-sm text-heading">Health Scores</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-sm text-heading">Health Scores</div>
+                <button
+                  type="button"
+                  onClick={() => void recalculateHealth()}
+                  disabled={healthRecalculating || !canvas || loading}
+                  title="Re-score the current canvas with AI"
+                  className="rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/20 disabled:opacity-40"
+                >
+                  {healthRecalculating ? "Scoring…" : "↻ Recalculate"}
+                </button>
+              </div>
+              {healthError ? (
+                <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-[11px] text-red">
+                  {healthError}
+                </div>
+              ) : null}
               {HEALTH_LABELS.map(([key, label]) => {
                 const v = health[key];
+                const color =
+                  v >= 80 ? "bg-teal" : v >= 55 ? "bg-primary" : "bg-amber";
                 return (
                   <div className="mt-3" key={key}>
                     <div className="mb-1 flex justify-between text-xs text-text2">
                       <span>{label}</span>
-                      <span>{v}%</span>
+                      <span className={v >= 80 ? "text-teal" : v >= 55 ? "text-primary" : "text-amber"}>
+                        {v}%
+                      </span>
                     </div>
                     <div className="h-2 rounded-full bg-surface3">
                       <div
-                        className="h-2 rounded-full bg-primary"
+                        className={`h-2 rounded-full transition-all duration-500 ${color}`}
                         style={{ width: `${v}%` }}
                       />
                     </div>
@@ -477,9 +592,9 @@ export default function PositioningStudioClient({
             </div>
 
             <div className="rounded-2xl border border-border bg-surface p-4">
-              <div className="mb-2 text-sm text-heading">Governed positioning versions</div>
+              <div className="mb-2 text-sm text-heading">Version history</div>
               <p className="text-xs text-text2">
-                Snapshots become your approved spine. Battlecards save against the latest approved version.
+                Save a draft version at any point, then approve it to make it the live spine for battlecards and GTM assets.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
@@ -488,7 +603,7 @@ export default function PositioningStudioClient({
                   disabled={loading || versionBusy !== null}
                   className="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
                 >
-                  {versionBusy === "snapshot" ? "Saving…" : "Save snapshot (draft)"}
+                  {versionBusy === "snapshot" ? "Saving…" : "Save draft version"}
                 </button>
               </div>
               {approvedVersionId ? (
@@ -566,7 +681,7 @@ export default function PositioningStudioClient({
                 value={pricingPlan}
                 onChange={(e) => setPricingPlan(e.target.value)}
                 placeholder="e.g. Growth"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -575,7 +690,7 @@ export default function PositioningStudioClient({
                 value={pricingPrice}
                 onChange={(e) => setPricingPrice(e.target.value)}
                 placeholder="e.g. $299/mo"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -584,7 +699,7 @@ export default function PositioningStudioClient({
                 value={pricingPersona}
                 onChange={(e) => setPricingPersona(e.target.value)}
                 placeholder="e.g. VP Marketing"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -593,7 +708,7 @@ export default function PositioningStudioClient({
                 value={pricingProof}
                 onChange={(e) => setPricingProof(e.target.value)}
                 placeholder="Metrics, outcomes"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
           </div>
@@ -623,6 +738,20 @@ export default function PositioningStudioClient({
             className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
             placeholder="Generated pricing narrative appears here."
           />
+        </div>
+        {/* Next step CTA */}
+        <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 text-sm shadow-sm">
+          <span className="text-text2">
+            <span className="mr-2 text-text3">→</span>
+            <span className="font-medium text-text">Next step:</span>{" "}
+            Turn your positioning canvas into messaging frameworks and artifacts.
+          </span>
+          <Link
+            href="/dashboard/messaging-artifacts"
+            className="shrink-0 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
+          >
+            Messaging &amp; Artifacts →
+          </Link>
         </div>
         </>
       )}

@@ -4,12 +4,12 @@ import AnalyticsSettingsClient from "@/app/dashboard/settings/analytics/Analytic
 
 export default async function AnalyticsSettingsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+        <div className="text-3xl font-semibold text-text">
           Analytics settings
         </div>
         <div className="mt-2 text-sm text-text2">

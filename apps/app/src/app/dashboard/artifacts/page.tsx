@@ -4,7 +4,7 @@ import { ArtifactLibraryClient } from "@/app/dashboard/artifacts/ArtifactLibrary
 
 export default async function ArtifactLibraryPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   return <ArtifactLibraryClient environmentId={ctx.environmentId} />;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -202,6 +203,11 @@ export function CreationWorkbench({
   contentStudio?: boolean;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const searchParams = useSearchParams();
+  const qTopic = searchParams.get("topic") ?? "";
+  const qProduct = searchParams.get("product") ?? "";
+  const qSegment = searchParams.get("segment") ?? "";
+  const qFrom = searchParams.get("from") ?? "";
   const [me, setMe] = useState<{ id: string; email: string } | null>(null);
   const [team, setTeam] = useState<Array<{ userId: string; name: string | null; role: string }>>([]);
   const [myTeamRole, setMyTeamRole] = useState<string>("member");
@@ -211,6 +217,8 @@ export function CreationWorkbench({
   const [error, setError] = useState<string | null>(null);
   const [ws, setWs] = useState<Workspace>(() => empty());
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [strategyContext, setStrategyContext] = useState("");
+  const prefilledRef = useRef(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -223,13 +231,81 @@ export function CreationWorkbench({
       .maybeSingle();
     if (qErr) setError(qErr.message);
     const v = (data?.value_json ?? null) as Partial<Workspace> | null;
-    setWs(migrateWorkspace(v));
+    const migrated = migrateWorkspace(v);
+    // Pre-fill prompt from GTM Planner context if workspace is empty and not already done
+    if (!prefilledRef.current && qTopic && !migrated.prompt.trim()) {
+      prefilledRef.current = true;
+      const parts: string[] = [];
+      parts.push(qTopic);
+      if (qProduct) parts.push(`Product: ${qProduct}`);
+      if (qSegment) parts.push(`Target segment: ${qSegment}`);
+      migrated.prompt = parts.join("\n");
+    }
+    setWs(migrated);
     setLoading(false);
-  }, [environmentId, moduleKey, supabase]);
+  }, [environmentId, moduleKey, supabase, qTopic, qProduct, qSegment]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Load approved positioning + top segments to enrich AI system prompts
+  useEffect(() => {
+    let cancelled = false;
+    async function loadStrategyContext() {
+      try {
+        const [{ data: canvasRow }, { data: segs }] = await Promise.all([
+          supabase
+            .from("module_settings")
+            .select("value_json")
+            .eq("environment_id", environmentId)
+            .eq("module", "positioning_studio")
+            .eq("key", "canvas")
+            .maybeSingle(),
+          supabase
+            .from("segments")
+            .select("name,pain_points")
+            .eq("environment_id", environmentId)
+            .order("created_at", { ascending: false })
+            .limit(4)
+        ]);
+        if (cancelled) return;
+
+        const parts: string[] = [];
+
+        const doc = (canvasRow?.value_json as { doc?: Record<string, string> } | null)?.doc;
+        if (doc) {
+          const lines: string[] = [];
+          if (doc.category) lines.push(`Market category: ${doc.category}`);
+          if (doc.target) lines.push(`Target customer: ${doc.target}`);
+          if (doc.problem) lines.push(`Core problem: ${doc.problem}`);
+          if (doc.solution) lines.push(`Solution: ${doc.solution}`);
+          if (doc.diff) lines.push(`Differentiation: ${doc.diff}`);
+          if (doc.wedge) lines.push(`Wedge: ${doc.wedge}`);
+          if (lines.length) {
+            parts.push(
+              `Approved positioning (all content must align with this):\n${lines.join("\n")}`
+            );
+          }
+        }
+
+        const segList = (segs ?? []) as { name: string; pain_points?: string[] }[];
+        if (segList.length) {
+          const segLines = segList.map((s) => {
+            const pains = (s.pain_points ?? []).slice(0, 2).join("; ");
+            return pains ? `  - ${s.name} (pains: ${pains})` : `  - ${s.name}`;
+          });
+          parts.push(`ICP segments to write for:\n${segLines.join("\n")}`);
+        }
+
+        setStrategyContext(parts.length ? `\n\n---\n${parts.join("\n\n")}\n---` : "");
+      } catch {
+        // Non-critical — silently skip if context unavailable
+      }
+    }
+    void loadStrategyContext();
+    return () => { cancelled = true; };
+  }, [environmentId, supabase]);
 
   useEffect(() => {
     let cancelled = false;
@@ -332,7 +408,7 @@ export function CreationWorkbench({
         },
         body: JSON.stringify({
           prompt: ws.prompt,
-          system: systemHint,
+          system: `${systemHint}${strategyContext}`,
           ...(contentStudio
             ? {
                 tone: ws.aiTone,
@@ -474,6 +550,17 @@ export function CreationWorkbench({
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
+        </div>
+      ) : null}
+
+      {qFrom ? (
+        <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-2.5 text-sm">
+          <span className="text-primary">←</span>
+          <span className="text-text2">
+            Context from <span className="font-semibold text-text">{qFrom}</span>
+            {qProduct ? <> — <span className="font-medium text-text">{qProduct}</span></> : null}
+            {qSegment ? <span className="text-text3"> · {qSegment}</span> : null}
+          </span>
         </div>
       ) : null}
 
@@ -926,6 +1013,12 @@ export function CreationWorkbench({
           >
             {generating ? "Generating…" : "Generate"}
           </button>
+          {strategyContext ? (
+            <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-text3">
+              <span className="h-1.5 w-1.5 rounded-full bg-teal inline-block" />
+              Positioning &amp; ICP context injected
+            </div>
+          ) : null}
           {ws.lastOutput ? (
             <div className="mt-3 rounded-xl border border-border bg-surface2 p-3 text-xs leading-relaxed text-text2">
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">

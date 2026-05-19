@@ -1,80 +1,243 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { EmptyState } from "@/app/dashboard/_components/EmptyState";
+import { SkeletonSegmentList } from "@/app/dashboard/_components/Skeleton";
+import { useToast } from "@/app/dashboard/_components/Toast";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import {
+  buildMessagingPillarsPrompt,
+  MESSAGING_PILLARS_SYSTEM
+} from "@/lib/pmmPrompts";
 
-type ArtifactRow = {
-  id: string;
-  name: string;
+type PillarData = {
+  headline: string;
+  subHeadline: string;
+  valueProp1: string;
+  valueProp2: string;
+  valueProp3: string;
+  proofPoint: string;
+  objection1: string;
+  response1: string;
+  objection2: string;
+  response2: string;
+  objection3: string;
+  response3: string;
+};
+
+type SegmentPillar = {
+  segmentId: string;
   segmentName: string;
-  status: string;
-  consistency: number;
+  painPoints: string[];
+  pillars: PillarData;
 };
 
-type Store = {
-  items: ArtifactRow[];
-  genType: string;
-  genTone: string;
-  genSegment: string;
-  lastOutput: string;
-};
-
-const MODULE = "messaging_artifacts";
-const KEY = "artifacts";
-
-const emptyStore = (): Store => ({
-  items: [],
-  genType: "Landing page copy",
-  genTone: "Confident + practical",
-  genSegment: "",
-  lastOutput: ""
+const emptyPillars = (): PillarData => ({
+  headline: "",
+  subHeadline: "",
+  valueProp1: "",
+  valueProp2: "",
+  valueProp3: "",
+  proofPoint: "",
+  objection1: "",
+  response1: "",
+  objection2: "",
+  response2: "",
+  objection3: "",
+  response3: ""
 });
 
-export function MessagingArtifactsClient({ environmentId }: { environmentId: string }) {
+const MODULE = "messaging_artifacts";
+const KEY = "pillars";
+
+function parsePillarsFromText(text: string): PillarData {
+  const pillars = emptyPillars();
+
+  function extract(label: string): string {
+    const re = new RegExp(`^${label}:\\s*(.+)$`, "mi");
+    const m = text.match(re);
+    return m ? m[1].trim() : "";
+  }
+
+  pillars.headline = extract("Headline");
+  pillars.subHeadline = extract("Sub-headline");
+  pillars.valueProp1 = extract("Value prop 1");
+  pillars.valueProp2 = extract("Value prop 2");
+  pillars.valueProp3 = extract("Value prop 3");
+  pillars.proofPoint = extract("Proof point");
+
+  // Objections use "Objection 1: ... | Response: ..." format
+  const objPattern = /^Objection (\d):\s*(.+?)\s*\|\s*Response:\s*(.+)$/m;
+  const objMatches = [...text.matchAll(new RegExp(objPattern.source, "gm"))];
+  for (const m of objMatches) {
+    const num = m[1];
+    const obj = m[2].trim();
+    const resp = m[3].trim();
+    if (num === "1") { pillars.objection1 = obj; pillars.response1 = resp; }
+    if (num === "2") { pillars.objection2 = obj; pillars.response2 = resp; }
+    if (num === "3") { pillars.objection3 = obj; pillars.response3 = resp; }
+  }
+
+  return pillars;
+}
+
+function PillarField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 1
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-text3">
+        {label}
+      </label>
+      {rows > 1 ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={rows}
+          placeholder={placeholder}
+          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+        />
+      )}
+    </div>
+  );
+}
+
+export function MessagingArtifactsClient({
+  environmentId,
+  productName = ""
+}: {
+  environmentId: string;
+  productName?: string;
+}) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-  const [segments, setSegments] = useState<{ id: string; name: string }[]>([]);
-  const [store, setStore] = useState<Store>(emptyStore);
+  const toast = useToast();
+  const [segments, setSegments] = useState<{ id: string; name: string; pain_points?: string[] }[]>([]);
+  const [segmentPillars, setSegmentPillars] = useState<Record<string, SegmentPillar>>({});
+  const [positioningContext, setPositioningContext] = useState<string | undefined>(undefined);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [genError, setGenError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: segData }, { data: ms }] = await Promise.all([
-      supabase.from("segments").select("id,name").eq("environment_id", environmentId).order("created_at", {
-        ascending: false
-      }),
-      supabase.from("module_settings").select("value_json").eq("environment_id", environmentId).eq("module", MODULE).eq("key", KEY).maybeSingle()
+    const [{ data: segData }, { data: ms }, { data: posRow }] = await Promise.all([
+      supabase
+        .from("segments")
+        .select("id,name,pain_points")
+        .eq("environment_id", environmentId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("module_settings")
+        .select("value_json")
+        .eq("environment_id", environmentId)
+        .eq("module", MODULE)
+        .eq("key", KEY)
+        .maybeSingle(),
+      supabase
+        .from("module_settings")
+        .select("value_json")
+        .eq("environment_id", environmentId)
+        .eq("module", "positioning_studio")
+        .eq("key", "canvas")
+        .maybeSingle()
     ]);
-    setSegments((segData ?? []) as { id: string; name: string }[]);
-    const v = ms?.value_json as Partial<Store> | null;
-    if (v && typeof v === "object") {
-      setStore({
-        items: Array.isArray(v.items) ? v.items : [],
-        genType: typeof v.genType === "string" ? v.genType : emptyStore().genType,
-        genTone: typeof v.genTone === "string" ? v.genTone : emptyStore().genTone,
-        genSegment: typeof v.genSegment === "string" ? v.genSegment : "",
-        lastOutput: typeof v.lastOutput === "string" ? v.lastOutput : ""
-      });
-    } else setStore(emptyStore());
+
+    // Build positioning context string from approved canvas
+    const posDoc = (posRow?.value_json as { doc?: Record<string, string> } | null)?.doc;
+    if (posDoc) {
+      const lines: string[] = [];
+      if (posDoc.category) lines.push(`Market category: ${posDoc.category}`);
+      if (posDoc.target) lines.push(`Target customer: ${posDoc.target}`);
+      if (posDoc.problem) lines.push(`Core problem: ${posDoc.problem}`);
+      if (posDoc.solution) lines.push(`Solution: ${posDoc.solution}`);
+      if (posDoc.diff) lines.push(`Differentiation: ${posDoc.diff}`);
+      if (posDoc.wedge) lines.push(`Wedge: ${posDoc.wedge}`);
+      if (lines.length) setPositioningContext(lines.join("\n"));
+    }
+
+    const segs = (segData ?? []) as { id: string; name: string; pain_points?: string[] }[];
+    setSegments(segs);
+
+    const stored = ((ms as { value_json?: unknown } | null)?.value_json ?? {}) as Record<string, unknown>;
+    const pillarsMap: Record<string, SegmentPillar> = {};
+
+    for (const seg of segs) {
+      const raw = stored[seg.id];
+      if (raw && typeof raw === "object") {
+        const r = raw as Record<string, unknown>;
+        pillarsMap[seg.id] = {
+          segmentId: seg.id,
+          segmentName: seg.name,
+          painPoints: seg.pain_points ?? [],
+          pillars: {
+            headline: String(r.headline ?? ""),
+            subHeadline: String(r.subHeadline ?? ""),
+            valueProp1: String(r.valueProp1 ?? ""),
+            valueProp2: String(r.valueProp2 ?? ""),
+            valueProp3: String(r.valueProp3 ?? ""),
+            proofPoint: String(r.proofPoint ?? ""),
+            objection1: String(r.objection1 ?? ""),
+            response1: String(r.response1 ?? ""),
+            objection2: String(r.objection2 ?? ""),
+            response2: String(r.response2 ?? ""),
+            objection3: String(r.objection3 ?? ""),
+            response3: String(r.response3 ?? "")
+          }
+        };
+      } else {
+        pillarsMap[seg.id] = {
+          segmentId: seg.id,
+          segmentName: seg.name,
+          painPoints: seg.pain_points ?? [],
+          pillars: emptyPillars()
+        };
+      }
+    }
+
+    setSegmentPillars(pillarsMap);
+    if (segs.length > 0 && !expandedId) setExpandedId(segs[0].id);
     setLoading(false);
-  }, [environmentId, supabase]);
+  }, [environmentId, supabase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     load();
   }, [load]);
 
   const persist = useCallback(
-    async (next: Store) => {
+    async (next: Record<string, SegmentPillar>) => {
       setSaving(true);
+      const payload: Record<string, PillarData> = {};
+      for (const [id, sp] of Object.entries(next)) {
+        payload[id] = sp.pillars;
+      }
       const { error: upErr } = await supabase.from("module_settings").upsert({
         environment_id: environmentId,
         module: MODULE,
         key: KEY,
-        value_json: next
+        value_json: payload
       });
       setSaving(false);
       if (upErr) setError(upErr.message);
@@ -82,244 +245,246 @@ export function MessagingArtifactsClient({ environmentId }: { environmentId: str
     [environmentId, supabase]
   );
 
-  function schedule(next: Store) {
-    setStore(next);
+  function schedule(next: Record<string, SegmentPillar>) {
+    setSegmentPillars(next);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void persist(next), 400);
   }
 
-  function addRow() {
-    const row: ArtifactRow = {
-      id: crypto.randomUUID(),
-      name: "New artifact",
-      segmentName: store.genSegment || segments[0]?.name || "—",
-      status: "Draft",
-      consistency: 80
+  function patchPillars(segId: string, patch: Partial<PillarData>) {
+    const existing = segmentPillars[segId];
+    if (!existing) return;
+    const next = {
+      ...segmentPillars,
+      [segId]: { ...existing, pillars: { ...existing.pillars, ...patch } }
     };
-    schedule({ ...store, items: [...store.items, row] });
+    schedule(next);
   }
 
-  function updateRow(id: string, patch: Partial<ArtifactRow>) {
-    schedule({
-      ...store,
-      items: store.items.map((r) => (r.id === id ? { ...r, ...patch } : r))
+  async function generatePillars(segId: string) {
+    const sp = segmentPillars[segId];
+    if (!sp) return;
+    setGeneratingId(segId);
+    setGenError(null);
+    const prompt = buildMessagingPillarsPrompt({
+      productOrFeature: productName || "this product",
+      segmentName: sp.segmentName,
+      segmentPains: sp.painPoints.length ? sp.painPoints.join("; ") : undefined,
+      positioningContext: positioningContext || undefined
     });
-  }
-
-  function removeRow(id: string) {
-    schedule({ ...store, items: store.items.filter((r) => r.id !== id) });
-  }
-
-  async function generate() {
-    setGenerating(true);
-    setError(null);
-    const prompt = `Create a ${store.genType} for the segment "${store.genSegment || "primary ICP"}".
-Tone: ${store.genTone}.
-Return:
-Line 1: short artifact title
-Line 2: blank
-Lines 3+: 2–4 sentences of copy suitable for marketing.`;
-
     try {
       const res = await fetch("/api/ai/module-generate", {
         method: "POST",
-        headers: {
-          "content-type": "application/json"
-        },
-        body: JSON.stringify({
-          prompt,
-          system:
-            "You write sharp B2B marketing copy. Follow the user's output shape exactly (title line, blank line, body)."
-        })
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt, system: MESSAGING_PILLARS_SYSTEM, length: "medium" })
       });
       const data = (await res.json()) as { text?: string; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Generation failed.");
-      const text = data.text ?? "";
-      schedule({ ...store, lastOutput: text });
+      const parsed = parsePillarsFromText(data.text ?? "");
+      const next = {
+        ...segmentPillars,
+        [segId]: { ...sp, pillars: parsed }
+      };
+      schedule(next);
+      toast(`✓ Pillars generated for ${sp.segmentName}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Generation failed.");
+      const msg = e instanceof Error ? e.message : "Generation failed.";
+      setGenError(msg);
+      toast(msg, "error");
     } finally {
-      setGenerating(false);
+      setGeneratingId(null);
     }
   }
 
-  function insertFromOutput() {
-    setStore((prev) => {
-      if (!prev.lastOutput.trim()) return prev;
-      const lines = prev.lastOutput.split(/\r?\n/).filter(Boolean);
-      const title = lines[0]?.trim() || "Generated artifact";
-      const row: ArtifactRow = {
-        id: crypto.randomUUID(),
-        name: title.slice(0, 120),
-        segmentName: prev.genSegment || segments[0]?.name || "—",
-        status: "Draft",
-        consistency: 85
-      };
-      const next = { ...prev, items: [...prev.items, row] };
-      void persist(next);
-      return next;
-    });
+  function hasContent(p: PillarData): boolean {
+    return Boolean(p.headline || p.valueProp1 || p.objection1);
   }
+
+  if (loading) return <SkeletonSegmentList count={3} />;
 
   return (
     <div className="space-y-4">
-      {loading ? <div className="text-sm text-text2">Loading…</div> : null}
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
-          {error}
+        <div className="flex items-start justify-between gap-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+          >
+            Try again
+          </button>
         </div>
       ) : null}
-      <AiProgressBar
-        active={generating}
-        variant="dark"
-        title="Generating messaging artifact…"
-        estimate={AI_PROGRESS_ESTIMATE.short}
-        durationMs={50_000}
-      />
-      <p className="text-xs text-text2">{saving ? "Saving…" : "Artifacts saved per product."}</p>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-surface p-4 lg:col-span-2">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-heading">Artifacts</div>
-            <button
-              type="button"
-              onClick={addRow}
-              className="rounded-xl border border-border px-3 py-1.5 text-xs text-heading hover:bg-surface2"
-            >
-              + Add row
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-text2">
-                <tr>
-                  <th className="pb-2 text-left font-medium">Artifact</th>
-                  <th className="pb-2 text-left font-medium">Segment</th>
-                  <th className="pb-2 text-left font-medium">Status</th>
-                  <th className="pb-2 text-left font-medium">Fit %</th>
-                  <th className="w-8" />
-                </tr>
-              </thead>
-              <tbody className="text-heading">
-                {store.items.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-4 text-text2">
-                      No artifacts yet. Generate or add a row.
-                    </td>
-                  </tr>
-                ) : (
-                  store.items.map((r) => (
-                    <tr key={r.id} className="border-t border-border">
-                      <td className="py-2 pr-2 align-top">
-                        <input
-                          value={r.name}
-                          onChange={(e) => updateRow(r.id, { name: e.target.value })}
-                          className="w-full min-w-[140px] rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
-                        />
-                      </td>
-                      <td className="py-2 pr-2 align-top">
-                        <input
-                          value={r.segmentName}
-                          onChange={(e) => updateRow(r.id, { segmentName: e.target.value })}
-                          className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
-                        />
-                      </td>
-                      <td className="py-2 pr-2 align-top">
-                        <select
-                          value={r.status}
-                          onChange={(e) => updateRow(r.id, { status: e.target.value })}
-                          className="rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
-                        >
-                          {["Draft", "Review", "Approved"].map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="py-2 pr-2 align-top">
-                        <input
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={r.consistency}
-                          onChange={(e) =>
-                            updateRow(r.id, { consistency: Number(e.target.value) || 0 })
-                          }
-                          className="w-16 rounded-lg border border-border bg-surface2 px-2 py-1 text-sm"
-                        />
-                      </td>
-                      <td className="py-2 align-top">
-                        <button
-                          type="button"
-                          onClick={() => removeRow(r.id)}
-                          className="text-xs text-text2 hover:text-red-300"
-                        >
-                          ✕
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+      {genError ? (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+          {genError}
         </div>
+      ) : null}
 
-        <div className="rounded-2xl border border-border bg-surface p-4">
-          <div className="mb-3 text-sm text-heading">Artifact generator</div>
-          <div className="space-y-2">
-            <label className="block text-xs text-text2">Type</label>
-            <input
-              value={store.genType}
-              onChange={(e) => schedule({ ...store, genType: e.target.value })}
-              className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
-            />
-            <label className="block text-xs text-text2">Segment</label>
-            <select
-              value={store.genSegment}
-              onChange={(e) => schedule({ ...store, genSegment: e.target.value })}
-              className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
-            >
-              <option value="">Best-fit segment</option>
-              {segments.map((s) => (
-                <option key={s.id} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            <label className="block text-xs text-text2">Tone</label>
-            <input
-              value={store.genTone}
-              onChange={(e) => schedule({ ...store, genTone: e.target.value })}
-              className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
-            />
-            <button
-              type="button"
-              onClick={() => generate()}
-              disabled={generating}
-              className="mt-2 w-full rounded-xl bg-amber p-2 text-sm font-medium text-black disabled:opacity-50"
-            >
-              {generating ? "Generating…" : "Generate"}
-            </button>
-            {store.lastOutput ? (
-              <div className="mt-3 space-y-2">
-                <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-xl border border-border bg-surface2 p-2 text-xs text-text2">
-                  {store.lastOutput}
-                </pre>
-                <button
-                  type="button"
-                  onClick={insertFromOutput}
-                  className="w-full rounded-xl border border-border px-2 py-2 text-xs text-heading hover:bg-surface2"
-                >
-                  Add title to table
-                </button>
+      <p className="text-xs text-text2">
+        {saving ? "Saving…" : "Pillars saved per product environment."}{" "}
+        {segments.length === 0
+          ? "Add segments in Settings → Segments to get started."
+          : `${segments.length} segment${segments.length !== 1 ? "s" : ""} found.`}
+        {positioningContext ? (
+          <span className="ml-2 rounded-full border border-teal/30 bg-teal/10 px-2 py-0.5 text-[10px] font-medium text-teal">
+            ✓ Positioning loaded
+          </span>
+        ) : null}
+      </p>
+
+      {segments.length === 0 ? (
+        <EmptyState
+          icon="✨"
+          headline="No ICP segments yet"
+          subheading="Each segment gets its own messaging pillar set — headlines, value props, and objection handling tailored to that buyer."
+          cta={{ label: "Add segments", href: "/dashboard/settings/segments" }}
+          secondaryCta={{ label: "Upload ICP document", href: "/dashboard/icp-segmentation" }}
+        />
+      ) : (
+        <div className="space-y-3">
+          {segments.map((seg) => {
+            const sp = segmentPillars[seg.id];
+            if (!sp) return null;
+            const isOpen = expandedId === seg.id;
+            const isGenerating = generatingId === seg.id;
+            const filled = hasContent(sp.pillars);
+
+            return (
+              <div
+                key={seg.id}
+                className="rounded-2xl border border-border bg-surface shadow-sm"
+              >
+                {/* Segment header */}
+                <div className="flex items-center justify-between gap-3 px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(isOpen ? null : seg.id)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    <span
+                      className={`inline-block h-2 w-2 shrink-0 rounded-full ${filled ? "bg-emerald-500" : "bg-border"}`}
+                      title={filled ? "Pillars defined" : "Not generated yet"}
+                    />
+                    <span className="truncate text-sm font-semibold text-heading">
+                      {seg.name}
+                    </span>
+                    <span className="text-xs text-text3 transition-transform duration-200">
+                      {isOpen ? "▾" : "▸"}
+                    </span>
+                  </button>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    {filled ? (
+                      <span className="text-[11px] text-emerald-600">Pillars ready</span>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => void generatePillars(seg.id)}
+                      disabled={Boolean(generatingId)}
+                      className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-40"
+                    >
+                      {isGenerating ? "Generating…" : filled ? "Regenerate" : "Generate pillars"}
+                    </button>
+                  </div>
+                </div>
+
+                <AiProgressBar
+                  active={isGenerating}
+                  variant="dark"
+                  title={`Generating messaging pillars for ${seg.name}…`}
+                  estimate={AI_PROGRESS_ESTIMATE.short}
+                  durationMs={55_000}
+                />
+
+                {isOpen ? (
+                  <div className="border-t border-border px-4 pb-4 pt-3">
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      {/* Left column: headline, sub-headline, value props, proof point */}
+                      <div className="space-y-3">
+                        <PillarField
+                          label="Headline"
+                          value={sp.pillars.headline}
+                          onChange={(v) => patchPillars(seg.id, { headline: v })}
+                          placeholder="Under 10 words, outcome-led"
+                        />
+                        <PillarField
+                          label="Sub-headline"
+                          value={sp.pillars.subHeadline}
+                          onChange={(v) => patchPillars(seg.id, { subHeadline: v })}
+                          placeholder="1 sentence — who it's for and what changes"
+                          rows={2}
+                        />
+                        <div className="rounded-xl border border-border bg-surface2 p-3 space-y-2">
+                          <div className="text-[11px] font-semibold uppercase tracking-wide text-text3">
+                            Value propositions
+                          </div>
+                          <PillarField
+                            label="Value prop 1"
+                            value={sp.pillars.valueProp1}
+                            onChange={(v) => patchPillars(seg.id, { valueProp1: v })}
+                            placeholder="Outcome, not feature — 1 sentence"
+                          />
+                          <PillarField
+                            label="Value prop 2"
+                            value={sp.pillars.valueProp2}
+                            onChange={(v) => patchPillars(seg.id, { valueProp2: v })}
+                            placeholder="Outcome, not feature — 1 sentence"
+                          />
+                          <PillarField
+                            label="Value prop 3"
+                            value={sp.pillars.valueProp3}
+                            onChange={(v) => patchPillars(seg.id, { valueProp3: v })}
+                            placeholder="Outcome, not feature — 1 sentence"
+                          />
+                        </div>
+                        <PillarField
+                          label="Proof point"
+                          value={sp.pillars.proofPoint}
+                          onChange={(v) => patchPillars(seg.id, { proofPoint: v })}
+                          placeholder="Specific stat, customer result, or named example"
+                          rows={2}
+                        />
+                      </div>
+
+                      {/* Right column: objections */}
+                      <div className="space-y-3">
+                        <div className="text-[11px] font-semibold uppercase tracking-wide text-text3">
+                          Objection handling
+                        </div>
+                        {([1, 2, 3] as const).map((n) => {
+                          const objKey = `objection${n}` as keyof PillarData;
+                          const respKey = `response${n}` as keyof PillarData;
+                          return (
+                            <div
+                              key={n}
+                              className="rounded-xl border border-border bg-surface2 p-3 space-y-2"
+                            >
+                              <PillarField
+                                label={`Objection ${n}`}
+                                value={sp.pillars[objKey]}
+                                onChange={(v) => patchPillars(seg.id, { [objKey]: v })}
+                                placeholder="Common objection from prospects"
+                              />
+                              <PillarField
+                                label="Response"
+                                value={sp.pillars[respKey]}
+                                onChange={(v) => patchPillars(seg.id, { [respKey]: v })}
+                                placeholder="1-sentence reframe"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 }
