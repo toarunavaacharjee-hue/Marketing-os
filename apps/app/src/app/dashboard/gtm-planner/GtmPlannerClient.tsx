@@ -111,7 +111,8 @@ const DEFAULT_PLAN: PlanValue = {
 };
 
 const MODULE = "gtm_planner";
-const KEY = "plan";
+
+type PlanListItem = { key: string; label: string };
 
 // Task → module detection
 const MODULE_KEYWORDS: [RegExp, string][] = [
@@ -236,6 +237,8 @@ export function GtmPlannerClient({
   const qProduct = searchParams.get("product") ?? "";
   const qSegment = searchParams.get("segment") ?? "";
   const qFrom = searchParams.get("from") ?? "";
+  const [planKey, setPlanKey] = useState("plan");
+  const [planList, setPlanList] = useState<PlanListItem[]>([]);
   const [plan, setPlan] = useState<PlanValue>(() => ({
     ...DEFAULT_PLAN,
     productOrFeature: qProduct || productName,
@@ -260,14 +263,32 @@ export function GtmPlannerClient({
     return Math.round((allTasks.filter((t) => t.done).length / allTasks.length) * 100);
   }, [plan.phases]);
 
-  const load = useCallback(async () => {
+  const loadPlanList = useCallback(async () => {
+    const { data } = await supabase
+      .from("module_settings")
+      .select("key, value_json")
+      .eq("environment_id", environmentId)
+      .eq("module", MODULE)
+      .like("key", "plan%");
+    if (data) {
+      const rows = data as { key: string; value_json: Partial<PlanValue> | null }[];
+      const list: PlanListItem[] = rows.map((r) => ({
+        key: r.key,
+        label: (r.value_json as Partial<PlanValue> | null)?.productOrFeature?.trim() || "Untitled"
+      }));
+      list.sort((a, b) => (a.key === "plan" ? -1 : b.key === "plan" ? 1 : a.key.localeCompare(b.key)));
+      setPlanList(list.length > 0 ? list : [{ key: "plan", label: "Default" }]);
+    }
+  }, [environmentId, supabase]);
+
+  const load = useCallback(async (key: string) => {
     setLoading(true);
     const { data: row, error: qErr } = await supabase
       .from("module_settings")
       .select("value_json")
       .eq("environment_id", environmentId)
       .eq("module", MODULE)
-      .eq("key", KEY)
+      .eq("key", key)
       .maybeSingle();
     if (qErr) setError(qErr.message);
     const v = row?.value_json as Partial<PlanValue> | null;
@@ -277,11 +298,12 @@ export function GtmPlannerClient({
         : DEFAULT_PHASES;
       const savedProduct = typeof v.productOrFeature === "string" ? v.productOrFeature : "";
       const savedSegment = typeof v.segment === "string" ? v.segment : "";
-      // Query params from "Plan launch →" always win — user deliberately navigated from a campaign card
+      // Query params win only for the default plan (campaign → GTM handoff)
+      const isDefault = key === "plan";
       setPlan({
         launchDate: typeof v.launchDate === "string" ? v.launchDate : "",
-        productOrFeature: qProduct || savedProduct || productName,
-        segment: qSegment || savedSegment,
+        productOrFeature: (isDefault ? qProduct : "") || savedProduct || productName,
+        segment: (isDefault ? qSegment : "") || savedSegment,
         goals: typeof v.goals === "string" ? v.goals : "",
         phases,
         stakeholders: typeof v.stakeholders === "string" ? v.stakeholders : DEFAULT_PLAN.stakeholders,
@@ -290,23 +312,38 @@ export function GtmPlannerClient({
       const initExpand: Record<string, boolean> = {};
       phases.forEach((p, i) => { initExpand[p.id] = i === 0; });
       setExpandedPhases(initExpand);
+    } else {
+      // New plan — reset to defaults
+      setPlan({ ...DEFAULT_PLAN });
+      setExpandedPhases({ "phase-1": true, "phase-2": false, "phase-3": false, "phase-4": false });
     }
     setLoading(false);
   }, [environmentId, supabase, productName, qProduct, qSegment]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    void loadPlanList();
+    void load("plan");
+  }, [load, loadPlanList]);
+
+  useEffect(() => {
+    void load(planKey);
+  }, [planKey, load]);
 
   const persist = useCallback(async (next: PlanValue) => {
     setSaving(true);
     const { error: upErr } = await supabase.from("module_settings").upsert({
       environment_id: environmentId,
       module: MODULE,
-      key: KEY,
+      key: planKey,
       value_json: next
     });
     setSaving(false);
     if (upErr) setError(upErr.message);
-  }, [environmentId, supabase]);
+    // Keep the plan list label in sync with the product name
+    setPlanList((prev) => prev.map((p) =>
+      p.key === planKey ? { ...p, label: next.productOrFeature?.trim() || "Untitled" } : p
+    ));
+  }, [environmentId, supabase, planKey]);
 
   function schedule(next: PlanValue) {
     setPlan(next);
@@ -355,6 +392,32 @@ export function GtmPlannerClient({
     setExpandedPhases((prev) => ({ ...prev, [phaseId]: !prev[phaseId] }));
   }
 
+  async function createNewPlan() {
+    const newKey = `plan_${crypto.randomUUID().slice(0, 8)}`;
+    const newPlan: PlanValue = { ...DEFAULT_PLAN };
+    await supabase.from("module_settings").upsert({
+      environment_id: environmentId,
+      module: MODULE,
+      key: newKey,
+      value_json: newPlan
+    });
+    setPlanList((prev) => [...prev, { key: newKey, label: "New plan" }]);
+    setPlanKey(newKey);
+    toast("New GTM plan created — fill in your product and segment");
+  }
+
+  async function deletePlan(key: string) {
+    if (planList.length <= 1) return;
+    await supabase.from("module_settings").delete()
+      .eq("environment_id", environmentId)
+      .eq("module", MODULE)
+      .eq("key", key);
+    const next = planList.filter((p) => p.key !== key);
+    setPlanList(next);
+    if (planKey === key) setPlanKey(next[0]?.key ?? "plan");
+    toast("Plan removed");
+  }
+
   async function generatePlan() {
     setGenerating(true);
     setGenError(null);
@@ -394,6 +457,43 @@ export function GtmPlannerClient({
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
       ) : null}
+
+      {/* Plan switcher */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-text2 shrink-0">GTM Plans:</span>
+        {planList.map((p) => (
+          <div key={p.key} className="group relative flex items-center">
+            <button
+              type="button"
+              onClick={() => setPlanKey(p.key)}
+              className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors pr-6 ${
+                planKey === p.key
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border bg-surface2 text-text2 hover:border-primary/30 hover:text-primary"
+              }`}
+            >
+              {p.label || "Untitled"}
+            </button>
+            {planList.length > 1 ? (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); void deletePlan(p.key); }}
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] text-text3 opacity-0 group-hover:opacity-100 hover:text-red transition-opacity"
+                title="Remove plan"
+              >
+                ✕
+              </button>
+            ) : null}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => void createNewPlan()}
+          className="rounded-lg border border-dashed border-border px-3 py-1 text-xs text-text2 hover:border-primary/40 hover:text-primary transition-colors"
+        >
+          + New plan
+        </button>
+      </div>
 
       {qFrom ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-2.5 text-sm">
