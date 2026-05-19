@@ -5,7 +5,7 @@ import { LaunchPlaybookDetailClient, type LaunchKind } from "@/app/dashboard/lau
 export default async function LaunchPlaybookDetailPage({ params }: { params: Promise<{ kind: string }> }) {
   const { kind } = await params;
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   const safeKind: LaunchKind = kind === "feature-launch" ? "feature-launch" : "product-launch";
   return <LaunchPlaybookDetailClient environmentId={ctx.environmentId} kind={safeKind} />;

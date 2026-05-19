@@ -9,7 +9,7 @@ export default async function FinalLaunchPackPage({ params }: { params: Promise<
   const safeKind: LaunchKind = kind === "feature-launch" ? "feature-launch" : "product-launch";
 
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   const supabase = createSupabaseServerClient();
 

@@ -6,7 +6,7 @@ import { SalesEnablementBriefBlock } from "@/app/dashboard/messaging-artifacts/S
 
 export default async function MessagingArtifactsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   const supabase = createSupabaseServerClient();
   const { data: productRow } = await supabase

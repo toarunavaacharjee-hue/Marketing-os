@@ -4,7 +4,7 @@ import { InsightWorkbench } from "@/app/dashboard/_components/InsightWorkbench";
 
 export default async function EventsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   return <InsightWorkbench environmentId={ctx.environmentId} variant="events" title="Events" />;
 }

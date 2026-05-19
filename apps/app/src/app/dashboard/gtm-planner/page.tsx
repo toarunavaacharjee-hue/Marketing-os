@@ -6,7 +6,7 @@ import { GtmPlannerClient } from "@/app/dashboard/gtm-planner/GtmPlannerClient";
 
 export default async function GTMPlannerPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   const supabase = createSupabaseServerClient();
   const { data: productRow } = await supabase

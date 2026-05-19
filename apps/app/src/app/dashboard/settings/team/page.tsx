@@ -83,7 +83,7 @@ export default async function TeamSettingsPage() {
             <span className="text-text3">|</span>
             <span>Team governance</span>
           </div>
-          <div className="mt-2 text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="text-3xl font-semibold text-text">
             Team & roles
           </div>
           <div className="mt-2 text-sm text-text2">

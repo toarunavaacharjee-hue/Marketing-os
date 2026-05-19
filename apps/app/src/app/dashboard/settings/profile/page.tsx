@@ -26,15 +26,15 @@ export default async function ProfileSettingsPage() {
     <div className="space-y-4">
       <div>
         <div className="flex flex-wrap items-center gap-3 text-sm text-text2">
-          <Link href="/dashboard" className="text-accent hover:underline">
+          <Link href="/dashboard" className="text-primary hover:underline">
             ← Command Centre
           </Link>
           <span className="text-text3">|</span>
-          <Link href="/dashboard/settings" className="text-accent hover:underline">
+          <Link href="/dashboard/settings" className="text-primary hover:underline">
             Workspace settings
           </Link>
         </div>
-        <div className="mt-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+        <div className="text-3xl font-semibold text-text">
           My profile
         </div>
         <div className="mt-2 text-sm text-text2">

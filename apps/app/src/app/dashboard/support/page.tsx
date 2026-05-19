@@ -112,7 +112,7 @@ export default function SupportPage() {
               {ent.supportTier === "dedicated" ? "Dedicated onboarding" : ent.supportTier === "priority" ? "Priority" : "Standard"}
             </span>
           </div>
-          <div className="mt-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+          <div className="mt-2 text-3xl font-semibold text-text">
             Support
           </div>
           <div className="mt-2 text-sm text-text2">

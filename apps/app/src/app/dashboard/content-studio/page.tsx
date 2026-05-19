@@ -5,7 +5,7 @@ import { CreationWorkbench } from "@/app/dashboard/_components/CreationWorkbench
 
 export default async function ContentStudioPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   return (
     <Suspense fallback={<div className="h-8 w-48 animate-pulse rounded-xl bg-surface3" />}>

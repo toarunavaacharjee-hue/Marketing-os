@@ -6,7 +6,7 @@ import { ArtifactDetailClient } from "@/app/dashboard/artifacts/ArtifactDetailCl
 export default async function ArtifactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
-  if (!ctx) redirect("/dashboard/onboarding");
+  if (!ctx) redirect("/onboarding-v2");
 
   const supabase = createSupabaseServerClient();
   const { data: row } = await supabase
