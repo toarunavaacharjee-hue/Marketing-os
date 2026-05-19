@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { MarketingLogo } from "@/components/marketing/MarketingChrome";
+import { marketingSiteBase } from "@/lib/marketingUrls";
 
 export function AuthShell({ children }: { children: React.ReactNode }) {
+  const marketingBase = marketingSiteBase();
   return (
     <div
       className="relative isolate min-h-screen overflow-hidden bg-page text-text antialiased"
@@ -15,20 +17,20 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
 
       <header className="relative z-10 border-b border-border bg-bg/80 backdrop-blur-xl">
         <div className="mx-auto flex h-[56px] max-w-6xl items-center justify-between px-4 sm:px-6">
-          <MarketingLogo />
+          <MarketingLogo href={marketingBase} />
           <nav className="flex items-center gap-1 sm:gap-3">
-            <Link
-              href="/pricing"
+            <a
+              href={`${marketingBase}/pricing`}
               className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface2 hover:text-text sm:px-3"
             >
               Pricing
-            </Link>
-            <Link
-              href="/"
+            </a>
+            <a
+              href={marketingBase}
               className="rounded-lg px-2.5 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface2 hover:text-text sm:px-3"
             >
               Home
-            </Link>
+            </a>
           </nav>
         </div>
       </header>

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { SkeletonIcpSegmentation } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ProductStaleBanner } from "@/components/ProductStaleBanner";
 
 type SegmentDetails = {
   urgency?: number;
@@ -282,6 +283,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
 
   return (
     <div className="space-y-6">
+      <ProductStaleBanner environmentId={environmentId} moduleName="ICP Segmentation" />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-semibold text-text">
