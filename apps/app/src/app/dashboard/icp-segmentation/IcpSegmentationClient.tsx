@@ -86,6 +86,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
   const [profileNote, setProfileNote] = useState<string | null>(null);
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -136,6 +137,49 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
     ] as [string, number][];
   }, [active]);
 
+  async function generateWithAi() {
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/ai/module-generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          prompt:
+            "Generate 4–5 distinct ICP segments for this product. For each segment return a JSON object with: name, pnf_score (0-100), pain_points (array of 4-5 strings), urgency (0-100), budget_fit (0-100), acv_potential (0-100), retention_potential (0-100), icp_profile (2-3 sentence description of the buyer persona and buying context). Return a JSON array of segment objects only, no other text.",
+          system:
+            "You are a B2B go-to-market strategist. Generate realistic, differentiated ICP segments based on the product profile and market context available. Return valid JSON only.",
+          length: "short"
+        })
+      });
+      const data = (await res.json()) as { ok?: boolean; text?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "AI generation failed.");
+      const raw = data.text ?? "";
+      const match = raw.match(/\[[\s\S]*\]/);
+      if (!match) throw new Error("Could not parse AI response.");
+      const parsed = JSON.parse(match[0]) as DraftSegment[];
+      if (!Array.isArray(parsed) || !parsed.length) throw new Error("No segments returned.");
+      const normalised: DraftSegment[] = parsed.map((s) => ({
+        name: String(s.name ?? "Segment"),
+        pnf_score: num(s.pnf_score, 70),
+        pain_points: Array.isArray(s.pain_points) ? s.pain_points.map(String) : [],
+        urgency: num(s.urgency, 70),
+        budget_fit: num(s.budget_fit, 70),
+        acv_potential: num(s.acv_potential, 70),
+        retention_potential: num(s.retention_potential, 70),
+        icp_profile: String(s.icp_profile ?? ""),
+        notes: null
+      }));
+      setDraft(normalised);
+      setProductProfileDraft(null);
+      setReplaceAll(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "AI generation failed.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   async function onUpload(file: File) {
     setExtracting(true);
     setError(null);
@@ -144,8 +188,8 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
     try {
       const res = await fetch("/api/segments/extract-document", {
         method: "POST",
-        body: fd,
-        headers: { "content-type": "application/json" }
+        body: fd
+        // Do NOT set content-type — browser must auto-set multipart/form-data with boundary
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -240,10 +284,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1
-            className="text-3xl font-semibold tracking-tight text-heading"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
+          <h1 className="text-3xl font-semibold text-text">
             ICP Segmentation
           </h1>
           <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text2">
@@ -260,13 +301,21 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void generateWithAi()}
+            disabled={extracting || generating || saving}
+            className="rounded-sm border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary shadow-card transition-[background-color,box-shadow,transform] duration-200 ease-out hover:bg-primary/15 hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50"
+          >
+            {generating ? "Generating…" : "✦ Generate with AI"}
+          </button>
           <label className="cursor-pointer rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card transition-[background-color,box-shadow,transform] duration-200 ease-out hover:bg-amber-hover hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50">
             {extracting ? "Reading…" : "Upload ICP document"}
             <input
               type="file"
               accept=".pdf,.docx,.xlsx,.xls,.csv"
               className="hidden"
-              disabled={extracting}
+              disabled={extracting || generating}
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 e.target.value = "";
@@ -306,6 +355,13 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
         title="Reading ICP document…"
         estimate={AI_PROGRESS_ESTIMATE.extract}
         durationMs={75_000}
+      />
+      <AiProgressBar
+        active={generating}
+        variant="dashboard"
+        title="Generating ICP segments with AI…"
+        estimate={AI_PROGRESS_ESTIMATE.short}
+        durationMs={30_000}
       />
       <AiProgressBar
         active={saving}
@@ -445,6 +501,21 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
               </div>
             </div>
           ) : null}
+
+          {/* Next step CTA */}
+          <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 text-sm shadow-sm">
+            <span className="text-text2">
+              <span className="mr-2 text-text3">→</span>
+              <span className="font-medium text-text">Next step:</span>{" "}
+              Generate your positioning canvas from these segments.
+            </span>
+            <Link
+              href="/dashboard/positioning-studio"
+              className="shrink-0 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
+            >
+              Positioning Studio →
+            </Link>
+          </div>
         </>
       )}
     </div>

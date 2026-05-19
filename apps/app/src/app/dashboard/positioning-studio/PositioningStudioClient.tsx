@@ -348,7 +348,7 @@ export default function PositioningStudioClient({
         body: JSON.stringify({
           prompt,
           system: PRICING_NARRATIVE_SYSTEM,
-          length: "medium"
+          length: "short"
         })
       });
       const data = (await res.json()) as { text?: string; error?: string };
@@ -426,12 +426,7 @@ export default function PositioningStudioClient({
     <div className="space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1
-            className="text-3xl text-heading"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Positioning Studio
-          </h1>
+          <h1 className="text-3xl font-semibold text-text">Positioning Studio</h1>
           <p className="mt-1 max-w-2xl text-sm text-text2">
             Canvas and health scores are generated from your saved ICP segments (from an uploaded document in{" "}
             <Link href="/dashboard/icp-segmentation" className="text-primary hover:underline">
@@ -743,6 +738,20 @@ export default function PositioningStudioClient({
             className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
             placeholder="Generated pricing narrative appears here."
           />
+        </div>
+        {/* Next step CTA */}
+        <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 text-sm shadow-sm">
+          <span className="text-text2">
+            <span className="mr-2 text-text3">→</span>
+            <span className="font-medium text-text">Next step:</span>{" "}
+            Turn your positioning canvas into messaging frameworks and artifacts.
+          </span>
+          <Link
+            href="/dashboard/messaging-artifacts"
+            className="shrink-0 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
+          >
+            Messaging &amp; Artifacts →
+          </Link>
         </div>
         </>
       )}
