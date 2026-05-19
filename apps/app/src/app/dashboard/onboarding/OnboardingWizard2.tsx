@@ -178,31 +178,31 @@ export function OnboardingWizard() {
       <div className="mx-auto max-w-xl">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-xs text-text2">Onboarding</div>
-            <div className="mt-2 text-4xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+            <div className="text-xs font-medium uppercase tracking-wide text-text3">Onboarding</div>
+            <div className="mt-2 text-4xl font-semibold text-heading" style={{ fontFamily: "var(--font-heading)" }}>
               Let’s get you to value fast
             </div>
             <div className="mt-2 text-sm text-text2">A 5-minute setup to generate your first ICP + positioning draft.</div>
           </div>
           <div className="shrink-0 rounded-xl border border-border bg-surface px-3 py-2 text-xs text-text2">
-            Step <span className="text-heading">{progressIdx}</span> / 5
+            Step <span className="font-semibold text-heading">{progressIdx}</span> / 5
           </div>
         </div>
 
         <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-surface3">
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(progressIdx / 5) * 100}%` }} />
+          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${(progressIdx / 5) * 100}%` }} />
         </div>
 
         {error ? (
           <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
         ) : null}
 
-        <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
+        <div className="mt-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
           {step === "role" ? (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div>
-                <div className="text-sm text-heading">Which best describes your role?</div>
-                <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="text-sm font-semibold text-heading">Which best describes your role?</div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
                   {(
                     [
                       ["owner", "Owner / Founder"],
@@ -219,10 +219,10 @@ export function OnboardingWizard() {
                       key={id}
                       type="button"
                       onClick={() => setRole(id)}
-                      className={`rounded-xl border px-3 py-2 text-sm ${
+                      className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
                         role === id
-                          ? "border-primary bg-primary/10 text-heading"
-                          : "border-border bg-black/10 text-text2 hover:bg-surface2"
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-input-border bg-surface2 text-heading hover:border-primary/40 hover:bg-primary/5"
                       }`}
                     >
                       {label}
@@ -232,8 +232,8 @@ export function OnboardingWizard() {
               </div>
 
               <div>
-                <div className="text-sm text-heading">What do you want to achieve first?</div>
-                <div className="mt-2 grid gap-2">
+                <div className="text-sm font-semibold text-heading">What do you want to achieve first?</div>
+                <div className="mt-3 grid gap-2">
                   {(
                     [
                       ["research_icp", "Research & ICP segmentation"],
@@ -247,10 +247,10 @@ export function OnboardingWizard() {
                       key={id}
                       type="button"
                       onClick={() => setGoal(id)}
-                      className={`w-full rounded-xl border px-3 py-2 text-left text-sm ${
+                      className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors ${
                         goal === id
-                          ? "border-primary bg-primary/10 text-heading"
-                          : "border-border bg-black/10 text-text2 hover:bg-surface2"
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-input-border bg-surface2 text-heading hover:border-primary/40 hover:bg-primary/5"
                       }`}
                     >
                       {label}
@@ -330,41 +330,52 @@ export function OnboardingWizard() {
           ) : null}
 
           {step === "confirm" ? (
-            <div className="space-y-4">
-              <div className="text-sm text-heading">Confirm & create</div>
-              <div className="rounded-xl border border-border bg-black/10 p-4 text-sm">
-                <div className="text-text2">Workspace</div>
-                <div className="mt-1 text-heading">{companyName.trim() || "—"}</div>
-                <div className="mt-3 text-text2">Product</div>
-                <div className="mt-1 text-heading">{productName.trim() || "—"}</div>
-                <div className="mt-3 text-text2">Website</div>
-                <div className="mt-1 break-words text-heading">{websiteUrl.trim() ? normalizeUrl(websiteUrl) : "—"}</div>
+            <div className="space-y-5">
+              <div>
+                <div className="text-sm font-semibold text-heading">Confirm & create</div>
+                <div className="mt-1 text-xs text-text2">Review your details before we set everything up.</div>
+              </div>
+              <div className="divide-y divide-border rounded-xl border border-border bg-surface2">
+                <div className="px-4 py-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-text3">Workspace</div>
+                  <div className="mt-0.5 text-sm font-medium text-heading">{companyName.trim() || "—"}</div>
+                </div>
+                <div className="px-4 py-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-text3">Product</div>
+                  <div className="mt-0.5 text-sm font-medium text-heading">{productName.trim() || "—"}</div>
+                </div>
+                <div className="px-4 py-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-text3">Website</div>
+                  <div className="mt-0.5 break-words text-sm text-heading">{websiteUrl.trim() ? normalizeUrl(websiteUrl) : <span className="text-text3">Not provided</span>}</div>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => setStep("details")}
-                  className="rounded-xl border border-border bg-black/10 px-4 py-2 text-sm text-heading hover:bg-surface2 disabled:opacity-60"
+                  className="rounded-xl border border-input-border bg-surface2 px-4 py-2 text-sm font-medium text-heading hover:bg-surface3 disabled:opacity-60"
                 >
-                  Edit
+                  ← Edit
                 </button>
-                <button
-                  type="button"
-                  disabled={loading}
-                  onClick={() => void create({ skipAutofill: true })}
-                  className="rounded-xl border border-border bg-transparent px-4 py-2 text-sm text-text2 hover:bg-surface2 disabled:opacity-60"
-                >
-                  Create without auto-fill
-                </button>
+                {websiteUrl.trim() ? (
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => void create({ skipAutofill: true })}
+                    className="rounded-xl border border-input-border bg-surface2 px-4 py-2 text-sm font-medium text-text hover:bg-surface3 disabled:opacity-60"
+                  >
+                    Create without auto-fill
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => void create({ skipAutofill: false })}
-                  className="ml-auto rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                  className="ml-auto rounded-xl bg-amber px-4 py-2 text-sm font-semibold text-black hover:bg-amber/90 disabled:opacity-60"
                 >
-                  {websiteUrl.trim() ? "Create & generate drafts" : "Create workspace"}
+                  {websiteUrl.trim() ? "Create & generate drafts →" : "Create workspace →"}
                 </button>
               </div>
             </div>
