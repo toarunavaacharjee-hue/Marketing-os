@@ -241,7 +241,7 @@ function PageCard({
             {page.name.trim() || <span className="font-normal italic text-text3">Untitled page</span>}
           </p>
           {page.copy.headline ? (
-            <p className="line-clamp-1 text-xs text-text2">"{page.copy.headline}"</p>
+            <p className="line-clamp-1 text-xs text-text2">&ldquo;{page.copy.headline}&rdquo;</p>
           ) : page.url ? (
             <p className="text-xs text-text3">{page.url}</p>
           ) : null}
