@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ProductStaleBanner } from "@/components/ProductStaleBanner";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { useToast } from "@/app/dashboard/_components/Toast";
 import { buildGtmPlanPrompt, GTM_PLAN_SYSTEM } from "@/lib/pmmPrompts";
@@ -459,6 +460,7 @@ export function GtmPlannerClient({
 
   return (
     <div className="space-y-5">
+      <ProductStaleBanner environmentId={environmentId} moduleName="GTM Planner" />
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
       ) : null}

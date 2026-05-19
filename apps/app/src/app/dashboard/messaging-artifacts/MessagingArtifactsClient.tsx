@@ -7,6 +7,7 @@ import { EmptyState } from "@/app/dashboard/_components/EmptyState";
 import { SkeletonSegmentList } from "@/app/dashboard/_components/Skeleton";
 import { useToast } from "@/app/dashboard/_components/Toast";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ProductStaleBanner } from "@/components/ProductStaleBanner";
 import {
   buildMessagingPillarsPrompt,
   MESSAGING_PILLARS_SYSTEM
@@ -304,6 +305,7 @@ export function MessagingArtifactsClient({
 
   return (
     <div className="space-y-4">
+      <ProductStaleBanner environmentId={environmentId} moduleName="Messaging & Artifacts" />
       {error ? (
         <div className="flex items-start justify-between gap-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           <span>{error}</span>
