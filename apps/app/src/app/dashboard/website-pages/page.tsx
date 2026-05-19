@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
+import { LandingPageWorkspace } from "@/app/dashboard/website-pages/LandingPageWorkspace";
 
 type WebsiteAsset = {
   id: string;
@@ -221,6 +223,15 @@ export default async function WebsitePagesPage() {
         </Link>{" "}
         for traffic proof.
       </div>
+
+      {/* Landing page copy workspace */}
+      {ctx?.environmentId ? (
+        <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+          <Suspense fallback={<div className="h-8 w-48 animate-pulse rounded-xl bg-surface3" />}>
+            <LandingPageWorkspace environmentId={ctx.environmentId} />
+          </Suspense>
+        </div>
+      ) : null}
     </div>
   );
 }
