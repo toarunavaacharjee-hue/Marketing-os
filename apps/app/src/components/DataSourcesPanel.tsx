@@ -125,12 +125,13 @@ export function DataSourcesPanel({ environmentId }: { environmentId: string }) {
         ? (JSON.parse(raw) as { imported?: number; type?: string; summary?: string; error?: string })
         : ({ error: raw || "Server error" } as { error: string });
       if (!res.ok) {
-        updateImportState(type, { loading: false, error: data.error ?? "Import failed." });
+        updateImportState(type, { loading: false, error: (data as { error?: string }).error ?? "Import failed." });
         return;
       }
+      const ok = data as { imported?: number; summary?: string };
       updateImportState(type, {
         loading: false,
-        success: `Imported ${data.imported ?? 0} rows — ${data.summary ?? `${type} data added to your research`}`
+        success: `Imported ${ok.imported ?? 0} rows — ${ok.summary ?? `${type} data added to your research`}`
       });
     } catch (e) {
       updateImportState(type, {
