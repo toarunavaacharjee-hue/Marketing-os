@@ -76,7 +76,7 @@ export default async function WebsitePagesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>
+      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
         Website & Pages
       </h1>
 

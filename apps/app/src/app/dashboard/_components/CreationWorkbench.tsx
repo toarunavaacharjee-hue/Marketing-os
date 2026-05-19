@@ -536,7 +536,7 @@ export function CreationWorkbench({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>
+        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
           {title}
         </h1>
         <p className="mt-1 text-sm text-text2">{description}</p>

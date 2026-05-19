@@ -515,7 +515,7 @@ export function SocialMediaClient({
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>Social Media</h1>
+        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>Social Media</h1>
         <p className="mt-1 text-sm text-text2">Queue, draft, and generate platform-ready posts with ICP context.</p>
         {loading ? (
           <p className="mt-2 text-sm text-text2">Loading…</p>

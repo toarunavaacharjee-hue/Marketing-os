@@ -534,7 +534,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>Design & Assets</h1>
+        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>Design & Assets</h1>
         <p className="mt-1 text-sm text-text2">
           Track creative requests, write briefs, and generate visual direction with AI.
         </p>

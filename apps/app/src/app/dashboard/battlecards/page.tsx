@@ -473,7 +473,7 @@ export default function BattlecardsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>Battlecards</h1>
+          <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>Battlecards</h1>
           <p className="mt-1 text-sm text-text2">
             Competitor notes, ICP-level positioning, and named-account pitches — tied to your Product Profile.
           </p>

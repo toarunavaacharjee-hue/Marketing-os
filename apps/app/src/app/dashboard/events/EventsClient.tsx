@@ -45,7 +45,7 @@ export function EventsClient({ environmentId }: { environmentId: string }) {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1
-            className="text-2xl font-semibold tracking-tight text-text"
+            className="text-2xl font-semibold tracking-tight text-heading"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Events

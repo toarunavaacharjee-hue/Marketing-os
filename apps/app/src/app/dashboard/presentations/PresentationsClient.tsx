@@ -513,7 +513,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>Presentations</h1>
+        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>Presentations</h1>
         <p className="mt-1 text-sm text-text2">
           Track decks, manage slide outlines, and generate talk tracks with AI.
         </p>
