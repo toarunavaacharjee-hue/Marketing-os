@@ -22,6 +22,15 @@ type ImportState = {
   error: string | null;
 };
 
+function StatTile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface p-3 text-center">
+      <div className="text-lg font-semibold text-text">{value}</div>
+      <div className="mt-0.5 text-[11px] text-text3">{label}</div>
+    </div>
+  );
+}
+
 const IMPORT_CONFIGS: Array<{ type: CsvImportType; label: string }> = [
   { type: "contacts", label: "Import Contacts CSV" },
   { type: "deals", label: "Import Deals CSV" },
