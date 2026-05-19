@@ -36,7 +36,7 @@ const faq = [
     "Does AI usage have limits?",
     "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes the full module set — tiers differ by products, AI volume, seats, and support."
   ],
-  ["Can we use our own Anthropic key?", "Yes. Each user can store their API key and run AI features in Copilot and module generators."],
+  ["Can we use our own Anthropic key?", "Yes. A workspace admin adds a workspace-level Anthropic key under Settings → AI integration. Starter and Growth can also use the platform key if your operator enables it. Enterprise requires BYOK — Anthropic token usage is billed directly to the customer."],
   ["Is there a contract?", "Starter and Growth are month-to-month. Enterprise can be monthly or annual with custom terms."]
 ];
 

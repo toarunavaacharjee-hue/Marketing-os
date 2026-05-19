@@ -45,7 +45,7 @@ const faq = [
     "Does AI usage have limits?",
     "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes the full module set — tiers differ by products, AI volume, seats, and support."
   ],
-  ["Can we use our own Anthropic key?", "Yes. Each user can store their API key and run AI features in Copilot and module generators."],
+  ["Can we use our own Anthropic key?", "Yes. A workspace admin adds a workspace-level Anthropic key under Settings → AI integration. Starter and Growth can also use the platform key if your operator enables it. Enterprise requires BYOK — Anthropic token usage is billed by Anthropic directly to the customer's account."],
   ["Is there a contract?", "Starter and Growth are month-to-month. Enterprise can be monthly or annual with custom terms."]
 ] as const;
 
@@ -147,8 +147,7 @@ export default function HomePageModernClient({
               The Marketing Operating System for teams that need clarity and execution
             </p>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-text2">
-              Run research, ICP definition, positioning, messaging, planning, campaigns, and analytics in one connected system — built for operators, not
-              scattered docs.
+              Run research, ICP definition, positioning, messaging, campaigns, sales enablement, customer insights, and analytics in one connected system — built for operators, not scattered docs.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -312,7 +311,7 @@ export default function HomePageModernClient({
               <div className="mt-2 text-xl font-semibold tracking-tight text-text" style={{ fontFamily: "var(--font-heading)" }}>
                 Planning + campaigns tied to strategy
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-text2">Keep GTM planning, campaign work, and analytics connected to the decisions that matter.</p>
+              <p className="mt-2 text-sm leading-relaxed text-text2">Keep GTM planning, campaign work, and analytics connected to the decisions that matter. Multi-plan GTM Planner with phase checklists and per-task module deep-links.</p>
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 {["GTM planner", "Campaign board", "Analytics"].map((x) => (
                   <div key={x} className="rounded-xl border border-border bg-surface2 px-3 py-2 text-[13px] text-text2">
@@ -323,13 +322,13 @@ export default function HomePageModernClient({
             </div>
 
             <div className="saas-bento-card saas-bento-card-hover p-6 md:col-span-5">
-              <div className="text-[13px] font-semibold uppercase tracking-[0.14em] text-primary">Agentic automation</div>
+              <div className="text-[13px] font-semibold uppercase tracking-[0.14em] text-primary">Sales &amp; customer intelligence</div>
               <div className="mt-2 text-xl font-semibold tracking-tight text-text" style={{ fontFamily: "var(--font-heading)" }}>
-                Work runs in the background
+                Close the loop from market to revenue
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-text2">Agent workers handle long workflows and structured generation so operators stay in flow.</p>
+              <p className="mt-2 text-sm leading-relaxed text-text2">Objection rebuttals, deal stage assets, VOC library, win/loss tracking, retention briefs — all connected to your positioning.</p>
               <div className="mt-4 grid gap-2 text-[13px] text-text2">
-                {["Queue workflows", "Review diffs", "Ship with confidence"].map((x) => (
+                {["Sales Intelligence", "Customer Insights", "Battlecards"].map((x) => (
                   <div key={x} className="rounded-xl border border-border bg-surface px-3 py-2">
                     {x}
                   </div>
@@ -349,11 +348,13 @@ export default function HomePageModernClient({
                 key={name}
                 className={`rounded-xl border p-3 text-sm transition ${
                   cat === "Core"
-                    ? "border-accent/25 bg-accent/10"
+                    ? "border-primary/25 bg-primary/10"
                     : cat === "Sales"
-                      ? "border-[rgba(184,255,108,0.35)] bg-[rgba(184,255,108,0.10)]"
-                      : "border-border bg-surface2"
-                } hover:border-accent/25 hover:shadow-sm`}
+                      ? "border-teal/30 bg-teal/10"
+                      : cat === "Insights"
+                        ? "border-amber/25 bg-amber/10"
+                        : "border-border bg-surface2"
+                } hover:border-primary/25 hover:shadow-sm`}
               >
                 <div className="font-medium text-text">{name}</div>
                 <div className="mt-1 text-xs text-text2">{cat}</div>
@@ -376,7 +377,8 @@ export default function HomePageModernClient({
               ["01", "Research the market", "Capture signals, competitors, and customer context in one workspace."],
               ["02", "Define the ICP focus", "Prioritize segments and strategic choices you can execute on."],
               ["03", "Build positioning + messaging", "Create reusable artifacts grounded in shared context."],
-              ["04", "Execute and measure", "Run campaigns and review outcomes without losing the thread."]
+              ["04", "Execute and measure", "Run campaigns and review outcomes without losing the thread."],
+              ["05", "Enable sales + capture feedback", "Arm the sales team with rebuttals and stage assets. Feed win/loss signals and customer VOC back into positioning."]
             ].map(([n, t, d]) => (
               <div key={n} className="saas-bento-card saas-bento-card-hover p-6 md:col-span-3">
                 <div className="flex items-start gap-3">
