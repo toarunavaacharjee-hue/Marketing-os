@@ -133,6 +133,25 @@ export function PricingModernClient() {
         </div>
       </div>
 
+      {/* Competitor comparison banner */}
+      <div className="mt-8 rounded-2xl border border-amber/30 bg-amber/5 p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="text-[13px] font-semibold uppercase tracking-[0.14em] text-amber-600">Pricing transparency</div>
+            <div className="mt-1 text-lg font-semibold text-text">Most tools charge per product. We charge per workspace.</div>
+            <p className="mt-2 text-sm text-text2">
+              Competitors price at $199–$399/product/month. For a team with 2 products, that&apos;s $398–$798/mo before AI costs.
+              Our Growth plan is <span className="font-semibold text-text">$299/mo for the entire workspace</span> — all products, unlimited AI, 3 seats.
+            </p>
+          </div>
+          <div className="shrink-0 rounded-xl border border-border bg-surface p-4 text-center">
+            <div className="font-mono text-2xl font-bold text-primary">$299</div>
+            <div className="mt-1 text-xs text-text2">vs $798+/mo</div>
+            <div className="mt-1 text-[11px] text-text3">per workspace / per product</div>
+          </div>
+        </div>
+      </div>
+
       <section className="mt-12 saas-bento">
         {PLANS.map((p) => (
           <div
@@ -210,7 +229,28 @@ export function PricingModernClient() {
           </table>
         </div>
       </section>
+
+      <section className="mt-14 saas-card p-6 sm:p-8">
+        <div className="text-lg font-semibold text-text">What makes us different</div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["No per-product charges", "One workspace price covers all your products. Scale products without scaling your bill."],
+            ["No research run limits", "Growth and Enterprise get unlimited AI workflow runs — no throttling on segments, positioning, or content."],
+            ["All 18 modules included", "Every plan includes every module. No paywalls, no add-ons, no upgrade gates mid-workflow."],
+            ["Self-serve in 60 seconds", "No demo required. Sign up, add a product brief, and generate your first ICP segments immediately."]
+          ].map(([t, d]) => (
+            <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+              <div className="flex items-start gap-2">
+                <span className="mt-0.5 text-teal">✓</span>
+                <div>
+                  <div className="text-[13px] font-semibold text-text">{t}</div>
+                  <div className="mt-1 text-[13px] leading-relaxed text-text2">{d}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
-
