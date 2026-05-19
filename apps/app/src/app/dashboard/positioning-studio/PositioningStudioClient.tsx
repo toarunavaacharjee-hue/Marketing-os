@@ -6,6 +6,7 @@ import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components
 import { useToast } from "@/app/dashboard/_components/Toast";
 import { SkeletonCard } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ProductStaleBanner } from "@/components/ProductStaleBanner";
 import {
   POSITIONING_KEY,
   POSITIONING_MODULE,
@@ -424,6 +425,7 @@ export default function PositioningStudioClient({
 
   return (
     <div className="space-y-4">
+      <ProductStaleBanner environmentId={environmentId} moduleName="Positioning Studio" />
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold text-text">Positioning Studio</h1>
