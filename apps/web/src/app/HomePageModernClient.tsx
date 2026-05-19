@@ -502,7 +502,7 @@ export default function HomePageModernClient({
             Built for every PMM role
           </h2>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-text2 sm:text-[15px]">
-            Whether you're a solo operator or leading a GTM team, the workbench adapts to how you work.
+            Whether you&apos;re a solo operator or leading a GTM team, the workbench adapts to how you work.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
