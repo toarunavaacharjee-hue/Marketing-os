@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -202,6 +203,11 @@ export function CreationWorkbench({
   contentStudio?: boolean;
 }) {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const searchParams = useSearchParams();
+  const qTopic = searchParams.get("topic") ?? "";
+  const qProduct = searchParams.get("product") ?? "";
+  const qSegment = searchParams.get("segment") ?? "";
+  const qFrom = searchParams.get("from") ?? "";
   const [me, setMe] = useState<{ id: string; email: string } | null>(null);
   const [team, setTeam] = useState<Array<{ userId: string; name: string | null; role: string }>>([]);
   const [myTeamRole, setMyTeamRole] = useState<string>("member");
@@ -212,6 +218,7 @@ export function CreationWorkbench({
   const [ws, setWs] = useState<Workspace>(() => empty());
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [strategyContext, setStrategyContext] = useState("");
+  const prefilledRef = useRef(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -224,9 +231,19 @@ export function CreationWorkbench({
       .maybeSingle();
     if (qErr) setError(qErr.message);
     const v = (data?.value_json ?? null) as Partial<Workspace> | null;
-    setWs(migrateWorkspace(v));
+    const migrated = migrateWorkspace(v);
+    // Pre-fill prompt from GTM Planner context if workspace is empty and not already done
+    if (!prefilledRef.current && qTopic && !migrated.prompt.trim()) {
+      prefilledRef.current = true;
+      const parts: string[] = [];
+      parts.push(qTopic);
+      if (qProduct) parts.push(`Product: ${qProduct}`);
+      if (qSegment) parts.push(`Target segment: ${qSegment}`);
+      migrated.prompt = parts.join("\n");
+    }
+    setWs(migrated);
     setLoading(false);
-  }, [environmentId, moduleKey, supabase]);
+  }, [environmentId, moduleKey, supabase, qTopic, qProduct, qSegment]);
 
   useEffect(() => {
     load();
@@ -533,6 +550,17 @@ export function CreationWorkbench({
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
           {error}
+        </div>
+      ) : null}
+
+      {qFrom ? (
+        <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-2.5 text-sm">
+          <span className="text-primary">←</span>
+          <span className="text-text2">
+            Context from <span className="font-semibold text-text">{qFrom}</span>
+            {qProduct ? <> — <span className="font-medium text-text">{qProduct}</span></> : null}
+            {qSegment ? <span className="text-text3"> · {qSegment}</span> : null}
+          </span>
         </div>
       ) : null}
 

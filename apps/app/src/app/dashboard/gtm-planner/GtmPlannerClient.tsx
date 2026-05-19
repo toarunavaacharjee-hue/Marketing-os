@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { useToast } from "@/app/dashboard/_components/Toast";
@@ -111,6 +112,60 @@ const DEFAULT_PLAN: PlanValue = {
 
 const MODULE = "gtm_planner";
 const KEY = "plan";
+
+// Task → module detection
+const MODULE_KEYWORDS: [RegExp, string][] = [
+  [/\b(email|outreach|sequence|nurture|drip|campaign)\b/i, "campaigns"],
+  [/\b(blog|article|write|copywriting|ebook|guide|case study|whitepaper)\b/i, "content-studio"],
+  [/\b(social|linkedin|twitter|meta|instagram|facebook|post)\b/i, "social-media"],
+  [/\b(battle\s?card|sales brief|enablement brief|sales enable)\b/i, "battlecards"],
+  [/\b(landing page|website|web page|seo|page copy)\b/i, "website-pages"],
+  [/\b(design|creative|banner|visual|asset|graphic|mockup)\b/i, "design-assets"],
+  [/\b(event|webinar|conference|demo day|field marketing)\b/i, "events"],
+  [/\b(icp|segment|persona|ideal customer)\b/i, "icp-segmentation"],
+  [/\b(positioning|canvas|differentiat|unique value prop)\b/i, "positioning-studio"],
+  [/\b(messaging|message pillar|narrative|value prop)\b/i, "messaging-artifacts"],
+];
+
+const MODULE_LABELS: Record<string, string> = {
+  "campaigns": "Campaigns",
+  "content-studio": "Content Studio",
+  "social-media": "Social Media",
+  "battlecards": "Battlecards",
+  "website-pages": "Website & Pages",
+  "design-assets": "Design & Assets",
+  "events": "Events",
+  "icp-segmentation": "ICP Segmentation",
+  "positioning-studio": "Positioning Studio",
+  "messaging-artifacts": "Messaging",
+};
+
+function detectModuleSlug(label: string): string | null {
+  for (const [re, slug] of MODULE_KEYWORDS) {
+    if (re.test(label)) return slug;
+  }
+  return null;
+}
+
+function buildModuleLink(slug: string, task: Task, plan: PlanValue): string {
+  const p = encodeURIComponent(plan.productOrFeature || "");
+  const s = encodeURIComponent(plan.segment || "");
+  const t = encodeURIComponent(task.label || "");
+  const f = encodeURIComponent(plan.productOrFeature ? `GTM Plan – ${plan.productOrFeature}` : "GTM Plan");
+  switch (slug) {
+    case "campaigns":          return `/dashboard/campaigns?product=${p}&segment=${s}&from=${f}`;
+    case "content-studio":     return `/dashboard/content-studio?topic=${t}&product=${p}&segment=${s}&from=${f}`;
+    case "social-media":       return `/dashboard/social-media?topic=${t}&product=${p}&segment=${s}&from=${f}`;
+    case "battlecards":        return `/dashboard/battlecards?product=${p}&from=${f}`;
+    case "website-pages":      return `/dashboard/website-pages?topic=${t}&product=${p}&from=${f}`;
+    case "design-assets":      return `/dashboard/design-assets?topic=${t}&product=${p}&from=${f}`;
+    case "events":             return `/dashboard/events?from=${f}`;
+    case "icp-segmentation":   return `/dashboard/icp-segmentation?from=${f}`;
+    case "positioning-studio": return `/dashboard/positioning-studio?from=${f}`;
+    case "messaging-artifacts":return `/dashboard/messaging-artifacts?product=${p}&from=${f}`;
+    default:                   return `/dashboard/${slug}?from=${f}`;
+  }
+}
 
 function normalizeTask(raw: unknown): Task | null {
   if (!raw || typeof raw !== "object") return null;
@@ -530,6 +585,19 @@ export function GtmPlannerClient({
                             }`}
                             placeholder="Task description"
                           />
+                          {(() => {
+                            const slug = detectModuleSlug(task.label);
+                            if (!slug || task.done) return null;
+                            return (
+                              <Link
+                                href={buildModuleLink(slug, task, plan)}
+                                className="shrink-0 rounded-lg border border-teal/30 bg-teal/8 px-2 py-0.5 text-[11px] font-medium text-teal hover:bg-teal/15 whitespace-nowrap"
+                                title={`Open in ${MODULE_LABELS[slug]}`}
+                              >
+                                → {MODULE_LABELS[slug]}
+                              </Link>
+                            );
+                          })()}
                           <select
                             value={task.owner}
                             onChange={(e) => patchTask(phase.id, task.id, { owner: e.target.value as Owner })}
