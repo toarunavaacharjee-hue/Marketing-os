@@ -5,10 +5,6 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Settings = {
   ga4_property_id: string;
-  linkedin_ad_account: string;
-  linkedin_access_token: string;
-  meta_ad_account: string;
-  meta_access_token: string;
   currency: string;
   timezone: string;
 };
@@ -32,10 +28,6 @@ export default function AnalyticsSettingsClient({
 
   const [form, setForm] = useState<Settings>({
     ga4_property_id: "",
-    linkedin_ad_account: "",
-    linkedin_access_token: "",
-    meta_ad_account: "",
-    meta_access_token: "",
     currency: "USD",
     timezone: "UTC"
   });
@@ -122,36 +114,22 @@ export default function AnalyticsSettingsClient({
         </div>
       ) : null}
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
+      {/* Redirect callout for ads tokens */}
+      <div className="mt-4 rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text2">
+        <span className="font-semibold text-text">LinkedIn Ads & Meta Ads tokens</span> are
+        configured in{" "}
+        <a href="/dashboard/settings/integrations" className="font-semibold text-primary hover:underline">
+          Settings → Integrations
+        </a>
+        . GA4 uses server-side env vars (below).
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Field
-          label="GA4 property ID (Required for GA)"
+          label="GA4 Property ID"
           value={form.ga4_property_id}
           onChange={(v) => setForm({ ...form, ga4_property_id: v })}
           placeholder="123456789"
-        />
-        <Field
-          label="LinkedIn ad account"
-          value={form.linkedin_ad_account}
-          onChange={(v) => setForm({ ...form, linkedin_ad_account: v })}
-          placeholder="urn:li:sponsoredAccount:..."
-        />
-        <PasswordField
-          label="LinkedIn Access Token"
-          value={form.linkedin_access_token}
-          onChange={(v) => setForm({ ...form, linkedin_access_token: v })}
-          placeholder="Bearer token from LinkedIn Developer Portal"
-        />
-        <Field
-          label="Meta ad account"
-          value={form.meta_ad_account}
-          onChange={(v) => setForm({ ...form, meta_ad_account: v })}
-          placeholder="act_1234567890"
-        />
-        <PasswordField
-          label="Meta Access Token"
-          value={form.meta_access_token}
-          onChange={(v) => setForm({ ...form, meta_access_token: v })}
-          placeholder="Long-lived access token from Meta Business"
         />
         <Field
           label="Currency"
@@ -165,33 +143,6 @@ export default function AnalyticsSettingsClient({
           onChange={(v) => setForm({ ...form, timezone: v })}
           placeholder="UTC"
         />
-      </div>
-
-      <div className="mt-4 rounded-xl border border-border bg-surface2 px-3 py-3 text-xs text-text2 space-y-1">
-        <div>
-          <span className="font-semibold text-text">LinkedIn:</span> Create an app at{" "}
-          <a
-            href="https://developer.linkedin.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-text"
-          >
-            developer.linkedin.com
-          </a>
-          , get an access token with <code className="rounded bg-surface3 px-1">r_ads_reporting</code> scope.
-        </div>
-        <div>
-          <span className="font-semibold text-text">Meta:</span> Generate a long-lived token at{" "}
-          <a
-            href="https://developers.facebook.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-text"
-          >
-            developers.facebook.com
-          </a>{" "}
-          with <code className="rounded bg-surface3 px-1">ads_read</code> scope.
-        </div>
       </div>
 
       <button
@@ -251,29 +202,4 @@ function Field({
   );
 }
 
-function PasswordField({
-  label,
-  value,
-  onChange,
-  placeholder
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-}) {
-  return (
-    <div>
-      <div className="mb-1 text-xs text-text2">{label}</div>
-      <input
-        type="password"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete="off"
-        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
-      />
-    </div>
-  );
-}
 

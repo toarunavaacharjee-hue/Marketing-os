@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 
-type AnalyticsSettings = {
-  meta_ad_account?: string;
-  meta_access_token?: string;
+type ConnectorRow = {
+  enabled?: boolean;
+  account_id?: string;
+  token?: string;
 };
 
 type MetaCampaignInsight = {
@@ -60,22 +61,23 @@ export async function GET() {
       .from("module_settings")
       .select("value_json")
       .eq("environment_id", selected.environmentId)
-      .eq("module", "analytics")
-      .eq("key", "connections")
+      .eq("module", "integrations")
+      .eq("key", "connectors")
       .maybeSingle();
 
     if (settingsError) {
       return NextResponse.json({ error: settingsError.message }, { status: 500 });
     }
 
-    const settings = (settingsRow?.value_json ?? null) as AnalyticsSettings | null;
-    const accountId = (settings?.meta_ad_account ?? "").trim();
-    const accessToken = (settings?.meta_access_token ?? "").trim();
+    const connectors = (settingsRow?.value_json ?? {}) as Record<string, ConnectorRow>;
+    const meta = connectors.meta_ads ?? {};
+    const accountId = (meta.account_id ?? "").trim();
+    const accessToken = (meta.token ?? "").trim();
 
-    if (!accountId || !accessToken) {
+    if (!meta.enabled || !accountId || !accessToken) {
       return NextResponse.json(
         {
-          error: "Meta ad account ID and access token required.",
+          error: "Meta ad account ID and access token required. Configure in Settings → Integrations.",
           code: "NOT_CONFIGURED"
         },
         { status: 400 }

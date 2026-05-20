@@ -11,12 +11,13 @@ export default async function IntegrationsSettingsPage() {
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-3xl font-semibold text-text">
-          Integrations settings
-        </div>
-        <div className="mt-2 text-sm text-text2">
-          Configure GA4, HubSpot, LinkedIn Ads, and Meta Ads for this product.
-        </div>
+        <h1 className="text-3xl font-semibold text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+          Integrations
+        </h1>
+        <p className="mt-2 text-sm text-text2">
+          Connect GA4, HubSpot, LinkedIn Ads, and Meta Ads. Tokens are stored securely
+          per-workspace via Supabase RLS.
+        </p>
       </div>
       <IntegrationsClient environmentId={ctx.environmentId} />
     </div>
