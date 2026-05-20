@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -541,16 +542,15 @@ SUGGESTED ACTION:
   const stageMeta = DEAL_STAGES.find((s) => s.id === activeStage)!;
 
   return (
+    <ModuleShell
+      title="Sales Intelligence"
+      subtitle="Objection handling, win/loss analysis, deal-stage playbooks, and coaching insights."
+      actions={<span className="text-xs text-text3">{saving ? "Saving…" : "Saved per product"}</span>}
+    >
     <div className="space-y-5">
 
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-semibold text-text">📊 Sales Intelligence</h1>
-        <span className="text-xs text-text3">{saving ? "Saving…" : "Saved per product"}</span>
-      </div>
-
       {error && (
-        <div className="flex items-center justify-between rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="ml-3 text-xs underline">Dismiss</button>
         </div>

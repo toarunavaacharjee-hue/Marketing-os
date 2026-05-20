@@ -677,7 +677,7 @@ export default function BattlecardsPage() {
               </div>
 
               {uploadError ? (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{uploadError}</div>
+                <div className="hs-alert hs-alert-error">{uploadError}</div>
               ) : null}
 
               {/* Generate panel */}
@@ -760,7 +760,7 @@ export default function BattlecardsPage() {
 
               {/* More detail needed */}
               {pitchQuestions?.length ? (
-                <div className="rounded-xl border border-yellow-400/30 bg-yellow-400/8 p-4">
+                <div className="hs-alert hs-alert-warn">
                   <div className="text-sm font-semibold text-heading">More detail needed</div>
                   {pitchInfo ? <div className="mt-1 text-sm text-text2">{pitchInfo}</div> : null}
                   <div className="mt-2 text-xs font-medium text-text2">Add these to the persona, then generate again:</div>
@@ -773,7 +773,7 @@ export default function BattlecardsPage() {
               ) : null}
 
               {pitchError ? (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{pitchError}</div>
+                <div className="hs-alert hs-alert-error">{pitchError}</div>
               ) : null}
 
               {/* Refine panels */}
