@@ -32,7 +32,7 @@ const NAV: NavSection[] = [
   {
     label: "Home",
     items: [
-      { label: "Marketing Workbench", slug: "work", icon: "🗂️" },
+      { label: "Marketing Workbench", slug: "", icon: "🗂️" },
       { label: "Overview", slug: "overview", icon: "⚡" },
       { label: "Help & documentation", slug: "help", icon: "📖" }
     ]
@@ -272,8 +272,11 @@ export function DashboardShell({
   const activeMap = useMemo(() => {
     const map = new Map<string, boolean>();
     NAV.flatMap((s) => s.items).forEach((m) => {
-      const href = `/dashboard/${m.slug}`;
-      const active = pathname === href || (pathname?.startsWith(href + "/") ?? false);
+      const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
+      const active =
+        href === "/dashboard"
+          ? pathname === "/dashboard"
+          : pathname === href || (pathname?.startsWith(href + "/") ?? false);
       map.set(href, active);
     });
     return map;
@@ -282,8 +285,11 @@ export function DashboardShell({
   const activeSectionLabel = useMemo(() => {
     const flat = NAV.flatMap((s) => s.items.map((i) => ({ section: s.label, item: i })));
     for (const { section, item } of flat) {
-      const href = `/dashboard/${item.slug}`;
-      const active = pathname === href || (pathname?.startsWith(href + "/") ?? false);
+      const href = item.slug ? `/dashboard/${item.slug}` : "/dashboard";
+      const active =
+        href === "/dashboard"
+          ? pathname === "/dashboard"
+          : pathname === href || (pathname?.startsWith(href + "/") ?? false);
       if (active) return section;
     }
     return "Home";
@@ -330,7 +336,7 @@ export function DashboardShell({
     return (
       <div className="flex h-full w-[220px] min-h-0 flex-col bg-sidebar text-on-dark">
         <div className="relative border-b border-[var(--sidebar-divider)] px-5 py-4">
-          <Link href="/dashboard/work" className="flex items-center gap-2.5" onClick={onNavigate}>
+          <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onNavigate}>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary-dark text-[11px] font-bold text-on-dark shadow-sm">
               AI
             </span>
@@ -378,7 +384,7 @@ export function DashboardShell({
                     {open ? (
                       <div className="space-y-0.5">
                         {section.items.map((m) => {
-                          const href = `/dashboard/${m.slug}`;
+                          const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
                           const active = activeMap.get(href) ?? false;
                           const allowed = isSlugAllowed(ent, m.slug);
                           return (
