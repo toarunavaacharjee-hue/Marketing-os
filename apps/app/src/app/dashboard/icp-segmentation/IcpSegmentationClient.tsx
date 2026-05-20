@@ -504,20 +504,6 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
             </div>
           ) : null}
 
-          {/* Next step CTA */}
-          <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 text-sm shadow-sm">
-            <span className="text-text2">
-              <span className="mr-2 text-text3">→</span>
-              <span className="font-medium text-text">Next step:</span>{" "}
-              Generate your positioning canvas from these segments.
-            </span>
-            <Link
-              href="/dashboard/positioning-studio"
-              className="shrink-0 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
-            >
-              Positioning Studio →
-            </Link>
-          </div>
         </>
       )}
     </div>
