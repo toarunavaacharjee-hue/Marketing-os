@@ -193,7 +193,7 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
         ))}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="text-sm font-semibold text-text">What you get</div>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
           {[
@@ -201,14 +201,14 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
             ["Narrative + messaging", "Positioning, message map, and launch story."],
             ["Enablement pack", "Sales deck outline, battlecard, email + call scripts."]
           ].map(([t, d]) => (
-            <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+            <div key={t} className="hs-card p-4">
               <div className="text-[13px] font-semibold text-text">{t}</div>
               <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </ModuleShell>
   );
 }
 

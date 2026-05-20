@@ -634,7 +634,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
               type="button"
               onClick={() => void generate()}
               disabled={generating}
-              className="mt-2 w-full rounded-xl bg-amber p-2.5 text-sm font-semibold text-black hover:bg-amber/90 disabled:opacity-50"
+              className="hs-btn hs-btn-cta mt-2 w-full disabled:opacity-50"
             >
               {generating ? "Generating…" : "Generate outline"}
             </button>
@@ -691,7 +691,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
       </div>
 
       {/* Talk track notes */}
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <div className="hs-card p-4">
         <div className="mb-2 text-sm font-semibold text-heading">Talk track &amp; Q&amp;A notes</div>
         <textarea
           value={ws.talkTrackNotes}
@@ -703,5 +703,6 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
       </div>
 
     </div>
+    </ModuleShell>
   );
 }

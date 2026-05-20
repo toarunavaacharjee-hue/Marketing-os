@@ -692,7 +692,7 @@ export default function BattlecardsPage() {
                   <button
                     type="button"
                     onClick={() => { setPitchMarkdownIcp(null); setPitchMarkdownAccount(null); }}
-                    className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-text2 hover:bg-surface3"
+                    className="hs-btn hs-btn-secondary"
                   >
                     Clear outputs
                   </button>
@@ -719,7 +719,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => void generatePitch("icp")}
                     disabled={pitchLoading || !icpPersonaId || !activeId}
-                    className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+                    className="hs-btn hs-btn-primary disabled:opacity-60"
                   >
                     {pitchLoading ? "Working…" : "Generate ICP battlecard"}
                   </button>
@@ -727,7 +727,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => void generatePitch("account")}
                     disabled={pitchLoading || !accountPersonaId || !activeId}
-                    className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+                    className="hs-btn hs-btn-primary disabled:opacity-60"
                   >
                     {pitchLoading ? "Working…" : "Generate account battlecard"}
                   </button>
@@ -735,7 +735,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => void generateBothPitches()}
                     disabled={pitchLoading || !icpPersonaId || !accountPersonaId || !activeId}
-                    className="rounded-xl border border-border bg-surface2 px-4 py-2 text-xs font-semibold text-text hover:bg-surface3 disabled:opacity-60"
+                    className="hs-btn hs-btn-secondary disabled:opacity-60"
                   >
                     Generate both
                   </button>
@@ -743,7 +743,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => { if (pitchMarkdownIcp) downloadPitchPdf({ productName: "AI Marketing Workbench", personaName: selectedIcp?.name ?? "ICP", competitorName: activeCompetitor?.name ?? "Competitor", pitchMarkdown: pitchMarkdownIcp }); }}
                     disabled={!pitchMarkdownIcp}
-                    className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-40"
+                    className="hs-btn hs-btn-secondary disabled:opacity-40"
                   >
                     PDF · ICP
                   </button>
@@ -751,7 +751,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => { if (pitchMarkdownAccount) downloadPitchPdf({ productName: "AI Marketing Workbench", personaName: selectedAccount?.name ?? "Account", competitorName: activeCompetitor?.name ?? "Competitor", pitchMarkdown: pitchMarkdownAccount }); }}
                     disabled={!pitchMarkdownAccount}
-                    className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-40"
+                    className="hs-btn hs-btn-secondary disabled:opacity-40"
                   >
                     PDF · Account
                   </button>
@@ -789,7 +789,7 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => void savePersonaImprovements("icp")}
                         disabled={personaSavingIcp}
-                        className="rounded-xl bg-teal/15 px-3 py-1.5 text-xs font-semibold text-teal border border-teal/30 hover:bg-teal/25 disabled:opacity-60"
+                        className="hs-btn hs-btn-primary disabled:opacity-60"
                       >
                         {personaSavingIcp ? "Saving…" : "Save ICP answers"}
                       </button>
