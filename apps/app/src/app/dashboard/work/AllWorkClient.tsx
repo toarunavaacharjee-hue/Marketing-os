@@ -20,6 +20,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
   const [query, setQuery] = useState("");
   const [source, setSource] = useState<string>("all");
   const [hideDone, setHideDone] = useState(false);
+  const [filterPriority, setFilterPriority] = useState<"" | "p1" | "p2" | "p3">("");
   const [busyIds, setBusyIds] = useState<Record<string, true>>({});
   const [outcomes, setOutcomes] = useState<Record<string, { notes: string; updatedAt: string }>>({});
   const [editingOutcomeId, setEditingOutcomeId] = useState<string | null>(null);
@@ -89,10 +90,8 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     }
     const rows = (data ?? []) as { module: string; key: string; value_json: unknown }[];
 
-    // Module settings workbench items (gtm, events, content, campaigns, etc.)
     const fromModules = aggregateWorkFromSettings(rows);
 
-    // ICP segments (separate table in Supabase)
     const { data: segs, error: segErr } = await supabase
       .from("segments")
       .select("id,name,pnf_score,pain_points")
@@ -101,7 +100,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       .limit(30);
 
     if (segErr) {
-      // Segments are optional for this page; still show module items.
       setItems(fromModules);
       setLoading(false);
       return;
@@ -129,7 +127,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       };
     });
 
-    // Work meta: outcomes + workflow run logs + priorities
     const { data: workRows } = await supabase
       .from("module_settings")
       .select("key,value_json")
@@ -191,15 +188,22 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       .filter((it) => {
         if (hideDone && it.done) return false;
         if (source !== "all" && it.source !== source) return false;
+        if (filterPriority) {
+          const effectivePriority = it.priority ?? priorities[it.id];
+          if (effectivePriority !== filterPriority) return false;
+        }
         if (!q) return true;
         const outcomeNotes = outcomes[it.id]?.notes ?? "";
         const blob = `${it.title} ${it.subtitle ?? ""} ${it.status ?? ""} ${it.owner ?? ""} ${it.category} ${it.sourceLabel} ${(it.tags ?? []).join(" ")} ${outcomeNotes}`.toLowerCase();
         return blob.includes(q);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items, query, source, hideDone, outcomes, priorities, pinned]);
+  }, [items, query, source, hideDone, filterPriority, outcomes, priorities, pinned]);
 
+  const now = Date.now();
   const openCount = items.filter((i) => !i.done).length;
+  const overdueCount = items.filter((i) => !i.done && i.dueTs != null && i.dueTs < now).length;
+  const doneCount = items.filter((i) => i.done).length;
 
   async function persistOutcomes(next: Record<string, { notes: string; updatedAt: string }>) {
     const payload = { items: next };
@@ -246,7 +250,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       [id]: notes ? { notes, updatedAt: new Date().toISOString() } : undefined
     } as any;
 
-    // Remove empty entries
     Object.keys(next).forEach((k) => {
       if (!next[k]?.notes) delete next[k];
     });
@@ -377,7 +380,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     const runId = startRun("ai_generate_messaging_draft", workId, segmentName);
     setError(null);
     try {
-
       const MOD = "messaging_artifacts";
       const KEY = "artifacts";
 
@@ -400,13 +402,10 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       const res = await fetch("/api/ai/module-generate", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           prompt,
-          system:
-            "You write sharp B2B marketing copy. Follow the user's output shape exactly (title line, blank line, body)."
+          system: "You write sharp B2B marketing copy. Follow the user's output shape exactly (title line, blank line, body)."
         })
       });
 
@@ -460,8 +459,6 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     const runId = startRun("ai_generate_pitch_battlecard", workId, "Positioning canvas");
     setError(null);
     try {
-
-      // 1) Create an ICP persona from the positioning canvas
       const personaRes = await fetch("/api/battlecards/persona-from-positioning", {
         method: "POST",
         headers: { "content-type": "application/json" }
@@ -483,9 +480,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       const pitchRes = await fetch("/api/battlecards/pitch", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({ competitor_id: competitorId, persona_id: personaId })
       });
 
@@ -513,35 +508,65 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     }
   }
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
-          Marketing Workbench
-        </h1>
-        <p className="mt-1 text-sm text-text2">
-          One view of tasks, queues, campaigns, and milestones from across modules for this product. Edit in each module
-          — this page is read-only aggregation.
-        </p>
-      </div>
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface p-3">
-        <span className="text-xs text-text2">
-          {loading ? "Loading…" : `${items.length} rows · ${openCount} open`}
-        </span>
+  function getRowAccent(it: WorkItem): string {
+    const isOverdue = !it.done && it.dueTs != null && it.dueTs < now;
+    if (isOverdue) return "border-l-red-500";
+    if (pinned[it.id]) return "border-l-primary";
+    const pri = it.priority ?? priorities[it.id];
+    if (pri === "p1") return "border-l-red-500";
+    if (pri === "p2") return "border-l-amber";
+    if (pri === "p3") return "border-l-[#CBD5E1]";
+    return "border-l-transparent";
+  }
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+            Marketing Workbench
+          </h1>
+          <p className="mt-1 text-sm text-text2">
+            Live view of tasks, campaigns, and milestones across every module.
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => void load()}
-          className="rounded-lg border border-border px-2 py-1 text-xs text-heading hover:bg-surface2"
+          disabled={loading}
+          className="shrink-0 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text2 hover:bg-surface2 disabled:opacity-50"
         >
-          Refresh
+          {loading ? "Loading…" : "↻ Refresh"}
         </button>
       </div>
 
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <KpiCard label="Total" value={loading ? "—" : String(items.length)} icon="📋" />
+        <KpiCard label="Open" value={loading ? "—" : String(openCount)} icon="🔵" accent="text-primary" />
+        <KpiCard
+          label="Overdue"
+          value={loading ? "—" : String(overdueCount)}
+          icon={overdueCount > 0 ? "🔴" : "✅"}
+          accent={overdueCount > 0 ? "text-red" : "text-teal"}
+        />
+        <KpiCard label="Done" value={loading ? "—" : String(doneCount)} icon="✓" accent="text-teal" />
+      </div>
+
+      {/* Error */}
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
+        <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/8 px-4 py-3 text-sm text-red">
+          <span className="mt-px shrink-0">⚠</span>
+          <span>{error}</span>
+        </div>
       ) : null}
 
+      {/* AI progress */}
       <AiProgressBar
         active={Object.keys(busyIds).length > 0}
         variant="dark"
@@ -550,464 +575,513 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         durationMs={120_000}
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-        <div className="min-w-[200px] flex-1">
-          <div className="mb-1 text-[10px] uppercase text-text2">Search</div>
+      {/* Filter bar */}
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-3 sm:flex-row sm:flex-wrap sm:items-center">
+        {/* Search */}
+        <div className="relative min-w-[180px] flex-1">
+          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text3 text-sm">⌕</span>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Title, owner, module, tag…"
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-heading"
+            placeholder="Search items…"
+            className="w-full rounded-lg border border-border bg-surface2 py-2 pl-8 pr-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-1 focus:ring-primary/40"
           />
         </div>
-        <div className="min-w-[160px]">
-          <div className="mb-1 text-[10px] uppercase text-text2">Module</div>
-          <select
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-heading"
+
+        {/* Module filter */}
+        <select
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          className="rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-1 focus:ring-primary/40"
+        >
+          <option value="all">All modules</option>
+          {summary.map((s) => (
+            <option key={s.source} value={s.source}>
+              {s.label} ({s.count})
+            </option>
+          ))}
+        </select>
+
+        {/* Priority pill filters */}
+        <div className="flex items-center gap-1.5">
+          {(["", "p1", "p2", "p3"] as const).map((p) => {
+            const label = p === "" ? "All" : p.toUpperCase();
+            const active = filterPriority === p;
+            const accent =
+              p === "p1"
+                ? active
+                  ? "bg-red-500 text-white border-red-500"
+                  : "border-red-500/40 text-red hover:bg-red-500/8"
+                : p === "p2"
+                  ? active
+                    ? "bg-amber text-black border-amber"
+                    : "border-amber/40 text-amber hover:bg-amber/8"
+                  : p === "p3"
+                    ? active
+                      ? "bg-surface3 text-text border-border"
+                      : "border-border text-text2 hover:bg-surface2"
+                    : active
+                      ? "bg-heading text-white border-heading"
+                      : "border-border text-text2 hover:bg-surface2";
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setFilterPriority(p)}
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${accent}`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Hide done */}
+        <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-text2">
+          <span
+            onClick={() => setHideDone((v) => !v)}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${hideDone ? "bg-primary" : "bg-surface3"}`}
           >
-            <option value="all">All modules</option>
-            {summary.map((s) => (
-              <option key={s.source} value={s.source}>
-                {s.label} ({s.count})
-              </option>
-            ))}
-          </select>
-        </div>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-text2">
-          <input
-            type="checkbox"
-            checked={hideDone}
-            onChange={(e) => setHideDone(e.target.checked)}
-            className="rounded border-border"
-          />
-          Hide done / live
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${hideDone ? "translate-x-4" : "translate-x-0"}`}
+            />
+          </span>
+          Hide done
         </label>
       </div>
 
+      {/* Empty state */}
       {!loading && filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-surface2 p-8 text-center text-sm text-text2">
-          No matching items. Add work in{" "}
-          <Link href="/dashboard/gtm-planner" className="text-primary hover:underline">
-            GTM
-          </Link>
-          ,{" "}
-          <Link href="/dashboard/events" className="text-primary hover:underline">
-            Events
-          </Link>
-          ,{" "}
-          <Link href="/dashboard/content-studio" className="text-primary hover:underline">
-            Content Studio
-          </Link>
-          , or{" "}
-          <Link href="/dashboard/campaigns" className="text-primary hover:underline">
-            Campaigns
-          </Link>
-          .
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-surface2 px-6 py-14 text-center">
+          <div className="text-4xl">📭</div>
+          <div className="mt-3 text-base font-medium text-heading">No items match your filters</div>
+          <div className="mt-1 text-sm text-text2">
+            Add work in{" "}
+            <Link href="/dashboard/gtm-planner" className="text-primary hover:underline">GTM Planner</Link>,{" "}
+            <Link href="/dashboard/events" className="text-primary hover:underline">Events</Link>,{" "}
+            <Link href="/dashboard/content-studio" className="text-primary hover:underline">Content Studio</Link>, or{" "}
+            <Link href="/dashboard/campaigns" className="text-primary hover:underline">Campaigns</Link>.
+          </div>
         </div>
       ) : null}
 
-      {/* Mobile list */}
-      <div className="space-y-3 md:hidden">
+      {/* ── Mobile cards ──────────────────────────────────────────────────────── */}
+      <div className="space-y-2.5 md:hidden">
         {filtered.map((it) => {
           const isUntitled = /^(untitled|new item|new artifact)/i.test(it.title.trim());
-          const isOverdueMobile = !it.done && it.dueTs != null && it.dueTs < Date.now();
-          const isPinnedMobile = Boolean(pinned[it.id]);
-          const itemPriorityMobile = priorities[it.id];
+          const isOverdue = !it.done && it.dueTs != null && it.dueTs < now;
+          const isPinnedRow = Boolean(pinned[it.id]);
+          const itemPriority = priorities[it.id];
+          const accentCls = getRowAccent(it);
+
           return (
-          <div key={it.id} className={`rounded-2xl border bg-surface p-4 ${isOverdueMobile ? "border-red-500/40" : "border-border"}`}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  {isPinnedMobile ? <span className="text-[11px]">📌</span> : null}
-                  {itemPriorityMobile ? <PriorityBadge priority={itemPriorityMobile} /> : null}
-                  <div className={`truncate text-sm font-medium ${isUntitled ? "italic text-text3" : "text-heading"}`}>{it.title}</div>
+            <div
+              key={it.id}
+              className={`group rounded-xl border border-border bg-surface border-l-4 ${accentCls} ${isOverdue ? "bg-red-500/4" : ""}`}
+            >
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {isPinnedRow && (
+                        <span className="text-[11px]" title="Pinned">★</span>
+                      )}
+                      {itemPriority && <PriorityBadge priority={itemPriority} />}
+                      <span
+                        className={`text-sm font-medium leading-snug ${isUntitled ? "italic text-text3" : "text-heading"}`}
+                      >
+                        {it.title}
+                      </span>
+                    </div>
+                    {it.subtitle && (
+                      <div className="mt-0.5 line-clamp-2 text-[11px] text-text2">{it.subtitle}</div>
+                    )}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <SourcePill label={it.sourceLabel} />
+                      {it.tags?.slice(0, 2).map((t) => (
+                        <span key={t} className="rounded bg-surface3 px-1.5 py-0.5 text-[10px] text-text2">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <StatusBadge status={it.status} done={it.done} />
+                    <div className={`mt-1 text-[11px] ${isOverdue ? "font-semibold text-red" : "text-text3"}`}>
+                      {isOverdue && <span>⚠ </span>}{it.due ?? "—"}
+                    </div>
+                  </div>
                 </div>
-                {it.subtitle ? (
-                  <div className="mt-0.5 truncate text-[11px] text-text2">{it.subtitle}</div>
-                ) : null}
-                <div className="mt-1 text-xs text-primary">{it.sourceLabel}</div>
-              </div>
-              <div className="shrink-0 text-right">
-                <StatusBadge status={it.status} done={it.done} />
-                <div className={`mt-1 text-[11px] ${isOverdueMobile ? "font-semibold text-red" : "text-text3"}`}>
-                  {isOverdueMobile ? "⚠ " : ""}{it.due ?? "—"}
-                </div>
-              </div>
-            </div>
 
-            {outcomes[it.id]?.notes ? (
-              <div className="mt-2 truncate text-[11px] text-primary">↳ {outcomes[it.id]!.notes}</div>
-            ) : null}
+                {outcomes[it.id]?.notes && (
+                  <div className="mt-2 line-clamp-2 rounded-lg bg-primary/6 px-2.5 py-1.5 text-[11px] text-primary">
+                    ↳ {outcomes[it.id]!.notes}
+                  </div>
+                )}
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {it.source === "segments" ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    void (async () => {
-                      try {
-                        await seedMessagingFromSegment(it.title);
-                      } catch (e) {
-                        setError(e instanceof Error ? e.message : "Failed to seed messaging.");
-                      }
-                    })();
-                  }}
-                  className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
-                >
-                  Seed messaging
-                </button>
-              ) : null}
-              {it.source === "segments" ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    void aiGenerateMessagingFromSegment(it.title, it.id);
-                  }}
-                  disabled={isBusy(it.id)}
-                  className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
-                >
-                  {isBusy(it.id) ? "Generating…" : "AI draft"}
-                </button>
-              ) : null}
-              {it.source === "positioning_studio" ? (
-                <button
-                  type="button"
-                  onClick={() => void openPitchModal(it.id)}
-                  disabled={isBusy(it.id)}
-                  className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
-                >
-                  {isBusy(it.id) ? "Generating…" : "AI pitch"}
-                </button>
-              ) : null}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingOutcomeId(it.id);
-                  setEditingOutcomeNotes(outcomes[it.id]?.notes ?? "");
-                }}
-                className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
-              >
-                Update
-              </button>
-              <Link href={it.href} className="text-xs font-medium text-primary hover:text-primary-dark hover:underline">
-                Open
-              </Link>
-            </div>
-
-            {editingOutcomeId === it.id ? (
-              <div className="mt-3">
-                <textarea
-                  value={editingOutcomeNotes}
-                  onChange={(e) => setEditingOutcomeNotes(e.target.value)}
-                  rows={3}
-                  placeholder="Update / outcome notes (what changed, numbers, wins, next step)…"
-                  className="w-full rounded-lg border border-border bg-surface px-2 py-2 text-sm text-heading"
-                />
-                <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+                {/* Actions */}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {it.source === "segments" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void (async () => {
+                            try { await seedMessagingFromSegment(it.title); }
+                            catch (e) { setError(e instanceof Error ? e.message : "Failed to seed messaging."); }
+                          })();
+                        }}
+                        className="rounded-lg border border-primary/30 bg-primary/8 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/14"
+                      >
+                        Seed messaging
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void aiGenerateMessagingFromSegment(it.title, it.id)}
+                        disabled={isBusy(it.id)}
+                        className="rounded-lg border border-primary/30 bg-primary/8 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/14 disabled:opacity-60"
+                      >
+                        {isBusy(it.id) ? "Generating…" : "AI draft"}
+                      </button>
+                    </>
+                  )}
+                  {it.source === "positioning_studio" && (
+                    <button
+                      type="button"
+                      onClick={() => void openPitchModal(it.id)}
+                      disabled={isBusy(it.id)}
+                      className="rounded-lg border border-primary/30 bg-primary/8 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/14 disabled:opacity-60"
+                    >
+                      {isBusy(it.id) ? "Generating…" : "AI pitch"}
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => void saveOutcomeFor(it.id)}
-                    className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingOutcomeId(null);
-                      setEditingOutcomeNotes("");
-                    }}
+                    onClick={() => { setEditingOutcomeId(it.id); setEditingOutcomeNotes(outcomes[it.id]?.notes ?? ""); }}
                     className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
                   >
-                    Cancel
+                    Update
                   </button>
+                  <Link
+                    href={it.href}
+                    className="ml-auto rounded-lg bg-heading px-3 py-1 text-xs font-medium text-white hover:opacity-80"
+                  >
+                    Open →
+                  </Link>
                 </div>
+
+                {/* Outcome editor */}
+                {editingOutcomeId === it.id && (
+                  <div className="mt-3">
+                    <textarea
+                      value={editingOutcomeNotes}
+                      onChange={(e) => setEditingOutcomeNotes(e.target.value)}
+                      rows={3}
+                      placeholder="Notes — what changed, results, next step…"
+                      className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-heading focus:outline-none focus:ring-1 focus:ring-primary/40"
+                    />
+                    <div className="mt-2 flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void saveOutcomeFor(it.id)}
+                        className="rounded-lg bg-primary px-3 py-1 text-xs font-medium text-white hover:opacity-80"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setEditingOutcomeId(null); setEditingOutcomeNotes(""); }}
+                        className="rounded-lg border border-border px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : null}
-          </div>
+            </div>
           );
         })}
       </div>
 
-      {/* Desktop table */}
-      <div className="hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-border text-[10px] font-medium uppercase tracking-wider text-text2">
-            <tr>
-              <th className="px-4 py-3">Item</th>
-              <th className="px-3 py-3">Priority</th>
-              <th className="px-3 py-3">Module</th>
-              <th className="px-3 py-3">Category</th>
-              <th className="px-3 py-3">Status</th>
-              <th className="px-3 py-3">Owner</th>
-              <th className="px-3 py-3">Due</th>
-              <th className="w-24 px-3 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((it) => {
-              const isUntitled = /^(untitled|new item|new artifact)/i.test(it.title.trim());
-              const isOverdue = !it.done && it.dueTs != null && it.dueTs < Date.now();
-              const isPinned = Boolean(pinned[it.id]);
-              const itemPriority = priorities[it.id];
-              return (
-              <tr key={it.id} className={`border-t border-border align-middle transition-colors ${isOverdue ? "bg-red-500/5 hover:bg-red-500/8" : "hover:bg-surface2/40"}`}>
-                <td className="max-w-[320px] px-4 py-2.5">
-                  <div className={`truncate text-sm font-medium ${isUntitled ? "italic text-text3" : "text-heading"}`} title={it.title}>
-                    {it.title}
-                  </div>
-                  {it.subtitle ? (
-                    <div className="mt-0.5 truncate text-[11px] text-text2" title={it.subtitle}>
-                      {it.subtitle}
-                    </div>
-                  ) : null}
-                  {outcomes[it.id]?.notes ? (
-                    <div className="mt-0.5 truncate text-[11px] text-primary" title={outcomes[it.id]!.notes}>
-                      ↳ {outcomes[it.id]!.notes}
-                    </div>
-                  ) : null}
-                  {it.tags?.length ? (
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {it.tags.map((t) => (
-                        <span key={t} className="max-w-[140px] truncate rounded bg-surface3 px-1.5 py-0.5 text-[10px] text-text2" title={t}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </td>
-                <td className="whitespace-nowrap px-3 py-2.5">
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => togglePin(it.id)}
-                      title={isPinned ? "Unpin" : "Pin to top"}
-                      className={`text-[13px] transition-opacity ${isPinned ? "opacity-100" : "opacity-20 hover:opacity-60"}`}
-                    >
-                      📌
-                    </button>
-                    <select
-                      value={itemPriority ?? ""}
-                      onChange={(e) => setPriority(it.id, e.target.value as "p1" | "p2" | "p3" | "")}
-                      className="rounded border border-border bg-surface2 px-1 py-0.5 text-[10px] text-text2"
-                    >
-                      <option value="">—</option>
-                      <option value="p1">P1</option>
-                      <option value="p2">P2</option>
-                      <option value="p3">P3</option>
-                    </select>
-                    {itemPriority ? <PriorityBadge priority={itemPriority} /> : null}
-                  </div>
-                </td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-primary">{it.sourceLabel}</td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.category}</td>
-                <td className="whitespace-nowrap px-3 py-2.5">
-                  <StatusBadge status={it.status} done={it.done} />
-                </td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.owner && it.owner !== "—" ? it.owner : <span className="text-text3">—</span>}</td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-xs">
-                  {it.due ? (
-                    <span className={isOverdue ? "font-semibold text-red" : "text-text2"}>
-                      {isOverdue ? "⚠ " : ""}{it.due}
-                    </span>
-                  ) : (
-                    <span className="text-text3">—</span>
-                  )}
-                </td>
-                <td className="px-3 py-2">
-                  <div className="flex flex-col items-end gap-2">
-                    {editingOutcomeId === it.id ? (
-                      <div className="w-56">
-                        <textarea
-                          value={editingOutcomeNotes}
-                          onChange={(e) => setEditingOutcomeNotes(e.target.value)}
-                          rows={3}
-                          placeholder="Update / outcome notes (what changed, numbers, wins, next step)…"
-                          className="w-full rounded-lg border border-border bg-surface px-2 py-2 text-sm text-heading"
-                        />
-                        <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => void saveOutcomeFor(it.id)}
-                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
-                          >
-                            Save
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingOutcomeId(null);
-                              setEditingOutcomeNotes("");
-                            }}
-                            className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {it.source === "segments" ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              void (async () => {
-                                try {
-                                  await seedMessagingFromSegment(it.title);
-                                } catch (e) {
-                                  setError(e instanceof Error ? e.message : "Failed to seed messaging.");
-                                }
-                              })();
-                            }}
-                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20"
-                          >
-                            Seed messaging
-                          </button>
-                        ) : null}
-                        {it.source === "segments" ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              void aiGenerateMessagingFromSegment(it.title, it.id);
-                            }}
-                            disabled={isBusy(it.id)}
-                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
-                          >
-                            {isBusy(it.id) ? "Generating…" : "AI generate draft"}
-                          </button>
-                        ) : null}
-                        {it.source === "positioning_studio" ? (
-                          <button
-                            type="button"
-                            onClick={() => void openPitchModal(it.id)}
-                            disabled={isBusy(it.id)}
-                            className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60"
-                          >
-                            {isBusy(it.id) ? "Generating…" : "AI generate pitch"}
-                          </button>
-                        ) : null}
+      {/* ── Desktop table ─────────────────────────────────────────────────────── */}
+      {filtered.length > 0 && (
+        <div className="hidden overflow-x-auto rounded-xl border border-border bg-surface md:block">
+          <table className="w-full min-w-[760px] text-left text-sm">
+            <thead>
+              <tr className="border-b border-border bg-surface2/60">
+                <th className="w-8 px-3 py-3" />
+                <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wider text-text2">Item</th>
+                <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wider text-text2">Module</th>
+                <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wider text-text2">Status</th>
+                <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wider text-text2">Owner</th>
+                <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wider text-text2">Due</th>
+                <th className="w-[200px] px-3 py-3 text-[10px] font-semibold uppercase tracking-wider text-text2">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map((it) => {
+                const isUntitled = /^(untitled|new item|new artifact)/i.test(it.title.trim());
+                const isOverdue = !it.done && it.dueTs != null && it.dueTs < now;
+                const isPinnedRow = Boolean(pinned[it.id]);
+                const itemPriority = priorities[it.id];
+                const accentCls = getRowAccent(it);
+
+                return (
+                  <tr
+                    key={it.id}
+                    className={`group relative border-l-4 transition-colors ${accentCls} ${isOverdue ? "bg-red-500/4 hover:bg-red-500/7" : "hover:bg-surface2/50"}`}
+                  >
+                    {/* Pin + Priority column */}
+                    <td className="px-3 py-3">
+                      <div className="flex flex-col items-center gap-1.5">
                         <button
                           type="button"
-                          onClick={() => {
-                            setEditingOutcomeId(it.id);
-                            setEditingOutcomeNotes(outcomes[it.id]?.notes ?? "");
-                          }}
-                          className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
+                          onClick={() => togglePin(it.id)}
+                          title={isPinnedRow ? "Unpin" : "Pin to top"}
+                          className={`text-[14px] transition-opacity ${isPinnedRow ? "opacity-100 text-primary" : "opacity-0 group-hover:opacity-40 hover:!opacity-80"}`}
                         >
-                          Update
+                          {isPinnedRow ? "★" : "☆"}
                         </button>
-                        <Link
-                          href={it.href}
-                          className="text-xs font-medium text-primary hover:text-primary-dark hover:underline"
+                        <select
+                          value={itemPriority ?? ""}
+                          onChange={(e) => setPriority(it.id, e.target.value as "p1" | "p2" | "p3" | "")}
+                          title="Set priority"
+                          className="w-10 rounded border border-border bg-surface2 px-0.5 py-0.5 text-center text-[10px] text-text2 opacity-0 group-hover:opacity-100 focus:opacity-100"
                         >
-                          Open
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                          <option value="">—</option>
+                          <option value="p1">P1</option>
+                          <option value="p2">P2</option>
+                          <option value="p3">P3</option>
+                        </select>
+                      </div>
+                    </td>
 
-      <details className="rounded-2xl border border-border bg-surface p-4">
-        <summary className="cursor-pointer text-sm font-medium text-heading">
-          Workflow runs <span className="text-xs text-text2">({runLogs.length})</span>
+                    {/* Item */}
+                    <td className="max-w-[300px] px-3 py-3">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {itemPriority && <PriorityBadge priority={itemPriority} />}
+                        <span
+                          className={`font-medium leading-snug ${isUntitled ? "italic text-text3" : "text-heading"}`}
+                          title={it.title}
+                        >
+                          {it.title}
+                        </span>
+                      </div>
+                      {it.subtitle && (
+                        <div className="mt-0.5 line-clamp-1 text-[11px] text-text2" title={it.subtitle}>
+                          {it.subtitle}
+                        </div>
+                      )}
+                      {outcomes[it.id]?.notes && (
+                        <div
+                          className="mt-1 line-clamp-1 rounded bg-primary/6 px-1.5 py-0.5 text-[11px] text-primary"
+                          title={outcomes[it.id]!.notes}
+                        >
+                          ↳ {outcomes[it.id]!.notes}
+                        </div>
+                      )}
+                      {it.tags?.length ? (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {it.tags.slice(0, 3).map((t) => (
+                            <span key={t} className="rounded bg-surface3 px-1.5 py-0.5 text-[10px] text-text2">{t}</span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </td>
+
+                    {/* Module */}
+                    <td className="whitespace-nowrap px-3 py-3">
+                      <SourcePill label={it.sourceLabel} />
+                    </td>
+
+                    {/* Status */}
+                    <td className="whitespace-nowrap px-3 py-3">
+                      <StatusBadge status={it.status} done={it.done} />
+                    </td>
+
+                    {/* Owner */}
+                    <td className="whitespace-nowrap px-3 py-3 text-xs text-text2">
+                      {it.owner && it.owner !== "—" ? it.owner : <span className="text-text3">—</span>}
+                    </td>
+
+                    {/* Due */}
+                    <td className="whitespace-nowrap px-3 py-3 text-xs">
+                      {it.due ? (
+                        <span className={isOverdue ? "font-semibold text-red" : "text-text2"}>
+                          {isOverdue && "⚠ "}{it.due}
+                        </span>
+                      ) : (
+                        <span className="text-text3">—</span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-3 py-3">
+                      {editingOutcomeId === it.id ? (
+                        <div className="w-52">
+                          <textarea
+                            value={editingOutcomeNotes}
+                            onChange={(e) => setEditingOutcomeNotes(e.target.value)}
+                            rows={3}
+                            placeholder="Notes — results, next step…"
+                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-xs text-heading focus:outline-none focus:ring-1 focus:ring-primary/40"
+                          />
+                          <div className="mt-1.5 flex justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => void saveOutcomeFor(it.id)}
+                              className="rounded bg-primary px-2.5 py-1 text-[11px] font-medium text-white hover:opacity-80"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setEditingOutcomeId(null); setEditingOutcomeNotes(""); }}
+                              className="rounded border border-border px-2.5 py-1 text-[11px] font-medium text-text2 hover:bg-surface2"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          {it.source === "segments" && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  void (async () => {
+                                    try { await seedMessagingFromSegment(it.title); }
+                                    catch (e) { setError(e instanceof Error ? e.message : "Failed to seed messaging."); }
+                                  })();
+                                }}
+                                className="rounded border border-primary/30 bg-primary/8 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/14"
+                              >
+                                Seed
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void aiGenerateMessagingFromSegment(it.title, it.id)}
+                                disabled={isBusy(it.id)}
+                                className="rounded border border-primary/30 bg-primary/8 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/14 disabled:opacity-60"
+                              >
+                                {isBusy(it.id) ? "…" : "AI draft"}
+                              </button>
+                            </>
+                          )}
+                          {it.source === "positioning_studio" && (
+                            <button
+                              type="button"
+                              onClick={() => void openPitchModal(it.id)}
+                              disabled={isBusy(it.id)}
+                              className="rounded border border-primary/30 bg-primary/8 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/14 disabled:opacity-60"
+                            >
+                              {isBusy(it.id) ? "…" : "AI pitch"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => { setEditingOutcomeId(it.id); setEditingOutcomeNotes(outcomes[it.id]?.notes ?? ""); }}
+                            className="rounded border border-border px-2 py-1 text-[11px] font-medium text-text2 hover:bg-surface2"
+                          >
+                            Update
+                          </button>
+                          <Link
+                            href={it.href}
+                            className="rounded bg-heading px-2.5 py-1 text-[11px] font-medium text-white hover:opacity-80"
+                          >
+                            Open →
+                          </Link>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Workflow runs log */}
+      <details className="rounded-xl border border-border bg-surface">
+        <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3 text-sm font-medium text-heading hover:bg-surface2/40">
+          <span>Workflow runs</span>
+          <span className="rounded-full bg-surface3 px-2 py-0.5 text-[11px] font-normal text-text2">
+            {runLogs.length}
+          </span>
         </summary>
-        <div className="mt-3 space-y-2">
+        <div className="border-t border-border px-4 py-3">
           {runLogs.length === 0 ? (
             <div className="text-sm text-text2">No workflow runs yet.</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="border-b border-border text-[10px] font-medium uppercase text-text2">
+              <table className="w-full min-w-[600px] text-left text-xs">
+                <thead className="border-b border-border text-[10px] uppercase text-text2">
                   <tr>
-                    <th className="py-2 pr-4">When</th>
-                    <th className="py-2 pr-4">Action</th>
-                    <th className="py-2 pr-4">Target</th>
-                    <th className="py-2 pr-4">Status</th>
-                    <th className="py-2">Message</th>
+                    <th className="py-2 pr-4 font-semibold">When</th>
+                    <th className="py-2 pr-4 font-semibold">Action</th>
+                    <th className="py-2 pr-4 font-semibold">Target</th>
+                    <th className="py-2 pr-4 font-semibold">Status</th>
+                    <th className="py-2 font-semibold">Message</th>
                   </tr>
                 </thead>
-                <tbody className="text-heading">
+                <tbody className="divide-y divide-border">
                   {runLogs.slice(0, 30).map((r) => (
-                    <tr key={r.id} className="border-t border-border align-top">
-                      <td className="py-2 pr-4 text-xs text-text2">
-                        {r.at ? new Date(r.at).toLocaleString() : "—"}
-                      </td>
-                      <td className="py-2 pr-4 text-xs text-primary">{r.action}</td>
-                      <td className="py-2 pr-4 text-xs text-text2">
-                        {r.targetLabel || r.targetId}
-                      </td>
-                      <td className="py-2 pr-4 text-xs">
-                        <span
-                          className={
-                            r.status === "ok"
-                              ? "text-emerald-300/90"
-                              : r.status === "error"
-                                ? "text-red-300/90"
-                                : "text-amber"
-                          }
-                        >
+                    <tr key={r.id} className="align-top">
+                      <td className="py-2 pr-4 text-text2">{r.at ? new Date(r.at).toLocaleString() : "—"}</td>
+                      <td className="py-2 pr-4 text-primary">{r.action}</td>
+                      <td className="py-2 pr-4 text-text2">{r.targetLabel || r.targetId}</td>
+                      <td className="py-2 pr-4">
+                        <span className={r.status === "ok" ? "text-teal" : r.status === "error" ? "text-red" : "text-amber"}>
                           {r.status}
                         </span>
                       </td>
-                      <td className="py-2 text-xs text-text2">{r.message ?? "—"}</td>
+                      <td className="py-2 text-text2">{r.message ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="mt-2 text-[11px] text-text3">
-                Showing the most recent 30 runs. Stored per product in <span className="font-mono">module_settings</span>{" "}
-                (<span className="font-mono">work/workflow_runs</span>).
-              </div>
             </div>
           )}
         </div>
       </details>
 
-      {pitchModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-5">
-            <div className="text-lg font-medium text-heading">Generate pitch battlecard</div>
-            <div className="mt-1 text-sm text-text2">
-              Pick a competitor. We’ll generate an ICP persona from your Positioning canvas, then create a pitch
-              battlecard.
-            </div>
+      {/* Pitch battlecard modal */}
+      {pitchModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+            <div className="text-lg font-semibold text-heading">Generate pitch battlecard</div>
+            <p className="mt-1 text-sm text-text2">
+              Pick a competitor. We'll build an ICP persona from your Positioning canvas and create a pitch battlecard.
+            </p>
 
-            {pitchError ? (
-              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+            {pitchError && (
+              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/8 px-3 py-2 text-sm text-red">
                 {pitchError}
               </div>
-            ) : null}
+            )}
 
             <div className="mt-4">
-              <div className="mb-1 text-[10px] uppercase text-text2">Competitor</div>
+              <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-text2">
+                Competitor
+              </label>
               <select
                 value={pitchCompetitorId}
                 onChange={(e) => setPitchCompetitorId(e.target.value)}
-                className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
                 disabled={!pitchCompetitors.length}
+                className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-1 focus:ring-primary/40"
               >
                 {pitchCompetitors.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
+                  <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
 
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
+            <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setPitchModalOpen(false)}
-                className="rounded-lg border border-border bg-surface2 px-4 py-2 text-sm font-medium text-text2 hover:bg-surface2"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text2 hover:bg-surface2"
               >
                 Cancel
               </button>
@@ -1015,15 +1089,47 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                 type="button"
                 onClick={() => void confirmPitchModal()}
                 disabled={!pitchCompetitorId || !pitchCompetitors.length}
-                className="rounded-lg bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                className="rounded-lg bg-amber px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
               >
-                Continue
+                Generate
               </button>
             </div>
           </div>
         </div>
-      ) : null}
+      )}
     </div>
+  );
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function KpiCard({
+  label,
+  value,
+  icon,
+  accent = "text-heading"
+}: {
+  label: string;
+  value: string;
+  icon: string;
+  accent?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1 rounded-xl border border-border bg-surface p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-text2">{label}</span>
+        <span className="text-base">{icon}</span>
+      </div>
+      <div className={`text-2xl font-bold leading-none ${accent}`}>{value}</div>
+    </div>
+  );
+}
+
+function SourcePill({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-semibold text-primary">
+      {label}
+    </span>
   );
 }
 
@@ -1050,7 +1156,6 @@ function StatusBadge({ status, done }: { status?: string; done: boolean }) {
   const s = status ?? "";
   if (!s) return <span className="text-[11px] text-text3">—</span>;
 
-  // PNF score
   const pnfMatch = s.match(/^PNF\s*(\d+)$/i);
   if (pnfMatch) {
     const score = parseInt(pnfMatch[1]);
@@ -1058,20 +1163,17 @@ function StatusBadge({ status, done }: { status?: string; done: boolean }) {
     return <span className={`${base} ${cls}`}>PNF {score}</span>;
   }
 
-  // Scoring metrics (Clarity XX% · Differentiation XX% · ...)
   if (/clarity|differentiation|credibility/i.test(s)) {
     const nums = [...s.matchAll(/(\d+)%/g)].map((m) => parseInt(m[1]));
     const avg = nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : null;
     return <span className={`${base} bg-primary/10 text-primary`}>{avg != null ? `Score ${avg}%` : "Scored"}</span>;
   }
 
-  // Draft (XX%)
   const draftMatch = s.match(/^Draft\s*\((\d+)%\)/i);
   if (draftMatch) {
     return <span className={`${base} bg-amber/12 text-amber`}>Draft {draftMatch[1]}%</span>;
   }
 
-  // XX% prep
   const prepMatch = s.match(/^(\d+)%\s*prep$/i);
   if (prepMatch) {
     const pct = parseInt(prepMatch[1]);
