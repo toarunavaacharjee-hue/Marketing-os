@@ -136,15 +136,15 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
               </div>
             ) : null}
           </div>
-        </div>
-      </div>
-
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
+        </>
+      }
+    >
+      <div className="grid gap-4 md:grid-cols-2">
         {initiatives.map((i) => (
           <Link
             key={i.id}
             href={`/dashboard/launch-playbook/${i.kind}`}
-            className="group overflow-hidden rounded-2xl border border-border bg-surface shadow-card transition hover:shadow-card-hover"
+            className="hs-card hs-card-hover group overflow-hidden transition"
           >
             <div className="border-b border-border bg-surface2 px-5 py-3">
               <div className="flex items-center justify-between gap-3 text-[13px] font-medium text-text2">

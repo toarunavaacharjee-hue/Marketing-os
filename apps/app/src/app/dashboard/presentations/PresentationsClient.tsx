@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -509,21 +510,18 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
   );
 
   return (
+    <ModuleShell
+      title="Presentations"
+      subtitle="Track decks, manage slide outlines, and generate talk tracks with AI."
+      actions={
+        <span className="text-xs text-text3">
+          {loading ? "Loading…" : saving ? "Saving…" : "Saved"}
+        </span>
+      }
+    >
     <div className="space-y-5">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>Presentations</h1>
-        <p className="mt-1 text-sm text-text2">
-          Track decks, manage slide outlines, and generate talk tracks with AI.
-        </p>
-        {loading ? (
-          <p className="mt-2 text-sm text-text2">Loading…</p>
-        ) : (
-          <p className="mt-2 text-xs text-text3">{saving ? "Saving…" : "Saved to this product environment."}</p>
-        )}
-      </div>
 
-      {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div> : null}
+      {error ? <div className="hs-alert hs-alert-error">{error}</div> : null}
 
       {qFrom ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-2.5 text-sm">
@@ -538,7 +536,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
 
       {/* Upcoming presentations banner */}
       {upcoming.length > 0 ? (
-        <div className="rounded-2xl border border-amber/30 bg-amber/8 p-4">
+        <div className="hs-alert hs-alert-warn">
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">Upcoming presentations</div>
           <div className="flex flex-wrap gap-3">
             {upcoming.map((d) => (
@@ -586,7 +584,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
             <button
               type="button"
               onClick={addBlankDeck}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
+              className="hs-btn hs-btn-primary"
             >
               + New deck
             </button>
@@ -618,7 +616,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
 
         {/* Right: AI outline generator */}
         <div className="space-y-3">
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+          <div className="hs-card p-4">
             <div className="text-sm font-semibold text-heading">AI slide outline</div>
             <p className="mt-1 text-xs text-text3">
               Describe the deck — AI generates a slide-by-slide outline with talk track hints.
