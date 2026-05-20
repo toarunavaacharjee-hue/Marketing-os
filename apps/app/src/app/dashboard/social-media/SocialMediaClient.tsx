@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 import { useToast } from "@/app/dashboard/_components/Toast";
 import { SkeletonCard } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
