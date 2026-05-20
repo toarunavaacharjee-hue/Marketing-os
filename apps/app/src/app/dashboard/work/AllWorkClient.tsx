@@ -42,6 +42,9 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
   const [pitchCompetitorId, setPitchCompetitorId] = useState<string>("");
   const [pitchError, setPitchError] = useState<string | null>(null);
 
+  const [priorities, setPriorities] = useState<Record<string, "p1" | "p2" | "p3">>({});
+  const [pinned, setPinned] = useState<Record<string, boolean>>({});
+
   function isBusy(id: string) {
     return Boolean(busyIds[id]);
   }
@@ -55,8 +58,16 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     });
   }
 
+  const PRIORITY_ORDER: Record<string, number> = { p1: 1, p2: 2, p3: 3 };
+
   function sortWork(a: WorkItem, b: WorkItem) {
     if (a.done !== b.done) return a.done ? 1 : -1;
+    const aPinned = Boolean(a.pinned ?? pinned[a.id]);
+    const bPinned = Boolean(b.pinned ?? pinned[b.id]);
+    if (aPinned !== bPinned) return aPinned ? -1 : 1;
+    const aPri = PRIORITY_ORDER[a.priority ?? priorities[a.id] ?? ""] ?? 4;
+    const bPri = PRIORITY_ORDER[b.priority ?? priorities[b.id] ?? ""] ?? 4;
+    if (aPri !== bPri) return aPri - bPri;
     if (a.dueTs != null && b.dueTs != null && a.dueTs !== b.dueTs) return a.dueTs - b.dueTs;
     if (a.dueTs != null && b.dueTs == null) return -1;
     if (a.dueTs == null && b.dueTs != null) return 1;
@@ -118,16 +129,17 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       };
     });
 
-    // Work meta: outcomes + workflow run logs
+    // Work meta: outcomes + workflow run logs + priorities
     const { data: workRows } = await supabase
       .from("module_settings")
       .select("key,value_json")
       .eq("environment_id", environmentId)
       .eq("module", "work")
-      .in("key", ["outcomes", "workflow_runs"]);
+      .in("key", ["outcomes", "workflow_runs", "priorities"]);
 
     const outcomesRow = (workRows ?? []).find((r: any) => r.key === "outcomes");
     const runsRow = (workRows ?? []).find((r: any) => r.key === "workflow_runs");
+    const prioritiesRow = (workRows ?? []).find((r: any) => r.key === "priorities");
 
     const outcomesVal = (outcomesRow?.value_json ?? null) as any;
     const rawItems = outcomesVal?.items;
@@ -153,6 +165,15 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
             }))
         : [];
     setRunLogs(loadedRuns);
+
+    const priVal = (prioritiesRow?.value_json ?? null) as any;
+    const loadedPriorities: Record<string, "p1" | "p2" | "p3"> =
+      priVal?.priorities && typeof priVal.priorities === "object" ? priVal.priorities : {};
+    const loadedPinned: Record<string, boolean> =
+      priVal?.pinned && typeof priVal.pinned === "object" ? priVal.pinned : {};
+    setPriorities(loadedPriorities);
+    setPinned(loadedPinned);
+
     setItems([...fromModules, ...segmentItems].sort(sortWork));
     setLoading(false);
   }, [environmentId, supabase]);
@@ -165,15 +186,18 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return items.filter((it) => {
-      if (hideDone && it.done) return false;
-      if (source !== "all" && it.source !== source) return false;
-      if (!q) return true;
-      const outcomeNotes = outcomes[it.id]?.notes ?? "";
-      const blob = `${it.title} ${it.subtitle ?? ""} ${it.status ?? ""} ${it.owner ?? ""} ${it.category} ${it.sourceLabel} ${(it.tags ?? []).join(" ")} ${outcomeNotes}`.toLowerCase();
-      return blob.includes(q);
-    });
-  }, [items, query, source, hideDone, outcomes]);
+    return [...items]
+      .sort(sortWork)
+      .filter((it) => {
+        if (hideDone && it.done) return false;
+        if (source !== "all" && it.source !== source) return false;
+        if (!q) return true;
+        const outcomeNotes = outcomes[it.id]?.notes ?? "";
+        const blob = `${it.title} ${it.subtitle ?? ""} ${it.status ?? ""} ${it.owner ?? ""} ${it.category} ${it.sourceLabel} ${(it.tags ?? []).join(" ")} ${outcomeNotes}`.toLowerCase();
+        return blob.includes(q);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, query, source, hideDone, outcomes, priorities, pinned]);
 
   const openCount = items.filter((i) => !i.done).length;
 
@@ -186,6 +210,33 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       value_json: payload
     });
     if (upErr) throw upErr;
+  }
+
+  async function persistPrioritiesState(
+    nextPriorities: Record<string, "p1" | "p2" | "p3">,
+    nextPinned: Record<string, boolean>
+  ) {
+    await supabase.from("module_settings").upsert({
+      environment_id: environmentId,
+      module: "work",
+      key: "priorities",
+      value_json: { priorities: nextPriorities, pinned: nextPinned }
+    });
+  }
+
+  function togglePin(id: string) {
+    const next = { ...pinned, [id]: !pinned[id] };
+    if (!next[id]) delete next[id];
+    setPinned(next);
+    void persistPrioritiesState(priorities, next);
+  }
+
+  function setPriority(id: string, p: "p1" | "p2" | "p3" | "") {
+    const next = { ...priorities };
+    if (p) next[id] = p;
+    else delete next[id];
+    setPriorities(next);
+    void persistPrioritiesState(next, pinned);
   }
 
   async function saveOutcomeFor(id: string) {
@@ -561,11 +612,18 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       <div className="space-y-3 md:hidden">
         {filtered.map((it) => {
           const isUntitled = /^(untitled|new item|new artifact)/i.test(it.title.trim());
+          const isOverdueMobile = !it.done && it.dueTs != null && it.dueTs < Date.now();
+          const isPinnedMobile = Boolean(pinned[it.id]);
+          const itemPriorityMobile = priorities[it.id];
           return (
-          <div key={it.id} className="rounded-2xl border border-border bg-surface p-4">
+          <div key={it.id} className={`rounded-2xl border bg-surface p-4 ${isOverdueMobile ? "border-red-500/40" : "border-border"}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className={`truncate text-sm font-medium ${isUntitled ? "italic text-text3" : "text-heading"}`}>{it.title}</div>
+                <div className="flex items-center gap-1.5">
+                  {isPinnedMobile ? <span className="text-[11px]">📌</span> : null}
+                  {itemPriorityMobile ? <PriorityBadge priority={itemPriorityMobile} /> : null}
+                  <div className={`truncate text-sm font-medium ${isUntitled ? "italic text-text3" : "text-heading"}`}>{it.title}</div>
+                </div>
                 {it.subtitle ? (
                   <div className="mt-0.5 truncate text-[11px] text-text2">{it.subtitle}</div>
                 ) : null}
@@ -573,7 +631,9 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
               </div>
               <div className="shrink-0 text-right">
                 <StatusBadge status={it.status} done={it.done} />
-                <div className="mt-1 text-[11px] text-text3">{it.due ?? "—"}</div>
+                <div className={`mt-1 text-[11px] ${isOverdueMobile ? "font-semibold text-red" : "text-text3"}`}>
+                  {isOverdueMobile ? "⚠ " : ""}{it.due ?? "—"}
+                </div>
               </div>
             </div>
 
@@ -678,6 +738,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
           <thead className="border-b border-border text-[10px] font-medium uppercase tracking-wider text-text2">
             <tr>
               <th className="px-4 py-3">Item</th>
+              <th className="px-3 py-3">Priority</th>
               <th className="px-3 py-3">Module</th>
               <th className="px-3 py-3">Category</th>
               <th className="px-3 py-3">Status</th>
@@ -689,8 +750,11 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
           <tbody>
             {filtered.map((it) => {
               const isUntitled = /^(untitled|new item|new artifact)/i.test(it.title.trim());
+              const isOverdue = !it.done && it.dueTs != null && it.dueTs < Date.now();
+              const isPinned = Boolean(pinned[it.id]);
+              const itemPriority = priorities[it.id];
               return (
-              <tr key={it.id} className="border-t border-border align-middle hover:bg-surface2/40 transition-colors">
+              <tr key={it.id} className={`border-t border-border align-middle transition-colors ${isOverdue ? "bg-red-500/5 hover:bg-red-500/8" : "hover:bg-surface2/40"}`}>
                 <td className="max-w-[320px] px-4 py-2.5">
                   <div className={`truncate text-sm font-medium ${isUntitled ? "italic text-text3" : "text-heading"}`} title={it.title}>
                     {it.title}
@@ -715,13 +779,44 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                     </div>
                   ) : null}
                 </td>
+                <td className="whitespace-nowrap px-3 py-2.5">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => togglePin(it.id)}
+                      title={isPinned ? "Unpin" : "Pin to top"}
+                      className={`text-[13px] transition-opacity ${isPinned ? "opacity-100" : "opacity-20 hover:opacity-60"}`}
+                    >
+                      📌
+                    </button>
+                    <select
+                      value={itemPriority ?? ""}
+                      onChange={(e) => setPriority(it.id, e.target.value as "p1" | "p2" | "p3" | "")}
+                      className="rounded border border-border bg-surface2 px-1 py-0.5 text-[10px] text-text2"
+                    >
+                      <option value="">—</option>
+                      <option value="p1">P1</option>
+                      <option value="p2">P2</option>
+                      <option value="p3">P3</option>
+                    </select>
+                    {itemPriority ? <PriorityBadge priority={itemPriority} /> : null}
+                  </div>
+                </td>
                 <td className="whitespace-nowrap px-3 py-2.5 text-xs text-primary">{it.sourceLabel}</td>
                 <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.category}</td>
                 <td className="whitespace-nowrap px-3 py-2.5">
                   <StatusBadge status={it.status} done={it.done} />
                 </td>
                 <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.owner && it.owner !== "—" ? it.owner : <span className="text-text3">—</span>}</td>
-                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.due ?? <span className="text-text3">—</span>}</td>
+                <td className="whitespace-nowrap px-3 py-2.5 text-xs">
+                  {it.due ? (
+                    <span className={isOverdue ? "font-semibold text-red" : "text-text2"}>
+                      {isOverdue ? "⚠ " : ""}{it.due}
+                    </span>
+                  ) : (
+                    <span className="text-text3">—</span>
+                  )}
+                </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-col items-end gap-2">
                     {editingOutcomeId === it.id ? (
@@ -929,6 +1024,19 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         </div>
       ) : null}
     </div>
+  );
+}
+
+function PriorityBadge({ priority }: { priority: "p1" | "p2" | "p3" }) {
+  const styles: Record<string, string> = {
+    p1: "bg-red-500/12 text-red font-bold",
+    p2: "bg-amber/12 text-amber font-semibold",
+    p3: "bg-surface3 text-text2 font-medium"
+  };
+  return (
+    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] uppercase tracking-wide ${styles[priority]}`}>
+      {priority.toUpperCase()}
+    </span>
   );
 }
 
