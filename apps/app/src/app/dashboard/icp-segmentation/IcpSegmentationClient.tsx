@@ -7,7 +7,6 @@ import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 import { SkeletonIcpSegmentation } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { ProductStaleBanner } from "@/components/ProductStaleBanner";
-import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type SegmentDetails = {
   urgency?: number;

@@ -8,7 +8,6 @@ import { useToast } from "@/app/dashboard/_components/Toast";
 import { SkeletonCard } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { ProductStaleBanner } from "@/components/ProductStaleBanner";
-import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 import {
   POSITIONING_KEY,
   POSITIONING_MODULE,
@@ -748,5 +747,6 @@ export default function PositioningStudioClient({
         </>
       )}
     </div>
+    </ModuleShell>
   );
 }
