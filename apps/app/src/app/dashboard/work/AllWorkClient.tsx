@@ -527,12 +527,12 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-heading" style={{ fontFamily: "var(--font-heading)" }}>
+          <h1 className="text-[22px] font-bold leading-tight tracking-[-0.2px] text-heading">
             Marketing Workbench
           </h1>
-          <p className="mt-1 text-sm text-text2">
+          <p className="mt-1 max-w-2xl text-[13px] leading-[1.55] text-text2">
             Live view of tasks, campaigns, and milestones across every module.
           </p>
         </div>
@@ -540,31 +540,28 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
           type="button"
           onClick={() => void load()}
           disabled={loading}
-          className="shrink-0 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text2 hover:bg-surface2 disabled:opacity-50"
+          className="hs-btn hs-btn-secondary disabled:opacity-50"
         >
           {loading ? "Loading…" : "↻ Refresh"}
         </button>
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KpiCard label="Total" value={loading ? "—" : String(items.length)} icon="📋" />
-        <KpiCard label="Open" value={loading ? "—" : String(openCount)} icon="🔵" accent="text-primary" />
+      <div className="hs-kpi-grid">
+        <KpiCard label="Total" value={loading ? "—" : String(items.length)} dot="bg-text3" />
+        <KpiCard label="Open" value={loading ? "—" : String(openCount)} dot="bg-primary" accent="text-primary" />
         <KpiCard
           label="Overdue"
           value={loading ? "—" : String(overdueCount)}
-          icon={overdueCount > 0 ? "🔴" : "✅"}
+          dot={overdueCount > 0 ? "bg-red" : "bg-teal"}
           accent={overdueCount > 0 ? "text-red" : "text-teal"}
         />
-        <KpiCard label="Done" value={loading ? "—" : String(doneCount)} icon="✓" accent="text-teal" />
+        <KpiCard label="Done" value={loading ? "—" : String(doneCount)} dot="bg-teal" accent="text-teal" />
       </div>
 
       {/* Error */}
       {error ? (
-        <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/8 px-4 py-3 text-sm text-red">
-          <span className="mt-px shrink-0">⚠</span>
-          <span>{error}</span>
-        </div>
+        <div className="hs-alert hs-alert-error">{error}</div>
       ) : null}
 
       {/* AI progress */}
@@ -577,15 +574,17 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       />
 
       {/* Filter bar */}
-      <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center">
         {/* Search */}
         <div className="relative min-w-[180px] flex-1">
-          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text3 text-sm">⌕</span>
+          <svg className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <circle cx={11} cy={11} r={8} /><path d="m21 21-4.35-4.35" />
+          </svg>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search items…"
-            className="w-full rounded-lg border border-border bg-surface2 py-2 pl-8 pr-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-1 focus:ring-primary/40"
+            className="w-full rounded-lg border border-border bg-surface2 py-1.5 pl-8 pr-3 text-[13px] text-heading placeholder:text-text3 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15"
           />
         </div>
 
@@ -593,7 +592,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         <select
           value={source}
           onChange={(e) => setSource(e.target.value)}
-          className="rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-1 focus:ring-primary/40"
+          className="rounded-lg border border-border bg-surface2 px-3 py-1.5 text-[13px] text-heading focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15"
         >
           <option value="all">All modules</option>
           {summary.map((s) => (
@@ -653,16 +652,20 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       {/* Empty state */}
       {!loading && filtered.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-surface2 px-6 py-14 text-center">
-          <div className="text-4xl">📭</div>
-          <div className="mt-3 text-base font-medium text-heading">No items match your filters</div>
-          <div className="mt-1 text-sm text-text2">
-            Add work in{" "}
-            <Link href="/dashboard/gtm-planner" className="text-primary hover:underline">GTM Planner</Link>,{" "}
-            <Link href="/dashboard/events" className="text-primary hover:underline">Events</Link>,{" "}
-            <Link href="/dashboard/content-studio" className="text-primary hover:underline">Content Studio</Link>, or{" "}
-            <Link href="/dashboard/campaigns" className="text-primary hover:underline">Campaigns</Link>.
+        <div className="flex flex-col items-center rounded-xl border border-dashed border-border bg-surface2/40 px-6 py-16 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-surface shadow-sm">
+            <svg className="h-6 w-6 text-text3" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
           </div>
+          <p className="text-[15px] font-semibold text-heading">No items match your filters</p>
+          <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-text2">
+            Add work in{" "}
+            <Link href="/dashboard/gtm-planner" className="font-medium text-primary hover:underline">GTM Planner</Link>,{" "}
+            <Link href="/dashboard/events" className="font-medium text-primary hover:underline">Events</Link>,{" "}
+            <Link href="/dashboard/content-studio" className="font-medium text-primary hover:underline">Content Studio</Link>, or{" "}
+            <Link href="/dashboard/campaigns" className="font-medium text-primary hover:underline">Campaigns</Link>.
+          </p>
         </div>
       ) : null}
 
@@ -678,7 +681,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
           return (
             <div
               key={it.id}
-              className={`group rounded-xl border border-border bg-surface border-l-4 ${accentCls} ${isOverdue ? "bg-red-500/4" : ""}`}
+              className={`hs-card group border-l-4 ${accentCls} ${isOverdue ? "bg-red-500/4" : ""}`}
             >
               <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
@@ -730,7 +733,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                             catch (e) { setError(e instanceof Error ? e.message : "Failed to seed messaging."); }
                           })();
                         }}
-                        className="rounded-lg border border-primary/30 bg-primary/8 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/14"
+                        className="hs-btn hs-btn-secondary py-1 px-3 text-xs"
                       >
                         Seed messaging
                       </button>
@@ -738,7 +741,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                         type="button"
                         onClick={() => void aiGenerateMessagingFromSegment(it.title, it.id)}
                         disabled={isBusy(it.id)}
-                        className="rounded-lg border border-primary/30 bg-primary/8 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/14 disabled:opacity-60"
+                        className="hs-btn hs-btn-secondary py-1 px-3 text-xs disabled:opacity-60"
                       >
                         {isBusy(it.id) ? "Generating…" : "AI draft"}
                       </button>
@@ -757,13 +760,13 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                   <button
                     type="button"
                     onClick={() => { setEditingOutcomeId(it.id); setEditingOutcomeNotes(outcomes[it.id]?.notes ?? ""); }}
-                    className="rounded-lg border border-border bg-surface px-3 py-1 text-xs font-medium text-text2 hover:bg-surface2"
+                    className="hs-btn hs-btn-secondary py-1 px-3 text-xs"
                   >
                     Update
                   </button>
                   <Link
                     href={it.href}
-                    className="ml-auto rounded-lg bg-heading px-3 py-1 text-xs font-medium text-white hover:opacity-80"
+                    className="hs-btn hs-btn-primary ml-auto py-1 px-3 text-xs"
                   >
                     Open →
                   </Link>
@@ -805,7 +808,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       {/* ── Desktop table ─────────────────────────────────────────────────────── */}
       {filtered.length > 0 && (
-        <div className="hidden overflow-x-auto rounded-xl border border-border bg-surface md:block">
+        <div className="hs-card hidden overflow-x-auto md:block">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-surface2/60">
@@ -930,14 +933,14 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                             <button
                               type="button"
                               onClick={() => void saveOutcomeFor(it.id)}
-                              className="rounded bg-primary px-2.5 py-1 text-[11px] font-medium text-white hover:opacity-80"
+                              className="hs-btn hs-btn-primary py-1 px-2.5 text-[11px]"
                             >
                               Save
                             </button>
                             <button
                               type="button"
                               onClick={() => { setEditingOutcomeId(null); setEditingOutcomeNotes(""); }}
-                              className="rounded border border-border px-2.5 py-1 text-[11px] font-medium text-text2 hover:bg-surface2"
+                              className="hs-btn hs-btn-secondary py-1 px-2.5 text-[11px]"
                             >
                               Cancel
                             </button>
@@ -1004,8 +1007,8 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       )}
 
       {/* Workflow runs log */}
-      <details className="rounded-xl border border-border bg-surface">
-        <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3 text-sm font-medium text-heading hover:bg-surface2/40">
+      <details className="hs-card">
+        <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3 text-[13px] font-semibold text-heading hover:bg-surface2/40 rounded-xl">
           <span>Workflow runs</span>
           <span className="rounded-full bg-surface3 px-2 py-0.5 text-[11px] font-normal text-text2">
             {runLogs.length}
@@ -1050,27 +1053,23 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       {/* Pitch battlecard modal */}
       {pitchModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
-            <div className="text-lg font-semibold text-heading">Generate pitch battlecard</div>
+          <div className="hs-card w-full max-w-md p-6 shadow-2xl">
+            <div className="text-[16px] font-semibold text-heading">Generate pitch battlecard</div>
             <p className="mt-1 text-sm text-text2">
               Pick a competitor. We&apos;ll build an ICP persona from your Positioning canvas and create a pitch battlecard.
             </p>
 
             {pitchError && (
-              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/8 px-3 py-2 text-sm text-red">
-                {pitchError}
-              </div>
+              <div className="hs-alert hs-alert-error mt-3">{pitchError}</div>
             )}
 
             <div className="mt-4">
-              <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-text2">
-                Competitor
-              </label>
+              <label className="hs-label">Competitor</label>
               <select
                 value={pitchCompetitorId}
                 onChange={(e) => setPitchCompetitorId(e.target.value)}
                 disabled={!pitchCompetitors.length}
-                className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-1 focus:ring-primary/40"
+                className="hs-input w-full mt-1"
               >
                 {pitchCompetitors.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
@@ -1082,7 +1081,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
               <button
                 type="button"
                 onClick={() => setPitchModalOpen(false)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text2 hover:bg-surface2"
+                className="hs-btn hs-btn-secondary"
               >
                 Cancel
               </button>
@@ -1090,7 +1089,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                 type="button"
                 onClick={() => void confirmPitchModal()}
                 disabled={!pitchCompetitorId || !pitchCompetitors.length}
-                className="rounded-lg bg-amber px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
+                className="hs-btn hs-btn-cta disabled:opacity-50"
               >
                 Generate
               </button>
@@ -1107,21 +1106,21 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 function KpiCard({
   label,
   value,
-  icon,
+  dot,
   accent = "text-heading"
 }: {
   label: string;
   value: string;
-  icon: string;
+  dot: string;
   accent?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-border bg-surface p-4">
+    <div className="hs-card hs-card-hover flex flex-col gap-1 p-5">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-text2">{label}</span>
-        <span className="text-base">{icon}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">{label}</span>
+        <span className={`h-2 w-2 rounded-full ${dot}`} />
       </div>
-      <div className={`text-2xl font-bold leading-none ${accent}`}>{value}</div>
+      <div className={`mt-1 text-[30px] font-extrabold leading-none tracking-tight ${accent}`}>{value}</div>
     </div>
   );
 }
