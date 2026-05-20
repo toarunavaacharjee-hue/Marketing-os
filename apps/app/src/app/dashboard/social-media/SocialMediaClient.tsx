@@ -716,5 +716,6 @@ export function SocialMediaClient({
       </div>
 
     </div>
+    </ModuleShell>
   );
 }

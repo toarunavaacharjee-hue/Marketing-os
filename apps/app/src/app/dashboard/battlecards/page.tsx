@@ -794,7 +794,7 @@ export default function BattlecardsPage() {
                         {personaSavingIcp ? "Saving…" : "Save ICP answers"}
                       </button>
                     </div>
-                    {personaSavedIcp ? <div className="rounded-xl border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{personaSavedIcp}</div> : null}
+                    {personaSavedIcp ? <div className="hs-alert hs-alert-success">{personaSavedIcp}</div> : null}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <FieldTextarea label="Industry" value={editIcp.industry} onChange={(v) => setEditIcp((p) => ({ ...p, industry: v }))} />
                       <FieldTextarea label="Buyer roles" value={editIcp.buyer_roles} onChange={(v) => setEditIcp((p) => ({ ...p, buyer_roles: v }))} />
@@ -825,7 +825,7 @@ export default function BattlecardsPage() {
                         {personaSavingAccount ? "Saving…" : "Save account answers"}
                       </button>
                     </div>
-                    {personaSavedAccount ? <div className="rounded-xl border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{personaSavedAccount}</div> : null}
+                    {personaSavedAccount ? <div className="hs-alert hs-alert-success">{personaSavedAccount}</div> : null}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <FieldTextarea label="Industry" value={editAccount.industry} onChange={(v) => setEditAccount((p) => ({ ...p, industry: v }))} />
                       <FieldTextarea label="Buyer roles" value={editAccount.buyer_roles} onChange={(v) => setEditAccount((p) => ({ ...p, buyer_roles: v }))} />
