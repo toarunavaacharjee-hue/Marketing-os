@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -173,8 +174,8 @@ function AssetCard({
 
   return (
     <div
-      className={`rounded-2xl border bg-surface shadow-sm transition-shadow ${
-        expanded ? "border-primary/40 shadow-md" : "border-border hover:border-primary/20"
+      className={`hs-card transition-shadow ${
+        expanded ? "border-primary/40 shadow-md" : "hover:border-primary/20"
       }`}
     >
       {/* Collapsed header */}
@@ -530,21 +531,18 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
   const activeStatuses = STATUS_ORDER.filter((s) => (statusCounts[s] ?? 0) > 0);
 
   return (
+    <ModuleShell
+      title="Design & Assets"
+      subtitle="Track creative requests, write briefs, and generate visual direction with AI."
+      actions={
+        <span className="text-xs text-text3">
+          {loading ? "Loading…" : saving ? "Saving…" : "Saved"}
+        </span>
+      }
+    >
     <div className="space-y-5">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>Design & Assets</h1>
-        <p className="mt-1 text-sm text-text2">
-          Track creative requests, write briefs, and generate visual direction with AI.
-        </p>
-        {loading ? (
-          <p className="mt-2 text-sm text-text2">Loading…</p>
-        ) : (
-          <p className="mt-2 text-xs text-text3">{saving ? "Saving…" : "Saved to this product environment."}</p>
-        )}
-      </div>
 
-      {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div> : null}
+      {error ? <div className="hs-alert hs-alert-error">{error}</div> : null}
 
       {qFrom ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-2.5 text-sm">
@@ -586,7 +584,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
             <button
               type="button"
               onClick={addBlankAsset}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
+              className="hs-btn hs-btn-primary"
             >
               + New asset
             </button>
@@ -619,7 +617,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
 
         {/* Right: AI brief generator */}
         <div className="space-y-3">
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+          <div className="hs-card p-4">
             <div className="text-sm font-semibold text-heading">AI brief generator</div>
             <p className="mt-1 text-xs text-text3">
               Describe the campaign or asset — AI will write a structured creative brief.
@@ -637,7 +635,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
               type="button"
               onClick={() => void generate()}
               disabled={generating}
-              className="mt-2 w-full rounded-xl bg-amber p-2.5 text-sm font-semibold text-black hover:bg-amber/90 disabled:opacity-50"
+              className="hs-btn hs-btn-cta mt-2 w-full disabled:opacity-50"
             >
               {generating ? "Writing brief…" : "Generate brief"}
             </button>
@@ -694,7 +692,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
       </div>
 
       {/* Brand notes */}
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <div className="hs-card p-4">
         <div className="mb-2 text-sm font-semibold text-heading">Brand notes & guidelines reminder</div>
         <textarea
           value={ws.brandNotes}
@@ -706,5 +704,6 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
       </div>
 
     </div>
+    </ModuleShell>
   );
 }

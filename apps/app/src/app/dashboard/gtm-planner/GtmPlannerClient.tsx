@@ -585,7 +585,7 @@ export function GtmPlannerClient({
       </div>
 
       {/* Overall progress */}
-      <div className="rounded-2xl border border-border bg-surface px-4 py-3 shadow-sm">
+      <div className="hs-card px-4 py-3">
         <div className="mb-2 flex items-center justify-between text-sm">
           <span className="font-medium text-heading">Launch readiness</span>
           <span className="font-semibold text-heading">{overallPct}%</span>
@@ -626,8 +626,8 @@ export function GtmPlannerClient({
           return (
             <div
               key={phase.id}
-              className={`rounded-2xl border bg-surface shadow-sm transition-colors ${
-                pct === 100 ? "border-teal/30" : "border-border"
+              className={`hs-card transition-colors ${
+                pct === 100 ? "border-teal/30" : ""
               }`}
             >
               {/* Phase header */}
@@ -740,7 +740,7 @@ export function GtmPlannerClient({
 
       {/* Stakeholders + risk notes */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+        <div className="hs-card p-4">
           <div className="mb-1 flex items-center justify-between">
             <div className="text-sm font-semibold text-heading">Stakeholders (RACI)</div>
             <span className={`text-[11px] tabular-nums ${plan.stakeholders.length > 800 ? "text-amber" : "text-text3"}`}>
@@ -758,7 +758,7 @@ export function GtmPlannerClient({
             className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+        <div className="hs-card p-4">
           <div className="mb-1 flex items-center justify-between">
             <div className="text-sm font-semibold text-heading">Risks & dependencies</div>
             <span className={`text-[11px] tabular-nums ${plan.riskNotes.length > 800 ? "text-amber" : "text-text3"}`}>

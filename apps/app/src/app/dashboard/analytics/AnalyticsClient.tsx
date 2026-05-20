@@ -231,35 +231,35 @@ function AdTab({
         <button
           onClick={load}
           disabled={loading}
-          className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-60"
+          className="hs-btn hs-btn-secondary disabled:opacity-60"
         >
           {loading ? "Loading..." : "Refresh"}
         </button>
       </div>
 
       {loading && !loaded ? (
-        <div className="rounded-[var(--radius)] border border-border bg-surface p-6 text-sm text-text2">
+        <div className="hs-card p-6 text-sm text-text2">
           Loading {platform} data…
         </div>
       ) : null}
 
       {error && notConfigured ? (
-        <div className="rounded-[var(--radius)] border border-amber bg-amber/10 p-4 text-sm text-text">
+        <div className="hs-alert hs-alert-warn">
           <div className="font-medium text-heading">{platform} not configured</div>
           <div className="mt-1 text-text2">{error}</div>
           <Link
             href="/dashboard/settings/analytics"
-            className="mt-3 inline-flex rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3"
+            className="hs-btn hs-btn-secondary mt-3"
           >
             Open Analytics settings
           </Link>
         </div>
       ) : error && !notConfigured ? (
-        <div className="rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           <div>{error}</div>
           <Link
             href="/dashboard/settings/analytics"
-            className="mt-3 inline-flex rounded-[var(--radius2)] border border-red px-3 py-2 text-xs font-semibold text-red transition hover:bg-[rgba(248,113,113,0.12)]"
+            className="hs-btn hs-btn-secondary mt-3"
           >
             Open Analytics settings
           </Link>
@@ -280,7 +280,7 @@ function AdTab({
             <MetricCard label="CPC ($)" value={fmtUSD(totals?.cpc ?? 0)} />
           </div>
 
-          <div className="rounded-[var(--radius)] border border-border bg-surface p-4 text-sm">
+          <div className="hs-card p-4 text-sm">
             <div className="mb-3 text-text">Campaigns (last 30 days)</div>
             {data.campaigns.length === 0 ? (
               <div className="text-text2">No campaign data available.</div>

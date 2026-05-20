@@ -162,8 +162,8 @@ function DeckCard({
 
   return (
     <div
-      className={`rounded-2xl border bg-surface shadow-sm transition-shadow ${
-        expanded ? "border-primary/40 shadow-md" : "border-border hover:border-primary/20"
+      className={`hs-card transition-shadow ${
+        expanded ? "border-primary/40 shadow-md" : "hover:border-primary/20"
       }`}
     >
       {/* Collapsed header */}

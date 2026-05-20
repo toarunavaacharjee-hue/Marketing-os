@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { Markdown } from "@/lib/Markdown";
 import { downloadPitchPdf } from "@/lib/pitchPdf";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type Competitor = { id: string; name: string; website_url: string; created_at: string };
 type Battlecard = {
@@ -153,7 +154,7 @@ function AddPersonaForm({
       ];
 
   return (
-    <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 space-y-3">
+    <div className="hs-card p-4 space-y-3">
       <div className="text-xs font-semibold uppercase tracking-wide text-primary">
         {kind === "icp" ? "New ICP profile" : "New account prospect"}
       </div>
@@ -468,40 +469,34 @@ export default function BattlecardsPage() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-5">
-
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>Battlecards</h1>
-          <p className="mt-1 text-sm text-text2">
-            Competitor notes, ICP-level positioning, and named-account pitches — tied to your Product Profile.
-          </p>
-          {approvedPositioningVersionId ? (
-            <p className="mt-1.5 text-xs text-text3">
-              Linked to approved positioning <span className="font-mono text-[11px] text-text">v{approvedPositioningVersionId.slice(0, 8)}…</span>
-            </p>
-          ) : (
-            <p className="mt-1.5 text-xs text-amber-700">
-              No approved positioning yet.{" "}
-              <Link href="/dashboard/positioning-studio" className="underline hover:no-underline">
-                Approve one in Positioning Studio
-              </Link>{" "}
-              to anchor battlecards to a spine.
-            </p>
-          )}
-        </div>
-        <Link
-          href="/dashboard/settings/product"
-          className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text hover:bg-surface3"
-        >
+    <ModuleShell
+      title="Battlecards"
+      subtitle="Competitor notes, ICP-level positioning, and named-account pitches — tied to your Product Profile."
+      actions={
+        <Link href="/dashboard/settings/product" className="hs-btn hs-btn-secondary">
           Edit competitors
         </Link>
-      </div>
+      }
+    >
+    <div className="space-y-5">
+
+      {approvedPositioningVersionId ? (
+        <p className="text-xs text-text3">
+          Linked to approved positioning <span className="font-mono text-[11px] text-text">v{approvedPositioningVersionId.slice(0, 8)}…</span>
+        </p>
+      ) : (
+        <p className="text-xs text-amber-700">
+          No approved positioning yet.{" "}
+          <Link href="/dashboard/positioning-studio" className="underline hover:no-underline">
+            Approve one in Positioning Studio
+          </Link>{" "}
+          to anchor battlecards to a spine.
+        </p>
+      )}
 
       {/* Toasts */}
-      {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div> : null}
-      {saved ? <div className="rounded-xl border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{saved}</div> : null}
+      {error ? <div className="hs-alert hs-alert-error">{error}</div> : null}
+      {saved ? <div className="hs-alert hs-alert-success">{saved}</div> : null}
 
       <AiProgressBar
         active={pitchLoading || uploadingIcp || uploadingAccount}
@@ -932,5 +927,6 @@ export default function BattlecardsPage() {
         </>
       ) : null}
     </div>
+    </ModuleShell>
   );
 }

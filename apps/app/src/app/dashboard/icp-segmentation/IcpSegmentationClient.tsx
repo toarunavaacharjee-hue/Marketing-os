@@ -494,6 +494,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
 
         </>
       )}
-    </div>
+      </div>
+    </ModuleShell>
   );
 }

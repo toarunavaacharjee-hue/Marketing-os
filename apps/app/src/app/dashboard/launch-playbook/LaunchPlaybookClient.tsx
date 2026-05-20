@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type Initiative = {
   id: string;
@@ -64,23 +65,14 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
   }, [pickerOpen]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Playbooks</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text" style={{ fontFamily: "var(--font-heading)" }}>
-            Launch Playbook
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text2">
-            Run launches with agentic workflows: research → narrative → GTM plan → sales enablement. Work is executed by background agent workers powered by
-            Anthropic Claude Sonnet.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
+    <ModuleShell
+      title="Launch Playbook"
+      subtitle="Run launches with agentic workflows: research → narrative → GTM plan → sales enablement. Work is executed by background agent workers powered by Anthropic Claude Sonnet."
+      actions={
+        <>
           <Link
             href="/dashboard/artifacts"
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+            className="hs-btn hs-btn-secondary"
           >
             Artifact Library
           </Link>
@@ -89,7 +81,7 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
             <button
               type="button"
               onClick={() => setPickerOpen((v) => !v)}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
+              className="hs-btn hs-btn-primary gap-2"
               aria-haspopup="menu"
               aria-expanded={pickerOpen}
             >
