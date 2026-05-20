@@ -173,6 +173,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
     setItems([...fromModules, ...segmentItems].sort(sortWork));
     setLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environmentId, supabase]);
 
   useEffect(() => {
@@ -1052,7 +1053,7 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
           <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
             <div className="text-lg font-semibold text-heading">Generate pitch battlecard</div>
             <p className="mt-1 text-sm text-text2">
-              Pick a competitor. We'll build an ICP persona from your Positioning canvas and create a pitch battlecard.
+              Pick a competitor. We&apos;ll build an ICP persona from your Positioning canvas and create a pitch battlecard.
             </p>
 
             {pitchError && (
