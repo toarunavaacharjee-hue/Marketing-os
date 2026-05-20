@@ -536,7 +536,7 @@ SUGGESTED ACTION:
 
   // ── Render ────────────────────────────────────────────────────────────
 
-  if (loading) return <div className="h-12 animate-pulse rounded-2xl bg-surface2" />;
+  if (loading) return <div className="h-12 animate-pulse rounded-xl bg-surface2" />;
 
   const stageData = ws.stages[activeStage];
   const stageMeta = DEAL_STAGES.find((s) => s.id === activeStage)!;
@@ -560,7 +560,7 @@ SUGGESTED ACTION:
       <div className="grid gap-4 lg:grid-cols-[1fr_380px]">
 
         {/* Objection Library */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">🎯 Objection Library</div>
@@ -568,7 +568,7 @@ SUGGESTED ACTION:
             </div>
             <button
               onClick={addObjection}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+              className="hs-btn hs-btn-secondary"
             >
               + Add objection
             </button>
@@ -665,7 +665,7 @@ SUGGESTED ACTION:
                             <button
                               onClick={() => void generateRebuttal(o)}
                               disabled={generatingRebuttal === o.id}
-                              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+                              className="hs-btn hs-btn-primary disabled:opacity-50"
                             >
                               {generatingRebuttal === o.id ? "Generating…" : o.rebuttal ? "Regenerate →" : "Generate rebuttal →"}
                             </button>
@@ -736,7 +736,7 @@ SUGGESTED ACTION:
         </div>
 
         {/* Win / Loss */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">📈 Win / Loss by Segment</div>
@@ -744,7 +744,7 @@ SUGGESTED ACTION:
             </div>
             <button
               onClick={addWinLoss}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+              className="hs-btn hs-btn-secondary"
             >
               + Add
             </button>
@@ -859,7 +859,7 @@ SUGGESTED ACTION:
       </div>
 
       {/* Deal-Stage Playbook */}
-      <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="hs-card p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="text-sm font-semibold text-heading">🗺️ Deal-Stage Playbook</div>
@@ -868,7 +868,7 @@ SUGGESTED ACTION:
           <button
             onClick={() => void generateStageAssets()}
             disabled={generatingStage}
-            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+            className="hs-btn hs-btn-primary disabled:opacity-50"
           >
             {generatingStage ? "Generating…" : `Generate ${stageMeta.emoji} ${stageMeta.label} assets →`}
           </button>
@@ -948,7 +948,7 @@ SUGGESTED ACTION:
       <div className="grid gap-4 lg:grid-cols-[1fr_400px]">
 
         {/* Call Intelligence */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">📞 Call Intelligence</div>
@@ -956,7 +956,7 @@ SUGGESTED ACTION:
             </div>
             <button
               onClick={addCallInsight}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+              className="hs-btn hs-btn-secondary"
             >
               + Add insight
             </button>
@@ -1013,7 +1013,7 @@ SUGGESTED ACTION:
         </div>
 
         {/* Coaching Playbook */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">🏋️ Coaching Playbook</div>
@@ -1022,7 +1022,7 @@ SUGGESTED ACTION:
             <button
               onClick={() => void generateCoachingPlaybook()}
               disabled={generatingPlaybook}
-              className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+              className="hs-btn hs-btn-primary disabled:opacity-50"
             >
               {generatingPlaybook ? "Generating…" : ws.coachingPlaybook ? "Regenerate →" : "Generate →"}
             </button>
@@ -1060,7 +1060,7 @@ SUGGESTED ACTION:
       </div>
 
       {/* Send to Strategy */}
-      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+      <div className="hs-card p-5">
         <div className="mb-1 flex items-center gap-2">
           <span className="text-sm font-semibold text-heading">Send to Strategy</span>
           <span className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">AI</span>
@@ -1070,7 +1070,7 @@ SUGGESTED ACTION:
         </p>
 
         {strategyError && (
-          <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{strategyError}</div>
+          <div className="hs-alert hs-alert-error mb-3">{strategyError}</div>
         )}
 
         <div className="space-y-2">
@@ -1106,7 +1106,7 @@ SUGGESTED ACTION:
         <button
           onClick={() => void generateStrategyFeedback()}
           disabled={generatingStrategy || !strategyInsight.trim()}
-          className="mt-3 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-40"
+          className="hs-btn hs-btn-primary mt-3 disabled:opacity-40"
         >
           {generatingStrategy ? "Analysing…" : "Extract strategy signals"}
         </button>
@@ -1124,5 +1124,6 @@ SUGGESTED ACTION:
         )}
       </div>
     </div>
+    </ModuleShell>
   );
 }

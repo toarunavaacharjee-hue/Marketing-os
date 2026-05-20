@@ -779,7 +779,7 @@ export default function BattlecardsPage() {
               {/* Refine panels */}
               <div className="grid gap-4 lg:grid-cols-2">
                 {icpPersonaId ? (
-                  <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-3">
+                  <div className="hs-card p-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <div className="text-sm font-semibold text-heading">Refine ICP</div>
@@ -810,7 +810,7 @@ export default function BattlecardsPage() {
                 )}
 
                 {accountPersonaId ? (
-                  <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-3">
+                  <div className="hs-card p-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <div className="text-sm font-semibold text-heading">Refine account</div>

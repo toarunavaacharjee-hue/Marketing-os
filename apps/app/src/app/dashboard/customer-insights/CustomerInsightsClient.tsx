@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -433,7 +434,7 @@ SUGGESTED ACTION:
 
   // ── Render ────────────────────────────────────────────────────────────
 
-  if (loading) return <div className="h-12 animate-pulse rounded-2xl bg-surface2" />;
+  if (loading) return <div className="h-12 animate-pulse rounded-xl bg-surface2" />;
 
   const npsColor = ws.nps >= 50 ? "text-teal" : ws.nps >= 30 ? "text-amber-700" : "text-red";
   const drivers = ws.themes.filter((t) => t.type === "driver");
@@ -445,16 +446,15 @@ SUGGESTED ACTION:
   const TREND_COLORS: Record<FeedbackTheme["trend"], string> = { up: "text-amber-700", stable: "text-text2", down: "text-red" };
 
   return (
+    <ModuleShell
+      title="Customer Insights"
+      subtitle="Voice-of-customer quotes, feedback themes, survey insights, and retention analysis."
+      actions={<span className="text-xs text-text3">{saving ? "Saving…" : "Saved per product"}</span>}
+    >
     <div className="space-y-5">
 
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-semibold text-text">💬 Customer Insights</h1>
-        <span className="text-xs text-text3">{saving ? "Saving…" : "Saved per product"}</span>
-      </div>
-
       {error && (
-        <div className="flex items-center justify-between rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="ml-3 text-xs underline">Dismiss</button>
         </div>
@@ -462,7 +462,7 @@ SUGGESTED ACTION:
 
       {/* NPS / CSAT / approved quotes strip */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="hs-card hs-card-hover p-4">
           <div className="text-xs font-medium uppercase tracking-wide text-text2">NPS</div>
           <div className="mt-1 flex items-end gap-2">
             <input
@@ -479,7 +479,7 @@ SUGGESTED ACTION:
             />
           </div>
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="hs-card hs-card-hover p-4">
           <div className="text-xs font-medium uppercase tracking-wide text-text2">CSAT</div>
           <div className="mt-1 flex items-end gap-2">
             <input
@@ -495,7 +495,7 @@ SUGGESTED ACTION:
             />
           </div>
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="hs-card hs-card-hover p-4">
           <div className="text-xs font-medium uppercase tracking-wide text-text2">Approved quotes</div>
           <div className={`mt-1 text-3xl font-bold tabular-nums ${approvedCount > 0 ? "text-teal" : "text-text2"}`}>{approvedCount}</div>
           <div className="mt-0.5 text-xs text-text2">of {ws.quotes.length} total — approved for marketing use</div>
@@ -506,7 +506,7 @@ SUGGESTED ACTION:
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
 
         {/* VOC Quote Library */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
               <div className="text-sm font-semibold text-heading">🗣️ VOC Quote Library</div>
@@ -514,7 +514,7 @@ SUGGESTED ACTION:
             </div>
             <button
               onClick={addQuote}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+              className="hs-btn hs-btn-secondary"
             >
               + Add quote
             </button>
@@ -677,7 +677,7 @@ SUGGESTED ACTION:
         </div>
 
         {/* Feedback Themes */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 text-sm font-semibold text-heading">📊 Feedback Themes</div>
 
           {/* Retention drivers */}
@@ -787,7 +787,7 @@ SUGGESTED ACTION:
       </div>
 
       {/* Survey / Interview Log */}
-      <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="hs-card p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <div className="text-sm font-semibold text-heading">📋 Survey & Interview Log</div>
@@ -795,7 +795,7 @@ SUGGESTED ACTION:
           </div>
           <button
             onClick={addSurveyInsight}
-            className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+            className="hs-btn hs-btn-secondary"
           >
             + Add finding
           </button>
@@ -850,7 +850,7 @@ SUGGESTED ACTION:
       <div className="grid gap-4 lg:grid-cols-2">
 
         {/* Customer Narrative */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">✍️ Customer Narrative</div>
@@ -859,7 +859,7 @@ SUGGESTED ACTION:
             <button
               onClick={() => void generateNarrative()}
               disabled={generatingNarrative}
-              className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+              className="hs-btn hs-btn-primary disabled:opacity-50"
             >
               {generatingNarrative ? "Generating…" : ws.customerNarrative ? "Regenerate →" : "Generate →"}
             </button>
@@ -896,7 +896,7 @@ SUGGESTED ACTION:
         </div>
 
         {/* Retention Brief */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">🚨 Retention Brief</div>
@@ -905,7 +905,7 @@ SUGGESTED ACTION:
             <button
               onClick={() => void generateRetentionBrief()}
               disabled={generatingRetention}
-              className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+              className="hs-btn hs-btn-primary disabled:opacity-50"
             >
               {generatingRetention ? "Generating…" : ws.retentionBrief ? "Regenerate →" : "Generate →"}
             </button>
@@ -943,7 +943,7 @@ SUGGESTED ACTION:
       </div>
 
       {/* Send to Strategy */}
-      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+      <div className="hs-card p-5">
         <div className="mb-1 flex items-center gap-2">
           <span className="text-sm font-semibold text-heading">Send to Strategy</span>
           <span className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">AI</span>
@@ -953,7 +953,7 @@ SUGGESTED ACTION:
         </p>
 
         {strategyError && (
-          <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{strategyError}</div>
+          <div className="hs-alert hs-alert-error mb-3">{strategyError}</div>
         )}
 
         <div className="space-y-2">
@@ -989,7 +989,7 @@ SUGGESTED ACTION:
         <button
           onClick={() => void generateStrategyFeedback()}
           disabled={generatingStrategy || !strategyInsight.trim()}
-          className="mt-3 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-40"
+          className="hs-btn hs-btn-primary mt-3 disabled:opacity-40"
         >
           {generatingStrategy ? "Analysing…" : "Extract strategy signals"}
         </button>
@@ -1007,5 +1007,6 @@ SUGGESTED ACTION:
         )}
       </div>
     </div>
+    </ModuleShell>
   );
 }
