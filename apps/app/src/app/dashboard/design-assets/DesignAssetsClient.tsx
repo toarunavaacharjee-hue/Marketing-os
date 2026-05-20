@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
-import { NextStepNudge } from "@/app/dashboard/_components/NextStepNudge";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -706,7 +705,6 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
         />
       </div>
 
-      <NextStepNudge />
     </div>
   );
 }
