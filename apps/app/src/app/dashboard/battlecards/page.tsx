@@ -507,7 +507,7 @@ export default function BattlecardsPage() {
 
       {/* No competitors */}
       {!loading && competitors.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-surface p-6 text-center">
+        <div className="hs-card p-6 text-center">
           <div className="text-sm font-semibold text-heading">No competitors added yet</div>
           <p className="mt-1 text-sm text-text2">Add competitors in Settings → Product profile, then generate battlecards here.</p>
           <Link href="/dashboard/settings/product" className="hs-btn hs-btn-primary mt-4">
@@ -562,7 +562,7 @@ export default function BattlecardsPage() {
               <div className="grid gap-5 lg:grid-cols-2">
 
                 {/* ICP profiles */}
-                <div className="space-y-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <div className="text-sm font-semibold text-heading">ICP profiles</div>
@@ -619,7 +619,7 @@ export default function BattlecardsPage() {
                 </div>
 
                 {/* Account prospects */}
-                <div className="space-y-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <div className="text-sm font-semibold text-heading">Account prospects</div>
@@ -681,7 +681,7 @@ export default function BattlecardsPage() {
               ) : null}
 
               {/* Generate panel */}
-              <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+              <div className="hs-card p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-heading">
@@ -820,7 +820,7 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => void savePersonaImprovements("account")}
                         disabled={personaSavingAccount}
-                        className="rounded-xl bg-teal/15 px-3 py-1.5 text-xs font-semibold text-teal border border-teal/30 hover:bg-teal/25 disabled:opacity-60"
+                        className="hs-btn hs-btn-primary disabled:opacity-60"
                       >
                         {personaSavingAccount ? "Saving…" : "Save account answers"}
                       </button>
@@ -843,13 +843,13 @@ export default function BattlecardsPage() {
 
               {/* Output panels */}
               <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4">
                   <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-text3">ICP battlecard</div>
                   {pitchMarkdownIcp
                     ? <Markdown content={pitchMarkdownIcp} />
                     : <p className="text-sm text-text2">Generate an ICP battlecard to see segment-level positioning.</p>}
                 </div>
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4">
                   <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-text3">Account battlecard</div>
                   {pitchMarkdownAccount
                     ? <Markdown content={pitchMarkdownAccount} />
@@ -863,7 +863,7 @@ export default function BattlecardsPage() {
           {mode === "competitor" ? (
             <div className="space-y-4">
               <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-4">
+                <div className="hs-card p-4 space-y-4">
                   <div>
                     <div className="mb-1.5 text-sm font-semibold text-heading">
                       Strengths <span className="font-normal text-text3">({activeCompetitor?.name ?? "Competitor"})</span>
@@ -888,7 +888,7 @@ export default function BattlecardsPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-4">
+                <div className="hs-card p-4 space-y-4">
                   <div>
                     <div className="mb-1.5 text-sm font-semibold text-heading">Why we win</div>
                     <textarea
@@ -917,7 +917,7 @@ export default function BattlecardsPage() {
                   type="button"
                   onClick={() => void save()}
                   disabled={saving || !activeId}
-                  className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+                  className="hs-btn hs-btn-primary disabled:opacity-60"
                 >
                   {saving ? "Saving…" : "Save battlecard"}
                 </button>
