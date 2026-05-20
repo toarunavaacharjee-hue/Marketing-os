@@ -34,6 +34,9 @@ const modules = [
   ["Battlecards", "Sales"],
   ["Sales Intelligence", "Sales"],
   ["Customer Insights", "Insights"],
+  ["Launch Playbook", "Execution"],
+  ["Prospect Research", "Sales"],
+  ["Artifact Library", "Content"],
   ["AI Copilot", "Core"]
 ] as const;
 
@@ -43,7 +46,7 @@ const faq: [string, string][] = [
   ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
   [
     "Does AI usage have limits?",
-    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes the full module set — tiers differ by products, AI volume, seats, and support."
+    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes all 21 modules — tiers differ by products, AI volume, seats, and support."
   ],
   ["Can we use our own Anthropic key?", "Yes. A workspace admin adds a workspace-level Anthropic key under Settings → AI integration. Starter and Growth can also use the platform key if your operator enables it. Enterprise requires BYOK — Anthropic token usage is billed by Anthropic directly to the customer's account."],
   ["Is there a contract?", "Starter and Growth are month-to-month. Enterprise can be monthly or annual with custom terms."],
@@ -189,7 +192,7 @@ export default function HomePageModernClient({
             </div>
 
             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-text3">
-              {["No demo call required", "No credit card", "All 18 modules included"].map((x) => (
+              {["No demo call required", "No credit card", "All 21 modules included"].map((x) => (
                 <span key={x} className="rounded-full border border-border bg-surface2 px-3 py-1.5">
                   {x}
                 </span>
@@ -256,7 +259,7 @@ export default function HomePageModernClient({
           <div className="saas-card saas-glass px-6 py-5 sm:px-8">
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
               {[
-                ["18 modules", "Full GTM stack"],
+                ["21 modules", "Full GTM stack"],
                 ["One workspace", "Not per-product pricing"],
                 ["No research limits", "Unlimited runs on Growth"],
                 ["Start in 60s", "No demo required"]
@@ -365,7 +368,9 @@ export default function HomePageModernClient({
               ["07", "Content Studio", "Blog posts, emails, landing copy written by AI", "~60s"],
               ["08", "Social Media", "Social posts generated per segment", "~30s"],
               ["09", "Battlecards", "Competitive rebuttals drafted from your positioning", "~60s"],
-              ["10", "Sales Intelligence", "Deal stage assets + objection handling", "~90s"]
+              ["10", "Sales Intelligence", "Deal stage assets + objection handling", "~90s"],
+              ["11", "Launch Playbook", "Track launch phases, milestones, and generate a Final Launch Pack", "~2 min"],
+              ["12", "Prospect Research", "AI account intelligence memo per target company, exportable as DOCX", "~60s"]
             ].map(([num, name, desc, time], idx, arr) => (
               <div key={num} className="relative">
                 <div className="saas-card saas-card-hover p-4 h-full">
@@ -421,7 +426,7 @@ export default function HomePageModernClient({
                 Artifacts your team ships from
               </div>
               <p className="mt-2 text-sm leading-relaxed text-text2">
-                Generate structured outputs and keep them versioned, reviewable, and easy to reuse across every launch.
+                Every module generates structured artifacts — positioning guides, message maps, launch packs, sales briefs — all stored in a shared Artifact Library your team can browse, reuse, and build from.
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {["Positioning guide", "Message map", "Launch playbook", "Sales enablement"].map((x) => (
@@ -468,10 +473,10 @@ export default function HomePageModernClient({
           </div>
         </section>
 
-        {/* ── SECTION 6: ALL 18 MODULES ── */}
+        {/* ── SECTION 6: ALL 21 MODULES ── */}
         <section id="modules" data-reveal className="saas-card mt-24 p-6 sm:p-8">
           <h2 className="text-2xl font-semibold tracking-tight text-text md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
-            All 18 modules
+            All 21 modules
           </h2>
           <p className="mt-2 text-sm text-text2">Every plan includes every module — no paywalls, no add-ons.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
@@ -733,7 +738,7 @@ export default function HomePageModernClient({
             <div className="text-[13px] font-semibold text-text mb-3">What&apos;s included on every plan</div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                "All 18 modules (no paywalls)",
+                "All 21 modules (no paywalls)",
                 "No research run limits on Growth+",
                 "No per-product charges",
                 "Self-serve — start in 60 seconds"

@@ -52,7 +52,7 @@ const PLANS: Array<{
 
 const MATRIX = [
   { group: "Core workflow", rows: [["Marketing Workbench (unified workbench)", true, true, true]] },
-  { group: "Modules", rows: [["All dashboard modules (18+)", true, true, true]] },
+  { group: "Modules", rows: [["All dashboard modules (21+)", true, true, true]] },
   { group: "Workspace", rows: [["Team seats (members + invites)", "1", "3", "5"], ["Products per workspace", "Up to 2", "Up to 10", "Up to 30"]] },
   {
     group: "AI",
@@ -236,7 +236,7 @@ export function PricingModernClient() {
           {[
             ["No per-product charges", "One workspace price covers all your products. Scale products without scaling your bill."],
             ["No research run limits", "Growth and Enterprise get unlimited AI workflow runs — no throttling on segments, positioning, or content."],
-            ["All 18 modules included", "Every plan includes every module. No paywalls, no add-ons, no upgrade gates mid-workflow."],
+            ["All 21 modules included", "Every plan includes all 21 modules. No paywalls, no add-ons, no upgrade gates mid-workflow."],
             ["Self-serve in 60 seconds", "No demo required. Sign up, add a product brief, and generate your first ICP segments immediately."]
           ].map(([t, d]) => (
             <div key={t} className="saas-card2 p-4">
