@@ -97,8 +97,8 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
     }
 
     const segmentItems: WorkItem[] = (segs ?? []).map((s: any) => {
-      const pain = Array.isArray(s.pain_points) ? s.pain_points.filter(Boolean).slice(0, 2) : [];
-      const painPreview = pain.length ? pain.join("; ") : "";
+      const pain = Array.isArray(s.pain_points) ? s.pain_points.filter(Boolean) : [];
+      const firstPain = pain[0] ? String(pain[0]).slice(0, 80) : "";
       const pnf = typeof s.pnf_score === "number" ? s.pnf_score : null;
       return {
         id: `segment:${s.id}`,
@@ -106,18 +106,15 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
         sourceLabel: "ICP Segments",
         category: "ICP Segment",
         title: s.name ?? "Untitled segment",
-        subtitle:
-          pnf != null || painPreview
-            ? [pnf != null ? `PNF ${pnf}` : null, painPreview].filter(Boolean).join(" · ")
-            : undefined,
-        timeline: painPreview || undefined,
+        subtitle: firstPain || undefined,
+        timeline: undefined,
         status: pnf != null ? `PNF ${pnf}` : "Reference",
         owner: "—",
         due: undefined,
         dueTs: null,
         done: false,
         href: "/dashboard/icp-segmentation",
-        tags: pain.length ? pain.slice(0, 1) : undefined
+        tags: undefined
       };
     });
 
@@ -562,33 +559,26 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
 
       {/* Mobile list */}
       <div className="space-y-3 md:hidden">
-        {filtered.map((it) => (
+        {filtered.map((it) => {
+          const isUntitled = /^(untitled|new item|new artifact)/i.test(it.title.trim());
+          return (
           <div key={it.id} className="rounded-2xl border border-border bg-surface p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-heading">{it.title}</div>
-                {it.subtitle ? <div className="mt-0.5 text-xs text-text2">{it.subtitle}</div> : null}
+                <div className={`truncate text-sm font-medium ${isUntitled ? "italic text-text3" : "text-heading"}`}>{it.title}</div>
+                {it.subtitle ? (
+                  <div className="mt-0.5 truncate text-[11px] text-text2">{it.subtitle}</div>
+                ) : null}
                 <div className="mt-1 text-xs text-primary">{it.sourceLabel}</div>
               </div>
-              <div className="shrink-0 text-right text-xs">
-                <div
-                  className={
-                    it.done
-                      ? "text-emerald-300/90"
-                      : it.status === "Reference"
-                        ? "text-text2"
-                        : "text-heading"
-                  }
-                >
-                  {it.status ?? "—"}
-                </div>
+              <div className="shrink-0 text-right">
+                <StatusBadge status={it.status} done={it.done} />
                 <div className="mt-1 text-[11px] text-text3">{it.due ?? "—"}</div>
               </div>
             </div>
 
-            {it.timeline ? <div className="mt-2 line-clamp-3 text-xs text-text3">{it.timeline}</div> : null}
             {outcomes[it.id]?.notes ? (
-              <div className="mt-2 line-clamp-2 text-[11px] text-primary">Update: {outcomes[it.id]!.notes}</div>
+              <div className="mt-2 truncate text-[11px] text-primary">↳ {outcomes[it.id]!.notes}</div>
             ) : null}
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -678,64 +668,60 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
               </div>
             ) : null}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Desktop table */}
       <div className="hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-border text-[10px] font-medium uppercase text-text2">
+          <thead className="border-b border-border text-[10px] font-medium uppercase tracking-wider text-text2">
             <tr>
-              <th className="px-3 py-2">Item</th>
-              <th className="px-3 py-2">Module</th>
-              <th className="px-3 py-2">Category</th>
-              <th className="px-3 py-2">Status</th>
-              <th className="px-3 py-2">Owner</th>
-              <th className="px-3 py-2">Due / timeline</th>
-              <th className="px-3 py-2 w-24" />
+              <th className="px-4 py-3">Item</th>
+              <th className="px-3 py-3">Module</th>
+              <th className="px-3 py-3">Category</th>
+              <th className="px-3 py-3">Status</th>
+              <th className="px-3 py-3">Owner</th>
+              <th className="px-3 py-3">Due</th>
+              <th className="w-24 px-3 py-3" />
             </tr>
           </thead>
-          <tbody className="text-heading">
-            {filtered.map((it) => (
-              <tr key={it.id} className="border-t border-border align-top">
-                <td className="px-3 py-2">
-                  <div className="font-medium">{it.title}</div>
-                  {it.subtitle ? <div className="mt-0.5 text-xs text-text2">{it.subtitle}</div> : null}
-                  {it.timeline ? (
-                    <div className="mt-1 line-clamp-2 text-xs text-text3">{it.timeline}</div>
+          <tbody>
+            {filtered.map((it) => {
+              const isUntitled = /^(untitled|new item|new artifact)/i.test(it.title.trim());
+              return (
+              <tr key={it.id} className="border-t border-border align-middle hover:bg-surface2/40 transition-colors">
+                <td className="max-w-[320px] px-4 py-2.5">
+                  <div className={`truncate text-sm font-medium ${isUntitled ? "italic text-text3" : "text-heading"}`} title={it.title}>
+                    {it.title}
+                  </div>
+                  {it.subtitle ? (
+                    <div className="mt-0.5 truncate text-[11px] text-text2" title={it.subtitle}>
+                      {it.subtitle}
+                    </div>
                   ) : null}
                   {outcomes[it.id]?.notes ? (
-                    <div className="mt-1 line-clamp-2 text-[11px] text-primary">
-                      Update: {outcomes[it.id]!.notes}
+                    <div className="mt-0.5 truncate text-[11px] text-primary" title={outcomes[it.id]!.notes}>
+                      ↳ {outcomes[it.id]!.notes}
                     </div>
                   ) : null}
                   {it.tags?.length ? (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {it.tags.map((t) => (
-                        <span key={t} className="rounded bg-surface3 px-1.5 py-0.5 text-[10px] text-text2">
+                        <span key={t} className="max-w-[140px] truncate rounded bg-surface3 px-1.5 py-0.5 text-[10px] text-text2" title={t}>
                           {t}
                         </span>
                       ))}
                     </div>
                   ) : null}
                 </td>
-                <td className="px-3 py-2 text-xs text-primary">{it.sourceLabel}</td>
-                <td className="px-3 py-2 text-xs text-text2">{it.category}</td>
-                <td className="px-3 py-2">
-                  <span
-                    className={
-                      it.done
-                        ? "text-emerald-300/90"
-                        : it.status === "Reference"
-                          ? "text-text2"
-                          : "text-heading"
-                    }
-                  >
-                    {it.status ?? "—"}
-                  </span>
+                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-primary">{it.sourceLabel}</td>
+                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.category}</td>
+                <td className="whitespace-nowrap px-3 py-2.5">
+                  <StatusBadge status={it.status} done={it.done} />
                 </td>
-                <td className="px-3 py-2 text-xs text-text2">{it.owner ?? "—"}</td>
-                <td className="px-3 py-2 text-xs text-text2">{it.due ?? "—"}</td>
+                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.owner && it.owner !== "—" ? it.owner : <span className="text-text3">—</span>}</td>
+                <td className="whitespace-nowrap px-3 py-2.5 text-xs text-text2">{it.due ?? <span className="text-text3">—</span>}</td>
                 <td className="px-3 py-2">
                   <div className="flex flex-col items-end gap-2">
                     {editingOutcomeId === it.id ? (
@@ -829,7 +815,8 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -943,4 +930,52 @@ export function AllWorkClient({ environmentId }: { environmentId: string }) {
       ) : null}
     </div>
   );
+}
+
+function StatusBadge({ status, done }: { status?: string; done: boolean }) {
+  const base = "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold";
+
+  if (done || /^(live|published|shipped|done)$/i.test(status ?? "")) {
+    return <span className={`${base} bg-teal/12 text-teal`}>Live</span>;
+  }
+
+  const s = status ?? "";
+  if (!s) return <span className="text-[11px] text-text3">—</span>;
+
+  // PNF score
+  const pnfMatch = s.match(/^PNF\s*(\d+)$/i);
+  if (pnfMatch) {
+    const score = parseInt(pnfMatch[1]);
+    const cls = score >= 80 ? "bg-teal/12 text-teal" : score >= 60 ? "bg-primary/10 text-primary" : "bg-surface3 text-text2";
+    return <span className={`${base} ${cls}`}>PNF {score}</span>;
+  }
+
+  // Scoring metrics (Clarity XX% · Differentiation XX% · ...)
+  if (/clarity|differentiation|credibility/i.test(s)) {
+    const nums = [...s.matchAll(/(\d+)%/g)].map((m) => parseInt(m[1]));
+    const avg = nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : null;
+    return <span className={`${base} bg-primary/10 text-primary`}>{avg != null ? `Score ${avg}%` : "Scored"}</span>;
+  }
+
+  // Draft (XX%)
+  const draftMatch = s.match(/^Draft\s*\((\d+)%\)/i);
+  if (draftMatch) {
+    return <span className={`${base} bg-amber/12 text-amber`}>Draft {draftMatch[1]}%</span>;
+  }
+
+  // XX% prep
+  const prepMatch = s.match(/^(\d+)%\s*prep$/i);
+  if (prepMatch) {
+    const pct = parseInt(prepMatch[1]);
+    if (pct === 0) return <span className={`${base} bg-surface3 text-text3`}>Not started</span>;
+    return <span className={`${base} bg-amber/12 text-amber`}>{pct}% prep</span>;
+  }
+
+  if (/^in[\s-]?draft$/i.test(s)) return <span className={`${base} bg-amber/12 text-amber`}>In draft</span>;
+  if (/^plan/i.test(s))           return <span className={`${base} bg-surface3 text-text2`}>{s}</span>;
+  if (/^open$/i.test(s))          return <span className={`${base} bg-primary/10 text-primary`}>Open</span>;
+  if (/^reference$/i.test(s))     return <span className={`${base} bg-surface3 text-text3`}>Reference</span>;
+  if (/^review/i.test(s))         return <span className={`${base} bg-amber/12 text-amber`}>{s}</span>;
+
+  return <span className="text-[11px] text-text2">{s}</span>;
 }
