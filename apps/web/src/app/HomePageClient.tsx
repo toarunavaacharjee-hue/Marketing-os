@@ -168,7 +168,7 @@ export default function HomePageClient() {
               </span>
               <span className="ml-2 truncate">workspace - AI Marketing Workbench</span>
             </div>
-            <div className="rounded-xl border border-border bg-surface2 p-4 shadow-inner">
+            <div className="saas-card2 p-4 shadow-inner">
               <div className="text-sm font-medium text-text">What the system keeps connected</div>
               <div className="mt-3 grid gap-2 text-sm text-text2">
                 {[
@@ -322,7 +322,7 @@ export default function HomePageClient() {
                   ["Keep teams aligned", "Log progress and results so everyone sees what changed and why."],
                   ["Guardrails by design", "Prefer explicit context; avoid inventing facts and unknown URLs."]
                 ].map(([t, d]) => (
-                  <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+                  <div key={t} className="saas-card2 p-4">
                     <div className="text-[13px] font-semibold text-text">{t}</div>
                     <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
                   </div>
@@ -432,7 +432,7 @@ export default function HomePageClient() {
           </h2>
           <div className="mt-6 space-y-2">
             {faq.map(([q, a], idx) => (
-              <div key={q} className="overflow-hidden rounded-xl border border-border bg-surface">
+              <div key={q} className="overflow-hidden saas-card">
                 <button
                   type="button"
                   onClick={() => setOpenFaq((v) => (v === idx ? -1 : idx))}

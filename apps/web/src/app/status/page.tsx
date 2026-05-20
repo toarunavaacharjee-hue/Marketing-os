@@ -40,14 +40,14 @@ export default function StatusPage() {
                 All systems operational
               </div>
             </div>
-            <span className="rounded-full bg-[rgba(184,255,108,0.15)] px-3 py-1 text-[12px] font-semibold text-[#b8ff6c] ring-1 ring-[rgba(184,255,108,0.25)]">
+            <span className="rounded-full bg-teal/10 px-3 py-1 text-[12px] font-semibold text-teal ring-1 ring-teal/25">
               Operational
             </span>
           </div>
 
           <div className="mt-6 grid gap-3 md:grid-cols-2">
             {systems.map((s) => (
-              <div key={s.name} className="rounded-xl border border-border bg-surface2 p-4">
+              <div key={s.name} className="saas-card2 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-text">{s.name}</div>
                   <div className="text-[12px] font-medium text-text2">{s.status}</div>
@@ -73,7 +73,7 @@ export default function StatusPage() {
           <div className="mt-4">
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+              className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
             >
               Contact us
             </Link>

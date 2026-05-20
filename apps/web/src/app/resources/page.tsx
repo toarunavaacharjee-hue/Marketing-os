@@ -38,7 +38,7 @@ export default function ResourcesPage() {
                 {label}
               </div>
               <div className="mt-2 text-sm leading-relaxed text-text2">{desc}</div>
-              <div className="mt-4 text-[13px] font-medium text-[#c4b8ff]">Open →</div>
+              <div className="mt-4 text-[13px] font-medium text-primary">Open →</div>
             </Link>
           ))}
         </section>

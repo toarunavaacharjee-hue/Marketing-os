@@ -78,7 +78,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href="/signup?plan=starter"
-              className="inline-flex items-center justify-center rounded-lg bg-[#b8ff6c] px-4 py-2 text-[13px] font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 transition hover:bg-[#c8ff7c]"
+              className="saas-btn saas-btn-cta px-4 py-2 text-[13px]"
             >
               Start free
             </Link>

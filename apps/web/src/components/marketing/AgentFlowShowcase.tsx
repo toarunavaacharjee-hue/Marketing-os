@@ -8,7 +8,7 @@ function Pill({
   subtitle: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3 shadow-card">
+    <div className="inline-flex items-center gap-3 saas-card px-4 py-3 shadow-card">
       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white shadow-card">
         <span className="text-[12px] font-bold">AI</span>
       </div>
@@ -33,7 +33,7 @@ function SmallNode({
   accentClass: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface2 px-4 py-3 shadow-sm">
+    <div className="flex items-center gap-3 saas-card2 px-4 py-3 shadow-sm">
       <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${accentClass} text-white shadow-sm`}>
         <span className="text-[12px] font-bold">{label.slice(0, 1).toUpperCase()}</span>
       </div>
@@ -62,7 +62,7 @@ export function AgentFlowShowcase() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             {["CRM", "Calls", "Reviews", "Reports", "News", "Websites"].map((s) => (
               <div key={s} className="text-center">
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-surface shadow-sm">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center saas-card shadow-sm">
                   <span className="text-[11px] font-semibold text-text2">{s.slice(0, 1)}</span>
                 </div>
                 <div className="mt-2 text-[11px] font-medium text-text3">{s}</div>
@@ -120,7 +120,7 @@ export function AgentFlowShowcase() {
             <Pill title="Workbench Frameworks" subtitle="Running across sources" />
 
             <div className="mt-10 grid w-full gap-3 md:grid-cols-2">
-              <div className="rounded-xl border border-border bg-surface2 p-4 shadow-sm">
+              <div className="saas-card2 p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-[13px] font-semibold text-text">
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#6d5cff] text-white">A</span>
                   Core artifact
@@ -129,7 +129,7 @@ export function AgentFlowShowcase() {
                   <span className="text-[#00bfa5]">✓</span> Positioning Guide
                 </div>
               </div>
-              <div className="rounded-xl border border-border bg-surface2 p-4 shadow-sm">
+              <div className="saas-card2 p-4 shadow-sm">
                 <div className="flex items-center gap-2 text-[13px] font-semibold text-text">
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#00bfa5] text-white">A</span>
                   Core artifact
@@ -140,7 +140,7 @@ export function AgentFlowShowcase() {
               </div>
             </div>
 
-            <div className="mt-6 w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text2">
+            <div className="mt-6 w-full saas-card px-4 py-3 text-sm text-text2">
               Result: a shared artifact library your team can execute from.
             </div>
           </div>

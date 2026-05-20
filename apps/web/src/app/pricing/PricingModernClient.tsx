@@ -97,7 +97,7 @@ export function PricingModernClient() {
           <button
             type="button"
             onClick={() => setAnnual((v) => !v)}
-            className="mt-6 inline-flex rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3"
+            className="mt-6 inline-flex saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
           >
             {headlinePrice}
           </button>
@@ -122,10 +122,10 @@ export function PricingModernClient() {
               ))}
             </ul>
             <div className="mt-5 flex flex-wrap gap-2">
-              <Link href={`${APP_URL}/signup?plan=growth`} className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
+              <Link href={`${APP_URL}/signup?plan=growth`} className="saas-btn saas-btn-accent px-4 py-2 text-[13px]">
                 Start free
               </Link>
-              <Link href="/contact" className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3">
+              <Link href="/contact" className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]">
                 Talk to sales
               </Link>
             </div>
@@ -144,7 +144,7 @@ export function PricingModernClient() {
               Our Growth plan is <span className="font-semibold text-text">$299/mo for the entire workspace</span> — all products, unlimited AI, 3 seats.
             </p>
           </div>
-          <div className="shrink-0 rounded-xl border border-border bg-surface p-4 text-center">
+          <div className="shrink-0 saas-card p-4 text-center">
             <div className="font-mono text-2xl font-bold text-primary">$299</div>
             <div className="mt-1 text-xs text-text2">vs $798+/mo</div>
             <div className="mt-1 text-[11px] text-text3">per workspace / per product</div>
@@ -239,7 +239,7 @@ export function PricingModernClient() {
             ["All 18 modules included", "Every plan includes every module. No paywalls, no add-ons, no upgrade gates mid-workflow."],
             ["Self-serve in 60 seconds", "No demo required. Sign up, add a product brief, and generate your first ICP segments immediately."]
           ].map(([t, d]) => (
-            <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+            <div key={t} className="saas-card2 p-4">
               <div className="flex items-start gap-2">
                 <span className="mt-0.5 text-teal">✓</span>
                 <div>

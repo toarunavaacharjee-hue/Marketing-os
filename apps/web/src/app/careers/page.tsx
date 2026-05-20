@@ -68,13 +68,13 @@ export default function CareersPage() {
               <div className="mt-6 flex flex-wrap gap-2">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center rounded-lg bg-[#7c6cff] px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-[#7c6cff]/25 transition hover:bg-[#8b7cff]"
+                  className="inline-flex items-center justify-center rounded-lg saas-btn saas-btn-accent px-4 py-2 text-[13px]"
                 >
                   Apply via contact
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                  className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
                 >
                   Learn more
                 </Link>
@@ -91,7 +91,7 @@ export default function CareersPage() {
           <div className="mt-4">
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+              className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
             >
               Contact us
             </Link>

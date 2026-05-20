@@ -233,6 +233,42 @@ html.dark .saas-pill {
   background: rgba(0, 0, 0, 0.4);
 }
 
+/* ─── Button system ─── */
+.saas-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--transition-fast) ease, box-shadow var(--transition-fast) ease, border-color var(--transition-fast) ease;
+}
+
+.saas-btn-cta {
+  background: var(--color-amber);
+  color: var(--text-heading);
+  font-weight: 600;
+  box-shadow: var(--shadow-card);
+}
+.saas-btn-cta:hover { background: var(--color-amber-hover); }
+
+.saas-btn-accent {
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: var(--shadow-focus);
+}
+.saas-btn-accent:hover { background: var(--color-primary-dark); }
+
+.saas-btn-secondary {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-weight: 500;
+}
+.saas-btn-secondary:hover { background: var(--surface3); }
+
 html,
 body {
   height: 100%;
