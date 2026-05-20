@@ -462,7 +462,7 @@ export function GtmPlannerClient({
     <div className="space-y-5">
       <ProductStaleBanner environmentId={environmentId} moduleName="GTM Planner" />
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
+        <div className="hs-alert hs-alert-error">{error}</div>
       ) : null}
 
       {/* Plan switcher */}
@@ -512,7 +512,7 @@ export function GtmPlannerClient({
       ) : null}
 
       {/* Context inputs + AI generate */}
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <div className="hs-card p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="text-sm font-semibold text-heading">Launch context</div>
           <span className="text-xs text-text2">{saving ? "Saving…" : "Saved per product."}</span>
@@ -558,9 +558,7 @@ export function GtmPlannerClient({
         </div>
 
         {genError ? (
-          <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
-            {genError}
-          </div>
+          <div className="hs-alert hs-alert-error mt-3">{genError}</div>
         ) : null}
 
         <AiProgressBar
@@ -576,7 +574,7 @@ export function GtmPlannerClient({
             type="button"
             onClick={() => void generatePlan()}
             disabled={generating}
-            className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+            className="hs-btn hs-btn-cta disabled:opacity-50"
           >
             {generating ? "Generating plan…" : "AI: Generate GTM plan"}
           </button>

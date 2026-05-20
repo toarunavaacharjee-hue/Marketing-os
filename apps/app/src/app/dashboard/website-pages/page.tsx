@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { LandingPageWorkspace } from "@/app/dashboard/website-pages/LandingPageWorkspace";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type WebsiteAsset = {
   id: string;
@@ -75,14 +76,12 @@ export default async function WebsitePagesPage() {
   const staleCount = withAges.filter((p) => (p.ageDays ?? 0) > 90).length;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
-        Website & Pages
-      </h1>
+    <ModuleShell title="Website & Pages" subtitle="Track crawled pages, review AI page audits, and draft landing page copy.">
+      <div className="space-y-6">
 
       {/* Page Tracker — full width */}
-      <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-        <div className="text-sm font-semibold text-text">Page Tracker</div>
+      <div className="hs-card p-5">
+        <div className="text-[14px] font-semibold text-heading">Page Tracker</div>
         <p className="mt-2 text-[13px] leading-relaxed text-text2">
           URLs come from your <strong className="text-text">live website crawl</strong> (not Google Analytics). We
           discover paths from links on your homepage. A nav link to <span className="font-mono">/pricing</span> or an
@@ -96,16 +95,10 @@ export default async function WebsitePagesPage() {
               product site and ingest pages here automatically.
             </div>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
-              <Link
-                href="/dashboard/market-research"
-                className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark"
-              >
+              <Link href="/dashboard/market-research" className="hs-btn hs-btn-primary">
                 Run AI Scan
               </Link>
-              <Link
-                href="/dashboard/settings/integrations"
-                className="inline-flex rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
-              >
+              <Link href="/dashboard/settings/integrations" className="hs-btn hs-btn-secondary">
                 Integrations
               </Link>
             </div>
@@ -168,8 +161,8 @@ export default async function WebsitePagesPage() {
 
       {/* AI Audit + stats */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:items-start">
-        <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-          <div className="text-sm font-semibold text-text">AI Page Audit</div>
+        <div className="hs-card p-5">
+          <div className="text-[14px] font-semibold text-heading">AI Page Audit</div>
           <p className="mt-1 text-sm text-text2">
             Insights from your latest Market Research scan — run a scan to refresh.
           </p>
@@ -182,10 +175,7 @@ export default async function WebsitePagesPage() {
                   Run a Market Research scan to generate real page-level and competitive context for
                   your site.
                 </span>
-                <Link
-                  href="/dashboard/market-research"
-                  className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark"
-                >
+                <Link href="/dashboard/market-research" className="hs-btn hs-btn-primary">
                   Open Market Research
                 </Link>
               </div>
@@ -208,7 +198,7 @@ export default async function WebsitePagesPage() {
         </div>
       </div>
 
-      <div className="rounded-[var(--radius)] border border-border bg-surface2/60 p-4 text-[13px] text-text2">
+      <div className="hs-card p-4 text-[13px] text-text2">
         <span className="font-semibold text-text">In the PMM spine:</span> pages here are fed by{" "}
         <Link href="/dashboard/market-research" className="text-accent hover:underline">
           Market Research
@@ -226,13 +216,14 @@ export default async function WebsitePagesPage() {
 
       {/* Landing page copy workspace */}
       {ctx?.environmentId ? (
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+        <div className="hs-card p-5">
           <Suspense fallback={<div className="h-8 w-48 animate-pulse rounded-xl bg-surface3" />}>
             <LandingPageWorkspace environmentId={ctx.environmentId} />
           </Suspense>
         </div>
       ) : null}
-    </div>
+      </div>
+    </ModuleShell>
   );
 }
 
@@ -246,7 +237,7 @@ function MetricCard({
   valueClass: string;
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-surface px-5 py-4">
+    <div className="hs-card hs-card-hover px-5 py-4">
       <div className="text-xs font-medium uppercase tracking-wide text-text2">{label}</div>
       <div className={`mt-1 text-3xl font-bold tabular-nums ${valueClass}`}>{value}</div>
     </div>

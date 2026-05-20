@@ -1,13 +1,11 @@
 import { AnalyticsClient } from "@/app/dashboard/analytics/AnalyticsClient";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 export default function AnalyticsPage() {
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
-        Analytics
-      </h1>
+    <ModuleShell title="Analytics" subtitle="Track website, ad, and campaign performance across GA4, LinkedIn, and Meta.">
       <AnalyticsClient />
-    </div>
+    </ModuleShell>
   );
 }
 

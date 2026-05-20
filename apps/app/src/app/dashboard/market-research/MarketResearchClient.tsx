@@ -10,6 +10,7 @@ import { loadLatestScanOnce } from "@/lib/marketResearchRemote";
 import type { MarketResearchScanResult } from "@/lib/marketResearchTypes";
 import { downloadMarketResearchPdf } from "@/lib/marketResearchPdf";
 import { DataSourcesPanel } from "@/components/DataSourcesPanel";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 const POLL_INTERVAL_MS = 1500;
 const POLL_TIMEOUT_MS = 6 * 60 * 1000;
@@ -214,53 +215,44 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
   const competitors = profile?.competitors ?? [];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div
-            className="text-[28px] font-extrabold tracking-[-0.5px] text-text"
-            style={{ fontFamily: "var(--font-heading)", lineHeight: 1.1 }}
-          >
-            Market Research <span className="text-[20px]">🔭</span>
-          </div>
-          <div className="mt-2 text-[13px] text-text2">
-            AI-powered intelligence scanning your product + competitors
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
+    <ModuleShell
+      title="Market Research"
+      subtitle="AI-powered intelligence scanning your product + competitors."
+      actions={
+        <>
           <Link
             href="/dashboard/settings/product"
-            className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+            className="hs-btn hs-btn-secondary"
           >
             Edit product profile
           </Link>
           <button
             onClick={runScan}
             disabled={running || loading}
-            className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
+            className="hs-btn hs-btn-primary disabled:opacity-60"
           >
-            🧠 {running ? "Running AI Scan…" : "Run AI Scan"}
+            {running ? "Running AI Scan…" : "Run AI Scan"}
           </button>
           <button
             type="button"
             onClick={() => setShowReport(true)}
             disabled={!summary}
-            className="rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-50"
+            className="hs-btn hs-btn-secondary disabled:opacity-50"
             title={summary ? "Open latest scan report" : "Run a scan first"}
           >
             View report
           </button>
-        </div>
-      </div>
+        </>
+      }
+    >
 
       {error ? (
-        <div className="flex items-start justify-between gap-4 rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
+        <div className="hs-alert hs-alert-error flex items-start justify-between gap-4">
           <span>{error}</span>
           <button
             type="button"
             onClick={() => void load()}
-            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold text-red hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+            className="hs-btn hs-btn-secondary shrink-0 text-xs"
           >
             Try again
           </button>
@@ -287,9 +279,9 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
 
       {/* Top row: signals + assistant */}
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-[var(--radius)] border border-border bg-surface p-5 lg:col-span-2">
-          <div className="mb-3 font-[var(--font-heading)] text-[14px] font-bold text-text">
-            🔥 Top Market Signals This Week
+        <div className="hs-card p-5 lg:col-span-2">
+          <div className="mb-3 text-[14px] font-semibold text-heading">
+            Top Market Signals This Week
           </div>
 
           <div className="space-y-3">
@@ -311,16 +303,16 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
                 />
               ))
             ) : (
-              <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-4 text-sm text-text2">
+              <div className="rounded-lg border border-border bg-surface2 p-4 text-sm text-text2">
                 Run an AI scan to generate signals.
               </div>
             )}
           </div>
 
-          <div className="mt-4 rounded-[var(--radius2)] border border-border bg-surface2 p-3 text-sm text-text2">
-            <div className="text-text">Scan inputs</div>
+          <div className="mt-4 rounded-lg border border-border bg-surface2 p-3 text-sm text-text2">
+            <div className="text-[14px] font-semibold text-heading">Scan inputs</div>
             <div className="mt-2 grid gap-2 md:grid-cols-2">
-              <div className="rounded-[var(--radius2)] border border-border bg-surface p-3">
+              <div className="rounded-lg border border-border bg-surface p-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.5px] text-text3">
                   Base product
                 </div>
@@ -331,7 +323,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
                   {baseUrl || "Website not set"}
                 </div>
               </div>
-              <div className="rounded-[var(--radius2)] border border-border bg-surface p-3">
+              <div className="rounded-lg border border-border bg-surface p-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.5px] text-text3">
                   Competitors
                 </div>
@@ -356,11 +348,11 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-            <div className="mb-2 font-[var(--font-heading)] text-[14px] font-bold text-text">
-              🤖 AI Research Assistant
+          <div className="hs-card p-5">
+            <div className="mb-2 text-[14px] font-semibold text-heading">
+              AI Research Assistant
             </div>
-            <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-3 text-sm text-text2">
+            <div className="rounded-lg border border-border bg-surface2 p-3 text-sm text-text2">
               Ask me anything about your market, competitors, or buyer pain points…
             </div>
 
@@ -369,7 +361,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="e.g. What are buyers saying about onboarding?"
-                className="w-full rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="hs-input w-full"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -380,7 +372,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
               <button
                 onClick={ask}
                 disabled={asking}
-                className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-60"
+                className="hs-btn hs-btn-primary disabled:opacity-60"
               >
                 Ask
               </button>
@@ -396,14 +388,14 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
                     if (t === "Competitor") setQuestion("How does our main competitor position against us?");
                     if (t === "Best segment") setQuestion("Which segment has the highest opportunity and why?");
                   }}
-                  className="rounded-[6px] border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text2 transition hover:bg-surface3 hover:border-border2 hover:text-text"
+                  className="hs-btn hs-btn-ghost text-xs"
                 >
                   {t}
                 </button>
               ))}
             </div>
 
-            <div className="mt-3 max-h-[260px] overflow-auto rounded-[var(--radius2)] border border-border bg-surface2 p-3">
+            <div className="mt-3 max-h-[260px] overflow-auto rounded-lg border border-border bg-surface2 p-3">
               {answer ? (
                 <Markdown content={answer} />
               ) : (
@@ -414,9 +406,9 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
             </div>
           </div>
 
-          <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-            <div className="mb-3 font-[var(--font-heading)] text-[14px] font-bold text-text">
-              📡 Active Monitoring Sources
+          <div className="hs-card p-5">
+            <div className="mb-3 text-[14px] font-semibold text-heading">
+              Active Monitoring Sources
             </div>
             <div className="space-y-2 text-sm text-text2">
               {resultJson?.monitoring_sources?.length ? (
@@ -436,11 +428,11 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
       </div>
 
       {/* Opportunity table */}
-      <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-        <div className="mb-3 font-[var(--font-heading)] text-[14px] font-bold text-text">
-          🌍 Market Opportunity Map
+      <div className="hs-card p-5">
+        <div className="mb-3 text-[14px] font-semibold text-heading">
+          Market Opportunity Map
         </div>
-        <div className="overflow-auto rounded-[var(--radius2)] border border-border bg-surface2">
+        <div className="overflow-auto rounded-lg border border-border bg-surface2">
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="text-left text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">
@@ -475,13 +467,13 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
 
       {/* ICP handoff */}
       {resultJson?.opportunity_map?.length ? (
-        <div className="rounded-xl border border-teal/30 bg-[color-mix(in_srgb,var(--color-teal)_8%,transparent)] p-4">
+        <div className="hs-card p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <div className="text-sm font-semibold text-text">
+              <div className="text-[14px] font-semibold text-heading">
                 Ready to define your ICP?
               </div>
-              <p className="mt-1 text-xs text-text2">
+              <p className="mt-0.5 text-[12px] text-text2">
                 Your top opportunity segments:{" "}
                 {resultJson.opportunity_map
                   .slice(0, 3)
@@ -492,7 +484,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
             </div>
             <Link
               href="/dashboard/icp-segmentation"
-              className="shrink-0 rounded-xl border border-teal/40 bg-[color-mix(in_srgb,var(--color-teal)_15%,transparent)] px-4 py-2 text-sm font-semibold text-teal transition-colors hover:bg-[color-mix(in_srgb,var(--color-teal)_25%,transparent)] whitespace-nowrap"
+              className="hs-btn hs-btn-secondary shrink-0 whitespace-nowrap"
             >
               Build ICP Segments →
             </Link>
@@ -507,13 +499,13 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
             className="absolute inset-0 bg-black/70"
             onClick={() => setShowReport(false)}
           />
-          <div className="relative w-full max-w-4xl rounded-[var(--radius)] border border-border bg-surface p-5 shadow-2xl">
+          <div className="hs-card relative w-full max-w-4xl p-5 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="font-[var(--font-heading)] text-[18px] font-extrabold text-text">
+                <div className="text-[18px] font-bold text-heading">
                   Market Research Report
                 </div>
-                <div className="mt-1 text-sm text-text2">
+                <div className="mt-0.5 text-[12px] text-text2">
                   Latest scan summary. Kept as-is in this browser until you run a new AI scan.
                 </div>
               </div>
@@ -529,21 +521,21 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
                     });
                   }}
                   disabled={!summary}
-                  className="rounded-[var(--radius2)] bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-50"
+                  className="hs-btn hs-btn-primary disabled:opacity-50"
                 >
                   Download PDF
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowReport(false)}
-                  className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+                  className="hs-btn hs-btn-secondary"
                 >
                   Close
                 </button>
               </div>
             </div>
 
-            <div className="mt-4 max-h-[70vh] overflow-auto rounded-[var(--radius2)] border border-border bg-surface2 p-4">
+            <div className="mt-4 max-h-[70vh] overflow-auto rounded-lg border border-border bg-surface2 p-4">
               {summary ? (
                 <Markdown content={summary} />
               ) : (
@@ -553,7 +545,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
           </div>
         </div>
       ) : null}
-    </div>
+    </ModuleShell>
   );
 }
 
@@ -611,16 +603,16 @@ function SourceRow({
 function Tag({ tone, children }: { tone: "green" | "yellow" | "red" | "blue" | "purple"; children: string }) {
   const cls =
     tone === "green"
-      ? "bg-[rgba(52,211,153,0.15)] text-green"
+      ? "hs-badge hs-badge-success"
       : tone === "yellow"
-        ? "bg-[rgba(251,191,36,0.15)] text-yellow"
+        ? "hs-badge hs-badge-warn"
         : tone === "red"
-          ? "bg-[rgba(248,113,113,0.15)] text-red"
+          ? "hs-badge hs-badge-error"
           : tone === "blue"
-            ? "bg-[rgba(56,189,248,0.15)] text-accent3"
-            : "bg-[rgba(167,139,250,0.15)] text-accent2";
+            ? "hs-badge hs-badge-neutral"
+            : "hs-badge hs-badge-new";
   return (
-    <span className={`inline-flex items-center rounded px-2 py-1 text-[11px] font-semibold ${cls}`}>
+    <span className={cls}>
       {children}
     </span>
   );
@@ -661,4 +653,3 @@ function OpportunityRow({
     </tr>
   );
 }
-

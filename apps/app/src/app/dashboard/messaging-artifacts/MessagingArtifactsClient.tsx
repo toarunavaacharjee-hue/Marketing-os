@@ -108,14 +108,14 @@ function PillarField({
           onChange={(e) => onChange(e.target.value)}
           rows={rows}
           placeholder={placeholder}
-          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+          className="hs-input w-full"
         />
       ) : (
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+          className="hs-input w-full"
         />
       )}
     </div>
@@ -307,19 +307,19 @@ export function MessagingArtifactsClient({
     <div className="space-y-4">
       <ProductStaleBanner environmentId={environmentId} moduleName="Messaging & Artifacts" />
       {error ? (
-        <div className="flex items-start justify-between gap-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error flex items-start justify-between gap-4">
           <span>{error}</span>
           <button
             type="button"
             onClick={() => void load()}
-            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+            className="hs-btn hs-btn-secondary shrink-0"
           >
             Try again
           </button>
         </div>
       ) : null}
       {genError ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           {genError}
         </div>
       ) : null}
@@ -356,7 +356,7 @@ export function MessagingArtifactsClient({
             return (
               <div
                 key={seg.id}
-                className="rounded-2xl border border-border bg-surface shadow-sm"
+                className="hs-card"
               >
                 {/* Segment header */}
                 <div className="flex items-center justify-between gap-3 px-4 py-3">
@@ -385,7 +385,7 @@ export function MessagingArtifactsClient({
                       type="button"
                       onClick={() => void generatePillars(seg.id)}
                       disabled={Boolean(generatingId)}
-                      className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-40"
+                      className="hs-btn hs-btn-primary disabled:opacity-40"
                     >
                       {isGenerating ? "Generating…" : filled ? "Regenerate" : "Generate pillars"}
                     </button>
@@ -418,7 +418,7 @@ export function MessagingArtifactsClient({
                           placeholder="1 sentence — who it's for and what changes"
                           rows={2}
                         />
-                        <div className="rounded-xl border border-border bg-surface2 p-3 space-y-2">
+                        <div className="hs-card p-3 space-y-2">
                           <div className="text-[11px] font-semibold uppercase tracking-wide text-text3">
                             Value propositions
                           </div>

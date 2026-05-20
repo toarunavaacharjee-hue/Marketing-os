@@ -57,7 +57,7 @@ function fmtUSD(n: number) {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-surface p-4">
+    <div className="hs-card hs-card-hover p-5">
       <div className="text-xs text-text2">{label}</div>
       <div className="mt-1 text-2xl text-text">{value}</div>
     </div>
@@ -100,22 +100,19 @@ function GA4Tab() {
         <button
           onClick={load}
           disabled={loading}
-          className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2 disabled:opacity-60"
+          className="hs-btn hs-btn-secondary disabled:opacity-60"
         >
           {loading ? "Loading..." : "Refresh"}
         </button>
       </div>
 
       {error ? (
-        <div className="rounded-[var(--radius)] border border-red bg-[rgba(248,113,113,0.12)] p-4 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           <div>{error}</div>
-          <div className="mt-2 text-xs text-red/90">
+          <div className="mt-2 text-xs">
             Configure GA4 in `Settings → Analytics`, and ensure service account env vars are set in deployment.
           </div>
-          <Link
-            href="/dashboard/settings/analytics"
-            className="mt-3 inline-flex rounded-[var(--radius2)] border border-red px-3 py-2 text-xs font-semibold text-red transition hover:bg-[rgba(248,113,113,0.12)]"
-          >
+          <Link href="/dashboard/settings/analytics" className="hs-btn hs-btn-secondary mt-3">
             Open Analytics settings
           </Link>
         </div>
@@ -147,7 +144,7 @@ function GA4Tab() {
         />
       </div>
 
-      <div className="rounded-[var(--radius)] border border-border bg-surface p-4 text-sm">
+      <div className="hs-card p-4 text-sm">
         <div className="mb-2 text-text">Top pages (last 30 days)</div>
         <table className="w-full text-text2">
           <tbody>

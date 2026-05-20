@@ -6,6 +6,7 @@ import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components
 import { SkeletonIcpSegmentation } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { ProductStaleBanner } from "@/components/ProductStaleBanner";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type SegmentDetails = {
   urgency?: number;
@@ -282,36 +283,20 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
   }
 
   return (
-    <div className="space-y-6">
-      <ProductStaleBanner environmentId={environmentId} moduleName="ICP Segmentation" />
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-text">
-            ICP Segmentation
-          </h1>
-          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text2">
-            Upload an ICP document to propose segments and a draft product profile; confirm to save segments and merge
-            profile fields into{" "}
-            <Link href="/dashboard/settings/product" className="font-medium text-link underline underline-offset-2 hover:opacity-80">
-              Settings → Product profile
-            </Link>{" "}
-            (empty extracted fields keep your current values). Segments match{" "}
-            <Link href="/dashboard/settings/segments" className="font-medium text-link underline underline-offset-2 hover:opacity-80">
-              Settings → Segments
-            </Link>
-            .
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+    <ModuleShell
+      title="ICP Segmentation"
+      subtitle="Upload an ICP document or generate segments with AI, then confirm to save and sync your product profile."
+      actions={
+        <>
           <button
             type="button"
             onClick={() => void generateWithAi()}
             disabled={extracting || generating || saving}
-            className="rounded-sm border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary shadow-card transition-[background-color,box-shadow,transform] duration-200 ease-out hover:bg-primary/15 hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50"
+            className="hs-btn hs-btn-secondary disabled:opacity-50"
           >
-            {generating ? "Generating…" : "✦ Generate with AI"}
+            {generating ? "Generating…" : "Generate with AI"}
           </button>
-          <label className="cursor-pointer rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card transition-[background-color,box-shadow,transform] duration-200 ease-out hover:bg-amber-hover hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50">
+          <label className="hs-btn hs-btn-cta cursor-pointer disabled:opacity-50">
             {extracting ? "Reading…" : "Upload ICP document"}
             <input
               type="file"
@@ -325,28 +310,31 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
               }}
             />
           </label>
-        </div>
-      </div>
+        </>
+      }
+    >
+      <div className="space-y-5">
+      <ProductStaleBanner environmentId={environmentId} moduleName="ICP Segmentation" />
 
       {error ? (
-        <div className="flex items-start justify-between gap-4 rounded-lg border border-red/30 bg-red/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error flex items-start justify-between gap-4">
           <span>{error}</span>
           <button
             type="button"
             onClick={() => void load()}
-            className="shrink-0 rounded-lg border border-red/40 bg-red/10 px-3 py-1 text-xs font-semibold hover:bg-red/20 focus:outline-none focus:ring-2 focus:ring-red/40"
+            className="hs-btn hs-btn-secondary shrink-0 text-xs"
           >
             Try again
           </button>
         </div>
       ) : null}
       {positioningNote ? (
-        <div className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-sm text-heading">
+        <div className="hs-alert hs-alert-warn">
           {positioningNote}
         </div>
       ) : null}
       {profileNote ? (
-        <div className="rounded-lg border border-amber/40 bg-amber/10 px-3 py-2 text-sm text-heading">
+        <div className="hs-alert hs-alert-warn">
           {profileNote}
         </div>
       ) : null}
@@ -374,11 +362,11 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
       />
 
       {draft?.length ? (
-        <div className="rounded-lg border border-primary/30 bg-primary-light/40 p-5 shadow-card">
-          <div className="text-sm font-semibold text-heading">Review proposed segments</div>
-          <p className="mt-1 text-xs text-text2">
+        <div className="hs-card p-5">
+          <div className="text-[14px] font-semibold text-heading">Review proposed segments</div>
+          <div className="mt-0.5 text-[12px] text-text2">
             Nothing is saved until you confirm. PDF, Word, or Excel up to 8 MB.
-          </p>
+          </div>
           <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm text-text2">
             <input
               type="checkbox"
@@ -392,7 +380,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
             {draft.map((s, i) => (
               <div
                 key={`${s.name}-${i}`}
-                className="rounded-lg border border-border bg-surface p-3 text-sm shadow-sm"
+                className="hs-card p-3 text-sm"
               >
                 <div className="font-medium text-heading">{s.name}</div>
                 <div className="mt-1 text-xs text-text2">
@@ -415,7 +403,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
               type="button"
               onClick={() => confirmDraft()}
               disabled={saving}
-              className="rounded-sm bg-amber px-4 py-2 text-sm font-semibold text-heading shadow-card transition-[background-color,box-shadow,transform] duration-200 ease-out hover:bg-amber-hover hover:shadow-md active:scale-[0.98] motion-reduce:active:scale-100 disabled:opacity-50"
+              className="hs-btn hs-btn-cta disabled:opacity-50"
             >
               {saving ? "Saving…" : "Confirm and save"}
             </button>
@@ -426,7 +414,7 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
                 setProductProfileDraft(null);
               }}
               disabled={saving}
-              className="rounded-sm border border-input-border bg-surface px-4 py-2 text-sm font-medium text-text transition-[background-color,border-color] duration-200 ease-out hover:bg-surface2"
+              className="hs-btn hs-btn-secondary"
             >
               Cancel
             </button>
@@ -452,10 +440,10 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
                 key={s.id}
                 type="button"
                 onClick={() => setActiveId(s.id)}
-                className={`rounded-lg border p-3 text-left shadow-card transition-[border-color,background-color,box-shadow,transform] duration-200 ease-out ${
+                className={`hs-card p-3 text-left transition-[border-color,background-color,box-shadow,transform] duration-200 ease-out ${
                   active?.id === s.id
                     ? "border-primary bg-primary-light ring-1 ring-primary/25"
-                    : "border-border bg-surface hover:border-primary/40 hover:bg-surface2 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
+                    : "hover:border-primary/40 hover:bg-surface2 hover:shadow-md active:scale-[0.99] motion-reduce:active:scale-100"
                 }`}
               >
                 <div className="text-sm font-medium text-heading">{s.name}</div>
@@ -466,17 +454,17 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
 
           {active && scorecard ? (
             <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-lg border border-border bg-surface p-4 shadow-card">
-                <div className="text-sm font-semibold text-heading">Detailed Scorecard — {active.name}</div>
+              <div className="hs-card p-4">
+                <div className="text-[14px] font-semibold text-heading">Detailed Scorecard — {active.name}</div>
                 {scorecard.map(([k, v]) => (
                   <div key={k} className="mt-3">
                     <div className="mb-1 flex justify-between text-xs text-text2">
                       <span>{k}</span>
                       <span className="tabular-nums font-medium text-heading">{v}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-surface3 ring-1 ring-inset ring-border/60">
+                    <div className="hs-progress">
                       <div
-                        className="h-2 rounded-full bg-primary transition-[width] duration-500 ease-aimw-out motion-reduce:transition-none"
+                        className="hs-progress-bar transition-[width] duration-500 ease-aimw-out motion-reduce:transition-none"
                         style={{ width: `${v}%` }}
                       />
                     </div>
@@ -484,17 +472,17 @@ export default function IcpSegmentationClient({ environmentId }: { environmentId
                 ))}
               </div>
               <div className="space-y-4">
-                <div className="rounded-lg border border-border bg-surface p-4 shadow-card">
-                  <div className="text-sm font-semibold text-heading">Pain Points</div>
+                <div className="hs-card p-4">
+                  <div className="text-[14px] font-semibold text-heading">Pain Points</div>
                   <ul className="mt-2 list-disc pl-5 text-sm text-text2">
                     {(active.pain_points ?? []).map((p) => (
                       <li key={p}>{p}</li>
                     ))}
                   </ul>
                 </div>
-                <div className="rounded-lg border border-border bg-surface p-4 text-sm shadow-card">
-                  <div className="text-sm font-semibold text-heading">ICP Profile</div>
-                  <p className="mt-2 leading-relaxed text-text2">
+                <div className="hs-card p-4">
+                  <div className="text-[14px] font-semibold text-heading">ICP Profile</div>
+                  <p className="mt-2 text-sm leading-relaxed text-text2">
                     {parseDetails(active.details)?.icp_profile?.trim() ||
                       active.notes?.trim() ||
                       "Add an ICP document with profile text, or enter notes in Settings → Segments."}
