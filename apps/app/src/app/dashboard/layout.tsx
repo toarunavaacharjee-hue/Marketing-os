@@ -102,6 +102,7 @@ export default async function DashboardLayout({
   let selectedProductId =
     productIdCookie ??
     allProducts.find((p) => p.company_id === selectedCompanyId)?.id ??
+    allProducts[0]?.id ??
     null;
 
   if (selectedProductId && !validIds.has(selectedProductId)) {
