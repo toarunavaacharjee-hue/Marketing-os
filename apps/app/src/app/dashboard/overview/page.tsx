@@ -261,47 +261,38 @@ export default async function OverviewPage() {
 
   return (
     <div className="pb-2">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      {/* Page header */}
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1
-            className="text-[28px] font-extrabold tracking-[-0.5px] text-heading"
-            style={{ fontFamily: "var(--font-heading)", lineHeight: 1.1 }}
-          >
-            Good morning, {name} <span className="text-accent2">⚡</span>
+          <h1 className="text-[24px] font-bold tracking-[-0.3px] text-heading">
+            Good {now.getHours() < 12 ? "morning" : now.getHours() < 17 ? "afternoon" : "evening"}, {name}
           </h1>
-          <div className="mt-2 text-[13px] text-text2">
-            {dateLabel}, {monthDayLabel} · {campaignCardCount} campaign cards · {segmentCount} ICP segments ·{" "}
-            {contentQueueCount} queued content pieces
-          </div>
+          <p className="mt-1 text-[13px] text-text2">
+            {dateLabel}, {monthDayLabel} &middot; {campaignCardCount} campaign cards &middot; {segmentCount} ICP segments &middot; {contentQueueCount} queued content pieces
+          </p>
         </div>
-
         <div className="flex flex-wrap items-center gap-2">
           <a
             href="#daily-digest"
-            className="inline-flex items-center gap-2 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-[13px] font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+            className="hs-btn hs-btn-secondary"
           >
-            📋 <span>Daily Brief</span>
+            Daily Brief
           </a>
-          <Link
-            href="/dashboard/help"
-            className="inline-flex items-center gap-2 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-[13px] font-semibold text-text transition hover:bg-surface3 hover:border-border2"
-          >
-            📖 <span>Help</span>
+          <Link href="/dashboard/help" className="hs-btn hs-btn-secondary">
+            Help
           </Link>
-          <Link
-            href="/dashboard/copilot"
-            className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-primary-dark"
-          >
-            🤖 <span>Ask AI</span>
+          <Link href="/dashboard/copilot" className="hs-btn hs-btn-primary">
+            Ask AI Copilot
           </Link>
         </div>
       </div>
 
-      <div className="grid gap-[14px] md:grid-cols-4">
-        <Kpi title="Campaigns (kanban)" value={String(campaignCardCount)} delta="All columns" tone="neutral" />
+      {/* KPI strip */}
+      <div className="hs-kpi-grid mb-5">
+        <Kpi title="Campaigns" value={String(campaignCardCount)} delta="Kanban cards" tone="neutral" />
         <Kpi title="Content queue" value={String(contentQueueCount)} delta="Content Studio" tone="neutral" />
         <Kpi title="ICP segments" value={String(segmentCount)} delta="ICP Segmentation" tone="neutral" />
-        <Kpi title="Competitors" value={String(competitorCount)} delta="Product profile" tone="neutral" />
+        <Kpi title="Competitors" value={String(competitorCount)} delta="Tracked" tone="neutral" />
       </div>
 
       <div id="workspace-health">
@@ -321,21 +312,16 @@ export default async function OverviewPage() {
         competitorCount={competitorCount}
       />
 
-      <div className="mt-5 rounded-[var(--radius)] border border-border bg-surface p-5">
+      <div className="hs-card mt-5 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-              🚀 Getting started
-            </div>
-            <div className="mt-1 text-[11px] text-text2">
-              Apply playbook templates and run your first workflows (segments → positioning → artifacts).
+            <div className="text-[14px] font-semibold text-heading">Getting started</div>
+            <div className="mt-0.5 text-[12px] text-text2">
+              Apply playbook templates and run your first workflows: segments → positioning → artifacts.
             </div>
           </div>
-          <Link
-            href="/dashboard/getting-started"
-            className="inline-flex rounded-[var(--radius2)] bg-accent px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-dark"
-          >
-            Open Getting started
+          <Link href="/dashboard/getting-started" className="hs-btn hs-btn-primary">
+            Open guide →
           </Link>
         </div>
       </div>
@@ -363,47 +349,28 @@ function NeedsAttentionSection({
   items: Array<{ id: string; title: string; sourceLabel: string; due?: string; href: string }>;
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+    <div className="hs-card p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-            🔴 Overdue items
-          </div>
-          <div className="mt-1 text-[11px] text-text2">
-            Tasks with a past due date across GTM, Events, Content, and Campaigns.
-          </div>
+          <div className="text-[14px] font-semibold text-heading">Overdue items</div>
+          <div className="mt-0.5 text-[12px] text-text2">Tasks past their due date across all modules.</div>
         </div>
-        <Link
-          href="/dashboard/work"
-          className="shrink-0 rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-1.5 text-[11px] font-semibold text-text hover:bg-surface3"
-        >
-          View all in Workbench →
+        <Link href="/dashboard/work" className="hs-btn hs-btn-secondary text-[11px] py-1.5 px-3">
+          View all →
         </Link>
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-4 rounded-[var(--radius2)] border border-[rgba(52,211,153,0.35)] bg-[rgba(52,211,153,0.1)] px-4 py-3 text-[12px] text-green">
-          No overdue items. You are on track.
-        </div>
+        <div className="hs-alert hs-alert-success mt-4 text-[12px]">No overdue items — you&apos;re on track.</div>
       ) : (
-        <div className="mt-3 space-y-2">
+        <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-red/20">
           {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--radius2)] border border-[rgba(248,113,113,0.35)] bg-[rgba(248,113,113,0.06)] px-4 py-3"
-            >
+            <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 bg-red/4 px-4 py-3">
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[13px] font-semibold text-text">{item.title}</div>
-                <div className="mt-0.5 text-[11px] text-text2">
-                  {item.sourceLabel} · Due {item.due ?? "—"}
-                </div>
+                <div className="truncate text-[13px] font-semibold text-heading">{item.title}</div>
+                <div className="mt-0.5 text-[11px] text-text2">{item.sourceLabel} · Due {item.due ?? "—"}</div>
               </div>
-              <Link
-                href={item.href}
-                className="shrink-0 rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-primary-dark"
-              >
-                Open
-              </Link>
+              <Link href={item.href} className="hs-btn hs-btn-primary text-[11px] py-1.5 px-3">Open</Link>
             </div>
           ))}
         </div>
@@ -418,50 +385,33 @@ function UpcomingThisWeek({
   items: Array<{ id: string; title: string; sourceLabel: string; due?: string; href: string }>;
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
+    <div className="hs-card p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-            📅 Due this week
-          </div>
-          <div className="mt-1 text-[11px] text-text2">
-            Items due in the next 7 days across all modules.
-          </div>
+          <div className="text-[14px] font-semibold text-heading">Due this week</div>
+          <div className="mt-0.5 text-[12px] text-text2">Items due in the next 7 days.</div>
         </div>
-        <Link
-          href="/dashboard/work"
-          className="shrink-0 rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-1.5 text-[11px] font-semibold text-text hover:bg-surface3"
-        >
-          Full Workbench →
+        <Link href="/dashboard/work" className="hs-btn hs-btn-secondary text-[11px] py-1.5 px-3">
+          Workbench →
         </Link>
       </div>
 
       {items.length === 0 ? (
         <div className="mt-4 text-[12px] text-text2">
-          Nothing due this week — or no due dates set yet.{" "}
-          <Link href="/dashboard/work" className="text-accent hover:underline">
-            See all work in Workbench →
+          Nothing due this week.{" "}
+          <Link href="/dashboard/work" className="font-medium text-primary hover:underline">
+            See all work →
           </Link>
         </div>
       ) : (
-        <div className="mt-3 space-y-2">
+        <div className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-border">
           {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-3"
-            >
+            <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 bg-surface px-4 py-3 hover:bg-surface2/50">
               <div className="min-w-0 flex-1">
-                <div className="truncate text-[13px] font-semibold text-text">{item.title}</div>
-                <div className="mt-0.5 text-[11px] text-text2">
-                  {item.sourceLabel} · Due {item.due ?? "—"}
-                </div>
+                <div className="truncate text-[13px] font-semibold text-heading">{item.title}</div>
+                <div className="mt-0.5 text-[11px] text-text2">{item.sourceLabel} · Due {item.due ?? "—"}</div>
               </div>
-              <Link
-                href={item.href}
-                className="shrink-0 rounded-[var(--radius2)] border border-border bg-surface px-3 py-1.5 text-[11px] font-semibold text-text hover:bg-surface3"
-              >
-                Open
-              </Link>
+              <Link href={item.href} className="hs-btn hs-btn-secondary text-[11px] py-1.5 px-3">Open</Link>
             </div>
           ))}
         </div>
@@ -472,24 +422,16 @@ function UpcomingThisWeek({
 
 function AnalyticsConnectCallout() {
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-      <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-        📊 Connect Analytics
-      </div>
-      <div className="mt-1 text-[11px] text-text2">
-        Link GA4, LinkedIn Ads, and Meta Ads to see live performance data across your campaigns and content.
+    <div className="hs-card p-5">
+      <div className="text-[14px] font-semibold text-heading">Connect Analytics</div>
+      <div className="mt-1 text-[12px] text-text2">
+        Link GA4, LinkedIn Ads, and Meta Ads to see live performance data across campaigns and content.
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          href="/dashboard/settings/integrations"
-          className="inline-flex items-center gap-2 rounded-[var(--radius2)] bg-accent px-4 py-2 text-[12px] font-semibold text-white hover:bg-primary-dark"
-        >
+        <Link href="/dashboard/settings/integrations" className="hs-btn hs-btn-primary">
           Connect integrations →
         </Link>
-        <Link
-          href="/dashboard/analytics"
-          className="inline-flex items-center gap-2 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-2 text-[12px] font-semibold text-text hover:bg-surface3"
-        >
+        <Link href="/dashboard/analytics" className="hs-btn hs-btn-secondary">
           Open Analytics
         </Link>
       </div>
@@ -515,18 +457,13 @@ function ProductOverview({
   competitorCount: number;
 }) {
   return (
-    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-4">
+    <div className="hs-card mt-4 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-sm text-text">Product and Web Presence</div>
-          <div className="mt-1 text-xs text-text2">
-            Categorized details used by Market Research and internet monitoring.
-          </div>
+          <div className="text-[13px] font-semibold text-heading">Product and Web Presence</div>
+          <div className="mt-0.5 text-[12px] text-text2">Details used by Market Research and internet monitoring.</div>
         </div>
-        <Link
-          href="/dashboard/settings/product"
-          className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
-        >
+        <Link href="/dashboard/settings/product" className="hs-btn hs-btn-secondary text-[11px] py-1.5 px-3">
           Edit product details
         </Link>
       </div>
@@ -611,10 +548,8 @@ function InfoBlock({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[var(--radius2)] border border-border bg-surface2 p-3">
-      <div className="text-xs font-semibold uppercase tracking-[0.5px] text-text3">
-        {title}
-      </div>
+    <div className="rounded-lg border border-border bg-surface2/60 p-3">
+      <div className="text-[10px] font-bold uppercase tracking-[0.6px] text-text3">{title}</div>
       <div className="mt-2 space-y-2">{children}</div>
     </div>
   );
@@ -686,82 +621,65 @@ function WorkspaceHealthChecklist({
   const allGreen = done === total;
 
   return (
-    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-5">
+    <div className="hs-card mt-4 p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="font-[var(--font-heading)] text-[15px] font-bold text-text">
-            Workspace health
-          </div>
+          <div className="text-[15px] font-semibold text-heading">Workspace health</div>
           <div className="mt-1 max-w-2xl text-[12px] leading-5 text-text2">
-            Live checks for the <span className="text-text">selected product</span>. Matches what{" "}
-            <Link href="/dashboard/market-research" className="text-accent hover:underline">
-              Market Research → Run AI Scan
+            Live checks for the selected product — what{" "}
+            <Link href="/dashboard/market-research" className="font-medium text-primary hover:underline">
+              Market Research
             </Link>{" "}
-            requires, plus segments, positioning canvas, and GA4 for reporting.
+            needs, plus segments, positioning, and analytics.
           </div>
         </div>
         <div className="text-right">
-          <div className="font-[var(--font-heading)] text-[28px] font-extrabold tabular-nums text-text">
-            {done}/{total}
-          </div>
+          <div className="text-[28px] font-extrabold tabular-nums text-heading">{done}/{total}</div>
           <div className="text-[11px] font-semibold text-text2">{pct}% complete</div>
         </div>
       </div>
-
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface2">
-        <div
-          className={`h-full rounded-full transition-all ${allGreen ? "bg-green" : "bg-accent2"}`}
-          style={{ width: `${pct}%` }}
-        />
+      <div className="hs-progress mt-3">
+        <div className={`hs-progress-bar ${allGreen ? "hs-progress-bar-teal" : ""}`} style={{ width: `${pct}%` }} />
       </div>
 
       {scanPrereqsOk && !scanCompletedOk ? (
-        <div className="mt-4 rounded-[var(--radius2)] border border-[rgba(251,191,36,0.35)] bg-[rgba(251,191,36,0.1)] px-4 py-3 text-[12px] text-text">
-          <span className="font-semibold text-yellow">Ready to scan.</span> Product profile meets run requirements.{" "}
-          <Link href="/dashboard/market-research" className="font-semibold text-accent hover:underline">
+        <div className="hs-alert hs-alert-warn mt-4">
+          <span className="font-semibold">Ready to scan.</span>&nbsp;Product profile meets requirements.{" "}
+          <Link href="/dashboard/market-research" className="font-semibold underline underline-offset-2 hover:opacity-80">
             Run your first AI scan →
           </Link>
         </div>
       ) : null}
 
       {allGreen ? (
-        <div className="mt-4 rounded-[var(--radius2)] border border-[rgba(52,211,153,0.35)] bg-[rgba(52,211,153,0.1)] px-4 py-3 text-[12px] text-green">
-          All checks passed for this product. You have a connected narrative from profile → segments → positioning →
-          research → analytics.
+        <div className="hs-alert hs-alert-success mt-4">
+          All checks passed. You have a complete narrative: profile → segments → positioning → research → analytics.
         </div>
       ) : null}
 
-      <ul className="mt-4 space-y-2">
+      <ul className="mt-4 divide-y divide-border overflow-hidden rounded-lg border border-border">
         {items.map((item) => (
-          <li
-            key={item.id}
-            className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--radius2)] border border-border bg-surface2 px-4 py-3"
-          >
-            <div className="flex min-w-0 flex-1 gap-3">
+          <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 bg-surface px-4 py-3 hover:bg-surface2/50">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
               <span
-                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                  item.ok
-                    ? "bg-[rgba(52,211,153,0.2)] text-green"
-                    : "bg-[rgba(248,113,113,0.15)] text-red"
+                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                  item.ok ? "bg-teal/15 text-teal" : "bg-red/10 text-red"
                 }`}
                 aria-hidden
               >
                 {item.ok ? "✓" : "!"}
               </span>
               <div className="min-w-0">
-                <div className="text-[13px] font-semibold text-text">{item.label}</div>
+                <div className="text-[13px] font-semibold text-heading">{item.label}</div>
                 <div className="mt-0.5 text-[11px] leading-4 text-text2">{item.detail}</div>
               </div>
             </div>
             {!item.ok ? (
-              <Link
-                href={item.fixHref}
-                className="shrink-0 rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-primary-dark"
-              >
+              <Link href={item.fixHref} className="hs-btn hs-btn-primary text-[11px] py-1.5 px-3">
                 {item.fixLabel}
               </Link>
             ) : (
-              <span className="shrink-0 text-[11px] font-semibold text-text3">Done</span>
+              <span className="text-[11px] font-semibold text-teal">Done ✓</span>
             )}
           </li>
         ))}
@@ -788,29 +706,26 @@ function IntegrationStatus({
   ];
 
   return (
-    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-4">
+    <div className="hs-card mt-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-text">Integration status</div>
-        <Link
-          href="/dashboard/settings/integrations"
-          className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text transition hover:bg-surface3 hover:border-border2"
-        >
-          Configure integrations
+        <div className="text-[13px] font-semibold text-heading">Integration status</div>
+        <Link href="/dashboard/settings/integrations" className="hs-btn hs-btn-secondary text-[11px] py-1.5 px-3">
+          Configure
         </Link>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {items.map((i) => (
           <div
             key={i.label}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface2 px-3 py-1.5 text-xs text-text2"
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium ${
+              i.on
+                ? "border-teal/30 bg-teal/8 text-teal"
+                : "border-border bg-surface2 text-text2"
+            }`}
           >
-            <span
-              className={`h-2 w-2 rounded-full ${
-                i.on ? "bg-green" : "bg-white/20"
-              }`}
-            />
-            <span className="text-text">{i.label}</span>
-            <span>{i.on ? "Connected" : "Not connected"}</span>
+            <span className={`h-1.5 w-1.5 rounded-full ${i.on ? "bg-teal" : "bg-text3"}`} />
+            {i.label}
+            <span className="text-[10px] opacity-70">{i.on ? "Connected" : "Not set"}</span>
           </div>
         ))}
       </div>
@@ -830,18 +745,10 @@ function Kpi({
   tone?: "up" | "down" | "neutral";
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-border bg-surface p-[18px]">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">
-        {title}
-      </div>
-      <div className="mt-2 font-[var(--font-heading)] text-[28px] font-extrabold leading-none text-text">
-        {value}
-      </div>
-      <div
-        className={`mt-1 text-[12px] font-semibold ${
-          tone === "up" ? "text-green" : tone === "down" ? "text-red" : "text-text2"
-        }`}
-      >
+    <div className="hs-card hs-card-hover flex flex-col gap-1 p-5">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">{title}</div>
+      <div className="mt-1 text-[30px] font-extrabold leading-none tracking-tight text-heading">{value}</div>
+      <div className={`mt-1 text-[12px] font-semibold ${tone === "up" ? "text-teal" : tone === "down" ? "text-red" : "text-text2"}`}>
         {delta}
       </div>
     </div>
@@ -859,40 +766,27 @@ function PmmJourneyMap() {
   };
 
   return (
-    <div className="mt-4 rounded-[var(--radius)] border border-border bg-surface p-5">
+    <div className="hs-card mt-4 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="font-[var(--font-heading)] text-[15px] font-bold text-text">
-            PMM workspace — single spine per product
-          </div>
+          <div className="text-[15px] font-semibold text-heading">PMM workspace — single spine per product</div>
           <div className="mt-1 max-w-3xl text-[12px] leading-5 text-text2">
-            Each module reads or writes the same product context (profile, segments, scans, assets). Follow the row
-            left-to-right for strategy → launch → measurement. Settings hold foundations; Copilot sits on top for
-            questions.
+            Each module reads and writes the same product context. Follow strategy → planning → creation → intelligence.
           </div>
         </div>
-        <Link
-          href="/dashboard/settings/product"
-          className="shrink-0 rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-2 text-[11px] font-semibold text-text hover:bg-surface3"
-        >
+        <Link href="/dashboard/settings/product" className="hs-btn hs-btn-secondary text-[11px] py-1.5 px-3">
           Edit product context
         </Link>
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {order.map((phase) => (
-          <div
-            key={phase}
-            className="rounded-[var(--radius2)] border border-border bg-surface2 p-3"
-          >
-            <div className="text-[10px] font-bold uppercase tracking-wide text-accent2">{phase}</div>
+          <div key={phase} className="rounded-lg border border-border bg-surface2/60 p-3">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-primary">{phase}</div>
             <div className="mt-1 text-[11px] leading-4 text-text3">{blurb[phase]}</div>
             <ul className="mt-2 space-y-1.5">
               {PMM_JOURNEY.filter((s) => s.phase === phase).map((s) => (
                 <li key={s.href}>
-                  <Link
-                    href={s.href}
-                    className="text-[12px] font-medium text-text hover:text-accent2 hover:underline"
-                  >
+                  <Link href={s.href} className="text-[12px] font-medium text-text hover:text-primary hover:underline">
                     {s.label}
                   </Link>
                 </li>
