@@ -461,7 +461,7 @@ export function MessagingArtifactsClient({
                           return (
                             <div
                               key={n}
-                              className="rounded-xl border border-border bg-surface2 p-3 space-y-2"
+                              className="hs-card2 p-3 space-y-2"
                             >
                               <PillarField
                                 label={`Objection ${n}`}

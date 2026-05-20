@@ -89,12 +89,12 @@ export default function AnalyticsSettingsClient({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-6">
+    <div className="hs-card p-6">
       <div className="text-lg text-heading">Analytics connections</div>
       <div className="mt-1 text-sm text-text2">
         Connect real GA4 data for this selected product.
       </div>
-      <div className="mt-2 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
+      <div className="mt-2 hs-card2 px-3 py-2 text-xs text-text2">
         Required for GA4: set `GA4_SERVICE_ACCOUNT_EMAIL` and `GA4_SERVICE_ACCOUNT_PRIVATE_KEY` in your environment,
         share GA4 property access with that service account in Google Analytics, then save the Property ID here.
       </div>
@@ -115,7 +115,7 @@ export default function AnalyticsSettingsClient({
       ) : null}
 
       {/* Redirect callout for ads tokens */}
-      <div className="mt-4 rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text2">
+      <div className="mt-4 hs-card2 px-4 py-3 text-sm text-text2">
         <span className="font-semibold text-text">LinkedIn Ads & Meta Ads tokens</span> are
         configured in{" "}
         <a href="/dashboard/settings/integrations" className="font-semibold text-primary hover:underline">
@@ -158,7 +158,7 @@ export default function AnalyticsSettingsClient({
           type="button"
           onClick={testGa}
           disabled={testing}
-          className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm font-medium text-heading transition hover:bg-surface2 disabled:opacity-60"
+          className="hs-card2 px-4 py-2 text-sm font-medium text-heading transition hover:bg-surface2 disabled:opacity-60"
         >
           {testing ? "Testing..." : "Test GA connection"}
         </button>
@@ -196,7 +196,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+        className="w-full hs-card2 px-3 py-2 text-sm text-heading"
       />
     </div>
   );

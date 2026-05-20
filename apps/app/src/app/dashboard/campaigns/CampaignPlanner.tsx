@@ -577,13 +577,13 @@ export function CampaignPlanner({
                     if (e.key === "Escape") setAddingIn(null);
                   }}
                   placeholder="Campaign title"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
                 <input
                   value={addTags}
                   onChange={(e) => setAddTags(e.target.value)}
                   placeholder="Tags (comma-separated)"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
                 <div className="flex gap-2">
                   <button
@@ -617,7 +617,7 @@ export function CampaignPlanner({
             if (e.target === e.currentTarget) closeModal();
           }}
         >
-          <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
+          <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden hs-card shadow-xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div>
@@ -682,7 +682,7 @@ export function CampaignPlanner({
                       <input
                         value={modalProduct}
                         onChange={(e) => setModalProduct(e.target.value)}
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                       />
                     </div>
                     <div>
@@ -691,7 +691,7 @@ export function CampaignPlanner({
                         value={modalSegment}
                         onChange={(e) => setModalSegment(e.target.value)}
                         placeholder="e.g. Series B SaaS marketing leaders"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -700,7 +700,7 @@ export function CampaignPlanner({
                         value={modalSeason}
                         onChange={(e) => setModalSeason(e.target.value)}
                         placeholder="e.g. Q1 planning, post-earnings"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -711,7 +711,7 @@ export function CampaignPlanner({
                         value={modalTension}
                         onChange={(e) => setModalTension(e.target.value)}
                         placeholder="e.g. noisy category, budget scrutiny"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                   </div>
@@ -746,7 +746,7 @@ export function CampaignPlanner({
                       rows={8}
                       maxLength={2000}
                       placeholder="Generated narrative appears here. Edit as needed."
-                      className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      className="w-full hs-card2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                     />
                   </div>
 
@@ -760,7 +760,7 @@ export function CampaignPlanner({
                         value={modalTheme}
                         onChange={(e) => setModalTheme(e.target.value)}
                         placeholder="Used as input for channel assets"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -772,7 +772,7 @@ export function CampaignPlanner({
                         value={modalHero}
                         onChange={(e) => setModalHero(e.target.value)}
                         placeholder="Used as input for channel assets"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                   </div>
@@ -853,7 +853,7 @@ export function CampaignPlanner({
               {activeTab === "assets" ? (
                 <div className="space-y-4">
                   {modalChannels.length === 0 ? (
-                    <div className="rounded-xl border border-border bg-surface2 p-4 text-sm text-text2">
+                    <div className="hs-card2 p-4 text-sm text-text2">
                       No channels selected.{" "}
                       <button
                         type="button"
@@ -939,7 +939,7 @@ export function CampaignPlanner({
                             }}
                             rows={6}
                             placeholder={`${CHANNEL_LABELS[ch]} will appear here after generation.`}
-                            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card2 p-3 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                       ))}

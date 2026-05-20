@@ -112,7 +112,7 @@ export function SalesEnablementBriefBlock({ environmentId }: { environmentId: st
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
+    <div className="hs-card p-4">
       <div className="mb-1 text-sm font-medium text-heading">Sales enablement brief (1-pager)</div>
       <p className="mb-4 text-xs text-text2">
         One page for reps: what it is, who it is for, pitch, and objections. Saved per product.
@@ -138,7 +138,7 @@ export function SalesEnablementBriefBlock({ environmentId }: { environmentId: st
           <input
             value={data.feature}
             onChange={(e) => schedule({ ...data, feature: e.target.value })}
-            className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
+            className="w-full hs-card2 p-2 text-sm text-heading"
             placeholder="e.g. Real-time analytics dashboards"
           />
         </div>
@@ -147,7 +147,7 @@ export function SalesEnablementBriefBlock({ environmentId }: { environmentId: st
           <input
             value={data.buyer}
             onChange={(e) => schedule({ ...data, buyer: e.target.value })}
-            className="w-full rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
+            className="w-full hs-card2 p-2 text-sm text-heading"
             placeholder="e.g. Director of RevOps"
           />
         </div>
@@ -157,7 +157,7 @@ export function SalesEnablementBriefBlock({ environmentId }: { environmentId: st
         <select
           value={data.segmentName}
           onChange={(e) => schedule({ ...data, segmentName: e.target.value })}
-          className="w-full max-w-md rounded-xl border border-border bg-surface2 p-2 text-sm text-heading"
+          className="w-full max-w-md hs-card2 p-2 text-sm text-heading"
         >
           <option value="">Best-fit / not specified</option>
           {segments.map((s) => (
@@ -173,7 +173,7 @@ export function SalesEnablementBriefBlock({ environmentId }: { environmentId: st
           value={data.objections}
           onChange={(e) => schedule({ ...data, objections: e.target.value })}
           rows={3}
-          className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+          className="w-full hs-card2 p-3 text-sm text-heading"
           placeholder="What reps hear in discovery…"
         />
       </div>
@@ -190,7 +190,7 @@ export function SalesEnablementBriefBlock({ environmentId }: { environmentId: st
         value={data.brief}
         onChange={(e) => schedule({ ...data, brief: e.target.value })}
         rows={14}
-        className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+        className="w-full hs-card2 p-3 text-sm text-heading"
         placeholder="Generated brief appears here. Edits save automatically (debounced)."
       />
     </div>

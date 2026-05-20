@@ -15,7 +15,7 @@ type Step = {
 
 function Pill({ title }: { title: string }) {
   return (
-    <div className="inline-flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3 shadow-card">
+    <div className="inline-flex items-center gap-3 hs-card px-4 py-3 shadow-card">
       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white shadow-card">
         <span className="text-[12px] font-bold">AI</span>
       </div>
@@ -143,13 +143,13 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
         <div className="flex flex-wrap gap-2">
           <Link
             href="/dashboard/artifacts"
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+            className="inline-flex items-center justify-center hs-card2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
           >
             Artifact Library
           </Link>
           <Link
             href={`/dashboard/launch-playbook/${kind}/final`}
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+            className="inline-flex items-center justify-center hs-card2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
           >
             Final pack
           </Link>
@@ -171,7 +171,7 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
           <div className="mt-8 grid w-full gap-3 md:grid-cols-2 lg:grid-cols-4">
             {steps.map((s, idx) => (
               <div key={s.id} className="relative">
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-card">
+                <div className="hs-card p-4 shadow-card">
                   <div className="flex items-center justify-between gap-3">
                     <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-light font-mono text-[12px] font-semibold text-primary-dark">
                       {String(idx + 1).padStart(2, "0")}
@@ -184,7 +184,7 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
                   <div className="mt-1 text-sm leading-relaxed text-text2">{s.description}</div>
                   <div className="mt-3 space-y-2">
                     {s.outputs.map((o) => (
-                      <div key={o} className="flex items-center gap-2 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text2">
+                      <div key={o} className="flex items-center gap-2 hs-card2 px-3 py-2 text-sm text-text2">
                         <span className="text-[var(--color-teal)]">✓</span>
                         <span className="truncate">{o}</span>
                       </div>
@@ -210,13 +210,13 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
       </div>
 
       {lastRunId ? (
-        <div className="mt-6 rounded-2xl border border-border bg-surface p-5 text-sm text-text2">
+        <div className="mt-6 hs-card p-5 text-sm text-text2">
           <span className="font-medium text-text">Run started.</span> Run id:{" "}
           <span className="font-mono text-text">{lastRunId}</span>. (MVP: this is a stub endpoint; next step is persisting runs + statuses.)
         </div>
       ) : null}
 
-      <div className="mt-6 rounded-2xl border border-border bg-surface p-5">
+      <div className="mt-6 hs-card p-5">
         <div className="flex items-center justify-between gap-3">
           <div className="text-[13px] font-semibold text-text">Recent runs</div>
           <Link href="/dashboard/artifacts" className="text-[13px] font-medium text-link hover:underline">
@@ -225,12 +225,12 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
         </div>
         <div className="mt-4 space-y-2">
           {recentRuns.length === 0 ? (
-            <div className="rounded-xl border border-border bg-surface2 p-4 text-sm text-text2">
+            <div className="hs-card2 p-4 text-sm text-text2">
               No runs yet. Click <span className="font-medium text-text">Run agents</span> to generate your first artifact set.
             </div>
           ) : (
             recentRuns.map((r) => (
-              <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface2 p-4">
+              <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 hs-card2 p-4">
                 <div className="min-w-0">
                   <div className="truncate text-[13px] font-semibold text-text">{r.kind}</div>
                   <div className="mt-0.5 text-xs text-text3">{new Date(r.created_at).toLocaleString()}</div>

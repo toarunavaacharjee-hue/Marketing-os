@@ -303,16 +303,16 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
                 />
               ))
             ) : (
-              <div className="rounded-lg border border-border bg-surface2 p-4 text-sm text-text2">
+              <div className="hs-card2 p-4 text-sm text-text2">
                 Run an AI scan to generate signals.
               </div>
             )}
           </div>
 
-          <div className="mt-4 rounded-lg border border-border bg-surface2 p-3 text-sm text-text2">
+          <div className="mt-4 hs-card2 p-3 text-sm text-text2">
             <div className="text-[14px] font-semibold text-heading">Scan inputs</div>
             <div className="mt-2 grid gap-2 md:grid-cols-2">
-              <div className="rounded-lg border border-border bg-surface p-3">
+              <div className="hs-card p-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.5px] text-text3">
                   Base product
                 </div>
@@ -323,7 +323,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
                   {baseUrl || "Website not set"}
                 </div>
               </div>
-              <div className="rounded-lg border border-border bg-surface p-3">
+              <div className="hs-card p-3">
                 <div className="text-xs font-semibold uppercase tracking-[0.5px] text-text3">
                   Competitors
                 </div>
@@ -352,7 +352,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
             <div className="mb-2 text-[14px] font-semibold text-heading">
               AI Research Assistant
             </div>
-            <div className="rounded-lg border border-border bg-surface2 p-3 text-sm text-text2">
+            <div className="hs-card2 p-3 text-sm text-text2">
               Ask me anything about your market, competitors, or buyer pain points…
             </div>
 
@@ -395,7 +395,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
               ))}
             </div>
 
-            <div className="mt-3 max-h-[260px] overflow-auto rounded-lg border border-border bg-surface2 p-3">
+            <div className="mt-3 max-h-[260px] overflow-auto hs-card2 p-3">
               {answer ? (
                 <Markdown content={answer} />
               ) : (
@@ -432,7 +432,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
         <div className="mb-3 text-[14px] font-semibold text-heading">
           Market Opportunity Map
         </div>
-        <div className="overflow-auto rounded-lg border border-border bg-surface2">
+        <div className="overflow-auto hs-card2">
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="text-left text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">
@@ -535,7 +535,7 @@ export default function MarketResearchClient({ environmentId }: { environmentId?
               </div>
             </div>
 
-            <div className="mt-4 max-h-[70vh] overflow-auto rounded-lg border border-border bg-surface2 p-4">
+            <div className="mt-4 max-h-[70vh] overflow-auto hs-card2 p-4">
               {summary ? (
                 <Markdown content={summary} />
               ) : (

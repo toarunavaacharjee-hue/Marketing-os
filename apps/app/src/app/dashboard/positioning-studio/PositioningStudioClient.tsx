@@ -531,7 +531,7 @@ export default function PositioningStudioClient({
                     value={val}
                     onChange={(e) => setDoc((d) => ({ ...d, [k]: e.target.value }))}
                     maxLength={max}
-                    className="min-h-[72px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="min-h-[72px] w-full hs-card2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
                     placeholder="—"
                   />
                 </div>
@@ -686,7 +686,7 @@ export default function PositioningStudioClient({
                 value={pricingPlan}
                 onChange={(e) => setPricingPlan(e.target.value)}
                 placeholder="e.g. Growth"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -695,7 +695,7 @@ export default function PositioningStudioClient({
                 value={pricingPrice}
                 onChange={(e) => setPricingPrice(e.target.value)}
                 placeholder="e.g. $299/mo"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -704,7 +704,7 @@ export default function PositioningStudioClient({
                 value={pricingPersona}
                 onChange={(e) => setPricingPersona(e.target.value)}
                 placeholder="e.g. VP Marketing"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -713,7 +713,7 @@ export default function PositioningStudioClient({
                 value={pricingProof}
                 onChange={(e) => setPricingProof(e.target.value)}
                 placeholder="Metrics, outcomes"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
           </div>
@@ -740,7 +740,7 @@ export default function PositioningStudioClient({
             value={pricingText}
             onChange={(e) => setPricingText(e.target.value)}
             rows={12}
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            className="w-full hs-card2 p-3 text-sm text-heading"
             placeholder="Generated pricing narrative appears here."
           />
         </div>

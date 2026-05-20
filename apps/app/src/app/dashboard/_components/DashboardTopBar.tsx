@@ -191,7 +191,7 @@ export function DashboardTopBar({
               <div
                 role="menu"
                 aria-label="Account"
-                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[220px] overflow-hidden rounded-xl border border-border bg-surface shadow-lg"
+                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[220px] overflow-hidden hs-card shadow-lg"
               >
                 <div className="border-b border-border px-4 py-3">
                   <div className="truncate text-[13px] font-semibold text-heading">{profile?.name ?? "Account"}</div>

@@ -88,7 +88,7 @@ export default function SegmentsClient({ environmentId }: { environmentId: strin
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="text-lg text-heading">Segments</div>
         <div className="mt-1 text-sm text-text2">
           Segments are scoped to this product’s <span className="text-heading">Default</span>{" "}
@@ -106,13 +106,13 @@ export default function SegmentsClient({ environmentId }: { environmentId: strin
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Segment name (e.g. RevOps-led B2B)"
-            className="md:col-span-2 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+            className="md:col-span-2 w-full hs-card2 px-3 py-2 text-sm text-heading"
           />
           <input
             type="number"
             value={pnf}
             onChange={(e) => setPnf(Number(e.target.value))}
-            className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+            className="w-full hs-card2 px-3 py-2 text-sm text-heading"
             min={0}
             max={100}
           />
@@ -130,7 +130,7 @@ export default function SegmentsClient({ environmentId }: { environmentId: strin
           <input
             value={pains}
             onChange={(e) => setPains(e.target.value)}
-            className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+            className="w-full hs-card2 px-3 py-2 text-sm text-heading"
           />
         </div>
 
@@ -139,13 +139,13 @@ export default function SegmentsClient({ environmentId }: { environmentId: strin
           <input
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+            className="w-full hs-card2 px-3 py-2 text-sm text-heading"
             placeholder="Optional"
           />
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="mb-3 text-sm text-heading">
           Saved segments {loading ? <span className="text-text2">(loading…)</span> : null}
         </div>
@@ -154,7 +154,7 @@ export default function SegmentsClient({ environmentId }: { environmentId: strin
           {segments.map((s) => (
             <div
               key={s.id}
-              className="rounded-2xl border border-border bg-surface2 p-4"
+              className="hs-card2 p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -171,7 +171,7 @@ export default function SegmentsClient({ environmentId }: { environmentId: strin
                         pnf_score: Math.min(100, (s.pnf_score ?? 0) + 5)
                       })
                     }
-                    className="rounded-xl border border-border bg-surface px-3 py-2 text-xs text-heading hover:bg-surface2"
+                    className="hs-card px-3 py-2 text-xs text-heading hover:bg-surface2"
                   >
                     +5 PNF
                   </button>

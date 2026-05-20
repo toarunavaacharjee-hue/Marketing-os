@@ -165,7 +165,7 @@ function AddPersonaForm({
             value={form[k]}
             onChange={(e) => onChange({ [k]: e.target.value })}
             placeholder={ph}
-            className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+            className="w-full hs-card px-2.5 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
           />
         ))}
       </div>
@@ -206,7 +206,7 @@ function FieldTextarea({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={3}
-        className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+        className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
       />
     </div>
   );
@@ -536,7 +536,7 @@ export default function BattlecardsPage() {
                 </button>
               ))}
             </div>
-            <div className="flex rounded-xl border border-border bg-surface2 p-0.5">
+            <div className="flex hs-card2 p-0.5">
               <button
                 type="button"
                 onClick={() => setMode("pitch")}
@@ -573,7 +573,7 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => icpUploadRef.current?.click()}
                         disabled={uploadingIcp}
-                        className="rounded-lg border border-border bg-surface2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
+                        className="hs-card2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
                         title="Upload PDF / Word / Excel to auto-fill"
                       >
                         {uploadingIcp ? "Reading…" : "↑ Upload"}
@@ -630,7 +630,7 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => accountUploadRef.current?.click()}
                         disabled={uploadingAccount}
-                        className="rounded-lg border border-border bg-surface2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
+                        className="hs-card2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
                         title="Upload RFP, account plan, or CRM export to auto-fill"
                       >
                         {uploadingAccount ? "Reading…" : "↑ Upload"}
@@ -872,7 +872,7 @@ export default function BattlecardsPage() {
                       value={activeCard?.strengths ?? ""}
                       onChange={(e) => patch({ strengths: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="What they do well — features, positioning, proof points"
                     />
                   </div>
@@ -882,7 +882,7 @@ export default function BattlecardsPage() {
                       value={activeCard?.weaknesses ?? ""}
                       onChange={(e) => patch({ weaknesses: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="Where they fall short — gaps, risks, customer complaints"
                     />
                   </div>
@@ -895,7 +895,7 @@ export default function BattlecardsPage() {
                       value={activeCard?.why_we_win ?? ""}
                       onChange={(e) => patch({ why_we_win: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="Your differentiators and proof against this competitor"
                     />
                   </div>
@@ -905,7 +905,7 @@ export default function BattlecardsPage() {
                       value={activeCard?.objection_handling ?? ""}
                       onChange={(e) => patch({ objection_handling: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="Talk tracks, rebuttals, and traps to avoid"
                     />
                   </div>

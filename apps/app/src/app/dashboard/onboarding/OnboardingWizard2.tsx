@@ -184,7 +184,7 @@ export function OnboardingWizard() {
             </div>
             <div className="mt-2 text-sm text-text2">A 5-minute setup to generate your first ICP + positioning draft.</div>
           </div>
-          <div className="shrink-0 rounded-xl border border-border bg-surface px-3 py-2 text-xs text-text2">
+          <div className="shrink-0 hs-card px-3 py-2 text-xs text-text2">
             Step <span className="font-semibold text-heading">{progressIdx}</span> / 5
           </div>
         </div>
@@ -197,7 +197,7 @@ export function OnboardingWizard() {
           <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
         ) : null}
 
-        <div className="mt-6 rounded-2xl border border-border bg-surface p-6 shadow-sm">
+        <div className="mt-6 hs-card p-6 shadow-sm">
           {step === "role" ? (
             <div className="space-y-6">
               <div>
@@ -287,7 +287,7 @@ export function OnboardingWizard() {
                 <input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                   placeholder="Your company / workspace"
                 />
               </div>
@@ -297,7 +297,7 @@ export function OnboardingWizard() {
                 <input
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                   placeholder="Your product"
                 />
               </div>
@@ -307,7 +307,7 @@ export function OnboardingWizard() {
                 <input
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                   placeholder="https://yourcompany.com"
                 />
                 {websiteHost ? <div className="mt-1 text-xs text-text3">Detected: {websiteHost}</div> : null}
@@ -335,7 +335,7 @@ export function OnboardingWizard() {
                 <div className="text-sm font-semibold text-heading">Confirm & create</div>
                 <div className="mt-1 text-xs text-text2">Review your details before we set everything up.</div>
               </div>
-              <div className="divide-y divide-border rounded-xl border border-border bg-surface2">
+              <div className="divide-y divide-border hs-card2">
                 <div className="px-4 py-3">
                   <div className="text-[11px] font-medium uppercase tracking-wide text-text3">Workspace</div>
                   <div className="mt-0.5 text-sm font-medium text-heading">{companyName.trim() || "—"}</div>

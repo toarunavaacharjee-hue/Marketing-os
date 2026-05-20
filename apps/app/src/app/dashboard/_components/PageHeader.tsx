@@ -89,7 +89,7 @@ export function StatCard({
     tone === "purple"  ? "text-primary" :
                          "text-text2";
   return (
-    <div className="flex flex-col gap-1 rounded-xl border border-border bg-surface p-5 shadow-sm">
+    <div className="flex flex-col gap-1 hs-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">{label}</span>
         {icon && <span className="text-text3">{icon}</span>}

@@ -73,7 +73,7 @@ export function EventsClient({ environmentId }: { environmentId: string }) {
       </div>
 
       {/* Tips row */}
-      <div className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text2">
+      <div className="hs-card2 px-4 py-3 text-sm text-text2">
         <span className="font-medium text-text">Pro tip:</span> Add event details, then use{" "}
         <span className="font-medium text-primary">✦ Generate campaign</span> to create a pre-event
         content plan, booth brief, and post-event follow-up sequence — all in one click.

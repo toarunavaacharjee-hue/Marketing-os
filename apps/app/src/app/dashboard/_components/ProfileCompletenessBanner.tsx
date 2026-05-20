@@ -102,7 +102,7 @@ export function ProfileCompletenessBanner() {
             </Link>
             <Link
               href="/dashboard/positioning-studio"
-              className="inline-flex rounded-sm border border-input-border bg-surface px-3 py-1.5 text-[12px] font-medium text-text hover:bg-surface2"
+              className="hs-btn hs-btn-secondary text-[12px]"
             >
               Positioning Studio
             </Link>

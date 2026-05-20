@@ -225,7 +225,7 @@ function AssetCard({
                 value={asset.name}
                 onChange={(e) => onChange({ name: e.target.value })}
                 placeholder="e.g. Q3 launch hero banner"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -233,7 +233,7 @@ function AssetCard({
               <select
                 value={asset.assetType}
                 onChange={(e) => onChange({ assetType: e.target.value as AssetType })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               >
                 {ASSET_TYPES.map((t) => (
                   <option key={t.id} value={t.id}>{t.label}</option>
@@ -249,7 +249,7 @@ function AssetCard({
               <select
                 value={asset.status}
                 onChange={(e) => onChange({ status: e.target.value as AssetStatus })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               >
                 {STATUS_ORDER.map((s) => (
                   <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
@@ -262,7 +262,7 @@ function AssetCard({
                 value={asset.dimensions}
                 onChange={(e) => onChange({ dimensions: e.target.value })}
                 placeholder={ASSET_TYPES.find((t) => t.id === asset.assetType)?.hint ?? "e.g. 1200×628px"}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
             <div>
@@ -271,7 +271,7 @@ function AssetCard({
                 type="date"
                 value={asset.dueDate}
                 onChange={(e) => onChange({ dueDate: e.target.value })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               />
             </div>
             <div>
@@ -280,7 +280,7 @@ function AssetCard({
                 value={asset.assignee}
                 onChange={(e) => onChange({ assignee: e.target.value })}
                 placeholder="Name or email"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
           </div>
@@ -293,7 +293,7 @@ function AssetCard({
                 value={asset.campaign}
                 onChange={(e) => onChange({ campaign: e.target.value })}
                 placeholder="e.g. q3-launch"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
             <div>
@@ -302,7 +302,7 @@ function AssetCard({
                 value={asset.audience}
                 onChange={(e) => onChange({ audience: e.target.value })}
                 placeholder="e.g. Series A CMOs"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
           </div>
@@ -315,7 +315,7 @@ function AssetCard({
               onChange={(e) => onChange({ brief: e.target.value })}
               rows={4}
               placeholder="Describe the concept, visual direction, copy overlay, mood, brand usage, CTA…"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+              className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -328,7 +328,7 @@ function AssetCard({
                   value={asset.referenceUrl}
                   onChange={(e) => onChange({ referenceUrl: e.target.value })}
                   placeholder="Brand guide, inspiration link…"
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                  className="min-w-0 flex-1 hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
                 />
                 {safeHref(asset.referenceUrl) ? (
                   <a href={safeHref(asset.referenceUrl)!} target="_blank" rel="noopener noreferrer"
@@ -345,7 +345,7 @@ function AssetCard({
                   value={asset.deliveryUrl}
                   onChange={(e) => onChange({ deliveryUrl: e.target.value })}
                   placeholder="Figma, Google Drive, Dropbox…"
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                  className="min-w-0 flex-1 hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
                 />
                 {safeHref(asset.deliveryUrl) ? (
                   <a href={safeHref(asset.deliveryUrl)!} target="_blank" rel="noopener noreferrer"
@@ -365,7 +365,7 @@ function AssetCard({
               onChange={(e) => onChange({ notes: e.target.value })}
               rows={2}
               placeholder="Revisions, feedback, print specs, file format requirements…"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
 
@@ -627,7 +627,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
               value={ws.prompt}
               onChange={(e) => scheduleSave({ ...ws, prompt: e.target.value })}
               rows={4}
-              className="mt-3 w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+              className="mt-3 w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
               placeholder="e.g. Product launch hero banner + 3 social graphics; target PLG teams; bold, minimal, teal accent"
             />
 
@@ -648,7 +648,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
             ) : null}
 
             {ws.lastOutput ? (
-              <div className="mt-3 space-y-2 rounded-xl border border-border bg-surface2 p-3">
+              <div className="mt-3 space-y-2 hs-card2 p-3">
                 <div className="text-[10px] font-medium uppercase tracking-wide text-text3">Generated brief</div>
                 <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap font-sans text-xs leading-relaxed text-heading">
                   {ws.lastOutput}
@@ -670,7 +670,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
                 </summary>
                 <ul className="mt-2 max-h-48 space-y-2 overflow-y-auto">
                   {ws.aiHistory.map((h) => (
-                    <li key={h.id} className="rounded-lg border border-border bg-surface p-2">
+                    <li key={h.id} className="hs-card p-2">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] text-text3">{new Date(h.at).toLocaleDateString()}</span>
                         <button
@@ -698,7 +698,7 @@ export function DesignAssetsClient({ environmentId }: { environmentId: string })
           value={ws.brandNotes}
           onChange={(e) => scheduleSave({ ...ws, brandNotes: e.target.value })}
           rows={4}
-          className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
+          className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
           placeholder={`Primary: #7C4DFF · Teal: #00BFA5 · Amber: #FF8F00\nFonts: DM Sans (headings), Inter (body)\nLogo clearspace: 32px min · No gradients on logo\nTone: confident, concise, not corporate`}
         />
       </div>

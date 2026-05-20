@@ -601,7 +601,7 @@ export function DashboardShell({
               )}
               {copilotLoading && (
                 <div className="flex justify-start">
-                  <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-surface2 px-4 py-3">
+                  <div className="flex items-center gap-1.5 hs-card2 px-4 py-3">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-bounce [animation-delay:0ms]" />
                     <span className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-bounce [animation-delay:150ms]" />
                     <span className="h-1.5 w-1.5 rounded-full bg-primary/60 animate-bounce [animation-delay:300ms]" />
@@ -622,7 +622,7 @@ export function DashboardShell({
                   }}
                   placeholder="Ask anything…"
                   disabled={copilotLoading}
-                  className="min-w-0 flex-1 rounded-xl border border-border bg-surface2 px-3 py-2 text-[13px] text-heading placeholder:text-text3 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-50"
+                  className="min-w-0 flex-1 hs-card2 px-3 py-2 text-[13px] text-heading placeholder:text-text3 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-50"
                 />
                 <button
                   type="button"

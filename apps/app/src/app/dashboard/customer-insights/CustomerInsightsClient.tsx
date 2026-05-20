@@ -475,7 +475,7 @@ SUGGESTED ACTION:
               value={ws.npsTrend}
               onChange={(e) => schedule({ ...ws, npsTrend: e.target.value })}
               placeholder="e.g. ↑ +3 QoQ"
-              className="mb-1 min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1 text-xs text-text2 placeholder:text-text3"
+              className="mb-1 min-w-0 flex-1 hs-card2 px-2 py-1 text-xs text-text2 placeholder:text-text3"
             />
           </div>
         </div>
@@ -491,7 +491,7 @@ SUGGESTED ACTION:
               value={ws.csatTrend}
               onChange={(e) => schedule({ ...ws, csatTrend: e.target.value })}
               placeholder="e.g. ↑ +0.2 QoQ"
-              className="mb-1 min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1 text-xs text-text2 placeholder:text-text3"
+              className="mb-1 min-w-0 flex-1 hs-card2 px-2 py-1 text-xs text-text2 placeholder:text-text3"
             />
           </div>
         </div>
@@ -584,7 +584,7 @@ SUGGESTED ACTION:
                         {q.text && (
                           <button
                             onClick={(e) => { e.stopPropagation(); void copy(`"${q.text}"${q.customerName ? ` — ${q.customerName}` : ""}`); }}
-                            className="rounded-lg border border-border bg-surface px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
+                            className="hs-card px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
                           >
                             Copy
                           </button>
@@ -603,7 +603,7 @@ SUGGESTED ACTION:
                             onChange={(e) => patchQuote(q.id, { text: e.target.value })}
                             rows={3}
                             placeholder="Paste the exact customer quote…"
-                            className="w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm italic text-heading placeholder:text-text3 placeholder:not-italic"
+                            className="w-full hs-card px-2.5 py-2 text-sm italic text-heading placeholder:text-text3 placeholder:not-italic"
                           />
                         </div>
                         <div className="grid gap-2 sm:grid-cols-3">
@@ -612,7 +612,7 @@ SUGGESTED ACTION:
                             <select
                               value={q.source}
                               onChange={(e) => patchQuote(q.id, { source: e.target.value as QuoteSource })}
-                              className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                              className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                             >
                               {(Object.entries(SOURCE_LABELS) as [QuoteSource, string][]).map(([k, v]) => (
                                 <option key={k} value={k}>{v}</option>
@@ -624,7 +624,7 @@ SUGGESTED ACTION:
                             <select
                               value={q.sentiment}
                               onChange={(e) => patchQuote(q.id, { sentiment: e.target.value as QuoteSentiment })}
-                              className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                              className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                             >
                               <option value="positive">😊 Positive</option>
                               <option value="neutral">😐 Neutral</option>
@@ -637,7 +637,7 @@ SUGGESTED ACTION:
                               value={q.segment}
                               onChange={(e) => patchQuote(q.id, { segment: e.target.value })}
                               placeholder="e.g. Enterprise"
-                              className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                              className="w-full hs-card px-2 py-1.5 text-sm text-heading placeholder:text-text3"
                             />
                           </div>
                         </div>
@@ -647,7 +647,7 @@ SUGGESTED ACTION:
                             value={q.customerName}
                             onChange={(e) => patchQuote(q.id, { customerName: e.target.value })}
                             placeholder="e.g. Sarah M., Head of Marketing at Acme"
-                            className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                         <div className="flex items-center justify-between">
@@ -702,7 +702,7 @@ SUGGESTED ACTION:
                         value={t.name}
                         onChange={(e) => patchTheme(t.id, { name: e.target.value })}
                         placeholder="Theme name"
-                        className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1 text-xs text-heading placeholder:text-text3"
+                        className="min-w-0 flex-1 hs-card2 px-2 py-1 text-xs text-heading placeholder:text-text3"
                       />
                       <div className="flex shrink-0 items-center gap-1">
                         <select
@@ -754,7 +754,7 @@ SUGGESTED ACTION:
                         value={t.name}
                         onChange={(e) => patchTheme(t.id, { name: e.target.value })}
                         placeholder="Risk name"
-                        className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1 text-xs text-heading placeholder:text-text3"
+                        className="min-w-0 flex-1 hs-card2 px-2 py-1 text-xs text-heading placeholder:text-text3"
                       />
                       <div className="flex shrink-0 items-center gap-1">
                         <select
@@ -808,12 +808,12 @@ SUGGESTED ACTION:
         ) : (
           <div className="space-y-2">
             {ws.surveyInsights.map((s) => (
-              <div key={s.id} className="rounded-xl border border-border bg-surface2 p-3">
+              <div key={s.id} className="hs-card2 p-3">
                 <div className="grid gap-2 sm:grid-cols-[110px_1fr_1fr_auto] sm:items-start">
                   <select
                     value={s.channel}
                     onChange={(e) => patchSurveyInsight(s.id, { channel: e.target.value as InsightChannel })}
-                    className="rounded-lg border border-border bg-surface px-2 py-1.5 text-xs font-semibold text-heading"
+                    className="hs-card px-2 py-1.5 text-xs font-semibold text-heading"
                   >
                     <option value="nps">NPS</option>
                     <option value="csat">CSAT</option>
@@ -825,7 +825,7 @@ SUGGESTED ACTION:
                     value={s.insight}
                     onChange={(e) => patchSurveyInsight(s.id, { insight: e.target.value })}
                     placeholder="Key finding or insight…"
-                    className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
+                    className="hs-card px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
                   />
                   <input
                     value={s.action}
@@ -879,11 +879,11 @@ SUGGESTED ACTION:
                 value={ws.customerNarrative}
                 onChange={(e) => schedule({ ...ws, customerNarrative: e.target.value })}
                 rows={10}
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm leading-relaxed text-heading"
+                className="w-full hs-card2 px-3 py-2.5 text-sm leading-relaxed text-heading"
               />
               <button
                 onClick={() => void copy(ws.customerNarrative)}
-                className="absolute right-2 top-2 rounded-lg border border-border bg-surface px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
+                className="absolute right-2 top-2 hs-card px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
               >
                 Copy
               </button>
@@ -925,11 +925,11 @@ SUGGESTED ACTION:
                 value={ws.retentionBrief}
                 onChange={(e) => schedule({ ...ws, retentionBrief: e.target.value })}
                 rows={10}
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm leading-relaxed text-heading"
+                className="w-full hs-card2 px-3 py-2.5 text-sm leading-relaxed text-heading"
               />
               <button
                 onClick={() => void copy(ws.retentionBrief)}
-                className="absolute right-2 top-2 rounded-lg border border-border bg-surface px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
+                className="absolute right-2 top-2 hs-card px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
               >
                 Copy
               </button>
@@ -963,7 +963,7 @@ SUGGESTED ACTION:
               value={strategyProduct}
               onChange={(e) => setStrategyProduct(e.target.value)}
               placeholder="e.g. AI Marketing Workbench — Onboarding flow"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
           <div>
@@ -973,7 +973,7 @@ SUGGESTED ACTION:
               onChange={(e) => setStrategyInsight(e.target.value)}
               rows={3}
               placeholder="e.g. NPS detractors mention onboarding friction as the top reason in 3 consecutive quarters…"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
         </div>
@@ -1000,7 +1000,7 @@ SUGGESTED ACTION:
               <span className="text-xs text-text2">Strategy signals</span>
               <button onClick={() => void copy(strategyOutput)} className="text-[10px] text-primary hover:underline">Copy</button>
             </div>
-            <pre className="whitespace-pre-wrap rounded-xl border border-border bg-surface p-3 text-sm text-heading">
+            <pre className="whitespace-pre-wrap hs-card p-3 text-sm text-heading">
               {strategyOutput}
             </pre>
           </div>

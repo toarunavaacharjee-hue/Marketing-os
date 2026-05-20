@@ -21,7 +21,7 @@ export function EmptyState({ icon, headline, subheading, cta, secondaryCta }: Em
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface2 px-6 py-14 text-center">
       {icon ? (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-surface text-3xl shadow-sm">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center hs-card text-3xl shadow-sm">
           {icon}
         </div>
       ) : null}
@@ -50,7 +50,7 @@ export function EmptyState({ icon, headline, subheading, cta, secondaryCta }: Em
           {secondaryCta ? (
             <Link
               href={secondaryCta.href}
-              className="rounded-xl border border-border bg-surface px-5 py-2.5 text-sm font-semibold text-text hover:bg-surface2"
+              className="hs-card px-5 py-2.5 text-sm font-semibold text-text hover:bg-surface2"
             >
               {secondaryCta.label}
             </Link>

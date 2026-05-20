@@ -198,7 +198,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+      <div className="hs-card p-6 shadow-sm">
         <div className="text-sm font-medium text-text">System setup</div>
         <div className="mt-2 text-sm text-text2">
           This is where you configure the basics so the dashboard and AI features work.
@@ -224,7 +224,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+        <div className="hs-card p-6 shadow-sm">
           <div className="text-sm font-medium text-text">Profile</div>
           <div className="mt-1 text-sm text-text2">Signed in as {email}</div>
 
@@ -234,7 +234,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                className="w-full hs-card2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                 placeholder="Your name"
               />
             </div>
@@ -243,7 +243,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               <input
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                className="w-full hs-card2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                 placeholder="Company"
               />
             </div>
@@ -269,7 +269,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+        <div className="hs-card p-6 shadow-sm">
           <div className="text-sm font-medium text-text">AI integration</div>
           <p className="mt-1 text-sm text-text2">
             Copilot and module generators use the{" "}
@@ -288,7 +288,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
             in the browser.
           </p>
 
-          <details className="group mt-4 rounded-xl border border-border bg-surface2 px-4 py-3 [&_summary::-webkit-details-marker]:hidden">
+          <details className="group mt-4 hs-card2 px-4 py-3 [&_summary::-webkit-details-marker]:hidden">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium text-text">
               <span>When should I add my own API key?</span>
               <span className="text-text3 transition group-open:rotate-90" aria-hidden>
@@ -332,7 +332,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
           ) : null}
 
           {!metaLoading && !canManage ? (
-            <div className="mt-4 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text2">
+            <div className="mt-4 hs-card2 px-3 py-2 text-sm text-text2">
               {configured
                 ? "A workspace Anthropic key is configured (BYOK). Only owners and admins can change it."
                 : anthropicReady
@@ -366,7 +366,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
                 placeholder="sk-ant-..."
                 type="password"
                 autoComplete="off"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="w-full hs-card2 px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
               />
 
               <div className="mt-3 flex flex-wrap gap-2">
@@ -402,7 +402,7 @@ export default function SettingsClient({ initialName, initialCompany, email }: P
               ) : null}
 
               {anthropicReady ? (
-                <div className="mt-3 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
+                <div className="mt-3 hs-card2 px-3 py-2 text-xs text-text2">
                   {aiStatus === "checking" ? (
                     <span>Checking connection…</span>
                   ) : aiStatus === "connected" ? (
@@ -438,7 +438,7 @@ function SetupItem({
   subtitle: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface2 p-4">
+    <div className="hs-card2 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-sm font-medium text-text">{title}</div>

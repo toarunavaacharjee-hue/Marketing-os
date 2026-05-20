@@ -243,7 +243,7 @@ function PostCard({
                   const fmts = FORMATS_BY_PLATFORM[p];
                   onChange({ platform: p, format: fmts.includes(post.format) ? post.format : fmts[0]! });
                 }}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               >
                 {PLATFORMS.map((p) => (
                   <option key={p.id} value={p.id}>{p.label}</option>
@@ -255,7 +255,7 @@ function PostCard({
               <select
                 value={post.format}
                 onChange={(e) => onChange({ format: e.target.value as PostFormat })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               >
                 {formats.map((f) => (
                   <option key={f} value={f}>{f.charAt(0).toUpperCase() + f.slice(1)}</option>
@@ -267,7 +267,7 @@ function PostCard({
               <select
                 value={post.status}
                 onChange={(e) => onChange({ status: e.target.value as PostStatus })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
@@ -280,7 +280,7 @@ function PostCard({
                 type="datetime-local"
                 value={post.scheduledAt}
                 onChange={(e) => onChange({ scheduledAt: e.target.value })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               />
             </div>
           </div>
@@ -295,7 +295,7 @@ function PostCard({
               onChange={(e) => onChange({ text: e.target.value })}
               rows={5}
               placeholder="Write your post copy here…"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+              className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -306,7 +306,7 @@ function PostCard({
                 value={post.audience}
                 onChange={(e) => onChange({ audience: e.target.value })}
                 placeholder="e.g. Series A CMOs"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
             <div>
@@ -315,7 +315,7 @@ function PostCard({
                 value={post.campaignTag}
                 onChange={(e) => onChange({ campaignTag: e.target.value })}
                 placeholder="e.g. q3-launch"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
           </div>
@@ -327,7 +327,7 @@ function PostCard({
               onChange={(e) => onChange({ notes: e.target.value })}
               rows={2}
               placeholder="Hashtags, mentions, visual brief, CTA…"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
 
@@ -621,7 +621,7 @@ export function SocialMediaClient({
               value={ws.prompt}
               onChange={(e) => scheduleSave({ ...ws, prompt: e.target.value })}
               rows={4}
-              className="mt-3 w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+              className="mt-3 w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
               placeholder={`e.g. 5 hooks on pipeline attribution for RevOps leaders`}
             />
 
@@ -642,7 +642,7 @@ export function SocialMediaClient({
             ) : null}
 
             {ws.lastOutput ? (
-              <div className="mt-3 space-y-2 rounded-xl border border-border bg-surface2 p-3">
+              <div className="mt-3 space-y-2 hs-card2 p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-medium uppercase tracking-wide text-text3">Output</span>
                   <CharCounter text={ws.lastOutput} platform={ws.promptPlatform} />
@@ -667,7 +667,7 @@ export function SocialMediaClient({
                 </summary>
                 <ul className="mt-2 max-h-48 space-y-2 overflow-y-auto">
                   {ws.aiHistory.map((h) => (
-                    <li key={h.id} className="rounded-lg border border-border bg-surface p-2">
+                    <li key={h.id} className="hs-card p-2">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5">
                           <PlatformBadge platform={h.platform} size="xs" />
@@ -699,7 +699,7 @@ export function SocialMediaClient({
             value={ws.calendarNotes}
             onChange={(e) => scheduleSave({ ...ws, calendarNotes: e.target.value })}
             rows={5}
-            className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
+            className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
             placeholder={`Mon: LinkedIn article draft\nTue: Twitter thread — pipeline hooks\nWed: Instagram carousel review\nFri: Publish LinkedIn + tweet`}
           />
         </div>
@@ -709,7 +709,7 @@ export function SocialMediaClient({
             value={ws.performanceNotes}
             onChange={(e) => scheduleSave({ ...ws, performanceNotes: e.target.value })}
             rows={5}
-            className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
+            className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
             placeholder="Top performing post, CTR, impressions, engagement rate, learnings…"
           />
         </div>

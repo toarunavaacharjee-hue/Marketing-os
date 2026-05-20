@@ -68,7 +68,7 @@ function renderValue(v: unknown): React.ReactNode {
     return (
       <div className="mt-2 space-y-2">
         {entries.map(([k, val]) => (
-          <div key={k} className="rounded-xl border border-border bg-surface2 px-4 py-3">
+          <div key={k} className="hs-card2 px-4 py-3">
             <div className="text-xs font-semibold uppercase tracking-wide text-text3">{titleFromKey(k)}</div>
             <div className="mt-1">{renderValue(val)}</div>
           </div>
@@ -105,17 +105,17 @@ function MessageMapView({
 }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="hs-card p-5">
         <div className="text-[13px] font-semibold text-text">Core message</div>
         <div className="mt-2 text-sm leading-relaxed text-text2">{coreMessage ? coreMessage : "—"}</div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="hs-card p-5">
         <div className="text-[13px] font-semibold text-text">Value pillars</div>
         <div className="mt-3 grid gap-3 md:grid-cols-3">
           {valuePillars.length ? (
             valuePillars.map((p, idx) => (
-              <div key={`${p.pillar ?? "pillar"}-${idx}`} className="rounded-xl border border-border bg-surface2 p-4">
+              <div key={`${p.pillar ?? "pillar"}-${idx}`} className="hs-card2 p-4">
                 <div className="text-sm font-semibold text-text">{p.pillar ?? `Pillar ${idx + 1}`}</div>
                 {p.benefit ? <div className="mt-2 text-sm text-text2">{p.benefit}</div> : null}
                 {p.proof?.length ? (
@@ -137,7 +137,7 @@ function MessageMapView({
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="text-[13px] font-semibold text-text">Copy-ready blocks</div>
           {copyBlocks ? (
             <div className="mt-3 space-y-3 text-sm text-text2">
@@ -175,7 +175,7 @@ function MessageMapView({
           )}
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="text-[13px] font-semibold text-text">Proof library</div>
           <div className="mt-2 text-sm text-text2">
             {proofLibrary.length ? (
@@ -266,7 +266,7 @@ function humanOutputForArtifact(artifact: ArtifactRow): { title: string; content
     content: (
       <div className="space-y-4">
         {meaningfulKeys.map((k) => (
-          <div key={k} className="rounded-2xl border border-border bg-surface p-5">
+          <div key={k} className="hs-card p-5">
             <div className="text-[13px] font-semibold text-text">{titleFromKey(k)}</div>
             <div className="mt-2">{renderValue((rest as any)[k])}</div>
           </div>
@@ -323,7 +323,7 @@ export function ArtifactDetailClient({
       </p>
 
       {meta.summary ? (
-        <div className="mt-6 rounded-2xl border border-border bg-surface p-5 text-sm text-text2">
+        <div className="mt-6 hs-card p-5 text-sm text-text2">
           <div className="text-[13px] font-semibold text-text">Summary</div>
           <div className="mt-2 leading-relaxed">{String(meta.summary)}</div>
         </div>
@@ -336,7 +336,7 @@ export function ArtifactDetailClient({
             {artifact.source_run_id ? (
               <Link
                 href="/dashboard/launch-playbook"
-                className="rounded-lg border border-border bg-surface2 px-3 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                className="hs-card2 px-3 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
               >
                 View playbook runs
               </Link>
@@ -344,7 +344,7 @@ export function ArtifactDetailClient({
             <button
               type="button"
               onClick={() => setShowStructured((v) => !v)}
-              className="rounded-lg border border-border bg-surface2 px-3 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+              className="hs-card2 px-3 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
               aria-expanded={showStructured}
             >
               {showStructured ? "Hide" : "Show"} structured output
@@ -355,7 +355,7 @@ export function ArtifactDetailClient({
         <div className="mt-4">{output.content}</div>
 
         {showStructured ? (
-          <div className="mt-6 rounded-2xl border border-border bg-surface p-5">
+          <div className="mt-6 hs-card p-5">
             <div className="text-[13px] font-semibold text-text">Structured output (advanced)</div>
             <pre className="mt-4 max-h-[520px] overflow-auto rounded-xl border border-border bg-bg p-4 text-xs leading-relaxed text-text2">
 {JSON.stringify(

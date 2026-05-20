@@ -466,7 +466,7 @@ export function InsightWorkbench({
               value={strategyProduct}
               onChange={(e) => setStrategyProduct(e.target.value)}
               placeholder="e.g. AI Marketing Workbench — Campaigns module"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
           <div>
@@ -480,7 +480,7 @@ export function InsightWorkbench({
                   ? "e.g. Reps are hearing 'we already have HubSpot for this' on 60% of calls this quarter…"
                   : "e.g. NPS detractors mention onboarding friction as the top reason in 3 consecutive quarters…"
               }
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
         </div>
@@ -505,7 +505,7 @@ export function InsightWorkbench({
         {strategyOutput ? (
           <div className="mt-3">
             <div className="mb-1 text-xs text-text2">Strategy signals</div>
-            <pre className="whitespace-pre-wrap rounded-xl border border-border bg-surface p-3 text-sm text-heading">
+            <pre className="whitespace-pre-wrap hs-card p-3 text-sm text-heading">
               {strategyOutput}
             </pre>
           </div>
@@ -588,7 +588,7 @@ export function InsightWorkbench({
           {events.events.map((ev, i) => (
             <div
               key={ev.id}
-              className="rounded-2xl border border-border bg-surface p-4 shadow-sm"
+              className="hs-card p-4 shadow-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <input
@@ -600,7 +600,7 @@ export function InsightWorkbench({
                     replaceEventsList(next);
                   }}
                   placeholder="Conference or event name (e.g. SIIA National Conference — AI Forum)"
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-3 py-2 text-sm font-medium text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                  className="min-w-0 flex-1 hs-card2 px-3 py-2 text-sm font-medium text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                 />
                 <button
                   type="button"
@@ -623,7 +623,7 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="https://conference.example.com"
-                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                    className="w-full hs-card2 px-2 py-1.5 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                   />
                 </div>
                 {hrefForUserUrl(ev.eventUrl) ? (
@@ -650,7 +650,7 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="Feb 19–20, 2025"
-                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                    className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
                   />
                 </div>
                 <div>
@@ -664,7 +664,7 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="City / venue / virtual"
-                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                    className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
                   />
                 </div>
                 <div>
@@ -678,7 +678,7 @@ export function InsightWorkbench({
                       replaceEventsList(next);
                     }}
                     placeholder="Booth, pavilion, session track"
-                    className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                    className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
                   />
                 </div>
               </div>
@@ -696,7 +696,7 @@ export function InsightWorkbench({
                     }}
                     rows={4}
                     placeholder="One per line: name, role (e.g. Alex Chen — PMM; Jordan — AE)"
-                    className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                    className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                   />
                 </div>
                 <div>
@@ -711,7 +711,7 @@ export function InsightWorkbench({
                     }}
                     rows={4}
                     placeholder="Reg deadline, booth setup, ship collateral, travel days, show floor hours…"
-                    className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                    className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                   />
                 </div>
               </div>
@@ -728,7 +728,7 @@ export function InsightWorkbench({
                   }}
                   rows={4}
                   placeholder="Hotel & confirmation, flights, badge pickup, parking, dress code, budget code, internal briefing doc link, emergency contact…"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                 />
               </div>
 
@@ -744,7 +744,7 @@ export function InsightWorkbench({
                   }}
                   rows={3}
                   placeholder="Pipeline targets, meetings to book, awareness, launch moments…"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                 />
               </div>
 
@@ -763,7 +763,7 @@ export function InsightWorkbench({
                       onChange={(e) => patchEventRow(i, { commercialNotes: e.target.value })}
                       rows={3}
                       placeholder="Sponsor tier, booth package, PO / budget owner, cancellation terms…"
-                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                      className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
@@ -773,7 +773,7 @@ export function InsightWorkbench({
                       onChange={(e) => patchEventRow(i, { leadCaptureNotes: e.target.value })}
                       rows={3}
                       placeholder="Scanner app, login, badge rules, data export owner…"
-                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                      className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
@@ -783,7 +783,7 @@ export function InsightWorkbench({
                       onChange={(e) => patchEventRow(i, { speakingNotes: e.target.value })}
                       rows={3}
                       placeholder="Session title, slot time, AV contact, sponsor deliverables…"
-                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                      className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
@@ -793,7 +793,7 @@ export function InsightWorkbench({
                       onChange={(e) => patchEventRow(i, { meetingsNotes: e.target.value })}
                       rows={3}
                       placeholder="Target accounts, pre-booked meetings, booth schedule, battlecard link…"
-                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                      className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
@@ -803,7 +803,7 @@ export function InsightWorkbench({
                       onChange={(e) => patchEventRow(i, { competitorNotes: e.target.value })}
                       rows={3}
                       placeholder="Who else is exhibiting; notes for reps…"
-                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                      className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                   <div>
@@ -813,7 +813,7 @@ export function InsightWorkbench({
                       onChange={(e) => patchEventRow(i, { followUpNotes: e.target.value })}
                       rows={3}
                       placeholder="Owner, SLA for leads, nurture track, CRM campaign…"
-                      className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                      className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                     />
                   </div>
                 </div>
@@ -891,7 +891,7 @@ export function InsightWorkbench({
                           replaceEventsList(next);
                         }}
                         placeholder="Task description"
-                        className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                        className="min-w-0 flex-1 hs-card2 px-2 py-1.5 text-sm text-heading"
                       />
                       <button
                         type="button"
@@ -957,7 +957,7 @@ export function InsightWorkbench({
                           value={eventCampaignProduct}
                           onChange={(e) => setEventCampaignProduct(e.target.value)}
                           placeholder="e.g. AI Marketing Workbench"
-                          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                          className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3"
                         />
                       </div>
                       <div>
@@ -968,7 +968,7 @@ export function InsightWorkbench({
                           value={eventCampaignSegment}
                           onChange={(e) => setEventCampaignSegment(e.target.value)}
                           placeholder="e.g. VP Marketing, Series B SaaS"
-                          className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+                          className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3"
                         />
                       </div>
                     </div>
@@ -1004,7 +1004,7 @@ export function InsightWorkbench({
                           }))
                         }
                         rows={18}
-                        className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+                        className="w-full hs-card2 p-3 text-sm text-heading"
                       />
                     ) : null}
                   </div>
@@ -1014,7 +1014,7 @@ export function InsightWorkbench({
           ))}
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2 lg:sticky lg:top-4 lg:self-start">
+        <div className="hs-card p-4 text-sm text-text2 lg:sticky lg:top-4 lg:self-start">
           <div className="text-sm text-heading">Past event ROI &amp; notes</div>
           <textarea
             value={events.pastNotes}
@@ -1024,7 +1024,7 @@ export function InsightWorkbench({
               schedule(v);
             }}
             rows={14}
-            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            className="mt-2 w-full hs-card2 p-3 text-sm text-heading"
           />
         </div>
       </div>
@@ -1035,7 +1035,7 @@ export function InsightWorkbench({
     return (
       <>
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="hs-card p-4">
             <div className="text-xs text-text2">NPS</div>
             <input
               type="number"
@@ -1048,7 +1048,7 @@ export function InsightWorkbench({
               className="mt-1 w-full bg-transparent text-3xl text-heading outline-none"
             />
           </div>
-          <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="hs-card p-4">
             <div className="text-xs text-text2">CSAT</div>
             <input
               value={customer.csat}
@@ -1062,7 +1062,7 @@ export function InsightWorkbench({
           </div>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="hs-card p-4">
             <div className="text-sm text-heading">VOC quotes</div>
             <div className="mt-2 space-y-2">
               {customer.quotes.map((q, i) => (
@@ -1077,12 +1077,12 @@ export function InsightWorkbench({
                     schedule(v);
                   }}
                   rows={2}
-                  className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-text2"
+                  className="w-full hs-card2 p-3 text-sm text-text2"
                 />
               ))}
             </div>
           </div>
-          <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="hs-card p-4">
             <div className="text-sm text-heading">Feedback themes</div>
             {customer.themes.map((t, i) => (
               <div key={t.id} className="mt-3">
@@ -1125,7 +1125,7 @@ export function InsightWorkbench({
                 schedule(v);
               }}
               rows={4}
-              className="mt-4 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-text2"
+              className="mt-4 w-full hs-card2 p-3 text-sm text-text2"
               placeholder="AI summary"
             />
           </div>
@@ -1139,7 +1139,7 @@ export function InsightWorkbench({
     return (
       <>
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-surface p-4">
+          <div className="hs-card p-4">
             <div className="text-sm text-heading">Objection themes</div>
             {sales.objections.map((o, i) => (
               <div key={o.id} className="mt-3">
@@ -1175,7 +1175,7 @@ export function InsightWorkbench({
               </div>
             ))}
           </div>
-          <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+          <div className="hs-card p-4 text-sm text-text2">
             <div className="text-sm text-heading">Win / loss by segment</div>
             <textarea
               value={sales.winloss}
@@ -1185,11 +1185,11 @@ export function InsightWorkbench({
                 schedule(v);
               }}
               rows={4}
-              className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+              className="mt-2 w-full hs-card2 p-3 text-sm text-heading"
             />
           </div>
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+        <div className="hs-card p-4 text-sm text-text2">
           <div className="text-sm text-heading">Recent call insights</div>
           <textarea
             value={sales.calls}
@@ -1199,7 +1199,7 @@ export function InsightWorkbench({
               schedule(v);
             }}
             rows={10}
-            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            className="mt-2 w-full hs-card2 p-3 text-sm text-heading"
           />
         </div>
         {renderStrategyFeedbackPanel()}
@@ -1227,7 +1227,7 @@ export function InsightWorkbench({
               <button
                 type="button"
                 onClick={addEvent}
-                className="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-heading hover:bg-surface2"
+                className="hs-card px-4 py-2 text-sm font-medium text-heading hover:bg-surface2"
               >
                 + Add event
               </button>

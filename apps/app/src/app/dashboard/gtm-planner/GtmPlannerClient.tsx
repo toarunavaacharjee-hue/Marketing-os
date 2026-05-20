@@ -525,7 +525,7 @@ export function GtmPlannerClient({
               value={plan.productOrFeature}
               onChange={(e) => schedule({ ...plan, productOrFeature: e.target.value })}
               placeholder="e.g. AI Campaign Builder"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -534,7 +534,7 @@ export function GtmPlannerClient({
               value={plan.segment}
               onChange={(e) => schedule({ ...plan, segment: e.target.value })}
               placeholder="e.g. Series B SaaS PMMs"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -543,7 +543,7 @@ export function GtmPlannerClient({
               type="date"
               value={plan.launchDate}
               onChange={(e) => schedule({ ...plan, launchDate: e.target.value })}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -552,7 +552,7 @@ export function GtmPlannerClient({
               value={plan.goals}
               onChange={(e) => schedule({ ...plan, goals: e.target.value })}
               placeholder="e.g. 50 trials, $200k pipeline"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
         </div>
@@ -755,7 +755,7 @@ export function GtmPlannerClient({
             onChange={(e) => schedule({ ...plan, stakeholders: e.target.value })}
             rows={7}
             maxLength={1000}
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full hs-card2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
         <div className="hs-card p-4">
@@ -774,7 +774,7 @@ export function GtmPlannerClient({
             rows={7}
             maxLength={1000}
             placeholder="e.g. Eng feature flag needs sign-off by T-2 weeks&#10;Legal review of pricing page required&#10;Competitor launching same week — monitor closely"
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full hs-card2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>

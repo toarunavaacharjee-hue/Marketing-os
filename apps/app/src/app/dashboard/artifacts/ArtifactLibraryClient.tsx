@@ -154,7 +154,7 @@ export function ArtifactLibraryClient({ environmentId }: { environmentId: string
                 {a.title}
               </div>
 
-              <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text2">
+              <div className="mt-3 flex items-center gap-2 hs-card2 px-3 py-2 text-sm text-text2">
                 <span className={a.status === "ready" ? "text-[var(--color-teal)]" : "text-text3"}>{a.status === "ready" ? "✓" : "•"}</span>
                 <span className="truncate">{a.status === "ready" ? "Generated and synced across modules" : "Start from the Launch Playbook"}</span>
               </div>

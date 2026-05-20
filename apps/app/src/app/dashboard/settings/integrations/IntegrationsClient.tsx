@@ -285,7 +285,7 @@ function IntegrationBlock({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface2 p-5 space-y-4">
+    <div className="hs-card2 p-5 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${badgeColor}`}>
@@ -369,7 +369,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoComplete="off"
-          className="w-full rounded-xl border border-border bg-surface px-3 py-2 pr-16 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+          className="w-full hs-card px-3 py-2 pr-16 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
         />
         {secret ? (
           <button

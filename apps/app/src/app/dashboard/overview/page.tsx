@@ -548,7 +548,7 @@ function InfoBlock({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface2/60 p-3">
+    <div className="hs-card2/60 p-3">
       <div className="text-[10px] font-bold uppercase tracking-[0.6px] text-text3">{title}</div>
       <div className="mt-2 space-y-2">{children}</div>
     </div>
@@ -780,7 +780,7 @@ function PmmJourneyMap() {
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {order.map((phase) => (
-          <div key={phase} className="rounded-lg border border-border bg-surface2/60 p-3">
+          <div key={phase} className="hs-card2/60 p-3">
             <div className="text-[10px] font-bold uppercase tracking-wide text-primary">{phase}</div>
             <div className="mt-1 text-[11px] leading-4 text-text3">{blurb[phase]}</div>
             <ul className="mt-2 space-y-1.5">

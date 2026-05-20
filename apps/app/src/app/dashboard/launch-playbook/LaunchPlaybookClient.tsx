@@ -92,7 +92,7 @@ export function LaunchPlaybookClient({ environmentId }: { environmentId: string 
               <div
                 role="menu"
                 aria-label="Create initiative"
-                className="absolute right-0 top-[calc(100%+8px)] w-[240px] overflow-hidden rounded-xl border border-border bg-surface text-text shadow-dropdown"
+                className="absolute right-0 top-[calc(100%+8px)] w-[240px] overflow-hidden hs-card text-text shadow-dropdown"
               >
                 <button
                   type="button"

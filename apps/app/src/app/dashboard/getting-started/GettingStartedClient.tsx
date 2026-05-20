@@ -403,7 +403,7 @@ export function GettingStartedClient({
                     </Link>
                     <Link
                       href="/dashboard/campaigns"
-                      className="rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-heading hover:bg-surface2"
+                      className="hs-card px-4 py-2 text-sm font-medium text-heading hover:bg-surface2"
                     >
                       Build a campaign →
                     </Link>
@@ -576,7 +576,7 @@ export function GettingStartedClient({
       })}
 
       {/* Quick-start templates (collapsible) */}
-      <details className="group overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+      <details className="group overflow-hidden hs-card shadow-sm">
         <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 hover:bg-surface2/50 transition-colors">
           <div>
             <div className="text-sm font-semibold text-heading">Quick-start templates</div>
