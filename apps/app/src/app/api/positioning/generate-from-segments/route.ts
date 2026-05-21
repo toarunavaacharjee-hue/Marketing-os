@@ -58,9 +58,8 @@ export async function POST(req: Request) {
       data: { user }
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
-    const _quota = await checkAiQuota();
-    if (!_quota.ok) return _quota.response;
-    const _quotaUserId = _quota.userId;
+    const quota = await checkAiQuota();
+    if (!quota.ok) return quota.response;
 
     const ctx = await getDefaultEnvironmentIdForSelectedProduct();
     if (!ctx) return NextResponse.json({ error: "No product selected." }, { status: 400 });
@@ -225,6 +224,7 @@ Write concise lines (1-2 sentences each for category/target/problem; 2-3 short c
       return NextResponse.json({ error: upErr.message }, { status: 400 });
     }
 
+    await incrementAiQuota(quota.userId);
     return NextResponse.json({ ok: true, canvas: value });
   } catch (e) {
     return NextResponse.json(

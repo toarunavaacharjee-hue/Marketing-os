@@ -28,9 +28,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       data: { user }
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
-    const _quota = await checkAiQuota();
-    if (!_quota.ok) return _quota.response;
-    const _quotaUserId = _quota.userId;
+    const quota = await checkAiQuota();
+    if (!quota.ok) return quota.response;
 
     const selected = await getDefaultEnvironmentIdForSelectedProduct();
     if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
@@ -97,6 +96,7 @@ Output ONLY valid JSON:
         : text.trim() || "No answer.";
     const needs_input = String(raw?.status ?? "").toLowerCase() === "needs_input";
 
+    await incrementAiQuota(quota.userId);
     return NextResponse.json({ answer, needs_input });
   } catch (e) {
     return NextResponse.json(

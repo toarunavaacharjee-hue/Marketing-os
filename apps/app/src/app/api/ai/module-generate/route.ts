@@ -158,10 +158,7 @@ Output plain text only (no JSON, no markdown code fences unless formatting helps
 
   const text = data.content?.find((c) => c.type === "text")?.text ?? "";
 
-  await supabase
-    .from("profiles")
-    .rpc("increment_ai_quota", { p_user_id: user.id })
-    .eq("id", user.id);
+  await supabase.rpc("increment_ai_quota", { p_user_id: user.id });
 
   return NextResponse.json({ text: text.trim() });
 }

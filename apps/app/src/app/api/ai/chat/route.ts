@@ -146,10 +146,7 @@ Rules:
     suggestions: sugg.length ? sugg : needsInput ? qs.slice(0, 3) : []
   };
 
-  await supabase
-    .from("profiles")
-    .rpc("increment_ai_quota", { p_user_id: user.id })
-    .eq("id", user.id);
+  await supabase.rpc("increment_ai_quota", { p_user_id: user.id });
 
   return NextResponse.json(payload);
 }
