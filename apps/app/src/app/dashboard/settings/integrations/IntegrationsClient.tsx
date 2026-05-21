@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useEffect, useState } from "react";
 
 type Connector = {
   enabled: boolean;
@@ -16,9 +15,6 @@ type IntegrationSettings = {
   linkedin_ads: Connector;
   meta_ads: Connector;
 };
-
-const MODULE = "integrations";
-const KEY = "connectors";
 
 const defaultConnector: Connector = {
   enabled: false,
@@ -35,11 +31,10 @@ const defaultSettings: IntegrationSettings = {
 };
 
 export default function IntegrationsClient({
-  environmentId
+  environmentId: _environmentId
 }: {
   environmentId: string;
 }) {
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [settings, setSettings] = useState<IntegrationSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -49,28 +44,27 @@ export default function IntegrationsClient({
   async function load() {
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("module_settings")
-      .select("value_json")
-      .eq("environment_id", environmentId)
-      .eq("module", MODULE)
-      .eq("key", KEY)
-      .maybeSingle();
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-
-    const value = (data?.value_json ?? null) as Partial<IntegrationSettings> | null;
-    if (value) {
-      setSettings({
-        ga4: { ...defaultConnector, ...(value.ga4 ?? {}) },
-        hubspot: { ...defaultConnector, ...(value.hubspot ?? {}) },
-        linkedin_ads: { ...defaultConnector, ...(value.linkedin_ads ?? {}) },
-        meta_ads: { ...defaultConnector, ...(value.meta_ads ?? {}) }
-      });
+    try {
+      const res = await fetch("/api/settings/integrations");
+      const data = (await res.json()) as {
+        settings?: Partial<IntegrationSettings>;
+        error?: string;
+      };
+      if (!res.ok) {
+        setError(data.error ?? "Failed to load integration settings.");
+        setLoading(false);
+        return;
+      }
+      if (data.settings) {
+        setSettings({
+          ga4: { ...defaultConnector, ...(data.settings.ga4 ?? {}) },
+          hubspot: { ...defaultConnector, ...(data.settings.hubspot ?? {}) },
+          linkedin_ads: { ...defaultConnector, ...(data.settings.linkedin_ads ?? {}) },
+          meta_ads: { ...defaultConnector, ...(data.settings.meta_ads ?? {}) }
+        });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load.");
     }
     setLoading(false);
   }
@@ -78,21 +72,30 @@ export default function IntegrationsClient({
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environmentId]);
+  }, []);
 
   async function save() {
     setSaving(true);
     setSaved(null);
     setError(null);
-    const { error } = await supabase.from("module_settings").upsert({
-      environment_id: environmentId,
-      module: MODULE,
-      key: KEY,
-      value_json: settings
-    });
+    try {
+      const res = await fetch("/api/settings/integrations", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ settings })
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "Failed to save.");
+      } else {
+        setSaved("Integration settings saved.");
+        // Reload to get fresh masked values from server
+        await load();
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save.");
+    }
     setSaving(false);
-    if (error) setError(error.message);
-    else setSaved("Integration settings saved.");
   }
 
   function update<K extends keyof IntegrationSettings>(
@@ -109,15 +112,15 @@ export default function IntegrationsClient({
     <div className="space-y-4">
       {/* Security notice */}
       <div className="rounded-xl border border-amber/30 bg-amber/8 px-4 py-3 text-sm text-text2">
-        <span className="font-semibold text-text">Security:</span> Tokens are stored in your
-        workspace database, scoped to your authenticated session via Supabase RLS. Never
-        commit tokens to source control — configure them only here.
+        <span className="font-semibold text-text">Security:</span> Tokens are stored
+        server-side and never sent to the browser in plaintext. Saved tokens appear masked
+        (••••xxxx). Clear a field and enter a new value to rotate a token.
       </div>
 
       {loading ? (
-        <div className="saas-card p-6 text-sm text-text2">Loading…</div>
+        <div className="hs-card p-6 text-sm text-text2">Loading…</div>
       ) : (
-        <div className="saas-card p-6 space-y-6">
+        <div className="hs-card p-6 space-y-6">
           {error ? (
             <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
               {error}
@@ -331,9 +334,7 @@ function IntegrationBlock({
       </details>
 
       {enabled ? (
-        <div className="grid gap-3 md:grid-cols-2">
-          {children}
-        </div>
+        <div className="grid gap-3 md:grid-cols-2">{children}</div>
       ) : (
         <div className="rounded-lg border border-dashed border-border px-3 py-2 text-[12px] text-text3">
           Enable this integration to enter credentials.
@@ -359,6 +360,7 @@ function Field({
   secret?: boolean;
 }) {
   const [show, setShow] = useState(false);
+  const isMaskedValue = value.startsWith("••");
   return (
     <div className="flex flex-col gap-1">
       <label className="text-[11px] font-semibold text-text2">{label}</label>
@@ -372,13 +374,20 @@ function Field({
           className="w-full hs-card px-3 py-2 pr-16 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
         />
         {secret ? (
-          <button
-            type="button"
-            onClick={() => setShow((s) => !s)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 py-0.5 text-[10px] font-medium text-text3 hover:text-text"
-          >
-            {show ? "hide" : "show"}
-          </button>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {isMaskedValue ? (
+              <span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-teal">
+                saved
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => setShow((s) => !s)}
+              className="rounded px-1.5 py-0.5 text-[10px] font-medium text-text3 hover:text-text"
+            >
+              {show ? "hide" : "show"}
+            </button>
+          </div>
         ) : null}
       </div>
       {hint ? <div className="text-[11px] leading-relaxed text-text3">{hint}</div> : null}

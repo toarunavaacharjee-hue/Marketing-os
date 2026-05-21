@@ -48,3 +48,110 @@ CREATE POLICY "profiles_update_own"
 -- 6. Platform admins need to read other profiles for the operator console.
 --    The operator console uses the service role client, so this is already covered.
 --    No additional policy required.
+
+-- ─── module_settings RLS (H-3) ───────────────────────────────────────────────
+-- module_settings stores per-environment configuration for every module,
+-- including integration tokens (HubSpot, LinkedIn Ads, Meta Ads).
+--
+-- Policy design:
+--   SELECT  — workspace members can read non-sensitive modules;
+--             only admin/owner can read rows where module = 'integrations'
+--             (tokens are additionally masked server-side before reaching the browser)
+--   INSERT  — same scoping as SELECT
+--   UPDATE  — same scoping as SELECT
+--   DELETE  — admin/owner only for all modules
+--
+-- The join chain: module_settings.environment_id
+--   → product_environments.id
+--   → products.company_id
+--   → company_members (user_id = auth.uid())
+-- ─────────────────────────────────────────────────────────────────────────────
+
+ALTER TABLE public.module_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "module_settings_select" ON public.module_settings;
+CREATE POLICY "module_settings_select"
+  ON public.module_settings
+  FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.product_environments pe
+      JOIN public.products p ON p.id = pe.product_id
+      JOIN public.company_members cm ON cm.company_id = p.company_id
+      WHERE pe.id = module_settings.environment_id
+        AND cm.user_id = auth.uid()
+        AND (
+          module_settings.module NOT IN ('integrations')
+          OR cm.role IN ('owner', 'admin')
+        )
+    )
+  );
+
+DROP POLICY IF EXISTS "module_settings_insert" ON public.module_settings;
+CREATE POLICY "module_settings_insert"
+  ON public.module_settings
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM public.product_environments pe
+      JOIN public.products p ON p.id = pe.product_id
+      JOIN public.company_members cm ON cm.company_id = p.company_id
+      WHERE pe.id = module_settings.environment_id
+        AND cm.user_id = auth.uid()
+        AND (
+          module_settings.module NOT IN ('integrations')
+          OR cm.role IN ('owner', 'admin')
+        )
+    )
+  );
+
+DROP POLICY IF EXISTS "module_settings_update" ON public.module_settings;
+CREATE POLICY "module_settings_update"
+  ON public.module_settings
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.product_environments pe
+      JOIN public.products p ON p.id = pe.product_id
+      JOIN public.company_members cm ON cm.company_id = p.company_id
+      WHERE pe.id = module_settings.environment_id
+        AND cm.user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM public.product_environments pe
+      JOIN public.products p ON p.id = pe.product_id
+      JOIN public.company_members cm ON cm.company_id = p.company_id
+      WHERE pe.id = module_settings.environment_id
+        AND cm.user_id = auth.uid()
+        AND (
+          module_settings.module NOT IN ('integrations')
+          OR cm.role IN ('owner', 'admin')
+        )
+    )
+  );
+
+DROP POLICY IF EXISTS "module_settings_delete" ON public.module_settings;
+CREATE POLICY "module_settings_delete"
+  ON public.module_settings
+  FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.product_environments pe
+      JOIN public.products p ON p.id = pe.product_id
+      JOIN public.company_members cm ON cm.company_id = p.company_id
+      WHERE pe.id = module_settings.environment_id
+        AND cm.user_id = auth.uid()
+        AND cm.role IN ('owner', 'admin')
+    )
+  );
