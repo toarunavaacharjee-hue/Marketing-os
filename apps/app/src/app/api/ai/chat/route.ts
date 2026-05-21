@@ -148,7 +148,7 @@ Rules:
 
   await supabase
     .from("profiles")
-    .update({ ai_queries_used: used + 1 })
+    .rpc("increment_ai_quota", { p_user_id: user.id })
     .eq("id", user.id);
 
   return NextResponse.json(payload);

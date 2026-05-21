@@ -58,7 +58,9 @@ export async function POST(req: Request) {
   }
   const prompt = hints.length ? `${hints.join(" ")}\n\n---\n\n${promptRaw}` : promptRaw;
 
-  const systemCustom = (body.system ?? "").trim();
+  // M-4 fix: ignore caller-supplied system prompts to prevent prompt injection.
+  // The system prompt is always the server-controlled default below.
+  const systemCustom = "";
 
   const maxTokens =
     length === "long" ? 4096 : length === "short" ? 1200 : 2048;
@@ -158,7 +160,7 @@ Output plain text only (no JSON, no markdown code fences unless formatting helps
 
   await supabase
     .from("profiles")
-    .update({ ai_queries_used: used + 1 })
+    .rpc("increment_ai_quota", { p_user_id: user.id })
     .eq("id", user.id);
 
   return NextResponse.json({ text: text.trim() });

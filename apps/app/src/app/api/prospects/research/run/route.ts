@@ -1,3 +1,4 @@
+import { checkAiQuota, incrementAiQuota } from "@/lib/ai/quotaGuard";
 import { NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -16,6 +17,9 @@ export async function POST(req: Request) {
       data: { user }
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    const _quota = await checkAiQuota();
+    if (!_quota.ok) return _quota.response;
+    const _quotaUserId = _quota.userId;
 
     const selected = await getDefaultEnvironmentIdForSelectedProduct();
     if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
@@ -77,6 +81,7 @@ export async function POST(req: Request) {
       })
     );
 
+    await incrementAiQuota(_quotaUserId);
     return NextResponse.json({ jobId: data.id }, { status: 202 });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";

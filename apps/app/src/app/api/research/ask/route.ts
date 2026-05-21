@@ -1,3 +1,4 @@
+import { checkAiQuota, incrementAiQuota } from "@/lib/ai/quotaGuard";
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
