@@ -34,6 +34,7 @@ export function logActivity(params: LogActivityParams): void {
   void (async () => {
     try {
       const admin = createSupabaseServiceRoleClient();
+      if (!admin) return;
       await admin.from("activity_log").insert({
         user_id: params.userId,
         company_id: params.companyId ?? null,
