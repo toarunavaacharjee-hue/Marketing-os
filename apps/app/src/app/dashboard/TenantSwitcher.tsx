@@ -58,8 +58,8 @@ export function TenantSwitcher({
   }
 
   return (
-    <div className="px-4 pb-3 pt-3">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-text3">
+    <div className="px-4 pb-2.5 pt-3">
+      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-on-dark/40">
         Workspace
       </div>
 
@@ -82,7 +82,7 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className="mb-2 mt-3 text-xs font-semibold uppercase tracking-wider text-text3">
+      <div className="mb-1.5 mt-2.5 text-[10px] font-semibold uppercase tracking-wider text-on-dark/40">
         Product
       </div>
       <select
@@ -104,22 +104,20 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className="mt-3 space-y-1 text-xs text-on-dark/75">
-        <div>
-          Want to add a product to this company?{" "}
-          <a
-            className="font-medium text-primary-light hover:underline"
-            href="/dashboard/settings/product#add-product"
-          >
-            Add product
-          </a>
-        </div>
-        <div>
-          Need a new company?{" "}
-          <a className="font-medium text-primary-light hover:underline" href="/onboarding">
-            Create company
-          </a>
-        </div>
+      <div className="mt-2.5 flex items-center gap-2 text-[11px] text-on-dark/45">
+        <a
+          href="/dashboard/settings/product#add-product"
+          className="font-medium text-primary-light/80 hover:text-primary-light hover:underline transition-colors"
+        >
+          + Add product
+        </a>
+        <span>·</span>
+        <a
+          href="/onboarding"
+          className="font-medium text-primary-light/80 hover:text-primary-light hover:underline transition-colors"
+        >
+          New company
+        </a>
       </div>
     </div>
   );

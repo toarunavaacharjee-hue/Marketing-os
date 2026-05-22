@@ -77,6 +77,7 @@ const NAV: NavSection[] = [
     items: [
       { label: "Marketing Workbench", slug: "",               icon: "squares"   },
       { label: "Overview",            slug: "overview",       icon: "bolt"      },
+      { label: "AI Copilot",          slug: "copilot",        icon: "sparkles"  },
       { label: "Help & docs",         slug: "help",           icon: "book"      },
     ]
   },
@@ -341,15 +342,28 @@ export function DashboardShell({
                   aria-expanded={open}
                   className="group flex w-full items-center gap-1.5 px-4 pb-1 pt-3 text-left"
                 >
-                  <span className="min-w-0 flex-1 text-[10px] font-semibold uppercase tracking-[0.7px] text-[rgba(255,255,255,0.38)] transition-colors group-hover:text-[rgba(255,255,255,0.6)]">
+                  {!open && activeSectionLabel === section.label && (
+                    <span className="mr-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-light" aria-hidden />
+                  )}
+                  <span className={`min-w-0 flex-1 text-[10px] font-semibold uppercase tracking-[0.7px] transition-colors group-hover:text-[rgba(255,255,255,0.75)] ${
+                    !open && activeSectionLabel === section.label
+                      ? "text-[rgba(255,255,255,0.75)]"
+                      : "text-[rgba(255,255,255,0.5)]"
+                  }`}>
                     {section.label}
                   </span>
-                  <span
-                    className={`shrink-0 text-[10px] text-[rgba(255,255,255,0.3)] transition-transform duration-200 ${open ? "rotate-90" : ""}`}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     aria-hidden
+                    className={`h-3 w-3 shrink-0 text-[rgba(255,255,255,0.3)] transition-transform duration-200 group-hover:text-[rgba(255,255,255,0.55)] ${open ? "rotate-90" : ""}`}
                   >
-                    ›
-                  </span>
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
                 </button>
 
                 {open && (
@@ -363,9 +377,9 @@ export function DashboardShell({
                           key={m.slug || "home"}
                           href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
                           onClick={onNavigate}
-                          className={`group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors duration-150 ${
+                          className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-[7px] text-[13px] font-medium transition-colors duration-150 ${
                             active
-                              ? "bg-white/12 text-white"
+                              ? "bg-white/[0.11] text-white before:absolute before:inset-y-1 before:left-0 before:w-[3px] before:rounded-r before:bg-primary-light"
                               : allowed
                                 ? "text-[rgba(255,255,255,0.72)] hover:bg-white/8 hover:text-white"
                                 : "text-[rgba(255,255,255,0.38)] hover:bg-white/8 hover:text-[rgba(255,255,255,0.6)]"
@@ -428,8 +442,14 @@ export function DashboardShell({
           <div className="flex items-center justify-between rounded-lg border border-white/8 bg-white/5 px-3 py-2">
             <div className="flex items-center gap-2 text-[11px]">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  aiStatus === "connected" ? "bg-teal" : anthropicReady ? "bg-amber" : "bg-on-dark/25"
+                className={`h-2 w-2 rounded-full shrink-0 ${
+                  aiStatus === "connected"
+                    ? "bg-teal animate-pulse"
+                    : aiStatus === "error"
+                      ? "bg-red-400"
+                      : anthropicReady
+                        ? "bg-amber"
+                        : "bg-on-dark/25"
                 }`}
                 aria-hidden
               />
