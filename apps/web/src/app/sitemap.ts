@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 import { BLOG_POSTS } from "@/lib/blog/posts";
-import { getSiteUrl } from "@/lib/siteUrl";
+
+const CANONICAL = "https://orahtechandmarketing.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = getSiteUrl();
+  const base = CANONICAL;
   const now = new Date();
 
   const staticRoutes: Array<{ path: string; priority: number }> = [

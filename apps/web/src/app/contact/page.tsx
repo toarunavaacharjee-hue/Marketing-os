@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact AI Marketing Workbench for support, partnerships, or questions."
+  description: "Contact AI Marketing Workbench for support, partnerships, or questions.",
+  alternates: { canonical: "/contact" }
 };
 
 export default function ContactPage() {

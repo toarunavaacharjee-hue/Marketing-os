@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Resources",
-  description: "Docs, product updates, and resources for AI Marketing Workbench."
+  description: "Docs, product updates, and resources for AI Marketing Workbench.",
+  alternates: { canonical: "/resources" }
 };
 
 export default function ResourcesPage() {

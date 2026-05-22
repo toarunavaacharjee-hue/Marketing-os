@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Status",
-  description: "Service status for AI Marketing Workbench."
+  description: "Service status for AI Marketing Workbench.",
+  alternates: { canonical: "/status" }
 };
 
 const systems = [

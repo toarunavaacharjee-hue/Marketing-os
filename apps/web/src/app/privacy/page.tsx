@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Privacy Policy · AI Marketing Workbench",
-  description: "Privacy policy for AI Marketing Workbench."
+  description: "Privacy policy for AI Marketing Workbench.",
+  alternates: { canonical: "/privacy" }
 };
 
 export default function PrivacyPage() {

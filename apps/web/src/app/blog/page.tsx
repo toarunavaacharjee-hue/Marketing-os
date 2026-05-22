@@ -5,7 +5,8 @@ import { BlogModernClient } from "@/app/blog/BlogModernClient";
 
 export const metadata: Metadata = {
   title: "Blog | AI Marketing Workbench",
-  description: "Templates, frameworks, and playbooks for PMM & GTM teams shipping weekly."
+  description: "Templates, frameworks, and playbooks for PMM & GTM teams shipping weekly.",
+  alternates: { canonical: "/blog" }
 };
 
 export default async function BlogIndexPage() {

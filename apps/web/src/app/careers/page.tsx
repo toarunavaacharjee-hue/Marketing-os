@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Careers",
-  description: "Careers at AI Marketing Workbench. Help build the operating system for product marketing and GTM teams."
+  description: "Careers at AI Marketing Workbench. Help build the operating system for product marketing and GTM teams.",
+  alternates: { canonical: "/careers" }
 };
 
 const roles = [

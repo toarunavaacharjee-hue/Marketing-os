@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Company",
-  description: "Learn about AI Marketing Workbench: mission, values, and how we help GTM teams ship weekly."
+  description: "Learn about AI Marketing Workbench: mission, values, and how we help GTM teams ship weekly.",
+  alternates: { canonical: "/company" }
 };
 
 export default function CompanyPage() {
