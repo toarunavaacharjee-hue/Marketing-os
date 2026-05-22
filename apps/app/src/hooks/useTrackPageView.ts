@@ -15,12 +15,12 @@ export function useTrackPageView(): void {
   useEffect(() => {
     if (pathname === lastTracked.current) return;
     lastTracked.current = pathname;
-    const module = pathToModule(pathname);
-    if (!module) return;
+    const moduleSlug = pathToModule(pathname);
+    if (!moduleSlug) return;
     void fetch("/api/track/page-view", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ module, path: pathname })
+      body: JSON.stringify({ module: moduleSlug, path: pathname })
     });
   }, [pathname]);
 }
