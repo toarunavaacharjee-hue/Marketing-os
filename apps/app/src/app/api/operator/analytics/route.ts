@@ -103,6 +103,7 @@ export async function GET() {
   if (!gate.ok) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
 
   const admin = createSupabaseServiceRoleClient();
+  if (!admin) return NextResponse.json({ error: "Missing SUPABASE_SERVICE_ROLE_KEY on server." }, { status: 500 });
 
   const now = new Date();
   const d1 = new Date(now.getTime() - 1 * 86400000).toISOString();
