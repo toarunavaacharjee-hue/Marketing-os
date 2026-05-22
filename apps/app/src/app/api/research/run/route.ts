@@ -146,7 +146,7 @@ export async function POST() {
 
     if (process.env.VERCEL) {
       waitUntil(job);
-      await incrementAiQuota(quota.userId);
+      await incrementAiQuota(quota.userId, "market-research");
       return NextResponse.json(
         {
           scan_id: scanId,
@@ -166,7 +166,7 @@ export async function POST() {
     if (finalErr) {
       return NextResponse.json({ error: finalErr.message }, { status: 500 });
     }
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "market-research");
     return NextResponse.json({
       scan_id: scanId,
       status: finalScan?.status ?? "unknown",

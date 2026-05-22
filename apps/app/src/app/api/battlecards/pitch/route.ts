@@ -425,7 +425,7 @@ Task: JSON only — battlecard vs competitor for this persona, or needs_input + 
       onConflict: "environment_id,competitor_id,persona_id"
     });
 
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "battlecards");
     return NextResponse.json({ ok: true, needs_input: false, markdown, pitch_json: parsed });
   } catch (e) {
     return NextResponse.json(

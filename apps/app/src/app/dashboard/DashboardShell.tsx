@@ -10,6 +10,7 @@ import { ProfileCompletenessBanner } from "@/app/dashboard/_components/ProfileCo
 import { NextStepNudge } from "@/app/dashboard/_components/NextStepNudge";
 import { ToastProvider } from "@/app/dashboard/_components/Toast";
 import { getEntitlements, isSlugAllowed } from "@/lib/planEntitlements";
+import { useTrackPageView } from "@/hooks/useTrackPageView";
 
 // ── Nav icon SVG paths (24 × 24 outline, stroke-width 1.5) ──────────────────
 const ICON_PATHS: Record<string, string> = {
@@ -142,6 +143,7 @@ export function DashboardShell({
   selectedProductId: string | null;
 }) {
   const pathname = usePathname();
+  useTrackPageView();
   const [mobileOpen, setMobileOpen] = useState(false);
   const ent = useMemo(() => getEntitlements(companyPlan ?? "starter"), [companyPlan]);
 

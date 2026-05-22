@@ -145,7 +145,7 @@ ${text}`;
       );
     }
 
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "battlecards");
     return NextResponse.json({ ok: true, fields });
   } catch (e) {
     return NextResponse.json(

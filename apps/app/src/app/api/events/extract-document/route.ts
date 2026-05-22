@@ -170,7 +170,7 @@ ${text}`;
       return NextResponse.json({ error: "Could not infer an event name from the document." }, { status: 400 });
     }
 
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "events");
     return NextResponse.json({ ok: true, events: valid });
   } catch (e) {
     return NextResponse.json(

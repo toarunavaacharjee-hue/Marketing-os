@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
+import { getCompanyPlanForSelectedCompany, getSelectedCompanyId } from "@/lib/companyContext";
 import { getEntitlements, isAiMonthlyQuotaExceeded } from "@/lib/planEntitlements";
+import { logActivity } from "@/lib/analytics/logActivity";
 
 type QuotaOk = { ok: true; userId: string; used: number };
 type QuotaBlocked = { ok: false; response: NextResponse };
 export type QuotaResult = QuotaOk | QuotaBlocked;
 
-/**
- * Check AI quota for the current request user.
- * Returns ok=false with a ready-to-return NextResponse if unauthenticated or over limit.
- */
 export async function checkAiQuota(): Promise<QuotaResult> {
   const supabase = createSupabaseServerClient();
   const {
@@ -37,6 +34,14 @@ export async function checkAiQuota(): Promise<QuotaResult> {
 
   if (isAiMonthlyQuotaExceeded(ent, used)) {
     const cap = ent.aiQueriesPerMonth ?? 0;
+    const companyId = await getSelectedCompanyId();
+    logActivity({
+      userId: user.id,
+      companyId,
+      event: "quota_exceeded",
+      status: "quota_exceeded",
+      metadata: { cap, used, plan }
+    });
     return {
       ok: false,
       response: NextResponse.json(
@@ -52,12 +57,11 @@ export async function checkAiQuota(): Promise<QuotaResult> {
   return { ok: true, userId: user.id, used };
 }
 
-/**
- * Atomically increment ai_queries_used for the given user via a database-side RPC,
- * preventing race conditions when concurrent requests read and write the same counter.
- * See supabase/security_hardening.sql for the increment_ai_quota function definition.
- */
-export async function incrementAiQuota(userId: string): Promise<void> {
+// Atomically increment the quota counter and log the AI query event.
+// Pass the module slug so the operator analytics can break down AI usage per feature.
+export async function incrementAiQuota(userId: string, module?: string): Promise<void> {
   const supabase = createSupabaseServerClient();
   await supabase.rpc("increment_ai_quota", { p_user_id: userId });
+  const companyId = await getSelectedCompanyId();
+  logActivity({ userId, companyId, event: "ai_query", module: module ?? null });
 }

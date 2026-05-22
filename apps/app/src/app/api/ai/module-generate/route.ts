@@ -7,6 +7,8 @@ import {
 import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
 import { getEntitlements, isAiMonthlyQuotaExceeded } from "@/lib/planEntitlements";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
+import { logActivity } from "@/lib/analytics/logActivity";
+import { getSelectedCompanyId } from "@/lib/companyContext";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type?: string; text?: string }>;
@@ -159,6 +161,7 @@ Output plain text only (no JSON, no markdown code fences unless formatting helps
   const text = data.content?.find((c) => c.type === "text")?.text ?? "";
 
   await supabase.rpc("increment_ai_quota", { p_user_id: user.id });
+  logActivity({ userId: user.id, companyId: await getSelectedCompanyId(), event: "ai_query", module: "content-studio" });
 
   return NextResponse.json({ text: text.trim() });
 }

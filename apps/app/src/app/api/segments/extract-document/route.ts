@@ -202,7 +202,7 @@ ${text}`;
       positioning_summary: asStr(ppRaw.positioning_summary)
     };
 
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "icp-segmentation");
     return NextResponse.json({
       ok: true,
       environmentId: ctx.environmentId,

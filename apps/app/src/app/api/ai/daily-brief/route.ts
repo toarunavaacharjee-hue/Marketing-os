@@ -99,7 +99,7 @@ Rules:
       : [];
     const summary = lines.length ? lines.join("\n") : text.trim() || "No summary returned.";
 
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "daily-brief");
     return NextResponse.json({ summary, needs_input: false });
   } catch (e) {
     return NextResponse.json(

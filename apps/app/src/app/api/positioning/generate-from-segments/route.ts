@@ -224,7 +224,7 @@ Write concise lines (1-2 sentences each for category/target/problem; 2-3 short c
       return NextResponse.json({ error: upErr.message }, { status: 400 });
     }
 
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "positioning-studio");
     return NextResponse.json({ ok: true, canvas: value });
   } catch (e) {
     return NextResponse.json(

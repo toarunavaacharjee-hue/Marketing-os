@@ -96,7 +96,7 @@ Output ONLY valid JSON:
         : text.trim() || "No answer.";
     const needs_input = String(raw?.status ?? "").toLowerCase() === "needs_input";
 
-    await incrementAiQuota(quota.userId);
+    await incrementAiQuota(quota.userId, "prospect-research");
     return NextResponse.json({ answer, needs_input });
   } catch (e) {
     return NextResponse.json(
