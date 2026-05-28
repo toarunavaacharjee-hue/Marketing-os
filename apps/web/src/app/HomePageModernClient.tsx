@@ -272,7 +272,61 @@ export default function HomePageModernClient({
           </div>
         </section>
 
-        {/* ── SECTION 3: AI DOES THE HEAVY LIFTING ── */}
+        {/* ── SECTION 3: THE COST TODAY ── */}
+        <section data-reveal className="mt-24">
+          <Kicker>The cost today</Kicker>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
+            Your story leaks revenue every day.
+          </h2>
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-text2 sm:text-[15px]">
+            It's not a content problem. It's a coordination problem. The positioning doc lives in Notion. The battlecard is two versions behind. The rep improvises. The launch is forgotten by week four.
+          </p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              {
+                kicker: "Revenue leakage",
+                heading: "Reps improvise in live deals. No one notices until the loss.",
+                body: "Inconsistent value articulation in openers, discovery, and objection handling. It's not a lazy rep problem. It's an avoidable PMM coordination failure.",
+                icon: "💸"
+              },
+              {
+                kicker: "Narrative drift",
+                heading: "Five teams. Five versions of the story.",
+                body: "Sales adapts the pitch. Enablement rewrites the deck. AI generates a sixth version. No one governs which one is true. Your ICP, positioning, and campaign messaging diverge silently.",
+                icon: "📡"
+              },
+              {
+                kicker: "Post-launch decay",
+                heading: "Launches produce activity. Not adoption.",
+                body: "Deck downloads don't mean the field carries the story. Without a connected workspace keeping strategy live, messaging reverts within weeks and the launch investment evaporates.",
+                icon: "📉"
+              }
+            ].map(({ kicker, heading, body, icon }) => (
+              <div key={kicker} className="rounded-2xl border border-border bg-surface p-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface2 text-[20px]">
+                  {icon}
+                </div>
+                <div className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-text3">{kicker}</div>
+                <div className="mt-2 text-[15px] font-semibold leading-snug text-text" style={{ fontFamily: "var(--font-heading)" }}>
+                  {heading}
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-text2">{body}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5">
+            <div className="text-[14px] font-semibold text-text">
+              AI Marketing Workbench fixes coordination, not just copy.
+            </div>
+            <p className="mt-1 text-sm leading-relaxed text-text2">
+              ICP, positioning, messaging, battlecards, and campaigns all share one connected context. When positioning updates, battlecards and campaign briefs update from the same source. The story stays consistent without a governance meeting.
+            </p>
+          </div>
+        </section>
+
+        {/* ── SECTION 4: AI DOES THE HEAVY LIFTING ── */}
         <section data-reveal className="mt-24">
           <Kicker>AI-powered</Kicker>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
@@ -344,7 +398,7 @@ export default function HomePageModernClient({
           </div>
         </section>
 
-        {/* ── SECTION 4: EXECUTION CHAIN DIAGRAM ── */}
+        {/* ── SECTION 5: EXECUTION CHAIN DIAGRAM ── */}
         <section id="how-it-works" data-reveal className="mt-24">
           <Kicker>Workflow</Kicker>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
@@ -840,10 +894,10 @@ export default function HomePageModernClient({
         {/* ── SECTION 14: BOTTOM CTA ── */}
         <section data-reveal className="saas-card mt-24 border-primary/25 bg-gradient-to-br from-primary/10 via-surface to-surface p-8 text-center sm:p-10">
           <h3 className="text-2xl font-semibold tracking-tight text-text sm:text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
-            Stop starting from scratch. Build a GTM motion that compounds.
+            One story. Every team. No drift.
           </h3>
           <p className="mt-3 max-w-2xl mx-auto text-text2">
-            Your research, ICP, positioning, campaigns, and content — all in one connected workspace. AI writes the first draft. You close the deal.
+            ICP, positioning, messaging, campaigns, battlecards, and analytics in one connected workspace. When the market shifts, your assets shift with it — in hours, not sprints.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
