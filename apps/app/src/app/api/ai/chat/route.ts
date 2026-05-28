@@ -4,6 +4,8 @@ import { parseJsonObject } from "@/lib/extractJsonObject";
 import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
 import { getEntitlements, isAiMonthlyQuotaExceeded } from "@/lib/planEntitlements";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
+import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
+import { gatherWorkspaceContext } from "@/lib/copilot/gatherWorkspaceContext";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -16,6 +18,8 @@ type ProfileRow = {
   name?: string | null;
 };
 
+type HistoryMessage = { role: "user" | "assistant"; content: string };
+
 export async function POST(req: Request) {
   const supabase = createSupabaseServerClient();
   const {
@@ -26,11 +30,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  const body = (await req.json()) as { message?: string };
+  const body = (await req.json()) as { message?: string; history?: HistoryMessage[] };
   const message = (body.message ?? "").trim();
   if (!message) {
     return NextResponse.json({ error: "Message is required." }, { status: 400 });
   }
+  const history: HistoryMessage[] = Array.isArray(body.history) ? body.history.slice(-10) : [];
 
   const profileSelect = await supabase
     .from("profiles")
@@ -62,24 +67,42 @@ export async function POST(req: Request) {
   }
   const anthropicKey = keyRes.key;
 
+  // Gather workspace context from all modules
+  let workspaceContext = "";
+  const productCtx = await getDefaultEnvironmentIdForSelectedProduct();
+  if (productCtx) {
+    workspaceContext = await gatherWorkspaceContext(
+      supabase,
+      productCtx.environmentId,
+      productCtx.productId
+    );
+  }
+
   const systemPrompt = `You are the AI Copilot for AI Marketing Workbench. Output ONLY valid JSON. Minimize tokens — short strings, no prose outside JSON.
 
-Context: plan=${plan}, company=${company}, user=${profile?.name ?? "Unknown"}
+Context: plan=${plan}, company=${company}, user=${profile?.name ?? "Unknown"}${workspaceContext}
 
 Schema:
 {
   "status": "ok" | "needs_input",
   "message": "optional; one short line when needs_input",
   "questions": ["max 3; only if needs_input"],
-  "response": "only if status ok; tactical answer, max ~350 chars",
+  "response": "only if status ok; tactical answer grounded in the workspace context above, max ~450 chars",
   "metrics": [{"label":"","value":""}],
   "suggestions": ["max 3 follow-up prompts"]
 }
 
 Rules:
+- Use the Workspace Context to give specific, grounded answers (reference actual segments, competitors, objections, campaigns by name).
 - If the ask is too vague to act on, use status needs_input with questions only (no long response).
 - If status ok: metrics 2–3 items, suggestions 3 items.
 - No markdown fences, no keys outside the schema.`;
+
+  // Build messages array including conversation history
+  const messages: Array<{ role: "user" | "assistant"; content: string }> = [
+    ...history.map((m) => ({ role: m.role, content: m.content })),
+    { role: "user", content: message },
+  ];
 
   const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -90,10 +113,10 @@ Rules:
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 320,
+      max_tokens: 600,
       temperature: 0.3,
       system: systemPrompt,
-      messages: [{ role: "user", content: message }]
+      messages
     })
   });
 

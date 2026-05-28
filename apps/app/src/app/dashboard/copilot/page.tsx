@@ -71,12 +71,17 @@ export default function CopilotPage() {
     setLoading(true);
 
     try {
+      // Build history from current messages (exclude the opening static message)
+      const history = messages
+        .filter((m) => m.id !== "opening")
+        .map((m) => ({ role: m.role, content: m.text }));
+
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ message: text })
+        body: JSON.stringify({ message: text, history })
       });
 
       const payload = (await res.json()) as {
