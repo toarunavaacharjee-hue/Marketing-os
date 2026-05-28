@@ -272,43 +272,37 @@ export default function HomePageModernClient({
           </div>
         </section>
 
-        {/* ── SECTION 3: THE COST TODAY ── */}
+        {/* ── SECTION 3: THE DISCONNECTION PROBLEM ── */}
         <section data-reveal className="mt-24">
-          <Kicker>The cost today</Kicker>
+          <Kicker>The real problem</Kicker>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-text md:text-4xl" style={{ fontFamily: "var(--font-heading)" }}>
-            Your story leaks revenue every day.
+            Six tools. Six workflows. Zero shared context.
           </h2>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-text2 sm:text-[15px]">
-            It&apos;s not a content problem. It&apos;s a coordination problem. The positioning doc lives in Notion. The battlecard is two versions behind. The rep improvises. The launch is forgotten by week four.
+            Research lives in Notion. ICP is a spreadsheet. Positioning is a doc. Campaigns are in Asana. Battlecards are in slides. None of them talk to each other — so every deliverable starts from scratch.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
               {
-                kicker: "Revenue leakage",
-                heading: "Reps improvise in live deals. No one notices until the loss.",
-                body: "Inconsistent value articulation in openers, discovery, and objection handling. It's not a lazy rep problem. It's an avoidable PMM coordination failure.",
-                icon: "💸"
+                icon: "🔀",
+                heading: "Every handoff loses context.",
+                body: "The campaign brief doesn't know the ICP. The battlecard contradicts the positioning. Sales asks PMM for the source of truth — again. The answer is always a different doc."
               },
               {
-                kicker: "Narrative drift",
-                heading: "Five teams. Five versions of the story.",
-                body: "Sales adapts the pitch. Enablement rewrites the deck. AI generates a sixth version. No one governs which one is true. Your ICP, positioning, and campaign messaging diverge silently.",
-                icon: "📡"
+                icon: "♻️",
+                heading: "Every launch starts from scratch.",
+                body: "The research from last quarter doesn't feed this quarter's GTM plan. The segment work isn't connected to the messaging. The deck doesn't know what the battlecard says."
               },
               {
-                kicker: "Post-launch decay",
-                heading: "Launches produce activity. Not adoption.",
-                body: "Deck downloads don't mean the field carries the story. Without a connected workspace keeping strategy live, messaging reverts within weeks and the launch investment evaporates.",
-                icon: "📉"
+                icon: "🤖",
+                heading: "AI makes it worse.",
+                body: "ChatGPT generates a seventh version. It has no memory of your ICP, no knowledge of last month's positioning, no access to your segments. Generic in, generic out — every session."
               }
-            ].map(({ kicker, heading, body, icon }) => (
-              <div key={kicker} className="rounded-2xl border border-border bg-surface p-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface2 text-[20px]">
-                  {icon}
-                </div>
-                <div className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-text3">{kicker}</div>
-                <div className="mt-2 text-[15px] font-semibold leading-snug text-text" style={{ fontFamily: "var(--font-heading)" }}>
+            ].map(({ icon, heading, body }) => (
+              <div key={heading} className="rounded-2xl border border-border bg-surface p-6">
+                <div className="text-[24px]">{icon}</div>
+                <div className="mt-4 text-[15px] font-semibold leading-snug text-text" style={{ fontFamily: "var(--font-heading)" }}>
                   {heading}
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-text2">{body}</p>
@@ -318,10 +312,10 @@ export default function HomePageModernClient({
 
           <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5">
             <div className="text-[14px] font-semibold text-text">
-              AI Marketing Workbench fixes coordination, not just copy.
+              One workspace. Every module shares the same context.
             </div>
             <p className="mt-1 text-sm leading-relaxed text-text2">
-              ICP, positioning, messaging, battlecards, and campaigns all share one connected context. When positioning updates, battlecards and campaign briefs update from the same source. The story stays consistent without a governance meeting.
+              ICP feeds positioning. Positioning feeds messaging. Messaging feeds campaigns and battlecards. When one thing changes, the connected modules already know. No re-briefing. No version drift. No starting over.
             </p>
           </div>
         </section>
