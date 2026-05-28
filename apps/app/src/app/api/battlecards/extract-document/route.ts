@@ -1,3 +1,4 @@
+import { checkAiQuota, incrementAiQuota } from "@/lib/ai/quotaGuard";
 import { NextResponse } from "next/server";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -26,6 +27,8 @@ export async function POST(req: Request) {
       data: { user }
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    const quota = await checkAiQuota();
+    if (!quota.ok) return quota.response;
 
     const ctx = await getDefaultEnvironmentIdForSelectedProduct();
     if (!ctx) return NextResponse.json({ error: "No product selected." }, { status: 400 });
@@ -142,6 +145,7 @@ ${text}`;
       );
     }
 
+    await incrementAiQuota(quota.userId, "battlecards");
     return NextResponse.json({ ok: true, fields });
   } catch (e) {
     return NextResponse.json(

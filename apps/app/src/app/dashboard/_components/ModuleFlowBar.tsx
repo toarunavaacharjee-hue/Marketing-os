@@ -11,7 +11,7 @@ import {
 import { usePersistedModuleFlowExpanded } from "@/app/dashboard/_components/usePersistedModuleFlowExpanded";
 
 const bar =
-  "relative mb-6 overflow-hidden rounded-2xl border border-border bg-surface/90 px-4 py-3.5 text-[12px] shadow-sm backdrop-blur-md transition-[border-color,box-shadow] duration-200 ease-out hover:border-primary/12 hover:shadow-card";
+  "relative mb-6 overflow-hidden hs-card/90 px-4 py-3.5 text-[12px] shadow-sm backdrop-blur-md transition-[border-color,box-shadow] duration-200 ease-out hover:border-primary/12 hover:shadow-card";
 
 const barAccent =
   "pointer-events-none absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-primary to-primary-dark";
@@ -20,7 +20,7 @@ const pill =
   "inline-flex items-center rounded-md border border-border bg-surface2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text3";
 
 const btnGhost =
-  "inline-flex items-center rounded-lg border border-border bg-surface2 px-3 py-1.5 text-[11px] font-semibold text-text transition-[background-color,border-color,color,box-shadow] duration-200 ease-out hover:bg-surface3 active:scale-[0.98] motion-reduce:active:scale-100";
+  "inline-flex items-center hs-card2 px-3 py-1.5 text-[11px] font-semibold text-text transition-[background-color,border-color,color,box-shadow] duration-200 ease-out hover:bg-surface3 active:scale-[0.98] motion-reduce:active:scale-100";
 
 const btnAccentSoft =
   "inline-flex items-center rounded-lg border border-accent/35 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent transition-[background-color,border-color,box-shadow] duration-200 ease-out hover:bg-accent/15 active:scale-[0.98] motion-reduce:active:scale-100";

@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseJsonObject } from "@/lib/extractJsonObject";
 import { getCompanyPlanForSelectedCompany } from "@/lib/companyContext";
 import { getEntitlements, isAiMonthlyQuotaExceeded } from "@/lib/planEntitlements";
+import { logActivity } from "@/lib/analytics/logActivity";
+import { getSelectedCompanyId } from "@/lib/companyContext";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { gatherWorkspaceContext } from "@/lib/copilot/gatherWorkspaceContext";
@@ -197,10 +199,8 @@ Rules:
     suggested_updates: suggestedUpdates
   };
 
-  await supabase
-    .from("profiles")
-    .update({ ai_queries_used: used + 1 })
-    .eq("id", user.id);
+  await supabase.rpc("increment_ai_quota", { p_user_id: user.id });
+  logActivity({ userId: user.id, companyId: await getSelectedCompanyId(), event: "ai_query", module: "copilot" });
 
   return NextResponse.json(payload);
 }

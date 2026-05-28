@@ -57,14 +57,14 @@ export default function OnboardingPage() {
         Create a company, then create your first product. Each product gets its own Default environment.
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="space-y-4">
           <div>
             <div className="mb-1 text-xs text-text2">Company name</div>
             <input
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading"
               placeholder="AI Marketing Workbench"
             />
           </div>
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
             <input
               value={productName}
               onChange={(e) => setProductName(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading"
               placeholder="AI Marketing Workbench"
             />
           </div>
@@ -84,7 +84,7 @@ export default function OnboardingPage() {
             <input
               value={websiteUrl}
               onChange={(e) => setWebsiteUrl(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading"
               placeholder="https://aimarketingworkbench.com"
             />
           </div>

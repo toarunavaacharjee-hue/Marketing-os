@@ -68,8 +68,8 @@ export function TenantSwitcher({
     : "w-full rounded-sm border border-transparent bg-sidebar-active px-3 py-2 text-sm text-on-dark shadow-none focus:border-primary focus:outline-none focus:shadow-focus";
   const linkCls = isLight
     ? "font-medium text-primary hover:underline"
-    : "font-medium text-primary-light hover:underline";
-  const helperCls = isLight ? "text-[11px] text-slate-400" : "text-xs text-on-dark/75";
+    : "font-medium text-primary-light/80 hover:text-primary-light hover:underline transition-colors";
+  const helperCls = isLight ? "text-[11px] text-slate-400" : "text-xs text-on-dark/45";
 
   return (
     <div className={isLight ? "px-3 pb-3 pt-2" : "px-4 pb-3 pt-3"}>
@@ -111,9 +111,10 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className={`mt-2.5 flex flex-wrap gap-x-3 gap-y-1 ${helperCls}`}>
+      <div className={`mt-2.5 flex items-center gap-2 ${helperCls}`}>
         <a className={linkCls} href="/dashboard/settings/product#add-product">+ Add product</a>
-        <a className={linkCls} href="/onboarding">+ New company</a>
+        <span>·</span>
+        <a className={linkCls} href="/onboarding">New company</a>
       </div>
     </div>
   );

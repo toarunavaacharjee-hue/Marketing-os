@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
-import { NextStepNudge } from "@/app/dashboard/_components/NextStepNudge";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -163,8 +163,8 @@ function DeckCard({
 
   return (
     <div
-      className={`rounded-2xl border bg-surface shadow-sm transition-shadow ${
-        expanded ? "border-primary/40 shadow-md" : "border-border hover:border-primary/20"
+      className={`hs-card transition-shadow ${
+        expanded ? "border-primary/40 shadow-md" : "hover:border-primary/20"
       }`}
     >
       {/* Collapsed header */}
@@ -205,7 +205,7 @@ function DeckCard({
                 value={deck.title}
                 onChange={(e) => onChange({ title: e.target.value })}
                 placeholder="e.g. Q3 Sales Deck — Enterprise"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
               />
             </div>
             <div>
@@ -213,7 +213,7 @@ function DeckCard({
               <select
                 value={deck.deckType}
                 onChange={(e) => onChange({ deckType: e.target.value as DeckType })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               >
                 {DECK_TYPES.map((t) => (
                   <option key={t.id} value={t.id}>{t.label}</option>
@@ -229,7 +229,7 @@ function DeckCard({
               <select
                 value={deck.status}
                 onChange={(e) => onChange({ status: e.target.value as DeckStatus })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               >
                 {STATUS_ORDER.map((s) => (
                   <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
@@ -242,7 +242,7 @@ function DeckCard({
                 value={deck.slideCount}
                 onChange={(e) => onChange({ slideCount: e.target.value })}
                 placeholder={DECK_TYPES.find((t) => t.id === deck.deckType)?.slideHint ?? "e.g. 12"}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
             <div>
@@ -251,7 +251,7 @@ function DeckCard({
                 type="date"
                 value={deck.dueDate}
                 onChange={(e) => onChange({ dueDate: e.target.value })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               />
             </div>
             <div>
@@ -260,7 +260,7 @@ function DeckCard({
                 value={deck.presenter}
                 onChange={(e) => onChange({ presenter: e.target.value })}
                 placeholder="Name or email"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
           </div>
@@ -273,7 +273,7 @@ function DeckCard({
                 value={deck.audience}
                 onChange={(e) => onChange({ audience: e.target.value })}
                 placeholder="e.g. Enterprise VPs, Series B investors"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
             </div>
             <div>
@@ -282,7 +282,7 @@ function DeckCard({
                 type="datetime-local"
                 value={deck.presentationDate}
                 onChange={(e) => onChange({ presentationDate: e.target.value })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
               />
             </div>
           </div>
@@ -295,7 +295,7 @@ function DeckCard({
                 value={deck.deckUrl}
                 onChange={(e) => onChange({ deckUrl: e.target.value })}
                 placeholder="Google Slides, Canva, PowerPoint, Pitch…"
-                className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="min-w-0 flex-1 hs-card2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
               />
               {safeHref(deck.deckUrl) ? (
                 <a
@@ -318,7 +318,7 @@ function DeckCard({
               onChange={(e) => onChange({ outline: e.target.value })}
               rows={6}
               placeholder={`1. Title slide\n2. Problem / pain\n3. Market opportunity\n4. Solution\n5. How it works\n6. Social proof\n7. Pricing\n8. Call to action`}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+              className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -330,7 +330,7 @@ function DeckCard({
               onChange={(e) => onChange({ notes: e.target.value })}
               rows={2}
               placeholder="Key objections to cover, Q&A prep, follow-up actions…"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
 
@@ -510,21 +510,18 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
   );
 
   return (
+    <ModuleShell
+      title="Presentations"
+      subtitle="Track decks, manage slide outlines, and generate talk tracks with AI."
+      actions={
+        <span className="text-xs text-text3">
+          {loading ? "Loading…" : saving ? "Saving…" : "Saved"}
+        </span>
+      }
+    >
     <div className="space-y-5">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>Presentations</h1>
-        <p className="mt-1 text-sm text-text2">
-          Track decks, manage slide outlines, and generate talk tracks with AI.
-        </p>
-        {loading ? (
-          <p className="mt-2 text-sm text-text2">Loading…</p>
-        ) : (
-          <p className="mt-2 text-xs text-text3">{saving ? "Saving…" : "Saved to this product environment."}</p>
-        )}
-      </div>
 
-      {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div> : null}
+      {error ? <div className="hs-alert hs-alert-error">{error}</div> : null}
 
       {qFrom ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-2.5 text-sm">
@@ -539,7 +536,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
 
       {/* Upcoming presentations banner */}
       {upcoming.length > 0 ? (
-        <div className="rounded-2xl border border-amber/30 bg-amber/8 p-4">
+        <div className="hs-alert hs-alert-warn">
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">Upcoming presentations</div>
           <div className="flex flex-wrap gap-3">
             {upcoming.map((d) => (
@@ -587,7 +584,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
             <button
               type="button"
               onClick={addBlankDeck}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
+              className="hs-btn hs-btn-primary"
             >
               + New deck
             </button>
@@ -619,7 +616,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
 
         {/* Right: AI outline generator */}
         <div className="space-y-3">
-          <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+          <div className="hs-card p-4">
             <div className="text-sm font-semibold text-heading">AI slide outline</div>
             <p className="mt-1 text-xs text-text3">
               Describe the deck — AI generates a slide-by-slide outline with talk track hints.
@@ -629,7 +626,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
               value={ws.prompt}
               onChange={(e) => scheduleSave({ ...ws, prompt: e.target.value })}
               rows={4}
-              className="mt-3 w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+              className="mt-3 w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
               placeholder="e.g. 12-slide board update: GTM efficiency, pipeline, next 2 quarters; audience: board + investors"
             />
 
@@ -637,7 +634,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
               type="button"
               onClick={() => void generate()}
               disabled={generating}
-              className="mt-2 w-full rounded-xl bg-amber p-2.5 text-sm font-semibold text-black hover:bg-amber/90 disabled:opacity-50"
+              className="hs-btn hs-btn-cta mt-2 w-full disabled:opacity-50"
             >
               {generating ? "Generating…" : "Generate outline"}
             </button>
@@ -650,7 +647,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
             ) : null}
 
             {ws.lastOutput ? (
-              <div className="mt-3 space-y-2 rounded-xl border border-border bg-surface2 p-3">
+              <div className="mt-3 space-y-2 hs-card2 p-3">
                 <div className="text-[10px] font-medium uppercase tracking-wide text-text3">Generated outline</div>
                 <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap font-sans text-xs leading-relaxed text-heading">
                   {ws.lastOutput}
@@ -672,7 +669,7 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
                 </summary>
                 <ul className="mt-2 max-h-48 space-y-2 overflow-y-auto">
                   {ws.aiHistory.map((h) => (
-                    <li key={h.id} className="rounded-lg border border-border bg-surface p-2">
+                    <li key={h.id} className="hs-card p-2">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-[10px] text-text3">{new Date(h.at).toLocaleDateString()}</span>
                         <button
@@ -694,18 +691,18 @@ export function PresentationsClient({ environmentId }: { environmentId: string }
       </div>
 
       {/* Talk track notes */}
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <div className="hs-card p-4">
         <div className="mb-2 text-sm font-semibold text-heading">Talk track &amp; Q&amp;A notes</div>
         <textarea
           value={ws.talkTrackNotes}
           onChange={(e) => scheduleSave({ ...ws, talkTrackNotes: e.target.value })}
           rows={4}
-          className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
+          className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
           placeholder={`Common objections and responses\nKey proof points to hit\nDemo flow notes\nFollow-up actions after the presentation`}
         />
       </div>
 
-      <NextStepNudge />
     </div>
+    </ModuleShell>
   );
 }

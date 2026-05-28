@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { Markdown } from "@/lib/Markdown";
 import { downloadPitchPdf } from "@/lib/pitchPdf";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type Competitor = { id: string; name: string; website_url: string; created_at: string };
 type Battlecard = {
@@ -153,7 +154,7 @@ function AddPersonaForm({
       ];
 
   return (
-    <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 space-y-3">
+    <div className="hs-card p-4 space-y-3">
       <div className="text-xs font-semibold uppercase tracking-wide text-primary">
         {kind === "icp" ? "New ICP profile" : "New account prospect"}
       </div>
@@ -164,7 +165,7 @@ function AddPersonaForm({
             value={form[k]}
             onChange={(e) => onChange({ [k]: e.target.value })}
             placeholder={ph}
-            className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+            className="w-full hs-card px-2.5 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
           />
         ))}
       </div>
@@ -173,14 +174,14 @@ function AddPersonaForm({
           type="button"
           onClick={onSave}
           disabled={saving || !form.name.trim()}
-          className="rounded-xl bg-teal/15 px-3 py-1.5 text-xs font-semibold text-teal border border-teal/30 hover:bg-teal/25 disabled:opacity-60"
+          className="hs-btn hs-btn-primary disabled:opacity-60"
         >
           {saving ? "Saving…" : `Save ${kind === "icp" ? "ICP profile" : "account"}`}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text2 hover:bg-surface2"
+          className="hs-btn hs-btn-secondary"
         >
           Cancel
         </button>
@@ -205,7 +206,7 @@ function FieldTextarea({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={3}
-        className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+        className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
       />
     </div>
   );
@@ -468,40 +469,34 @@ export default function BattlecardsPage() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-5">
-
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>Battlecards</h1>
-          <p className="mt-1 text-sm text-text2">
-            Competitor notes, ICP-level positioning, and named-account pitches — tied to your Product Profile.
-          </p>
-          {approvedPositioningVersionId ? (
-            <p className="mt-1.5 text-xs text-text3">
-              Linked to approved positioning <span className="font-mono text-[11px] text-text">v{approvedPositioningVersionId.slice(0, 8)}…</span>
-            </p>
-          ) : (
-            <p className="mt-1.5 text-xs text-amber-700">
-              No approved positioning yet.{" "}
-              <Link href="/dashboard/positioning-studio" className="underline hover:no-underline">
-                Approve one in Positioning Studio
-              </Link>{" "}
-              to anchor battlecards to a spine.
-            </p>
-          )}
-        </div>
-        <Link
-          href="/dashboard/settings/product"
-          className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs font-semibold text-text hover:bg-surface3"
-        >
+    <ModuleShell
+      title="Battlecards"
+      subtitle="Competitor notes, ICP-level positioning, and named-account pitches — tied to your Product Profile."
+      actions={
+        <Link href="/dashboard/settings/product" className="hs-btn hs-btn-secondary">
           Edit competitors
         </Link>
-      </div>
+      }
+    >
+    <div className="space-y-5">
+
+      {approvedPositioningVersionId ? (
+        <p className="text-xs text-text3">
+          Linked to approved positioning <span className="font-mono text-[11px] text-text">v{approvedPositioningVersionId.slice(0, 8)}…</span>
+        </p>
+      ) : (
+        <p className="text-xs text-amber-700">
+          No approved positioning yet.{" "}
+          <Link href="/dashboard/positioning-studio" className="underline hover:no-underline">
+            Approve one in Positioning Studio
+          </Link>{" "}
+          to anchor battlecards to a spine.
+        </p>
+      )}
 
       {/* Toasts */}
-      {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div> : null}
-      {saved ? <div className="rounded-xl border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{saved}</div> : null}
+      {error ? <div className="hs-alert hs-alert-error">{error}</div> : null}
+      {saved ? <div className="hs-alert hs-alert-success">{saved}</div> : null}
 
       <AiProgressBar
         active={pitchLoading || uploadingIcp || uploadingAccount}
@@ -512,10 +507,10 @@ export default function BattlecardsPage() {
 
       {/* No competitors */}
       {!loading && competitors.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-surface p-6 text-center">
+        <div className="hs-card p-6 text-center">
           <div className="text-sm font-semibold text-heading">No competitors added yet</div>
           <p className="mt-1 text-sm text-text2">Add competitors in Settings → Product profile, then generate battlecards here.</p>
-          <Link href="/dashboard/settings/product" className="mt-4 inline-flex rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90">
+          <Link href="/dashboard/settings/product" className="hs-btn hs-btn-primary mt-4">
             Add competitors
           </Link>
         </div>
@@ -541,7 +536,7 @@ export default function BattlecardsPage() {
                 </button>
               ))}
             </div>
-            <div className="flex rounded-xl border border-border bg-surface2 p-0.5">
+            <div className="flex hs-card2 p-0.5">
               <button
                 type="button"
                 onClick={() => setMode("pitch")}
@@ -567,7 +562,7 @@ export default function BattlecardsPage() {
               <div className="grid gap-5 lg:grid-cols-2">
 
                 {/* ICP profiles */}
-                <div className="space-y-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <div className="text-sm font-semibold text-heading">ICP profiles</div>
@@ -578,7 +573,7 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => icpUploadRef.current?.click()}
                         disabled={uploadingIcp}
-                        className="rounded-lg border border-border bg-surface2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
+                        className="hs-card2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
                         title="Upload PDF / Word / Excel to auto-fill"
                       >
                         {uploadingIcp ? "Reading…" : "↑ Upload"}
@@ -624,7 +619,7 @@ export default function BattlecardsPage() {
                 </div>
 
                 {/* Account prospects */}
-                <div className="space-y-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4 space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <div className="text-sm font-semibold text-heading">Account prospects</div>
@@ -635,7 +630,7 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => accountUploadRef.current?.click()}
                         disabled={uploadingAccount}
-                        className="rounded-lg border border-border bg-surface2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
+                        className="hs-card2 px-2.5 py-1.5 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-50"
                         title="Upload RFP, account plan, or CRM export to auto-fill"
                       >
                         {uploadingAccount ? "Reading…" : "↑ Upload"}
@@ -682,11 +677,11 @@ export default function BattlecardsPage() {
               </div>
 
               {uploadError ? (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{uploadError}</div>
+                <div className="hs-alert hs-alert-error">{uploadError}</div>
               ) : null}
 
               {/* Generate panel */}
-              <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+              <div className="hs-card p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold text-heading">
@@ -697,7 +692,7 @@ export default function BattlecardsPage() {
                   <button
                     type="button"
                     onClick={() => { setPitchMarkdownIcp(null); setPitchMarkdownAccount(null); }}
-                    className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-text2 hover:bg-surface3"
+                    className="hs-btn hs-btn-secondary"
                   >
                     Clear outputs
                   </button>
@@ -724,7 +719,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => void generatePitch("icp")}
                     disabled={pitchLoading || !icpPersonaId || !activeId}
-                    className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+                    className="hs-btn hs-btn-primary disabled:opacity-60"
                   >
                     {pitchLoading ? "Working…" : "Generate ICP battlecard"}
                   </button>
@@ -732,7 +727,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => void generatePitch("account")}
                     disabled={pitchLoading || !accountPersonaId || !activeId}
-                    className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+                    className="hs-btn hs-btn-primary disabled:opacity-60"
                   >
                     {pitchLoading ? "Working…" : "Generate account battlecard"}
                   </button>
@@ -740,7 +735,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => void generateBothPitches()}
                     disabled={pitchLoading || !icpPersonaId || !accountPersonaId || !activeId}
-                    className="rounded-xl border border-border bg-surface2 px-4 py-2 text-xs font-semibold text-text hover:bg-surface3 disabled:opacity-60"
+                    className="hs-btn hs-btn-secondary disabled:opacity-60"
                   >
                     Generate both
                   </button>
@@ -748,7 +743,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => { if (pitchMarkdownIcp) downloadPitchPdf({ productName: "AI Marketing Workbench", personaName: selectedIcp?.name ?? "ICP", competitorName: activeCompetitor?.name ?? "Competitor", pitchMarkdown: pitchMarkdownIcp }); }}
                     disabled={!pitchMarkdownIcp}
-                    className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-40"
+                    className="hs-btn hs-btn-secondary disabled:opacity-40"
                   >
                     PDF · ICP
                   </button>
@@ -756,7 +751,7 @@ export default function BattlecardsPage() {
                     type="button"
                     onClick={() => { if (pitchMarkdownAccount) downloadPitchPdf({ productName: "AI Marketing Workbench", personaName: selectedAccount?.name ?? "Account", competitorName: activeCompetitor?.name ?? "Competitor", pitchMarkdown: pitchMarkdownAccount }); }}
                     disabled={!pitchMarkdownAccount}
-                    className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs font-medium text-text2 hover:bg-surface3 disabled:opacity-40"
+                    className="hs-btn hs-btn-secondary disabled:opacity-40"
                   >
                     PDF · Account
                   </button>
@@ -765,7 +760,7 @@ export default function BattlecardsPage() {
 
               {/* More detail needed */}
               {pitchQuestions?.length ? (
-                <div className="rounded-xl border border-yellow-400/30 bg-yellow-400/8 p-4">
+                <div className="hs-alert hs-alert-warn">
                   <div className="text-sm font-semibold text-heading">More detail needed</div>
                   {pitchInfo ? <div className="mt-1 text-sm text-text2">{pitchInfo}</div> : null}
                   <div className="mt-2 text-xs font-medium text-text2">Add these to the persona, then generate again:</div>
@@ -778,13 +773,13 @@ export default function BattlecardsPage() {
               ) : null}
 
               {pitchError ? (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{pitchError}</div>
+                <div className="hs-alert hs-alert-error">{pitchError}</div>
               ) : null}
 
               {/* Refine panels */}
               <div className="grid gap-4 lg:grid-cols-2">
                 {icpPersonaId ? (
-                  <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-3">
+                  <div className="hs-card p-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <div className="text-sm font-semibold text-heading">Refine ICP</div>
@@ -794,12 +789,12 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => void savePersonaImprovements("icp")}
                         disabled={personaSavingIcp}
-                        className="rounded-xl bg-teal/15 px-3 py-1.5 text-xs font-semibold text-teal border border-teal/30 hover:bg-teal/25 disabled:opacity-60"
+                        className="hs-btn hs-btn-primary disabled:opacity-60"
                       >
                         {personaSavingIcp ? "Saving…" : "Save ICP answers"}
                       </button>
                     </div>
-                    {personaSavedIcp ? <div className="rounded-xl border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{personaSavedIcp}</div> : null}
+                    {personaSavedIcp ? <div className="hs-alert hs-alert-success">{personaSavedIcp}</div> : null}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <FieldTextarea label="Industry" value={editIcp.industry} onChange={(v) => setEditIcp((p) => ({ ...p, industry: v }))} />
                       <FieldTextarea label="Buyer roles" value={editIcp.buyer_roles} onChange={(v) => setEditIcp((p) => ({ ...p, buyer_roles: v }))} />
@@ -815,7 +810,7 @@ export default function BattlecardsPage() {
                 )}
 
                 {accountPersonaId ? (
-                  <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-3">
+                  <div className="hs-card p-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <div className="text-sm font-semibold text-heading">Refine account</div>
@@ -825,12 +820,12 @@ export default function BattlecardsPage() {
                         type="button"
                         onClick={() => void savePersonaImprovements("account")}
                         disabled={personaSavingAccount}
-                        className="rounded-xl bg-teal/15 px-3 py-1.5 text-xs font-semibold text-teal border border-teal/30 hover:bg-teal/25 disabled:opacity-60"
+                        className="hs-btn hs-btn-primary disabled:opacity-60"
                       >
                         {personaSavingAccount ? "Saving…" : "Save account answers"}
                       </button>
                     </div>
-                    {personaSavedAccount ? <div className="rounded-xl border border-teal/30 bg-teal/10 px-3 py-2 text-sm text-teal">{personaSavedAccount}</div> : null}
+                    {personaSavedAccount ? <div className="hs-alert hs-alert-success">{personaSavedAccount}</div> : null}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <FieldTextarea label="Industry" value={editAccount.industry} onChange={(v) => setEditAccount((p) => ({ ...p, industry: v }))} />
                       <FieldTextarea label="Buyer roles" value={editAccount.buyer_roles} onChange={(v) => setEditAccount((p) => ({ ...p, buyer_roles: v }))} />
@@ -848,13 +843,13 @@ export default function BattlecardsPage() {
 
               {/* Output panels */}
               <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4">
                   <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-text3">ICP battlecard</div>
                   {pitchMarkdownIcp
                     ? <Markdown content={pitchMarkdownIcp} />
                     : <p className="text-sm text-text2">Generate an ICP battlecard to see segment-level positioning.</p>}
                 </div>
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="hs-card p-4">
                   <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-text3">Account battlecard</div>
                   {pitchMarkdownAccount
                     ? <Markdown content={pitchMarkdownAccount} />
@@ -868,7 +863,7 @@ export default function BattlecardsPage() {
           {mode === "competitor" ? (
             <div className="space-y-4">
               <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-4">
+                <div className="hs-card p-4 space-y-4">
                   <div>
                     <div className="mb-1.5 text-sm font-semibold text-heading">
                       Strengths <span className="font-normal text-text3">({activeCompetitor?.name ?? "Competitor"})</span>
@@ -877,7 +872,7 @@ export default function BattlecardsPage() {
                       value={activeCard?.strengths ?? ""}
                       onChange={(e) => patch({ strengths: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="What they do well — features, positioning, proof points"
                     />
                   </div>
@@ -887,20 +882,20 @@ export default function BattlecardsPage() {
                       value={activeCard?.weaknesses ?? ""}
                       onChange={(e) => patch({ weaknesses: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="Where they fall short — gaps, risks, customer complaints"
                     />
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm space-y-4">
+                <div className="hs-card p-4 space-y-4">
                   <div>
                     <div className="mb-1.5 text-sm font-semibold text-heading">Why we win</div>
                     <textarea
                       value={activeCard?.why_we_win ?? ""}
                       onChange={(e) => patch({ why_we_win: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="Your differentiators and proof against this competitor"
                     />
                   </div>
@@ -910,7 +905,7 @@ export default function BattlecardsPage() {
                       value={activeCard?.objection_handling ?? ""}
                       onChange={(e) => patch({ objection_handling: e.target.value })}
                       rows={6}
-                      className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                      className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
                       placeholder="Talk tracks, rebuttals, and traps to avoid"
                     />
                   </div>
@@ -922,7 +917,7 @@ export default function BattlecardsPage() {
                   type="button"
                   onClick={() => void save()}
                   disabled={saving || !activeId}
-                  className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+                  className="hs-btn hs-btn-primary disabled:opacity-60"
                 >
                   {saving ? "Saving…" : "Save battlecard"}
                 </button>
@@ -932,5 +927,6 @@ export default function BattlecardsPage() {
         </>
       ) : null}
     </div>
+    </ModuleShell>
   );
 }

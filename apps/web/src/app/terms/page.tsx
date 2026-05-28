@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Terms of Service · AI Marketing Workbench",
-  description: "Terms for AI Marketing Workbench."
+  description: "Terms for AI Marketing Workbench.",
+  alternates: { canonical: "/terms" }
 };
 
 export default function TermsPage() {

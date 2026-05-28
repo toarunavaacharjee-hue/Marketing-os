@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 
-type AnalyticsSettings = {
-  linkedin_ad_account?: string;
-  linkedin_access_token?: string;
+type ConnectorRow = {
+  enabled?: boolean;
+  account_id?: string;
+  token?: string;
 };
 
 type LinkedInAnalyticsElement = {
@@ -48,23 +49,24 @@ export async function GET() {
       .from("module_settings")
       .select("value_json")
       .eq("environment_id", selected.environmentId)
-      .eq("module", "analytics")
-      .eq("key", "connections")
+      .eq("module", "integrations")
+      .eq("key", "connectors")
       .maybeSingle();
 
     if (settingsError) {
       return NextResponse.json({ error: settingsError.message }, { status: 500 });
     }
 
-    const settings = (settingsRow?.value_json ?? null) as AnalyticsSettings | null;
-    const accountId = (settings?.linkedin_ad_account ?? "").trim();
-    const accessToken = (settings?.linkedin_access_token ?? "").trim();
+    const connectors = (settingsRow?.value_json ?? {}) as Record<string, ConnectorRow>;
+    const li = connectors.linkedin_ads ?? {};
+    const accountId = (li.account_id ?? "").trim();
+    const accessToken = (li.token ?? "").trim();
 
-    if (!accountId || !accessToken) {
+    if (!li.enabled || !accountId || !accessToken) {
       return NextResponse.json(
         {
           error:
-            "LinkedIn account ID and access token required. Configure in Settings → Analytics.",
+            "LinkedIn account ID and access token required. Configure in Settings → Integrations.",
           code: "NOT_CONFIGURED"
         },
         { status: 400 }

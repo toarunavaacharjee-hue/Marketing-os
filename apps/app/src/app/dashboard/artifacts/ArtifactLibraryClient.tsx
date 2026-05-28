@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type Artifact = {
   id: string;
@@ -109,23 +110,14 @@ export function ArtifactLibraryClient({ environmentId }: { environmentId: string
   }, [rows]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Library</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text" style={{ fontFamily: "var(--font-heading)" }}>
-            Artifact Library
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text2">
-            A connected set of strategic artifacts your team can reuse across launches and channels. Artifacts are generated and updated by agent workers,
-            powered by Anthropic Claude Sonnet.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
+    <ModuleShell
+      title="Artifact Library"
+      subtitle="A connected set of strategic artifacts your team can reuse across launches and channels. Artifacts are generated and updated by agent workers, powered by Anthropic Claude Sonnet."
+      actions={
+        <>
           <Link
             href="/dashboard/launch-playbook"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
+            className="hs-btn hs-btn-primary"
           >
             Open Launch Playbook
           </Link>
@@ -134,61 +126,59 @@ export function ArtifactLibraryClient({ environmentId }: { environmentId: string
             onClick={() => {
               void environmentId;
             }}
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+            className="hs-btn hs-btn-secondary"
           >
             New artifact
           </button>
-        </div>
-      </div>
-
-      <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {loading ? (
-          <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-text2">Loading artifacts…</div>
-        ) : null}
-        {artifacts.map((a) => (
-          <Link key={a.id} href={a.href} className="group rounded-2xl border border-border bg-surface p-5 shadow-card transition hover:shadow-card-hover">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-[13px] font-semibold text-text">
-                <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl text-white ${accentClass(a.accent)}`}>A</span>
-                {a.subtitle}
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {loading ? (
+            <div className="hs-card p-5 text-sm text-text2">Loading artifacts…</div>
+          ) : null}
+          {artifacts.map((a) => (
+            <Link key={a.id} href={a.href} className="hs-card hs-card-hover group p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-[13px] font-semibold text-text">
+                  <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl text-white ${accentClass(a.accent)}`}>A</span>
+                  {a.subtitle}
+                </div>
+                <span className={a.status === "ready" ? "hs-badge hs-badge-success" : "hs-badge hs-badge-neutral"}>
+                  {a.status === "ready" ? "Ready" : "Draft"}
+                </span>
               </div>
-              <span
-                className={`rounded-full border px-2.5 py-1 text-xs ${
-                  a.status === "ready" ? "border-[rgba(0,191,165,0.35)] bg-[rgba(0,191,165,0.10)] text-[var(--color-teal)]" : "border-border bg-surface2 text-text2"
-                }`}
-              >
-                {a.status === "ready" ? "Ready" : "Draft"}
-              </span>
-            </div>
 
-            <div className="mt-4 text-[16px] font-semibold tracking-tight text-text group-hover:text-primary" style={{ fontFamily: "var(--font-heading)" }}>
-              {a.title}
-            </div>
+              <div className="mt-4 text-[16px] font-semibold tracking-tight text-text group-hover:text-primary" style={{ fontFamily: "var(--font-heading)" }}>
+                {a.title}
+              </div>
 
-            <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text2">
-              <span className={a.status === "ready" ? "text-[var(--color-teal)]" : "text-text3"}>{a.status === "ready" ? "✓" : "•"}</span>
-              <span className="truncate">{a.status === "ready" ? "Generated and synced across modules" : "Start from the Launch Playbook"}</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
-        <div className="text-sm font-semibold text-text">How artifacts are created</div>
-        <div className="mt-3 grid gap-3 md:grid-cols-3">
-          {[
-            ["Agent workers", "Run long workflows in the background and keep a progress log."],
-            ["Structured outputs", "Artifacts are saved as reusable blocks, not just chat messages."],
-            ["Connected context", "Research → ICP → messaging stays tied to your product and environment."]
-          ].map(([t, d]) => (
-            <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
-              <div className="text-[13px] font-semibold text-text">{t}</div>
-              <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
-            </div>
+              <div className="mt-3 flex items-center gap-2 hs-card2 px-3 py-2 text-sm text-text2">
+                <span className={a.status === "ready" ? "text-[var(--color-teal)]" : "text-text3"}>{a.status === "ready" ? "✓" : "•"}</span>
+                <span className="truncate">{a.status === "ready" ? "Generated and synced across modules" : "Start from the Launch Playbook"}</span>
+              </div>
+            </Link>
           ))}
         </div>
+
+        <div className="hs-card p-6">
+          <div className="text-[14px] font-semibold text-heading">How artifacts are created</div>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            {[
+              ["Agent workers", "Run long workflows in the background and keep a progress log."],
+              ["Structured outputs", "Artifacts are saved as reusable blocks, not just chat messages."],
+              ["Connected context", "Research → ICP → messaging stays tied to your product and environment."]
+            ].map(([t, d]) => (
+              <div key={t} className="hs-card p-4">
+                <div className="text-[13px] font-semibold text-heading">{t}</div>
+                <div className="mt-1 text-[12px] text-text2">{d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
+    </ModuleShell>
   );
 }
 

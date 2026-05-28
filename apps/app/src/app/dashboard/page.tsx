@@ -3,6 +3,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DailyDigestCard } from "@/app/dashboard/DailyDigestCard";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { PMM_JOURNEY, type JourneyPhase } from "@/lib/pmmModuleFlow";
+export const dynamic = "force-dynamic";
+
 import { POSITIONING_KEY, POSITIONING_MODULE } from "@/lib/positioningStudio";
 
 type ScanSignal = {

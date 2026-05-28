@@ -18,6 +18,8 @@ export type WorkItem = {
   done: boolean;
   href: string;
   tags?: string[];
+  priority?: "p1" | "p2" | "p3";
+  pinned?: boolean;
 };
 
 type SettingRow = { module: string; key: string; value_json: unknown };

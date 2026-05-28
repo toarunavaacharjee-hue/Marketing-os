@@ -34,6 +34,9 @@ const modules = [
   ["Battlecards", "Sales"],
   ["Sales Intelligence", "Sales"],
   ["Customer Insights", "Insights"],
+  ["Launch Playbook", "Execution"],
+  ["Prospect Research", "Sales"],
+  ["Artifact Library", "Content"],
   ["AI Copilot", "Core"]
 ] as const;
 
@@ -43,7 +46,7 @@ const faq: [string, string][] = [
   ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
   [
     "Does AI usage have limits?",
-    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes the full module set — tiers differ by products, AI volume, seats, and support."
+    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes all 21 modules — tiers differ by products, AI volume, seats, and support."
   ],
   ["Can we use our own Anthropic key?", "Yes. A workspace admin adds a workspace-level Anthropic key under Settings → AI integration. Starter and Growth can also use the platform key if your operator enables it. Enterprise requires BYOK — Anthropic token usage is billed by Anthropic directly to the customer's account."],
   ["Is there a contract?", "Starter and Growth are month-to-month. Enterprise can be monthly or annual with custom terms."],
@@ -170,26 +173,26 @@ export default function HomePageModernClient({
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href={`${APP_URL}/signup?plan=starter`}
-                className="inline-flex items-center justify-center rounded-lg bg-amber px-5 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card transition hover:bg-amber-hover"
+                className="saas-btn saas-btn-cta px-5 py-3 text-[15px]"
               >
                 Start free →
               </Link>
               <Link
                 href="/#how-it-works"
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-5 py-3 text-[15px] font-medium text-text transition hover:bg-surface3"
+                className="saas-btn saas-btn-secondary px-5 py-3 text-[15px]"
               >
                 See how it works
               </Link>
               <Link
                 href={`${APP_URL}/dashboard`}
-                className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-[15px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
+                className="saas-btn saas-btn-accent px-5 py-3 text-[15px]"
               >
                 View demo
               </Link>
             </div>
 
             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-text3">
-              {["No demo call required", "No credit card", "All 18 modules included"].map((x) => (
+              {["No demo call required", "No credit card", "All 21 modules included"].map((x) => (
                 <span key={x} className="rounded-full border border-border bg-surface2 px-3 py-1.5">
                   {x}
                 </span>
@@ -212,7 +215,7 @@ export default function HomePageModernClient({
               </div>
 
               <div className="mt-5 space-y-3">
-                <div className="flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3">
+                <div className="flex items-center justify-between saas-card px-4 py-3">
                   <div>
                     <div className="text-[13px] font-semibold text-text">ICP Segments</div>
                     <div className="mt-0.5 text-[11px] text-text3">3 segments scored + prioritized</div>
@@ -222,7 +225,7 @@ export default function HomePageModernClient({
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3">
+                <div className="flex items-center justify-between saas-card px-4 py-3">
                   <div>
                     <div className="text-[13px] font-semibold text-text">Positioning narrative</div>
                     <div className="mt-0.5 text-[11px] text-text3">Full positioning doc + proof points</div>
@@ -232,7 +235,7 @@ export default function HomePageModernClient({
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl border border-border bg-surface px-4 py-3">
+                <div className="flex items-center justify-between saas-card px-4 py-3">
                   <div>
                     <div className="text-[13px] font-semibold text-text">GTM Plan</div>
                     <div className="mt-0.5 text-[11px] text-text3">Auto-filling from campaign handoff...</div>
@@ -256,7 +259,7 @@ export default function HomePageModernClient({
           <div className="saas-card saas-glass px-6 py-5 sm:px-8">
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
               {[
-                ["18 modules", "Full GTM stack"],
+                ["21 modules", "Full GTM stack"],
                 ["One workspace", "Not per-product pricing"],
                 ["No research limits", "Unlimited runs on Growth"],
                 ["Start in 60s", "No demo required"]
@@ -332,7 +335,7 @@ export default function HomePageModernClient({
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             {/* WITHOUT column */}
-            <div className="rounded-2xl border border-border bg-surface2 p-6">
+            <div className="saas-card2 p-6">
               <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text3 mb-4">
                 Without AI Marketing Workbench
               </div>
@@ -413,7 +416,9 @@ export default function HomePageModernClient({
               ["07", "Content Studio", "Blog posts, emails, landing copy written by AI", "~60s"],
               ["08", "Social Media", "Social posts generated per segment", "~30s"],
               ["09", "Battlecards", "Competitive rebuttals drafted from your positioning", "~60s"],
-              ["10", "Sales Intelligence", "Deal stage assets + objection handling", "~90s"]
+              ["10", "Sales Intelligence", "Deal stage assets + objection handling", "~90s"],
+              ["11", "Launch Playbook", "Track launch phases, milestones, and generate a Final Launch Pack", "~2 min"],
+              ["12", "Prospect Research", "AI account intelligence memo per target company, exportable as DOCX", "~60s"]
             ].map(([num, name, desc, time], idx, arr) => (
               <div key={num} className="relative">
                 <div className="saas-card saas-card-hover p-4 h-full">
@@ -456,7 +461,7 @@ export default function HomePageModernClient({
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {["Sources", "Competitor intel", "Customer themes", "Evidence trail"].map((x) => (
-                  <div key={x} className="rounded-xl border border-border bg-surface px-3 py-2 text-[13px] text-text2">
+                  <div key={x} className="saas-card px-3 py-2 text-[13px] text-text2">
                     {x}
                   </div>
                 ))}
@@ -469,11 +474,11 @@ export default function HomePageModernClient({
                 Artifacts your team ships from
               </div>
               <p className="mt-2 text-sm leading-relaxed text-text2">
-                Generate structured outputs and keep them versioned, reviewable, and easy to reuse across every launch.
+                Every module generates structured artifacts — positioning guides, message maps, launch packs, sales briefs — all stored in a shared Artifact Library your team can browse, reuse, and build from.
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
                 {["Positioning guide", "Message map", "Launch playbook", "Sales enablement"].map((x) => (
-                  <div key={x} className="rounded-xl border border-border bg-surface px-3 py-2 text-[13px] text-text2">
+                  <div key={x} className="saas-card px-3 py-2 text-[13px] text-text2">
                     {x}
                   </div>
                 ))}
@@ -490,7 +495,7 @@ export default function HomePageModernClient({
               </p>
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 {["GTM planner", "Campaign board", "Analytics", "Events"].map((x) => (
-                  <div key={x} className="rounded-xl border border-border bg-surface2 px-3 py-2 text-[13px] text-text2">
+                  <div key={x} className="saas-card2 px-3 py-2 text-[13px] text-text2">
                     {x}
                   </div>
                 ))}
@@ -507,7 +512,7 @@ export default function HomePageModernClient({
               </p>
               <div className="mt-4 grid gap-2 text-[13px] text-text2">
                 {["Sales Intelligence", "Customer Insights", "Battlecards"].map((x) => (
-                  <div key={x} className="rounded-xl border border-border bg-surface px-3 py-2">
+                  <div key={x} className="saas-card px-3 py-2">
                     {x}
                   </div>
                 ))}
@@ -516,10 +521,10 @@ export default function HomePageModernClient({
           </div>
         </section>
 
-        {/* ── SECTION 6: ALL 18 MODULES ── */}
+        {/* ── SECTION 6: ALL 21 MODULES ── */}
         <section id="modules" data-reveal className="saas-card mt-24 p-6 sm:p-8">
           <h2 className="text-2xl font-semibold tracking-tight text-text md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
-            All 18 modules
+            All 21 modules
           </h2>
           <p className="mt-2 text-sm text-text2">Every plan includes every module — no paywalls, no add-ons.</p>
           <div className="mt-5 grid gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
@@ -604,7 +609,7 @@ export default function HomePageModernClient({
                 <div className="mt-5">
                   <Link
                     href="/use-cases"
-                    className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-3.5 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                    className="saas-btn saas-btn-secondary px-3.5 py-2 text-[13px]"
                   >
                     View use case →
                   </Link>
@@ -623,7 +628,7 @@ export default function HomePageModernClient({
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
             {/* Generic AI column */}
-            <div className="rounded-2xl border border-border bg-surface2 p-6">
+            <div className="saas-card2 p-6">
               <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text3 mb-4">
                 Claude / ChatGPT / Gemini (standalone)
               </div>
@@ -678,10 +683,10 @@ export default function HomePageModernClient({
                 Agent workers run long tasks like research runs, drafts, and structured outputs — so your team stays unblocked while the system does the work.
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
-                <Link href="/docs#agent-workers" className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3">
+                <Link href="/docs#agent-workers" className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]">
                   Read how it works
                 </Link>
-                <Link href={`${APP_URL}/dashboard/work`} className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
+                <Link href={`${APP_URL}/dashboard/work`} className="saas-btn saas-btn-accent px-4 py-2 text-[13px]">
                   View workbench
                 </Link>
               </div>
@@ -695,7 +700,7 @@ export default function HomePageModernClient({
                   ["Keep teams aligned", "Log progress and results so everyone sees what changed and why."],
                   ["Guardrails by design", "Prefer explicit context; avoid inventing facts and unknown URLs."]
                 ].map(([t, d]) => (
-                  <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+                  <div key={t} className="saas-card2 p-4">
                     <div className="text-[13px] font-semibold text-text">{t}</div>
                     <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
                   </div>
@@ -721,7 +726,7 @@ export default function HomePageModernClient({
             <button
               type="button"
               onClick={() => setAnnual((v) => !v)}
-              className="rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3"
+              className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
             >
               {annual ? "Annual billing (~20% off)" : "Monthly billing"}
             </button>
@@ -761,7 +766,7 @@ export default function HomePageModernClient({
                 <div className="mt-6 grid gap-2">
                   <Link
                     href={`${APP_URL}/signup?plan=${p.name.toLowerCase()}`}
-                    className="inline-flex w-full items-center justify-center rounded-lg bg-amber px-4 py-3 text-sm font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover"
+                    className="saas-btn saas-btn-cta w-full px-4 py-3 text-sm"
                   >
                     Choose {p.name}
                   </Link>
@@ -777,11 +782,11 @@ export default function HomePageModernClient({
           </div>
 
           {/* What's included on every plan */}
-          <div className="mt-8 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+          <div className="mt-8 saas-card p-5 sm:p-6">
             <div className="text-[13px] font-semibold text-text mb-3">What&apos;s included on every plan</div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {[
-                "All 18 modules (no paywalls)",
+                "All 21 modules (no paywalls)",
                 "No research run limits on Growth+",
                 "No per-product charges",
                 "Self-serve — start in 60 seconds"
@@ -822,7 +827,7 @@ export default function HomePageModernClient({
                 <div className="mt-4">
                   <Link
                     href={`/use-cases/${entry.slug}`}
-                    className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-3.5 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                    className="saas-btn saas-btn-secondary px-3.5 py-2 text-[13px]"
                   >
                     View use case
                   </Link>
@@ -851,7 +856,7 @@ export default function HomePageModernClient({
                 <div className="mt-4">
                   <Link
                     href={`/blog/${p.slug}`}
-                    className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-3.5 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                    className="saas-btn saas-btn-secondary px-3.5 py-2 text-[13px]"
                   >
                     Read post
                   </Link>
@@ -868,7 +873,7 @@ export default function HomePageModernClient({
           </h2>
           <div className="mt-6 space-y-2">
             {faq.map(([q, a], idx) => (
-              <div key={q} className="overflow-hidden rounded-xl border border-border bg-surface">
+              <div key={q} className="overflow-hidden saas-card">
                 <button
                   type="button"
                   onClick={() => setOpenFaq((v) => (v === idx ? -1 : idx))}
@@ -896,13 +901,13 @@ export default function HomePageModernClient({
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               href={`${APP_URL}/signup?plan=starter`}
-              className="inline-flex rounded-lg bg-amber px-6 py-3 text-[15px] font-semibold text-heading shadow-lg shadow-card hover:bg-amber-hover"
+              className="saas-btn saas-btn-cta px-6 py-3 text-[15px]"
             >
               Start free — no demo required
             </Link>
             <Link
               href={`${APP_URL}/dashboard`}
-              className="inline-flex rounded-lg bg-primary px-6 py-3 text-[15px] font-semibold text-white shadow-lg shadow-focus hover:bg-primary-dark"
+              className="saas-btn saas-btn-accent px-6 py-3 text-[15px]"
             >
               View the workspace
             </Link>

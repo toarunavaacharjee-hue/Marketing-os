@@ -536,7 +536,7 @@ export function CreationWorkbench({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-3xl text-text" style={{ fontFamily: "var(--font-heading)" }}>
+        <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
           {title}
         </h1>
         <p className="mt-1 text-sm text-text2">{description}</p>
@@ -582,13 +582,13 @@ export function CreationWorkbench({
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm lg:col-span-2">
+        <div className="hs-card p-4 shadow-sm lg:col-span-2">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="text-sm font-medium text-text">{contentStudio ? "Content pipeline" : "Content queue"}</div>
             <button
               type="button"
               onClick={addQueueRow}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
+              className="hs-card2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
             >
               + Add {contentStudio ? "piece" : "row"}
             </button>
@@ -619,21 +619,21 @@ export function CreationWorkbench({
                           <input
                             value={r.title}
                             onChange={(e) => updateQueue(r.id, { title: e.target.value })}
-                            className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                            className="w-full hs-card2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                           />
                         </td>
                         <td className="py-2 pr-2 align-top">
                           <input
                             value={r.due}
                             onChange={(e) => updateQueue(r.id, { due: e.target.value })}
-                            className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                            className="w-full hs-card2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                           />
                         </td>
                         <td className="py-2 pr-2 align-top">
                           <input
                             value={r.status}
                             onChange={(e) => updateQueue(r.id, { status: e.target.value })}
-                            className="w-full rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
+                            className="w-full hs-card2 px-2 py-1 text-sm text-text placeholder:text-text3 focus:border-accent focus:outline-none"
                           />
                         </td>
                         <td className="py-2 align-top">
@@ -662,7 +662,7 @@ export function CreationWorkbench({
                 ws.queue.map((r) => (
                   <div
                     key={r.id}
-                    className="rounded-xl border border-border bg-surface2 p-3 text-sm text-text"
+                    className="hs-card2 p-3 text-sm text-text"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <input
@@ -706,7 +706,7 @@ export function CreationWorkbench({
                         <select
                           value={r.contentType}
                           onChange={(e) => updateQueue(r.id, { contentType: e.target.value })}
-                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                          className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                         >
                           <option value="">Select…</option>
                           {CONTENT_TYPES.map((t) => (
@@ -721,7 +721,7 @@ export function CreationWorkbench({
                         <select
                           value={r.channel}
                           onChange={(e) => updateQueue(r.id, { channel: e.target.value })}
-                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                          className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                         >
                           <option value="">Select…</option>
                           {CHANNELS.map((c) => (
@@ -736,7 +736,7 @@ export function CreationWorkbench({
                         <select
                           value={r.status}
                           onChange={(e) => updateQueue(r.id, { status: e.target.value })}
-                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                          className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                         >
                           {STATUS_OPTIONS.map((s) => (
                             <option key={s} value={s}>
@@ -751,7 +751,7 @@ export function CreationWorkbench({
                           type="date"
                           value={r.dueDate}
                           onChange={(e) => updateQueue(r.id, { dueDate: e.target.value })}
-                          className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                          className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                         />
                       </div>
                       <div>
@@ -760,7 +760,7 @@ export function CreationWorkbench({
                           <select
                             value={r.owner}
                             onChange={(e) => updateQueue(r.id, { owner: e.target.value })}
-                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                            className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                           >
                             <option value="">Unassigned</option>
                             {team.map((m) => (
@@ -774,7 +774,7 @@ export function CreationWorkbench({
                             value={r.owner}
                             onChange={(e) => updateQueue(r.id, { owner: e.target.value })}
                             placeholder="Writer"
-                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+                            className="w-full hs-card px-2 py-1.5 text-sm"
                           />
                         )}
                       </div>
@@ -784,7 +784,7 @@ export function CreationWorkbench({
                           <select
                             value={r.reviewer}
                             onChange={(e) => updateQueue(r.id, { reviewer: e.target.value })}
-                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                            className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                           >
                             <option value="">None</option>
                             {team.map((m) => (
@@ -798,7 +798,7 @@ export function CreationWorkbench({
                             value={r.reviewer}
                             onChange={(e) => updateQueue(r.id, { reviewer: e.target.value })}
                             placeholder="Approver email or user id"
-                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+                            className="w-full hs-card px-2 py-1.5 text-sm"
                           />
                         )}
                       </div>
@@ -883,7 +883,7 @@ export function CreationWorkbench({
                             onChange={(e) => updateQueue(r.id, { reviewNotes: e.target.value })}
                             rows={2}
                             placeholder="Feedback for the writer…"
-                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                            className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                           />
                         </div>
                         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text2">
@@ -901,7 +901,7 @@ export function CreationWorkbench({
                         value={r.audience}
                         onChange={(e) => updateQueue(r.id, { audience: e.target.value })}
                         placeholder="e.g. Series A CMOs, enterprise IT"
-                        className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+                        className="w-full hs-card px-2 py-1.5 text-sm"
                       />
                     </div>
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -912,7 +912,7 @@ export function CreationWorkbench({
                             value={r.draftUrl}
                             onChange={(e) => updateQueue(r.id, { draftUrl: e.target.value })}
                             placeholder="Doc, Notion, CMS…"
-                            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+                            className="min-w-0 flex-1 hs-card px-2 py-1.5 text-sm"
                           />
                           {hrefForUserUrl(r.draftUrl) ? (
                             <a
@@ -933,7 +933,7 @@ export function CreationWorkbench({
                             value={r.publishedUrl}
                             onChange={(e) => updateQueue(r.id, { publishedUrl: e.target.value })}
                             placeholder="Live URL"
-                            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-2 py-1.5 text-sm"
+                            className="min-w-0 flex-1 hs-card px-2 py-1.5 text-sm"
                           />
                           {hrefForUserUrl(r.publishedUrl) ? (
                             <a
@@ -955,7 +955,7 @@ export function CreationWorkbench({
                         onChange={(e) => updateQueue(r.id, { description: e.target.value })}
                         rows={2}
                         placeholder="Angle, hook, CTA, or link to Messaging & Artifacts"
-                        className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                        className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                       />
                     </div>
                   </div>
@@ -965,7 +965,7 @@ export function CreationWorkbench({
           )}
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="hs-card p-4">
           <div className="text-sm text-heading">AI generator</div>
           {contentStudio ? (
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -974,7 +974,7 @@ export function CreationWorkbench({
                 <select
                   value={ws.aiTone}
                   onChange={(e) => scheduleSave({ ...ws, aiTone: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                  className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
                 >
                   {AI_TONES.map((t) => (
                     <option key={t} value={t}>
@@ -988,7 +988,7 @@ export function CreationWorkbench({
                 <select
                   value={ws.aiLength}
                   onChange={(e) => scheduleSave({ ...ws, aiLength: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                  className="w-full hs-card2 px-2 py-1.5 text-sm text-heading"
                 >
                   {AI_LENGTHS.map(([val, label]) => (
                     <option key={val} value={val}>
@@ -1002,7 +1002,7 @@ export function CreationWorkbench({
           <textarea
             value={ws.prompt}
             onChange={(e) => scheduleSave({ ...ws, prompt: e.target.value })}
-            className="mt-2 min-h-[96px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            className="mt-2 min-h-[96px] w-full hs-card2 p-3 text-sm text-heading"
             placeholder={placeholder}
           />
           <button
@@ -1020,7 +1020,7 @@ export function CreationWorkbench({
             </div>
           ) : null}
           {ws.lastOutput ? (
-            <div className="mt-3 rounded-xl border border-border bg-surface2 p-3 text-xs leading-relaxed text-text2">
+            <div className="mt-3 hs-card2 p-3 text-xs leading-relaxed text-text2">
               <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[10px] uppercase text-text2">Output</span>
                 {contentStudio ? (
@@ -1084,23 +1084,23 @@ export function CreationWorkbench({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+        <div className="hs-card p-4 text-sm text-text2">
           <div className="text-sm text-heading">Mini calendar / milestones</div>
           <textarea
             value={ws.calendar}
             onChange={(e) => scheduleSave({ ...ws, calendar: e.target.value })}
             rows={5}
-            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            className="mt-2 w-full hs-card2 p-3 text-sm text-heading"
             placeholder="Tue: draft&#10;Wed: review"
           />
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
+        <div className="hs-card p-4 text-sm text-text2">
           <div className="text-sm text-heading">Notes & performance</div>
           <textarea
             value={ws.notes}
             onChange={(e) => scheduleSave({ ...ws, notes: e.target.value })}
             rows={5}
-            className="mt-2 w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            className="mt-2 w-full hs-card2 p-3 text-sm text-heading"
             placeholder="CTR, read time, top formats, learnings from Analytics…"
           />
         </div>

@@ -43,13 +43,13 @@ export function MarketingHeader() {
         <div className="flex items-center gap-2">
           <Link
             href={`${APP_URL}/dashboard`}
-            className="hidden rounded-lg border border-border bg-surface2 px-3 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3 sm:inline-flex"
+            className="hidden saas-btn saas-btn-secondary px-3 py-2 text-[13px] sm:inline-flex"
           >
             View demo
           </Link>
           <Link
             href={`${APP_URL}/signup?plan=starter`}
-            className="rounded-lg bg-amber px-3.5 py-2 text-[13px] font-semibold text-heading shadow-card transition hover:bg-amber-hover"
+            className="saas-btn saas-btn-cta px-3.5 py-2 text-[13px]"
           >
             Start free
           </Link>

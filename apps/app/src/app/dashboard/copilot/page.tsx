@@ -146,7 +146,7 @@ export default function CopilotPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] min-h-[580px] flex-col rounded-2xl border border-border bg-surface">
+    <div className="flex h-[calc(100vh-120px)] min-h-[580px] flex-col hs-card">
       <div className="border-b border-border px-5 py-4">
         <div className="text-lg text-heading">AI Copilot</div>
         <div className="text-sm text-text2">
@@ -234,7 +234,7 @@ export default function CopilotPage() {
               }
             }}
             placeholder={pinnedSignal ? `Tell Copilot what to do about this signal…` : "Ask Copilot anything..."}
-            className="w-full rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-heading placeholder:text-text2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full hs-card2 px-4 py-3 text-sm text-heading placeholder:text-text2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <button
             onClick={() => sendMessage(input)}
@@ -319,7 +319,7 @@ function MessageBubble({
             {message.metrics.map((m) => (
               <div
                 key={`${m.label}-${m.value}`}
-                className="rounded-xl border border-border bg-surface2 px-3 py-2"
+                className="hs-card2 px-3 py-2"
               >
                 <div className="text-[11px] uppercase tracking-wider text-text2">{m.label}</div>
                 <div className="mt-1 text-sm text-heading">{m.value}</div>

@@ -459,7 +459,7 @@ export function CampaignPlanner({
     <div className="space-y-3">
       {loading ? <SkeletonKanban /> : null}
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           {error}
         </div>
       ) : null}
@@ -478,7 +478,7 @@ export function CampaignPlanner({
               const id = e.dataTransfer.getData("text/plain");
               if (id) onDrop(col.key, id);
             }}
-            className="min-h-[360px] rounded-2xl border border-border bg-surface p-3 shadow-sm"
+            className="min-h-[360px] hs-card p-3"
           >
             <div className="mb-3 flex items-center justify-between gap-2">
               <div className="text-sm font-medium text-text">
@@ -492,7 +492,7 @@ export function CampaignPlanner({
                   setAddTitle("");
                   setAddTags("");
                 }}
-                className="rounded-lg border border-border bg-surface2 px-2 py-0.5 text-[11px] font-semibold text-text hover:bg-surface3"
+                className="hs-btn hs-btn-secondary px-2 py-0.5 text-[11px]"
               >
                 + Add
               </button>
@@ -506,7 +506,7 @@ export function CampaignPlanner({
                     key={card.id}
                     draggable
                     onDragStart={(e) => e.dataTransfer.setData("text/plain", card.id)}
-                    className="cursor-grab rounded-xl border border-border bg-surface2 p-3 active:cursor-grabbing active:shadow-md"
+                    className="hs-card cursor-grab p-3 active:cursor-grabbing active:shadow-md"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 items-center gap-1.5">
@@ -536,14 +536,14 @@ export function CampaignPlanner({
                       <button
                         type="button"
                         onClick={() => openModal(card.id)}
-                        className="rounded-lg border border-primary/40 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/20"
+                        className="hs-btn hs-btn-secondary px-2 py-1 text-[11px] border-primary/40 text-primary hover:bg-primary/10"
                       >
                         Campaign brief
                       </button>
                       {hasNarrative ? (
                         <Link
                           href={`/dashboard/gtm-planner?product=${encodeURIComponent(card.campaignProduct || productName || card.title)}&segment=${encodeURIComponent(card.campaignSegment ?? "")}&from=${encodeURIComponent(card.title)}`}
-                          className="rounded-lg border border-teal/40 bg-teal/10 px-2 py-1 text-[11px] font-medium text-teal hover:bg-teal/20"
+                          className="hs-btn hs-btn-secondary px-2 py-1 text-[11px] border-teal/40 text-teal hover:bg-teal/10"
                         >
                           Plan launch →
                         </Link>
@@ -577,27 +577,27 @@ export function CampaignPlanner({
                     if (e.key === "Escape") setAddingIn(null);
                   }}
                   placeholder="Campaign title"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
                 <input
                   value={addTags}
                   onChange={(e) => setAddTags(e.target.value)}
                   placeholder="Tags (comma-separated)"
-                  className="w-full rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => confirmAddCard(col.key)}
                     disabled={!addTitle.trim()}
-                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+                    className="hs-btn hs-btn-primary text-xs py-1.5 px-3 disabled:opacity-40"
                   >
                     Add card
                   </button>
                   <button
                     type="button"
                     onClick={() => setAddingIn(null)}
-                    className="rounded-lg border border-border px-3 py-1.5 text-xs text-heading hover:bg-surface2"
+                    className="hs-btn hs-btn-secondary text-xs py-1.5 px-3"
                   >
                     Cancel
                   </button>
@@ -617,7 +617,7 @@ export function CampaignPlanner({
             if (e.target === e.currentTarget) closeModal();
           }}
         >
-          <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
+          <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden hs-card shadow-xl">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <div>
@@ -664,7 +664,7 @@ export function CampaignPlanner({
             {/* Tab body */}
             <div className="flex-1 overflow-y-auto p-5">
               {modalError ? (
-                <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+                <div className="hs-alert hs-alert-error mb-3">
                   {modalError}
                 </div>
               ) : null}
@@ -682,7 +682,7 @@ export function CampaignPlanner({
                       <input
                         value={modalProduct}
                         onChange={(e) => setModalProduct(e.target.value)}
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading"
                       />
                     </div>
                     <div>
@@ -691,7 +691,7 @@ export function CampaignPlanner({
                         value={modalSegment}
                         onChange={(e) => setModalSegment(e.target.value)}
                         placeholder="e.g. Series B SaaS marketing leaders"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -700,7 +700,7 @@ export function CampaignPlanner({
                         value={modalSeason}
                         onChange={(e) => setModalSeason(e.target.value)}
                         placeholder="e.g. Q1 planning, post-earnings"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -711,7 +711,7 @@ export function CampaignPlanner({
                         value={modalTension}
                         onChange={(e) => setModalTension(e.target.value)}
                         placeholder="e.g. noisy category, budget scrutiny"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                   </div>
@@ -728,7 +728,7 @@ export function CampaignPlanner({
                     type="button"
                     onClick={() => void generateNarrative()}
                     disabled={generatingNarrative}
-                    className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+                    className="hs-btn hs-btn-cta disabled:opacity-50"
                   >
                     {generatingNarrative ? "Generating…" : "Generate narrative"}
                   </button>
@@ -746,7 +746,7 @@ export function CampaignPlanner({
                       rows={8}
                       maxLength={2000}
                       placeholder="Generated narrative appears here. Edit as needed."
-                      className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      className="w-full hs-card2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                     />
                   </div>
 
@@ -760,7 +760,7 @@ export function CampaignPlanner({
                         value={modalTheme}
                         onChange={(e) => setModalTheme(e.target.value)}
                         placeholder="Used as input for channel assets"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                     <div>
@@ -772,7 +772,7 @@ export function CampaignPlanner({
                         value={modalHero}
                         onChange={(e) => setModalHero(e.target.value)}
                         placeholder="Used as input for channel assets"
-                        className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
                       />
                     </div>
                   </div>
@@ -781,7 +781,7 @@ export function CampaignPlanner({
                     <button
                       type="button"
                       onClick={() => setActiveTab("channels")}
-                      className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white"
+                      className="hs-btn hs-btn-primary"
                     >
                       Next: Select channels →
                     </button>
@@ -834,7 +834,7 @@ export function CampaignPlanner({
                     <button
                       type="button"
                       onClick={() => setActiveTab("brief")}
-                      className="rounded-xl border border-border px-4 py-2 text-sm text-heading hover:bg-surface2"
+                      className="hs-btn hs-btn-secondary"
                     >
                       ← Back
                     </button>
@@ -842,7 +842,7 @@ export function CampaignPlanner({
                       type="button"
                       onClick={() => setActiveTab("assets")}
                       disabled={modalChannels.length === 0}
-                      className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+                      className="hs-btn hs-btn-primary disabled:opacity-40"
                     >
                       Next: Generate assets →
                     </button>
@@ -853,7 +853,7 @@ export function CampaignPlanner({
               {activeTab === "assets" ? (
                 <div className="space-y-4">
                   {modalChannels.length === 0 ? (
-                    <div className="rounded-xl border border-border bg-surface2 p-4 text-sm text-text2">
+                    <div className="hs-card2 p-4 text-sm text-text2">
                       No channels selected.{" "}
                       <button
                         type="button"
@@ -916,7 +916,7 @@ export function CampaignPlanner({
                                 type="button"
                                 onClick={() => void generateChannelAsset(ch)}
                                 disabled={isAnyGenerating}
-                                className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-40"
+                                className="hs-btn hs-btn-secondary text-xs py-1.5 px-3 border-primary/40 text-primary hover:bg-primary/10 disabled:opacity-40"
                               >
                                 {generatingChannel === ch
                                   ? "Generating…"
@@ -939,7 +939,7 @@ export function CampaignPlanner({
                             }}
                             rows={6}
                             placeholder={`${CHANNEL_LABELS[ch]} will appear here after generation.`}
-                            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card2 p-3 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                       ))}
@@ -950,7 +950,7 @@ export function CampaignPlanner({
                     <button
                       type="button"
                       onClick={() => setActiveTab("channels")}
-                      className="rounded-xl border border-border px-4 py-2 text-sm text-heading hover:bg-surface2"
+                      className="hs-btn hs-btn-secondary"
                     >
                       ← Back to Channels
                     </button>
@@ -964,7 +964,7 @@ export function CampaignPlanner({
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm text-heading hover:bg-surface3"
+                className="hs-btn hs-btn-secondary"
               >
                 Cancel
               </button>
@@ -972,7 +972,7 @@ export function CampaignPlanner({
                 type="button"
                 onClick={saveModal}
                 disabled={isAnyGenerating}
-                className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-50"
+                className="hs-btn hs-btn-primary disabled:opacity-50"
               >
                 Save to card
               </button>

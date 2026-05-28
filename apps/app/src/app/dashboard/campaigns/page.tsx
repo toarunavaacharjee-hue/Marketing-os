@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
 import { CampaignPlanner } from "@/app/dashboard/campaigns/CampaignPlanner";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 export default async function CampaignsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
@@ -16,14 +17,11 @@ export default async function CampaignsPage() {
   const productName = String((productRow as { name?: string } | null)?.name ?? "").trim();
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
-        Campaigns
-      </h1>
-      <p className="text-sm text-text2">
-        Drag cards between columns to update status. Campaign narratives are saved per card. Data is saved per product.
-      </p>
+    <ModuleShell
+      title="Campaigns"
+      subtitle="Plan and track your marketing campaigns across channels."
+    >
       <CampaignPlanner environmentId={ctx.environmentId} productName={productName} />
-    </div>
+    </ModuleShell>
   );
 }

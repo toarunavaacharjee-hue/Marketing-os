@@ -5,7 +5,8 @@ import { UseCasesModernClient } from "@/app/use-cases/UseCasesModernClient";
 
 export const metadata: Metadata = {
   title: "Use Cases | AI Marketing Workbench",
-  description: "See how AI Marketing Workbench supports product marketing teams, founders, GTM leaders, consultants, and multi-product companies."
+  description: "See how AI Marketing Workbench supports product marketing teams, founders, GTM leaders, consultants, and multi-product companies.",
+  alternates: { canonical: "/use-cases" }
 };
 
 export default async function UseCasesIndexPage() {

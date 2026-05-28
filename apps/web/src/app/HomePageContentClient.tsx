@@ -25,6 +25,9 @@ const modules = [
   ["Battlecards", "Sales"],
   ["Sales Intelligence", "Sales"],
   ["Customer Insights", "Insights"],
+  ["Launch Playbook", "Execution"],
+  ["Prospect Research", "Sales"],
+  ["Artifact Library", "Content"],
   ["AI Copilot", "Core"]
 ] as const;
 
@@ -34,7 +37,7 @@ const faq = [
   ["Can I upgrade later?", "Yes. You can move from Starter to Growth or Enterprise any time from Settings."],
   [
     "Does AI usage have limits?",
-    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes the full module set — tiers differ by products, AI volume, seats, and support."
+    "Starter includes 100 AI workflow runs/month (Copilot + module generators). Growth and Enterprise are unlimited. Every plan includes all 21 modules — tiers differ by products, AI volume, seats, and support."
   ],
   ["Can we use our own Anthropic key?", "Yes. A workspace admin adds a workspace-level Anthropic key under Settings → AI integration. Starter and Growth can also use the platform key if your operator enables it. Enterprise requires BYOK — Anthropic token usage is billed directly to the customer."],
   ["Is there a contract?", "Starter and Growth are month-to-month. Enterprise can be monthly or annual with custom terms."]
@@ -161,7 +164,7 @@ export default function HomePageContentClient({
               </span>
               <span className="ml-2 truncate">workspace - AI Marketing Workbench</span>
             </div>
-            <div className="rounded-xl border border-border bg-surface2 p-4 shadow-inner">
+            <div className="saas-card2 p-4 shadow-inner">
               <div className="text-sm font-medium text-text">What the system keeps connected</div>
               <div className="mt-3 grid gap-2 text-sm text-text2">
                 {[
@@ -228,7 +231,7 @@ export default function HomePageContentClient({
 
         <section id="modules" data-reveal className="saas-card mt-24 p-6 sm:p-8">
           <h2 className="text-2xl font-semibold tracking-tight text-text md:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
-            All 18 modules
+            All 21 modules
           </h2>
           <div className="mt-5 grid gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {modules.map(([name, cat]) => (
@@ -293,7 +296,7 @@ export default function HomePageContentClient({
                     ["04", "Execution", "Campaigns, planning, analytics, outcomes"]
                   ].map(([n, t, d], idx) => (
                     <div key={n} className="relative">
-                      <div className="rounded-xl border border-border bg-surface2 p-4">
+                      <div className="saas-card2 p-4">
                         <div className="flex items-center justify-between gap-3">
                           <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary-light font-mono text-[12px] font-semibold text-primary-dark">
                             {n}
@@ -333,7 +336,7 @@ export default function HomePageContentClient({
                     ["Reusable strategic layer", "Positioning and messaging compound across launches."],
                     ["Execution stays aligned", "Campaigns and outcomes remain tied to the strategy."]
                   ].map(([t, d]) => (
-                    <div key={t} className="rounded-xl border border-border bg-surface p-4">
+                    <div key={t} className="saas-card p-4">
                       <div className="text-[13px] font-semibold text-text">{t}</div>
                       <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
                     </div>
@@ -398,7 +401,7 @@ export default function HomePageContentClient({
                   ["Keep teams aligned", "Log progress and results so everyone sees what changed and why."],
                   ["Guardrails by design", "Prefer explicit context; avoid inventing facts and unknown URLs."]
                 ].map(([t, d]) => (
-                  <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+                  <div key={t} className="saas-card2 p-4">
                     <div className="text-[13px] font-semibold text-text">{t}</div>
                     <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
                   </div>
@@ -503,7 +506,7 @@ export default function HomePageContentClient({
           </h2>
           <div className="mt-6 space-y-2">
             {faq.map(([q, a], idx) => (
-              <div key={q} className="overflow-hidden rounded-xl border border-border bg-surface">
+              <div key={q} className="overflow-hidden saas-card">
                 <button
                   type="button"
                   onClick={() => setOpenFaq((v) => (v === idx ? -1 : idx))}

@@ -22,6 +22,8 @@ export const metadata: Metadata = {
     title: "AI Marketing Workbench",
     description: "The operating system for product marketing and GTM teams.",
     type: "website",
+    url: SITE_URL,
+    siteName: "AI Marketing Workbench",
     images: [{ url: DEFAULT_OG, width: 1200, height: 630, alt: "AI Marketing Workbench" }]
   },
   twitter: {

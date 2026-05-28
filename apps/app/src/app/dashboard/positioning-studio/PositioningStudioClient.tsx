@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 import { useToast } from "@/app/dashboard/_components/Toast";
 import { SkeletonCard } from "@/app/dashboard/_components/Skeleton";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -424,25 +425,24 @@ export default function PositioningStudioClient({
   const health = canvas?.health ?? defaultHealth();
 
   return (
-    <div className="space-y-4">
-      <ProductStaleBanner environmentId={environmentId} moduleName="Positioning Studio" />
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-text">Positioning Studio</h1>
-          <p className="mt-1 max-w-2xl text-sm text-text2">
-            Canvas and health scores are generated from your saved ICP segments (from an uploaded document in{" "}
-            <Link href="/dashboard/icp-segmentation" className="text-primary hover:underline">
-              ICP Segmentation
-            </Link>
-            ). Regenerate after you change segments, or edit the text yourself and save.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <ModuleShell
+      title="Positioning Studio"
+      subtitle={
+        <>
+          Canvas and health scores are generated from your saved ICP segments (from an uploaded document in{" "}
+          <Link href="/dashboard/icp-segmentation" className="text-primary hover:underline">
+            ICP Segmentation
+          </Link>
+          ). Regenerate after you change segments, or edit the text yourself and save.
+        </>
+      }
+      actions={
+        <>
           <button
             type="button"
             onClick={() => generateFromSegments()}
             disabled={generating || loading}
-            className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+            className="hs-btn hs-btn-cta disabled:opacity-50"
           >
             {generating ? "Generating…" : "Regenerate from ICP segments"}
           </button>
@@ -450,25 +450,28 @@ export default function PositioningStudioClient({
             type="button"
             onClick={() => saveManualEdits()}
             disabled={saving || !canvas || loading}
-            className="rounded-xl border border-border bg-surface px-4 py-2 text-sm text-heading hover:bg-surface2 disabled:opacity-50"
+            className="hs-btn hs-btn-secondary disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save edits"}
           </button>
-        </div>
-      </div>
+        </>
+      }
+    >
+      <div className="space-y-4">
+      <ProductStaleBanner environmentId={environmentId} moduleName="Positioning Studio" />
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           {error}
         </div>
       ) : null}
       {saved ? (
-        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+        <div className="hs-alert hs-alert-success">
           {saved}
         </div>
       ) : null}
       {versionError ? (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+        <div className="hs-alert hs-alert-warn">
           {versionError}{" "}
           <span className="text-text2">
             (If this mentions a missing table, run <code className="font-mono text-[11px]">supabase/positioning_versions_spine.sql</code> in Supabase.)
@@ -515,7 +518,7 @@ export default function PositioningStudioClient({
               const max = 400;
               const near = val.length > max * 0.8;
               return (
-                <div key={k} className="rounded-2xl border border-border bg-surface p-4">
+                <div key={k} className="hs-card p-4">
                   <div className="mb-2 flex items-center justify-between">
                     <label className="text-xs font-semibold uppercase tracking-wide text-text3">
                       {FIELD_LABELS[k]}
@@ -528,7 +531,7 @@ export default function PositioningStudioClient({
                     value={val}
                     onChange={(e) => setDoc((d) => ({ ...d, [k]: e.target.value }))}
                     maxLength={max}
-                    className="min-h-[72px] w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    className="min-h-[72px] w-full hs-card2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
                     placeholder="—"
                   />
                 </div>
@@ -536,21 +539,21 @@ export default function PositioningStudioClient({
             })}
           </div>
           <div className="space-y-4">
-            <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="hs-card p-4">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-sm text-heading">Health Scores</div>
+                <div className="text-[14px] font-semibold text-heading">Health Scores</div>
                 <button
                   type="button"
                   onClick={() => void recalculateHealth()}
                   disabled={healthRecalculating || !canvas || loading}
                   title="Re-score the current canvas with AI"
-                  className="rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary hover:bg-primary/20 disabled:opacity-40"
+                  className="hs-btn hs-btn-ghost text-[11px] text-primary disabled:opacity-40"
                 >
                   {healthRecalculating ? "Scoring…" : "↻ Recalculate"}
                 </button>
               </div>
               {healthError ? (
-                <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-[11px] text-red">
+                <div className="mt-2 hs-alert hs-alert-error">
                   {healthError}
                 </div>
               ) : null}
@@ -566,9 +569,9 @@ export default function PositioningStudioClient({
                         {v}%
                       </span>
                     </div>
-                    <div className="h-2 rounded-full bg-surface3">
+                    <div className="hs-progress">
                       <div
-                        className={`h-2 rounded-full transition-all duration-500 ${color}`}
+                        className={`hs-progress-bar transition-all duration-500 ${color}`}
                         style={{ width: `${v}%` }}
                       />
                     </div>
@@ -576,8 +579,8 @@ export default function PositioningStudioClient({
                 );
               })}
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-text2">
-              <div className="mb-2 text-sm text-heading">AI version history</div>
+            <div className="hs-card p-4 text-sm text-text2">
+              <div className="mb-2 text-[14px] font-semibold text-heading">AI version history</div>
               {canvas?.history?.length ? (
                 <div className="space-y-2">
                   {canvas.history.map((h, i) => (
@@ -593,8 +596,8 @@ export default function PositioningStudioClient({
               )}
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface p-4">
-              <div className="mb-2 text-sm text-heading">Version history</div>
+            <div className="hs-card p-4">
+              <div className="mb-2 text-[14px] font-semibold text-heading">Version history</div>
               <p className="text-xs text-text2">
                 Save a draft version at any point, then approve it to make it the live spine for battlecards and GTM assets.
               </p>
@@ -603,7 +606,7 @@ export default function PositioningStudioClient({
                   type="button"
                   onClick={() => snapshotDraftVersion()}
                   disabled={loading || versionBusy !== null}
-                  className="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
+                  className="hs-btn hs-btn-primary disabled:opacity-50"
                 >
                   {versionBusy === "snapshot" ? "Saving…" : "Save draft version"}
                 </button>
@@ -620,7 +623,7 @@ export default function PositioningStudioClient({
                   versions.map((v) => (
                     <div
                       key={v.id}
-                      className="rounded-xl border border-border bg-surface2 px-3 py-2 text-[12px]"
+                      className="hs-card px-3 py-2 text-[12px]"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="text-heading">
@@ -633,7 +636,7 @@ export default function PositioningStudioClient({
                               type="button"
                               onClick={() => submitVersion(v.id)}
                               disabled={versionBusy !== null}
-                              className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white hover:bg-white/10 disabled:opacity-50"
+                              className="hs-btn hs-btn-secondary disabled:opacity-50"
                             >
                               {versionBusy === `${v.id}-submit` ? "…" : "Submit"}
                             </button>
@@ -643,7 +646,7 @@ export default function PositioningStudioClient({
                               type="button"
                               onClick={() => approveVersion(v.id)}
                               disabled={versionBusy !== null}
-                              className="rounded-lg bg-amber px-2 py-1 text-[11px] font-semibold text-black hover:bg-amber-hover disabled:opacity-50"
+                              className="hs-btn hs-btn-cta disabled:opacity-50"
                             >
                               {versionBusy === `${v.id}-approve` ? "…" : "Approve"}
                             </button>
@@ -660,19 +663,19 @@ export default function PositioningStudioClient({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-4">
-          <div className="mb-1 text-sm font-medium text-heading">Pricing narrative</div>
+        <div className="hs-card p-4">
+          <div className="mb-1 text-[14px] font-semibold text-heading">Pricing narrative</div>
           <p className="mb-4 text-xs text-text2">
             Value-based talking points for a price point. Generation uses the positioning canvas above — save edits to the
             canvas first if you want them included.
           </p>
           {pricingError ? (
-            <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+            <div className="mb-3 hs-alert hs-alert-error">
               {pricingError}
             </div>
           ) : null}
           {pricingSaved ? (
-            <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+            <div className="mb-3 hs-alert hs-alert-success">
               {pricingSaved}
             </div>
           ) : null}
@@ -683,7 +686,7 @@ export default function PositioningStudioClient({
                 value={pricingPlan}
                 onChange={(e) => setPricingPlan(e.target.value)}
                 placeholder="e.g. Growth"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -692,7 +695,7 @@ export default function PositioningStudioClient({
                 value={pricingPrice}
                 onChange={(e) => setPricingPrice(e.target.value)}
                 placeholder="e.g. $299/mo"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -701,7 +704,7 @@ export default function PositioningStudioClient({
                 value={pricingPersona}
                 onChange={(e) => setPricingPersona(e.target.value)}
                 placeholder="e.g. VP Marketing"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
             <div>
@@ -710,7 +713,7 @@ export default function PositioningStudioClient({
                 value={pricingProof}
                 onChange={(e) => setPricingProof(e.target.value)}
                 placeholder="Metrics, outcomes"
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
           </div>
@@ -719,7 +722,7 @@ export default function PositioningStudioClient({
               type="button"
               onClick={() => void generatePricingNarrative()}
               disabled={pricingGenerating}
-              className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+              className="hs-btn hs-btn-cta disabled:opacity-50"
             >
               {pricingGenerating ? "Generating…" : "Generate"}
             </button>
@@ -727,7 +730,7 @@ export default function PositioningStudioClient({
               type="button"
               onClick={() => void savePricingNarrative()}
               disabled={pricingSaving}
-              className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm text-heading hover:bg-surface3 disabled:opacity-50"
+              className="hs-btn hs-btn-secondary disabled:opacity-50"
             >
               {pricingSaving ? "Saving…" : "Save narrative"}
             </button>
@@ -737,26 +740,13 @@ export default function PositioningStudioClient({
             value={pricingText}
             onChange={(e) => setPricingText(e.target.value)}
             rows={12}
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading"
+            className="w-full hs-card2 p-3 text-sm text-heading"
             placeholder="Generated pricing narrative appears here."
           />
-        </div>
-        {/* Next step CTA */}
-        <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3 text-sm shadow-sm">
-          <span className="text-text2">
-            <span className="mr-2 text-text3">→</span>
-            <span className="font-medium text-text">Next step:</span>{" "}
-            Turn your positioning canvas into messaging frameworks and artifacts.
-          </span>
-          <Link
-            href="/dashboard/messaging-artifacts"
-            className="shrink-0 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20"
-          >
-            Messaging &amp; Artifacts →
-          </Link>
         </div>
         </>
       )}
     </div>
+    </ModuleShell>
   );
 }

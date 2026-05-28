@@ -15,7 +15,7 @@
 - Primary actions: dark `#1A1A1A` buttons; brand/AI actions: purple. Mobile responsive.
 - Optional legacy dark theme: `<html class="dark">` still remaps variables for edge pages.
 
-## 18 app modules
+## 21 app modules
 Command Centre (home dashboard)
 Market Research
 ICP Segmentation  
@@ -23,6 +23,7 @@ Positioning Studio
 Messaging & Artifacts
 Campaigns (Kanban board)
 GTM Planner (checklist + timeline)
+Launch Playbook (initiative tracker + Final Launch Pack)
 Events
 Content Studio
 Social Media
@@ -32,7 +33,9 @@ Website & Pages
 Analytics (GA4 + LinkedIn + Meta)
 Battlecards
 Sales Intelligence
+Prospect Research (account-level AI intelligence memo, DOCX export)
 Customer Insights
+Artifact Library (cross-module repository of all generated artifacts)
 AI Copilot (full chat interface)
 
 ## Auth

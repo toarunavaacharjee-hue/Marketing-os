@@ -84,21 +84,25 @@ export function DashboardTopBar({
     return () => document.removeEventListener("pointerdown", onDocPointerDown, { capture: true } as any);
   }, [accountOpen, closeAccount]);
 
+  const planLabel = (companyPlan ?? "starter").charAt(0).toUpperCase() + (companyPlan ?? "starter").slice(1);
+
   return (
-    <header className="relative z-20 hidden h-[52px] shrink-0 border-b border-[var(--sidebar-divider)] bg-sidebar px-4 text-on-dark md:flex md:px-6">
-      <div className="mx-auto flex w-full max-w-[1200px] items-center gap-3 lg:gap-4">
-        <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-[13px]">
+    <header className="relative z-20 hidden h-[52px] shrink-0 items-center border-b border-border bg-surface px-4 md:flex md:px-6">
+      <div className="mx-auto flex w-full max-w-[1200px] items-center gap-4">
+
+        {/* Breadcrumbs */}
+        <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1 text-[13px]">
           {crumbs.map((c, i) => (
-            <span key={`${c.href}-${i}`} className="flex min-w-0 items-center gap-1.5">
-              {i > 0 ? <span className="shrink-0 text-on-dark/35">/</span> : null}
+            <span key={`${c.href}-${i}`} className="flex min-w-0 items-center gap-1">
+              {i > 0 && <span className="shrink-0 text-text3 select-none">/</span>}
               {i === crumbs.length - 1 ? (
-                <span className="truncate font-semibold text-on-dark" title={c.label}>
+                <span className="truncate font-semibold text-heading" title={c.label}>
                   {c.label}
                 </span>
               ) : (
                 <Link
                   href={c.href}
-                  className="truncate text-on-dark/65 transition-colors hover:text-on-dark"
+                  className="truncate text-text2 transition-colors hover:text-heading"
                   title={c.label}
                 >
                   {c.label}
@@ -108,136 +112,124 @@ export function DashboardTopBar({
           ))}
         </nav>
 
-        {contextLabel ? (
+        {/* Context label */}
+        {contextLabel && (
           <span
-            className="hidden max-w-[200px] shrink-0 truncate text-xs text-on-dark/55 xl:block"
+            className="hidden max-w-[180px] shrink-0 truncate rounded-full border border-border bg-surface2 px-2.5 py-0.5 text-[11px] font-medium text-text2 xl:inline"
             title={contextLabel}
           >
             {contextLabel}
           </span>
-        ) : null}
+        )}
 
-        <div className="ml-auto flex min-w-0 shrink-0 items-center justify-end gap-2 sm:gap-3">
-          <div className="relative hidden w-[min(100%,240px)] lg:block">
-            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-on-dark/35" aria-hidden>
-              ⌕
-            </span>
+        {/* Right utilities */}
+        <div className="flex shrink-0 items-center gap-1">
+
+          {/* Search */}
+          <div className="relative hidden w-[220px] lg:block">
+            <svg
+              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text3"
+              fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
+            >
+              <circle cx={11} cy={11} r={8} /><path d="m21 21-4.35-4.35" />
+            </svg>
             <input
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onKeyDown={onSearchKeyDown}
               placeholder="Ask Copilot…"
-              className="w-full rounded-sm border border-transparent bg-sidebar-active py-2 pl-8 pr-3 text-sm text-on-dark placeholder:text-on-dark/40 transition-[border-color,box-shadow] duration-200 focus:border-primary focus:outline-none focus:shadow-focus"
+              className="w-full rounded-md border border-border bg-surface2 py-1.5 pl-8 pr-3 text-[13px] text-heading placeholder:text-text3 transition-[border-color,box-shadow] focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/15"
               aria-label="Ask Copilot"
             />
           </div>
 
+          {/* Plan badge */}
           <span
-            className="hidden shrink-0 rounded-sm border border-[var(--sidebar-divider)] px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-on-dark/50 xl:inline"
-            title="Plan"
+            className="hidden shrink-0 rounded-full border border-primary/25 bg-primary/8 px-2.5 py-0.5 text-[11px] font-semibold text-primary xl:inline"
+            title="Current plan"
           >
-            {companyPlan ?? "starter"}
+            {planLabel}
           </span>
 
+          {/* Help */}
           <Link
             href="/dashboard/help"
-            className="shrink-0 rounded-sm px-2 py-1.5 text-xs font-semibold text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-text2 transition-colors hover:bg-surface2 hover:text-heading"
+            title="Help & documentation"
           >
-            Help
-          </Link>
-          <Link
-            href="/dashboard/copilot"
-            className="shrink-0 rounded-sm px-2 py-1.5 text-xs font-semibold text-primary-light transition-colors hover:bg-sidebar-active"
-          >
-            Copilot
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+            </svg>
           </Link>
 
+          {/* Copilot button */}
+          <Link
+            href="/dashboard/copilot"
+            className="flex h-8 items-center gap-1.5 rounded-md border border-primary/30 bg-primary/8 px-2.5 text-[12px] font-semibold text-primary transition-colors hover:bg-primary/14"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.75} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+            <span className="hidden sm:inline">Copilot</span>
+          </Link>
+
+          {/* Account menu */}
           <div className="relative" ref={accountRef}>
             <button
               type="button"
               aria-haspopup="menu"
               aria-expanded={accountOpen}
               onClick={() => setAccountOpen((v) => !v)}
-              className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-on-dark/80 transition-colors hover:bg-sidebar-active hover:text-on-dark"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-dark text-[11px] font-bold text-white shadow-sm transition-opacity hover:opacity-90"
+              title={profile?.name ?? "Account"}
             >
-              <span
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-sidebar-active text-[11px] font-bold text-on-dark"
-                aria-hidden
-              >
-                {initials}
-              </span>
-              <span className="text-on-dark/40" aria-hidden>
-                ▾
-              </span>
+              {initials}
             </button>
 
-            {accountOpen ? (
+            {accountOpen && (
               <div
                 role="menu"
                 aria-label="Account"
-                className="absolute right-0 top-[calc(100%+8px)] w-[220px] overflow-hidden rounded-lg border border-border bg-surface text-text shadow-dropdown"
+                className="absolute right-0 top-[calc(100%+8px)] z-50 w-[220px] overflow-hidden hs-card shadow-lg"
               >
-                <div className="border-b border-border px-3 py-2">
-                  <div className="truncate text-sm font-semibold text-heading">{profile?.name ?? "Account"}</div>
+                <div className="border-b border-border px-4 py-3">
+                  <div className="truncate text-[13px] font-semibold text-heading">{profile?.name ?? "Account"}</div>
                   <div className="mt-0.5 truncate text-xs text-text2">{contextLabel ?? "Workspace"}</div>
                 </div>
 
-                <div className="p-1">
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                    onClick={() => onAccountAction("/dashboard/help")}
-                  >
-                    <span>Help & documentation</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                    onClick={() => onAccountAction("/dashboard/settings/profile")}
-                  >
-                    <span>My profile</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                    onClick={() => onAccountAction("/dashboard/settings/team")}
-                  >
-                    <span>My team</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                    onClick={() => onAccountAction("/dashboard/settings/integrations")}
-                  >
-                    <span>Integrations</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm text-text transition-colors hover:bg-surface2"
-                    onClick={() => onAccountAction("/dashboard/settings")}
-                  >
-                    <span>Settings</span>
-                  </button>
+                <div className="p-1.5 space-y-0.5">
+                  {[
+                    { label: "My profile", href: "/dashboard/settings/profile" },
+                    { label: "My team", href: "/dashboard/settings/team" },
+                    { label: "Integrations", href: "/dashboard/settings/integrations" },
+                    { label: "Settings", href: "/dashboard/settings" },
+                    { label: "Help & documentation", href: "/dashboard/help" },
+                  ].map((item) => (
+                    <button
+                      key={item.href}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => onAccountAction(item.href)}
+                      className="flex w-full items-center rounded-lg px-3 py-2 text-[13px] text-text transition-colors hover:bg-surface2 hover:text-heading"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
                 </div>
 
-                <div className="border-t border-border p-1">
+                <div className="border-t border-border p-1.5">
                   <button
                     type="button"
                     role="menuitem"
-                    className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm font-semibold text-red transition-colors hover:bg-red/10"
                     onClick={() => onAccountAction("/logout")}
+                    className="flex w-full items-center rounded-lg px-3 py-2 text-[13px] font-semibold text-red transition-colors hover:bg-red/8"
                   >
-                    <span>Logout</span>
+                    Sign out
                   </button>
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
