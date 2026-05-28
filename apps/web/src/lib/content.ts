@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
 
-export type ContentKind = "blog" | "use-cases";
+export type ContentKind = "blog" | "use-cases" | "templates" | "vs";
 
 type ContentFrontmatter = {
   title: string;
@@ -16,6 +16,8 @@ type ContentFrontmatter = {
   audience?: string;
   heroCtaLabel?: string;
   heroCtaHref?: string;
+  category?: string;
+  competitor?: string;
 };
 
 export type ContentEntry = {
@@ -29,6 +31,8 @@ export type ContentEntry = {
   audience: string | null;
   heroCtaLabel: string | null;
   heroCtaHref: string | null;
+  category: string | null;
+  competitor: string | null;
   content: string;
 };
 
@@ -52,6 +56,8 @@ function normalizeEntry(kind: ContentKind, frontmatter: ContentFrontmatter, cont
     audience: frontmatter.audience ?? null,
     heroCtaLabel: frontmatter.heroCtaLabel ?? null,
     heroCtaHref: frontmatter.heroCtaHref ?? null,
+    category: frontmatter.category ?? null,
+    competitor: frontmatter.competitor ?? null,
     content: content.trim()
   };
 }

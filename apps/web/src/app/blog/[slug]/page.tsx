@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { MarketingFooter, MarketingHeader } from "@/components/marketing/MarketingChrome";
 import { Markdown } from "@/lib/Markdown";
 import { getAllContent, getContentEntry } from "@/lib/content";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export async function generateStaticParams() {
   const posts = await getAllContent("blog");
@@ -14,15 +15,26 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const post = await getContentEntry("blog", params.slug);
   if (!post) return {};
 
+  const ogImage = `/og?title=${encodeURIComponent(post.title)}&description=${encodeURIComponent(post.description)}&type=blog`;
+
   return {
-    title: `${post.title} | AI Marketing Workbench`,
+    title: post.title,
     description: post.description,
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
       title: post.title,
       description: post.description,
       type: "article",
-      url: `/blog/${post.slug}`
+      url: `/blog/${post.slug}`,
+      publishedTime: post.date ?? undefined,
+      tags: post.tags,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images: [ogImage]
     }
   };
 }
@@ -31,8 +43,34 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   const post = await getContentEntry("blog", params.slug);
   if (!post) notFound();
 
+  const siteUrl = getSiteUrl();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date ?? undefined,
+    dateModified: post.date ?? undefined,
+    publisher: {
+      "@type": "Organization",
+      name: "AI Marketing Workbench",
+      url: siteUrl
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/blog/${post.slug}`
+    },
+    keywords: post.tags.join(", ")
+  };
+
   return (
     <div className="min-h-screen bg-bg text-text antialiased" style={{ fontFamily: "var(--font-body)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <MarketingHeader />
 
       <div className="pointer-events-none absolute inset-x-0 top-[60px] h-[420px] saas-hero-glow" aria-hidden />

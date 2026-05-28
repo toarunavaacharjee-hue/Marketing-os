@@ -3,12 +3,10 @@ import { APP_URL } from "@/lib/appUrl";
 
 const nav = [
   { href: "/#features", label: "Features" },
-  { href: "/#how-it-works", label: "How it works" },
   { href: "/use-cases", label: "Use Cases" },
-  { href: "/#modules", label: "Modules" },
+  { href: "/tools/templates", label: "Templates" },
   { href: "/blog", label: "Blog" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" }
+  { href: "/pricing", label: "Pricing" }
 ] as const;
 
 export function MarketingLogo({ className = "" }: { className?: string }) {
@@ -118,11 +116,16 @@ export function MarketingFooter() {
             </ul>
           </div>
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Resources</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Free Tools</div>
             <ul className="mt-4 space-y-2.5 text-sm text-text2">
               <li>
-                <Link href="/docs" className="transition hover:text-text">
-                  Docs
+                <Link href="/tools/templates" className="transition hover:text-text">
+                  PMM Templates
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/glossary" className="transition hover:text-text">
+                  Glossary
                 </Link>
               </li>
               <li>
@@ -131,8 +134,8 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/#faq" className="transition hover:text-text">
-                  FAQ
+                <Link href="/docs" className="transition hover:text-text">
+                  Docs
                 </Link>
               </li>
               <li>
