@@ -295,198 +295,147 @@ export function DashboardShell({
     return "Home";
   }, [pathname]);
 
-  function SectionHeader({
-    label,
-    open,
-    onToggle
-  }: {
-    label: string;
-    open: boolean;
-    onToggle: () => void;
-  }) {
-    return (
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="group flex w-full items-center gap-2 px-5 pb-1 pt-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-text3 transition-colors hover:text-on-dark"
-      >
-        <span className="min-w-0 flex-1">{label}</span>
-        <span
-          className={`shrink-0 text-[12px] text-text3 transition-transform duration-200 group-hover:text-on-dark/80 ${
-            open ? "rotate-90" : ""
-          }`}
-          aria-hidden
-        >
-          ›
-        </span>
-      </button>
-    );
-  }
+  const SECTION_COLORS: Record<string, string> = {
+    Home:         "#94A3B8",
+    Strategy:     "#7C4DFF",
+    Planning:     "#0EA5E9",
+    Creation:     "#F59E0B",
+    Intelligence: "#10B981",
+  };
 
-  function NavBadge({ children }: { children: string }) {
-    return (
-      <span className="ml-auto rounded border border-primary/25 bg-primary-light px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-primary-dark">
-        {children}
-      </span>
-    );
+  function initials(name: string | null) {
+    if (!name) return "?";
+    return name.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   }
 
   function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     return (
-      <div className="flex h-full w-[220px] min-h-0 flex-col bg-sidebar text-on-dark">
-        <div className="relative border-b border-[var(--sidebar-divider)] px-5 py-4">
+      <div className="flex h-full w-[232px] min-h-0 flex-col bg-[#F5F6F8]">
+
+        {/* Logo */}
+        <div className="relative flex items-center justify-between border-b border-slate-200 px-4 py-3.5">
           <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onNavigate}>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-primary to-primary-dark text-[11px] font-bold text-on-dark shadow-sm">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-dark text-[10px] font-extrabold text-white shadow-sm">
               AI
             </span>
-            <span className="font-[var(--font-heading)] text-[15px] font-bold leading-tight tracking-tight text-on-dark">
-              Marketing <span className="text-primary-light">Workbench</span>
+            <span className="text-[13.5px] font-bold tracking-tight text-slate-800">
+              Marketing <span className="text-primary">Workbench</span>
             </span>
           </Link>
-
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
-            className="absolute right-3 top-3 rounded-sm px-2 py-1 text-sm text-on-dark/70 hover:bg-sidebar-active hover:text-on-dark md:hidden"
+            className="rounded-md p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 md:hidden"
             aria-label="Close menu"
           >
             ✕
           </button>
         </div>
 
-        <div className="border-b border-[var(--sidebar-divider)]">
+        {/* Workspace + Product switcher */}
+        <div className="border-b border-slate-200">
           <TenantSwitcher
             companies={companies}
             products={products}
             selectedCompanyId={selectedCompanyId}
             selectedProductId={selectedProductId}
+            theme="light"
           />
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto py-2">
-          {NAV.map((section) => (
-            <div key={section.label}>
-              {(() => {
-                const open =
-                  sectionOpen[section.label] ??
-                  (section.label === "Home" || activeSectionLabel === section.label);
-                return (
-                  <>
-                    <SectionHeader
-                      label={section.label}
-                      open={open}
-                      onToggle={() => {
-                        const next = { ...sectionOpen, [section.label]: !open };
-                        persistSections(next);
-                      }}
-                    />
-                    {open ? (
-                      <div className="space-y-0.5">
-                        {section.items.map((m) => {
-                          const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
-                          const active = activeMap.get(href) ?? false;
-                          const allowed = isSlugAllowed(ent, m.slug);
-                          return (
-                            <Link
-                              key={m.slug || "home"}
-                              href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
-                              onClick={onNavigate}
-                              className={`relative flex items-center gap-2 border-l-[3px] py-2.5 pl-[17px] pr-5 text-sm font-medium transition-[background-color,border-color,color] duration-200 ease-out ${
-                                active
-                                  ? "border-primary bg-sidebar-active text-on-dark"
-                                  : allowed
-                                    ? "border-transparent text-on-dark/90 hover:bg-sidebar-active"
-                                    : "border-transparent text-text3 hover:bg-sidebar-active"
-                              }`}
-                            >
-                              <span className="w-[18px] text-center text-base">{m.icon ?? "•"}</span>
-                              <span className="truncate">{m.label}</span>
-                              {!allowed ? (
-                                <NavBadge>UPGRADE</NavBadge>
-                              ) : m.badge ? (
-                                <NavBadge>{m.badge}</NavBadge>
-                              ) : null}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    ) : null}
-                  </>
-                );
-              })()}
-            </div>
-          ))}
+        {/* Nav */}
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+          {NAV.map((section) => {
+            const color = SECTION_COLORS[section.label] ?? "#94A3B8";
+            const open =
+              sectionOpen[section.label] ??
+              (section.label === "Home" || activeSectionLabel === section.label);
+
+            return (
+              <div key={section.label} className="mb-1">
+                <button
+                  type="button"
+                  onClick={() => persistSections({ ...sectionOpen, [section.label]: !open })}
+                  aria-expanded={open}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition hover:bg-slate-200/60"
+                >
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: color }} />
+                  <span className="flex-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    {section.label}
+                  </span>
+                  <span className="text-[10px] text-slate-300" aria-hidden>
+                    {open ? "−" : "+"}
+                  </span>
+                </button>
+
+                {open && (
+                  <div className="mt-0.5 space-y-0.5 pb-1">
+                    {section.items.map((m) => {
+                      const href = m.slug ? `/dashboard/${m.slug}` : "/dashboard";
+                      const active = activeMap.get(href) ?? false;
+                      const allowed = isSlugAllowed(ent, m.slug);
+
+                      return (
+                        <Link
+                          key={m.slug || "home"}
+                          href={allowed ? href : `/dashboard/upgrade?next=${encodeURIComponent(href)}`}
+                          onClick={onNavigate}
+                          className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] transition-all duration-150 ${
+                            active
+                              ? "bg-white font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200"
+                              : allowed
+                                ? "text-slate-600 hover:bg-white/70 hover:text-slate-900"
+                                : "text-slate-400 hover:bg-white/50"
+                          }`}
+                          style={active ? { borderLeft: `2.5px solid ${color}`, paddingLeft: "8px" } : {}}
+                        >
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-[12px]">
+                            {m.icon ?? "·"}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate">{m.label}</span>
+                          {!allowed ? (
+                            <span className="ml-auto shrink-0 rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                              Pro
+                            </span>
+                          ) : m.badge ? (
+                            <span className="ml-auto shrink-0 rounded border border-primary/20 bg-primary/8 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
+                              {m.badge}
+                            </span>
+                          ) : null}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Settings lives in the top-bar account menu to avoid duplication. */}
-
-        <div className="border-t border-[var(--sidebar-divider)] p-3">
-          <div className="mb-2 px-1">
-            <div className="text-sm text-on-dark">{profile?.name ?? "—"}</div>
-            <div className="text-xs text-text3">
-              {profile?.company ?? "—"} • {companyPlan ?? "starter"}
+        {/* User footer */}
+        <div className="border-t border-slate-200 px-3 py-3 space-y-2">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+              {initials(profile?.name)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[12px] font-semibold text-slate-800">{profile?.name ?? "—"}</div>
+              <div className="truncate text-[10px] text-slate-400">{companyPlan ?? "starter"}</div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0" title={anthropicReady ? "AI connected" : "AI not configured"}>
+              <span className={`h-1.5 w-1.5 rounded-full ${anthropicReady ? "bg-emerald-400" : "bg-slate-300"}`} />
+              <span className="text-[10px] text-slate-400">AI</span>
             </div>
           </div>
 
-          <details className="group rounded-md border border-[var(--sidebar-divider)] bg-sidebar-active px-3 py-2">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-[11px] font-semibold text-on-dark/90 [&::-webkit-details-marker]:hidden">
-              <span className="flex items-center gap-2">
-                <span
-                  className={`h-2 w-2 rounded-full ${anthropicReady ? "bg-teal" : "bg-on-dark/25"}`}
-                  aria-hidden
-                />
-                Workspace AI
-              </span>
-              <span className="text-text3 transition group-open:rotate-90">›</span>
-            </summary>
-
-            <div className="mt-3">
-              <div className="mb-2 flex items-center justify-between">
-                <div className="text-[10px] font-semibold uppercase tracking-wide text-text3">
-                  Anthropic (this workspace)
-                </div>
-                <div
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    anthropicReady
-                      ? "bg-[color-mix(in_srgb,var(--color-teal)_18%,transparent)] text-teal"
-                      : "bg-[color-mix(in_srgb,var(--color-amber)_22%,transparent)] text-amber"
-                  }`}
-                >
-                  {aiKeySource === "workspace"
-                    ? "YOUR KEY"
-                    : aiKeySource === "platform"
-                      ? "PLATFORM"
-                      : "NOT SET"}
-                </div>
-              </div>
-              {anthropicReady ? (
-                <div className="mt-2 text-[11px] text-on-dark/80">
-                  {aiStatus === "checking" ? (
-                    <span>Checking connection…</span>
-                  ) : aiStatus === "connected" ? (
-                    <span className="text-teal">Connected</span>
-                  ) : aiStatus === "error" ? (
-                    <span className="text-red">
-                      Not connected{aiError ? ` — ${aiError}` : ""}
-                    </span>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="mt-2 text-[11px] text-on-dark/80">
-                  Enterprise needs a workspace key; Starter, Free, and Growth may use platform AI when enabled. Open
-                  Settings → AI integration.
-                </div>
-              )}
-              <Link
-                href="/dashboard/settings"
-                onClick={onNavigate}
-                className="mt-2 inline-block text-[11px] font-semibold text-primary-light hover:underline"
-              >
-                Open Settings
-              </Link>
-            </div>
-          </details>
+          <Link
+            href="/dashboard/settings"
+            onClick={onNavigate}
+            className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-[11px] text-slate-500 transition hover:border-slate-300 hover:text-slate-700"
+          >
+            <span>Settings &amp; AI integration</span>
+            <span className="text-slate-300">→</span>
+          </Link>
         </div>
       </div>
     );
@@ -521,7 +470,7 @@ export function DashboardShell({
 
       <div className="flex h-[calc(100dvh-52px)] md:h-dvh">
         {/* Desktop sidebar */}
-        <div className="hidden w-[220px] shrink-0 border-r border-[var(--sidebar-divider)] bg-sidebar md:block">
+        <div className="hidden w-[232px] shrink-0 border-r border-slate-200 md:block">
           <div className="h-dvh overflow-y-auto">
             <Sidebar />
           </div>
@@ -531,7 +480,7 @@ export function DashboardShell({
         {mobileOpen ? (
           <div className="fixed inset-0 z-40 md:hidden">
             <div className="aimw-modal-backdrop absolute inset-0" onClick={() => setMobileOpen(false)} />
-            <div className="absolute left-0 top-0 h-full w-[220px] border-r border-[var(--sidebar-divider)] bg-sidebar shadow-dropdown">
+            <div className="absolute left-0 top-0 h-full w-[232px] border-r border-slate-200 shadow-dropdown">
               <div className="h-full overflow-y-auto">
                 <Sidebar onNavigate={() => setMobileOpen(false)} />
               </div>
