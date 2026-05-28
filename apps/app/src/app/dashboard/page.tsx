@@ -5,6 +5,115 @@ import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext"
 import { PMM_JOURNEY, type JourneyPhase } from "@/lib/pmmModuleFlow";
 import { POSITIONING_KEY, POSITIONING_MODULE } from "@/lib/positioningStudio";
 
+type ScanSignal = {
+  title: string;
+  description: string;
+  source: string;
+  severity: "risk" | "opportunity" | "info";
+};
+
+type LiveSignal = {
+  id: string;
+  category: "COMPETITOR" | "POSITIONING" | "ICP" | "MARKET" | "BATTLECARD";
+  severity: "risk" | "opportunity" | "info";
+  title: string;
+  detail: string;
+  moduleHref: string;
+  moduleLabel: string;
+  copilotQ: string;
+};
+
+function deriveSignals({
+  scanSignals,
+  positioningCanvasOk,
+  segmentCount,
+  competitorCount,
+  battlecardCount,
+  scanCompletedOk,
+  productName,
+}: {
+  scanSignals: ScanSignal[];
+  positioningCanvasOk: boolean;
+  segmentCount: number;
+  competitorCount: number;
+  battlecardCount: number;
+  scanCompletedOk: boolean;
+  productName: string | null;
+}): LiveSignal[] {
+  const signals: LiveSignal[] = [];
+  const prod = productName ?? "your product";
+
+  scanSignals.slice(0, 3).forEach((s, i) => {
+    const src = (s.source ?? "").toLowerCase();
+    const category: LiveSignal["category"] =
+      src.includes("competitor") || src.includes("rival") ? "COMPETITOR" : "MARKET";
+    signals.push({
+      id: `scan-${i}`,
+      category,
+      severity: s.severity,
+      title: s.title,
+      detail: (s.description ?? "").slice(0, 150),
+      moduleHref: "/dashboard/market-research",
+      moduleLabel: "View Research",
+      copilotQ: `Based on the market signal "${s.title}", what should I do to update our positioning and assets?`,
+    });
+  });
+
+  if (!positioningCanvasOk) {
+    signals.push({
+      id: "gap-positioning",
+      category: "POSITIONING",
+      severity: "risk",
+      title: "Positioning canvas is empty",
+      detail: "Without a saved positioning canvas, AI assets (battlecards, messaging, one-pagers) lack a consistent foundation.",
+      moduleHref: "/dashboard/positioning-studio",
+      moduleLabel: "Positioning Studio",
+      copilotQ: `Help me write a positioning statement for ${prod}. Ask me what you need.`,
+    });
+  }
+
+  if (segmentCount === 0) {
+    signals.push({
+      id: "gap-icp",
+      category: "ICP",
+      severity: "risk",
+      title: "No ICP segments defined",
+      detail: "Segments feed messaging, battlecard targeting, and win/loss analysis. Add at least one to unlock full AI context.",
+      moduleHref: "/dashboard/icp-segmentation",
+      moduleLabel: "ICP Segmentation",
+      copilotQ: `Help me define ICP segments for ${prod}. What firmographic and pain-point criteria should I use?`,
+    });
+  }
+
+  if (competitorCount > 0 && battlecardCount === 0) {
+    signals.push({
+      id: "gap-battlecards",
+      category: "BATTLECARD",
+      severity: "opportunity",
+      title: `${competitorCount} competitor${competitorCount > 1 ? "s" : ""} tracked — no battlecards yet`,
+      detail: "Battlecards give sales quick win/loss narratives per competitor. Generate from your positioning canvas.",
+      moduleHref: "/dashboard/battlecards",
+      moduleLabel: "Build Battlecards",
+      copilotQ: "Draft a battlecard for our top competitor. What are our key differentiation points and common objections?",
+    });
+  }
+
+  if (!scanCompletedOk && signals.filter((s) => s.id.startsWith("scan-")).length === 0) {
+    signals.push({
+      id: "gap-scan",
+      category: "MARKET",
+      severity: "info",
+      title: "No market intelligence scan yet",
+      detail: "Run your first AI scan to surface competitor moves, TAM signals, and positioning opportunities.",
+      moduleHref: "/dashboard/market-research",
+      moduleLabel: "Run First Scan",
+      copilotQ: `What market signals should I be monitoring for ${prod} to stay ahead of competitors?`,
+    });
+  }
+
+  return signals.slice(0, 5);
+}
+
 export default function DashboardIndex() {
   return <CommandCentrePage />;
 }
@@ -138,9 +247,11 @@ async function CommandCentrePage() {
   let positioningCanvasOk = false;
   let completedScanCount = 0;
   let ga4Configured = false;
+  let latestScanSignals: ScanSignal[] = [];
+  let bcCount = 0;
 
   if (ctx?.environmentId && ctx.productId) {
-    const [posRes, scanRes, analyticsRes] = await Promise.all([
+    const [posRes, scanRes, analyticsRes, latestScanRes, bcCountRes] = await Promise.all([
       supabase
         .from("module_settings")
         .select("value_json")
@@ -160,7 +271,19 @@ async function CommandCentrePage() {
         .eq("environment_id", ctx.environmentId)
         .eq("module", "analytics")
         .eq("key", "connections")
-        .maybeSingle()
+        .maybeSingle(),
+      supabase
+        .from("research_scans")
+        .select("result_json")
+        .eq("environment_id", ctx.environmentId)
+        .eq("product_id", ctx.productId)
+        .eq("status", "completed")
+        .order("created_at", { ascending: false })
+        .limit(1),
+      supabase
+        .from("battlecards")
+        .select("id", { count: "exact", head: true })
+        .eq("environment_id", ctx.environmentId)
     ]);
 
     const doc = (posRes.data?.value_json as { doc?: Record<string, string> } | null)?.doc;
@@ -168,7 +291,21 @@ async function CommandCentrePage() {
     completedScanCount = scanRes.count ?? 0;
     const ga4 = (analyticsRes.data?.value_json as { ga4_property_id?: string } | null)?.ga4_property_id;
     ga4Configured = Boolean(t(ga4));
+    latestScanSignals =
+      ((latestScanRes.data?.[0] as { result_json?: { signals?: ScanSignal[] } } | null)
+        ?.result_json?.signals ?? []);
+    bcCount = bcCountRes.count ?? 0;
   }
+
+  const liveSignals = deriveSignals({
+    scanSignals: latestScanSignals,
+    positioningCanvasOk,
+    segmentCount,
+    competitorCount,
+    battlecardCount: bcCount,
+    scanCompletedOk: completedScanCount > 0,
+    productName: productProfile?.name ?? null,
+  });
 
   const scanCompletedOk = completedScanCount > 0;
 
@@ -325,7 +462,7 @@ async function CommandCentrePage() {
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
-          <NeedsAttention />
+          <LiveSignalFeed signals={liveSignals} />
           <ThisWeek />
         </div>
 
@@ -748,87 +885,80 @@ function PmmJourneyMap() {
   );
 }
 
-function NeedsAttention() {
+function LiveSignalFeed({ signals }: { signals: LiveSignal[] }) {
+  if (!signals.length) return null;
+
+  const categoryColor: Record<LiveSignal["category"], string> = {
+    COMPETITOR: "bg-[rgba(248,113,113,0.12)] text-red border-[rgba(248,113,113,0.3)]",
+    POSITIONING: "bg-[rgba(139,92,246,0.12)] text-[#a78bfa] border-[rgba(139,92,246,0.3)]",
+    ICP: "bg-[rgba(56,189,248,0.12)] text-[#38bdf8] border-[rgba(56,189,248,0.3)]",
+    MARKET: "bg-[rgba(251,191,36,0.12)] text-yellow border-[rgba(251,191,36,0.3)]",
+    BATTLECARD: "bg-[rgba(52,211,153,0.12)] text-green border-[rgba(52,211,153,0.3)]",
+  };
+
+  const severityIcon: Record<LiveSignal["severity"], string> = {
+    risk: "⚠️",
+    opportunity: "💡",
+    info: "ℹ️",
+  };
+
   return (
     <div className="rounded-[var(--radius)] border border-border bg-surface p-5">
-      <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
-        🔴 Example alerts
-      </div>
-      <div className="mt-1 text-[11px] text-text2">
-        Illustrative PMM actions. Wire Analytics + product data to replace with live signals.
-      </div>
-
-      <div className="mt-3 space-y-3">
-        <AttentionRow
-          icon="⚠️"
-          iconBg="rgba(248,113,113,0.15)"
-          title="LinkedIn Ad creative fatigue detected"
-          detail='Ad set "Enterprise Q1" CTR dropped 34% over 7 days. Creative refresh recommended.'
-          actions={[
-            { label: "View Analytics", href: "/dashboard/analytics" },
-            { label: "Draft New Creative", href: "/dashboard/content-studio", primary: true }
-          ]}
-        />
-        <AttentionRow
-          icon="📅"
-          iconBg="rgba(251,191,36,0.15)"
-          title="SaaStr booth brief overdue by 2 days"
-          detail="Event is in 18 days. Assign owner and brief the design team."
-          actions={[{ label: "Open Events", href: "/dashboard/events", primary: true }]}
-        />
-        <AttentionRow
-          icon="🌐"
-          iconBg="rgba(248,113,113,0.15)"
-          title="3 website pages are 90+ days stale"
-          detail="Pricing, Integrations, and Enterprise pages need content refresh after Q4 product updates."
-          actions={[{ label: "Review Pages", href: "/dashboard/website-pages" }]}
-        />
-      </div>
-    </div>
-  );
-}
-
-function AttentionRow({
-  icon,
-  iconBg,
-  title,
-  detail,
-  actions
-}: {
-  icon: string;
-  iconBg: string;
-  title: string;
-  detail: string;
-  actions: Array<{ label: string; href: string; primary?: boolean }>;
-}) {
-  return (
-    <div className="flex gap-3 rounded-[var(--radius)] border border-border bg-surface2 p-4">
-      <div
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-[16px]"
-        style={{ background: iconBg }}
-      >
-        {icon}
-      </div>
-      <div className="flex-1">
-        <div className="text-[13px] font-semibold text-text">{title}</div>
-        <div className="mt-1 text-[12px] leading-5 text-text2">{detail}</div>
-        {actions.length ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {actions.map((a) => (
-              <Link
-                key={a.label}
-                href={a.href}
-                className={`inline-flex items-center gap-2 rounded-[var(--radius2)] px-4 py-2 text-[12px] font-semibold transition ${
-                  a.primary
-                    ? "bg-accent text-white hover:bg-primary-dark"
-                    : "border border-border bg-surface text-text hover:bg-surface3 hover:border-border2"
-                }`}
-              >
-                {a.label}
-              </Link>
-            ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="font-[var(--font-heading)] text-[14px] font-bold text-text">
+            📡 Live intelligence feed
           </div>
-        ) : null}
+          <div className="mt-1 text-[11px] text-text2">
+            Signals from your workspace. Click <strong className="text-text">Ask AI</strong> to act on any signal in Copilot.
+          </div>
+        </div>
+        <Link
+          href="/dashboard/market-research"
+          className="rounded-[var(--radius2)] border border-border bg-surface2 px-3 py-1.5 text-[11px] font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+        >
+          Run new scan →
+        </Link>
+      </div>
+
+      <div className="mt-3 space-y-2.5">
+        {signals.map((signal) => (
+          <div
+            key={signal.id}
+            className="flex gap-3 rounded-[var(--radius2)] border border-border bg-surface2 p-4"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-surface3 text-[16px]">
+              {severityIcon[signal.severity]}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${categoryColor[signal.category]}`}
+                >
+                  {signal.category}
+                </span>
+                <div className="text-[13px] font-semibold text-text">{signal.title}</div>
+              </div>
+              {signal.detail && (
+                <p className="mt-1 text-[12px] leading-5 text-text2">{signal.detail}</p>
+              )}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link
+                  href={`/dashboard/copilot?q=${encodeURIComponent(signal.copilotQ)}`}
+                  className="inline-flex items-center gap-1.5 rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-primary-dark"
+                >
+                  🤖 Ask AI
+                </Link>
+                <Link
+                  href={signal.moduleHref}
+                  className="inline-flex items-center gap-1.5 rounded-[var(--radius2)] border border-border bg-surface px-3 py-1.5 text-[11px] font-semibold text-text transition hover:bg-surface3 hover:border-border2"
+                >
+                  {signal.moduleLabel}
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
