@@ -944,7 +944,7 @@ function LiveSignalFeed({ signals }: { signals: LiveSignal[] }) {
               )}
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link
-                  href={`/dashboard/copilot?q=${encodeURIComponent(signal.copilotQ)}`}
+                  href={`/dashboard/copilot?signal=${encodeURIComponent(JSON.stringify({ title: signal.title, category: signal.category, module: signal.moduleLabel }))}&q=${encodeURIComponent(signal.copilotQ)}`}
                   className="inline-flex items-center gap-1.5 rounded-[var(--radius2)] bg-accent px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-primary-dark"
                 >
                   🤖 Ask AI

@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 
 type Metric = { label: string; value: string };
 type ChatRole = "assistant" | "user";
+type SuggestedUpdate = { module: string; href: string; action: string };
+
+type PinnedSignal = { title: string; category: string; module: string } | null;
 
 type ChatMessage = {
   id: string;
@@ -12,6 +16,16 @@ type ChatMessage = {
   text: string;
   metrics?: Metric[];
   suggestions?: string[];
+  suggested_updates?: SuggestedUpdate[];
+  signalTitle?: string;
+};
+
+const CATEGORY_STYLE: Record<string, string> = {
+  COMPETITOR: "bg-[rgba(248,113,113,0.12)] text-red border-[rgba(248,113,113,0.3)]",
+  POSITIONING: "bg-[rgba(139,92,246,0.12)] text-[#a78bfa] border-[rgba(139,92,246,0.3)]",
+  ICP: "bg-[rgba(56,189,248,0.12)] text-[#38bdf8] border-[rgba(56,189,248,0.3)]",
+  MARKET: "bg-[rgba(251,191,36,0.12)] text-yellow border-[rgba(251,191,36,0.3)]",
+  BATTLECARD: "bg-[rgba(52,211,153,0.12)] text-green border-[rgba(52,211,153,0.3)]",
 };
 
 const HINTS = [
@@ -46,11 +60,21 @@ export default function CopilotPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pinnedSignal, setPinnedSignal] = useState<PinnedSignal>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
+    const signalParam = params.get("signal");
+    if (signalParam) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(signalParam)) as PinnedSignal;
+        if (parsed?.title) setPinnedSignal(parsed);
+      } catch {
+        // ignore malformed
+      }
+    }
     const qParam = params.get("q");
     if (qParam) {
       setInput((prev) => prev || decodeURIComponent(qParam));
@@ -71,23 +95,25 @@ export default function CopilotPage() {
     setLoading(true);
 
     try {
-      // Build history from current messages (exclude the opening static message)
       const history = messages
         .filter((m) => m.id !== "opening")
         .map((m) => ({ role: m.role, content: m.text }));
 
       const res = await fetch("/api/ai/chat", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ message: text, history })
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          history,
+          signal: pinnedSignal?.title || undefined
+        })
       });
 
       const payload = (await res.json()) as {
         response?: string;
         metrics?: Metric[];
         suggestions?: string[];
+        suggested_updates?: SuggestedUpdate[];
         needs_input?: boolean;
         questions?: string[];
         message?: string | null;
@@ -107,7 +133,9 @@ export default function CopilotPage() {
           role: "assistant",
           text: payload.response ?? "I could not generate a response.",
           metrics: payload.metrics ?? [],
-          suggestions: payload.suggestions ?? []
+          suggestions: payload.suggestions ?? [],
+          suggested_updates: payload.suggested_updates ?? [],
+          signalTitle: pinnedSignal?.title
         }
       ]);
     } catch (e) {
@@ -126,6 +154,29 @@ export default function CopilotPage() {
         </div>
       </div>
 
+      {pinnedSignal && (
+        <div className="flex items-center gap-2.5 border-b border-border bg-surface2 px-5 py-2.5">
+          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-text3">
+            Signal attached
+          </span>
+          <span
+            className={`shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${CATEGORY_STYLE[pinnedSignal.category] ?? "bg-surface3 text-text3 border-border"}`}
+          >
+            {pinnedSignal.category}
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-text">
+            {pinnedSignal.title}
+          </span>
+          <button
+            onClick={() => setPinnedSignal(null)}
+            className="shrink-0 text-[11px] text-text3 transition hover:text-text"
+            aria-label="Dismiss signal"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6">
         <div className="space-y-4">
           {messages.map((m) => (
@@ -139,7 +190,7 @@ export default function CopilotPage() {
                 <AiProgressBar
                   active
                   variant="dark"
-                  title="Copilot is thinking…"
+                  title={pinnedSignal ? `Processing signal: ${pinnedSignal.title.slice(0, 50)}…` : "Copilot is thinking…"}
                   estimate={AI_PROGRESS_ESTIMATE.chat}
                   durationMs={60_000}
                   className="!p-3"
@@ -152,17 +203,19 @@ export default function CopilotPage() {
       </div>
 
       <div className="border-t border-border px-4 py-4 md:px-6">
-        <div className="mb-3 grid grid-cols-2 gap-2 md:grid-cols-4">
-          {HINTS.map((hint) => (
-            <button
-              key={hint}
-              onClick={() => sendMessage(hint)}
-              className="rounded-xl border border-border bg-primary-light px-3 py-2 text-xs text-heading hover:bg-surface2"
-            >
-              {hint}
-            </button>
-          ))}
-        </div>
+        {!pinnedSignal && (
+          <div className="mb-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+            {HINTS.map((hint) => (
+              <button
+                key={hint}
+                onClick={() => sendMessage(hint)}
+                className="rounded-xl border border-border bg-primary-light px-3 py-2 text-xs text-heading hover:bg-surface2"
+              >
+                {hint}
+              </button>
+            ))}
+          </div>
+        )}
 
         {error ? (
           <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
@@ -180,7 +233,7 @@ export default function CopilotPage() {
                 sendMessage(input);
               }
             }}
-            placeholder="Ask Copilot anything..."
+            placeholder={pinnedSignal ? `Tell Copilot what to do about this signal…` : "Ask Copilot anything..."}
             className="w-full rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-heading placeholder:text-text2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <button
@@ -208,6 +261,36 @@ function Avatar({ role }: { role: ChatRole }) {
   );
 }
 
+function CarryButton({ response, updates, signalTitle }: { response: string; updates: SuggestedUpdate[]; signalTitle?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function buildSummary() {
+    const lines: string[] = [];
+    if (signalTitle) lines.push(`📡 *Signal:* ${signalTitle}`);
+    lines.push(`*AI recommendation:* ${response.slice(0, 280)}${response.length > 280 ? "…" : ""}`);
+    if (updates.length) {
+      lines.push(`*Suggested updates:*`);
+      updates.forEach((u) => lines.push(`• *${u.module}* — ${u.action}`));
+    }
+    return lines.join("\n");
+  }
+
+  async function copy() {
+    await navigator.clipboard.writeText(buildSummary());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <button
+      onClick={copy}
+      className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface2 px-3 py-1.5 text-[11px] font-semibold text-text2 transition hover:bg-surface3 hover:text-text"
+    >
+      {copied ? "✓ Copied" : "📋 Copy team summary"}
+    </button>
+  );
+}
+
 function MessageBubble({
   message,
   onSuggestion
@@ -216,6 +299,7 @@ function MessageBubble({
   onSuggestion: (value: string) => void;
 }) {
   const isAI = message.role === "assistant";
+  const hasUpdates = isAI && (message.suggested_updates?.length ?? 0) > 0;
 
   return (
     <div className={`flex items-start gap-3 ${isAI ? "" : "justify-end"}`}>
@@ -237,14 +321,40 @@ function MessageBubble({
                 key={`${m.label}-${m.value}`}
                 className="rounded-xl border border-border bg-surface2 px-3 py-2"
               >
-                <div className="text-[11px] uppercase tracking-wider text-text2">
-                  {m.label}
-                </div>
+                <div className="text-[11px] uppercase tracking-wider text-text2">{m.label}</div>
                 <div className="mt-1 text-sm text-heading">{m.value}</div>
               </div>
             ))}
           </div>
         ) : null}
+
+        {hasUpdates && (
+          <div className="mt-4 border-t border-border pt-3">
+            <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-text3">
+              Suggested updates
+            </div>
+            <div className="space-y-2">
+              {message.suggested_updates!.map((u) => (
+                <Link
+                  key={u.href}
+                  href={u.href}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-surface2 px-3 py-2 transition hover:border-primary/40 hover:bg-surface"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[12px] font-semibold text-text">{u.module}</div>
+                    <div className="text-[11px] text-text2">{u.action}</div>
+                  </div>
+                  <span className="shrink-0 text-text3 transition group-hover:text-primary">→</span>
+                </Link>
+              ))}
+            </div>
+            <CarryButton
+              response={message.text}
+              updates={message.suggested_updates!}
+              signalTitle={message.signalTitle}
+            />
+          </div>
+        )}
 
         {isAI && message.suggestions?.length ? (
           <div className="mt-3 flex flex-wrap gap-2">
@@ -265,4 +375,3 @@ function MessageBubble({
     </div>
   );
 }
-

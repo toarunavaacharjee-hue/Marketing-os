@@ -30,12 +30,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
   }
 
-  const body = (await req.json()) as { message?: string; history?: HistoryMessage[] };
+  const body = (await req.json()) as { message?: string; history?: HistoryMessage[]; signal?: string };
   const message = (body.message ?? "").trim();
   if (!message) {
     return NextResponse.json({ error: "Message is required." }, { status: 400 });
   }
   const history: HistoryMessage[] = Array.isArray(body.history) ? body.history.slice(-10) : [];
+  const signal = (body.signal ?? "").trim();
 
   const profileSelect = await supabase
     .from("profiles")
@@ -78,24 +79,44 @@ export async function POST(req: Request) {
     );
   }
 
+  const signalBlock = signal
+    ? `\n\nACTIVE SIGNAL (highest priority — ground your entire response in this): "${signal}"\nPopulate suggested_updates with the 1–3 most relevant modules to act on.`
+    : "";
+
+  const moduleList = `
+Available modules (use exact hrefs in suggested_updates):
+- Market Research: /dashboard/market-research
+- Positioning Studio: /dashboard/positioning-studio
+- ICP Segmentation: /dashboard/icp-segmentation
+- Battlecards: /dashboard/battlecards
+- Messaging & Artifacts: /dashboard/messaging-artifacts
+- Campaigns: /dashboard/campaigns
+- GTM Planner: /dashboard/gtm-planner
+- Content Studio: /dashboard/content-studio
+- Sales Intelligence: /dashboard/sales-intelligence`;
+
   const systemPrompt = `You are the AI Copilot for AI Marketing Workbench. Output ONLY valid JSON. Minimize tokens — short strings, no prose outside JSON.
 
-Context: plan=${plan}, company=${company}, user=${profile?.name ?? "Unknown"}${workspaceContext}
+Context: plan=${plan}, company=${company}, user=${profile?.name ?? "Unknown"}${workspaceContext}${signalBlock}
+${signal ? moduleList : ""}
 
 Schema:
 {
   "status": "ok" | "needs_input",
   "message": "optional; one short line when needs_input",
   "questions": ["max 3; only if needs_input"],
-  "response": "only if status ok; tactical answer grounded in the workspace context above, max ~450 chars",
+  "response": "only if status ok; tactical answer grounded in workspace context, max ~450 chars",
   "metrics": [{"label":"","value":""}],
-  "suggestions": ["max 3 follow-up prompts"]
+  "suggestions": ["max 3 follow-up prompts"],
+  "suggested_updates": [{"module":"module name","href":"/dashboard/...","action":"what to update — 1 sentence"}]
 }
 
 Rules:
 - Use the Workspace Context to give specific, grounded answers (reference actual segments, competitors, objections, campaigns by name).
+- If an ACTIVE SIGNAL is present, respond specifically to it — do not give generic advice.
 - If the ask is too vague to act on, use status needs_input with questions only (no long response).
 - If status ok: metrics 2–3 items, suggestions 3 items.
+- suggested_updates: only when a clear asset update is implied (max 3); omit the field otherwise.
 - No markdown fences, no keys outside the schema.`;
 
   // Build messages array including conversation history
@@ -113,7 +134,7 @@ Rules:
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
-      max_tokens: 600,
+      max_tokens: signal ? 800 : 600,
       temperature: 0.3,
       system: systemPrompt,
       messages
@@ -136,6 +157,7 @@ Rules:
     response?: string;
     metrics?: Array<{ label?: string; value?: string }>;
     suggestions?: string[];
+    suggested_updates?: Array<{ module?: string; href?: string; action?: string }>;
   } | null;
 
   const needsInput = String(parsed?.status ?? "ok").toLowerCase() === "needs_input";
@@ -156,6 +178,11 @@ Rules:
   }
 
   const sugg = (parsed?.suggestions ?? []).filter(Boolean).slice(0, 4);
+  const suggestedUpdates = (parsed?.suggested_updates ?? [])
+    .filter((u) => u.module && u.href && u.action)
+    .map((u) => ({ module: String(u.module), href: String(u.href), action: String(u.action) }))
+    .slice(0, 3);
+
   const payload = {
     needs_input: needsInput && qs.length > 0,
     message: parsed?.message ?? null,
@@ -166,7 +193,8 @@ Rules:
         ?.filter((m) => m.label && m.value)
         .map((m) => ({ label: String(m.label), value: String(m.value) }))
         .slice(0, 4) ?? [],
-    suggestions: sugg.length ? sugg : needsInput ? qs.slice(0, 3) : []
+    suggestions: sugg.length ? sugg : needsInput ? qs.slice(0, 3) : [],
+    suggested_updates: suggestedUpdates
   };
 
   await supabase
