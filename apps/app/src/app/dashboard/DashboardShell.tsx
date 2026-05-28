@@ -303,7 +303,7 @@ export function DashboardShell({
     Intelligence: "#10B981",
   };
 
-  function initials(name: string | null) {
+  function initials(name: string | null | undefined) {
     if (!name) return "?";
     return name.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   }
