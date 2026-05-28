@@ -279,7 +279,7 @@ export default function HomePageModernClient({
             Your story leaks revenue every day.
           </h2>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-text2 sm:text-[15px]">
-            It's not a content problem. It's a coordination problem. The positioning doc lives in Notion. The battlecard is two versions behind. The rep improvises. The launch is forgotten by week four.
+            It&apos;s not a content problem. It&apos;s a coordination problem. The positioning doc lives in Notion. The battlecard is two versions behind. The rep improvises. The launch is forgotten by week four.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
