@@ -207,9 +207,272 @@ function MessageMapView({
   );
 }
 
+function PositioningGuideView({ json }: { json: Record<string, any> }) {
+  const stmt = typeof json.positioning_statement === "string" ? json.positioning_statement : null;
+  const diffs = Array.isArray(json.differentiators) ? json.differentiators : [];
+  const proof = Array.isArray(json.proof_points) ? json.proof_points : [];
+  const objections = Array.isArray(json.objections) ? json.objections : [];
+  return (
+    <div className="space-y-4">
+      {stmt && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Positioning statement</div>
+          <div className="mt-2 text-sm leading-relaxed text-text2 italic">&ldquo;{stmt}&rdquo;</div>
+        </div>
+      )}
+      <div className="grid gap-4 md:grid-cols-2">
+        {diffs.length > 0 && (
+          <div className="hs-card p-5">
+            <div className="text-[13px] font-semibold text-text">Differentiators</div>
+            <ul className="mt-3 space-y-2">
+              {diffs.map((d: any, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-text2">
+                  <span className="mt-0.5 shrink-0 text-primary">▸</span>
+                  {String(d)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {proof.length > 0 && (
+          <div className="hs-card p-5">
+            <div className="text-[13px] font-semibold text-text">Proof points</div>
+            <ul className="mt-3 space-y-2">
+              {proof.map((p: any, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-text2">
+                  <span className="mt-0.5 shrink-0 text-[var(--color-teal)]">✓</span>
+                  {String(p)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      {objections.length > 0 && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Objection responses</div>
+          <div className="mt-3 space-y-3">
+            {objections.map((o: any, i: number) => (
+              <div key={i} className="hs-card2 rounded-xl p-4">
+                <div className="text-[12px] font-semibold text-heading">&ldquo;{o.objection}&rdquo;</div>
+                <div className="mt-1.5 text-[13px] text-text2">{o.response}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LaunchBriefView({ json }: { json: Record<string, any> }) {
+  const objective = typeof json.objective === "string" ? json.objective : null;
+  const keyMessages = Array.isArray(json.key_messages) ? json.key_messages : [];
+  const timeline = Array.isArray(json.timeline) ? json.timeline : [];
+  const channels = Array.isArray(json.channels) ? json.channels : [];
+  const assetChecklist = Array.isArray(json.asset_checklist) ? json.asset_checklist : [];
+  const metrics = Array.isArray(json.success_metrics) ? json.success_metrics : [];
+  return (
+    <div className="space-y-4">
+      {objective && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Launch objective</div>
+          <div className="mt-2 text-sm leading-relaxed text-text2">{objective}</div>
+        </div>
+      )}
+      {keyMessages.length > 0 && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Key messages</div>
+          <ul className="mt-3 space-y-2">
+            {keyMessages.map((m: any, i: number) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-text2">
+                <span className="mt-0.5 shrink-0 font-semibold text-primary">{i + 1}.</span>
+                {String(m)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {timeline.length > 0 && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Timeline</div>
+          <div className="mt-3 space-y-3">
+            {timeline.map((t: any, i: number) => (
+              <div key={i} className="hs-card2 rounded-xl p-4">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <div className="text-[13px] font-semibold text-heading">{t.phase}</div>
+                  <div className="text-[11px] text-text3">{t.timing}</div>
+                </div>
+                {Array.isArray(t.deliverables) && t.deliverables.length > 0 && (
+                  <ul className="mt-2 space-y-1">
+                    {t.deliverables.map((d: any, j: number) => (
+                      <li key={j} className="flex items-center gap-2 text-[12px] text-text2">
+                        <span className="text-text3">·</span>
+                        {String(d)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="grid gap-4 md:grid-cols-3">
+        {channels.length > 0 && (
+          <div className="hs-card p-5">
+            <div className="text-[13px] font-semibold text-text">Channels</div>
+            <ul className="mt-3 space-y-2">
+              {channels.map((c: any, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-[12px] text-text2">
+                  <span className="shrink-0 text-primary">▸</span>
+                  {String(c)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {assetChecklist.length > 0 && (
+          <div className="hs-card p-5">
+            <div className="text-[13px] font-semibold text-text">Asset checklist</div>
+            <ul className="mt-3 space-y-2">
+              {assetChecklist.map((a: any, i: number) => (
+                <li key={i} className="flex items-center gap-2 text-[12px] text-text2">
+                  <span className="h-3.5 w-3.5 rounded border border-border" />
+                  {String(a)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {metrics.length > 0 && (
+          <div className="hs-card p-5">
+            <div className="text-[13px] font-semibold text-text">Success metrics</div>
+            <ul className="mt-3 space-y-2">
+              {metrics.map((m: any, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-[12px] text-text2">
+                  <span className="shrink-0 text-[var(--color-teal)]">✓</span>
+                  {String(m)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SalesEnablementView({ json }: { json: Record<string, any> }) {
+  const talkTrack = Array.isArray(json.talk_track) ? json.talk_track : [];
+  const discoveryQ = Array.isArray(json.discovery_questions) ? json.discovery_questions : [];
+  const compAngles = Array.isArray(json.competitive_angles) ? json.competitive_angles : [];
+  const objections = Array.isArray(json.objections) ? json.objections : [];
+  const emails = Array.isArray(json.email_templates) ? json.email_templates : [];
+  const deckOutline = Array.isArray(json.deck_outline) ? json.deck_outline : [];
+  return (
+    <div className="space-y-4">
+      {talkTrack.length > 0 && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Talk track</div>
+          <ol className="mt-3 space-y-2">
+            {talkTrack.map((t: any, i: number) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-text2">
+                <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-light text-[10px] font-bold text-primary">
+                  {i + 1}
+                </span>
+                {String(t)}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      <div className="grid gap-4 md:grid-cols-2">
+        {discoveryQ.length > 0 && (
+          <div className="hs-card p-5">
+            <div className="text-[13px] font-semibold text-text">Discovery questions</div>
+            <ul className="mt-3 space-y-2">
+              {discoveryQ.map((q: any, i: number) => (
+                <li key={i} className="text-[13px] text-text2">
+                  <span className="font-medium text-text">Q{i + 1}:</span> {String(q)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {compAngles.length > 0 && (
+          <div className="hs-card p-5">
+            <div className="text-[13px] font-semibold text-text">Competitive angles</div>
+            <ul className="mt-3 space-y-2">
+              {compAngles.map((a: any, i: number) => (
+                <li key={i} className="flex items-start gap-2 text-[13px] text-text2">
+                  <span className="shrink-0 text-primary">▸</span>
+                  {String(a)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+      {objections.length > 0 && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Objection responses</div>
+          <div className="mt-3 space-y-3">
+            {objections.map((o: any, i: number) => (
+              <div key={i} className="hs-card2 rounded-xl p-4">
+                <div className="text-[12px] font-semibold text-heading">&ldquo;{o.objection}&rdquo;</div>
+                <div className="mt-1.5 text-[13px] text-text2">{o.response}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {emails.length > 0 && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Email templates</div>
+          <div className="mt-3 space-y-4">
+            {emails.map((e: any, i: number) => (
+              <div key={i} className="hs-card2 rounded-xl p-4">
+                <div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-text3">{e.type}</div>
+                <div className="text-[12px] font-semibold text-heading">Subject: {e.subject}</div>
+                <div className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-text2">{e.body}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {deckOutline.length > 0 && (
+        <div className="hs-card p-5">
+          <div className="text-[13px] font-semibold text-text">Deck outline</div>
+          <ol className="mt-3 space-y-2">
+            {deckOutline.map((s: any, i: number) => (
+              <li key={i} className="flex items-center gap-2 text-[13px] text-text2">
+                <span className="shrink-0 font-mono text-[11px] text-text3">{String(i + 1).padStart(2, "0")}</span>
+                {String(s)}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function humanOutputForArtifact(artifact: ArtifactRow): { title: string; content: React.ReactNode } {
   const json = artifact.content_json ?? {};
   const typeLabel = prettyType(artifact.artifact_type);
+
+  if (artifact.artifact_type === "positioning_guide" && isPlainObject(json)) {
+    return { title: "Positioning Guide", content: <PositioningGuideView json={json} /> };
+  }
+
+  if (artifact.artifact_type === "launch_brief" && isPlainObject(json)) {
+    return { title: "Launch Brief", content: <LaunchBriefView json={json} /> };
+  }
+
+  if (artifact.artifact_type === "sales_enablement" && isPlainObject(json)) {
+    return { title: "Sales Enablement Pack", content: <SalesEnablementView json={json} /> };
+  }
 
   if (artifact.artifact_type === "message_map" && isPlainObject(json)) {
     const coreMessage = typeof json.core_message === "string" ? json.core_message : null;
