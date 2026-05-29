@@ -25,7 +25,7 @@ export default function DashboardHelpPage() {
           href="/dashboard"
           className="inline-flex shrink-0 items-center justify-center hs-card2 px-4 py-2 text-sm font-semibold text-heading transition hover:bg-surface3"
         >
-          ← Command Centre
+          ← Marketing Workbench
         </Link>
       </div>
 
