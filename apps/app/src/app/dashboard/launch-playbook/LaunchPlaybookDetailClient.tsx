@@ -314,7 +314,10 @@ export function LaunchPlaybookDetailClient({
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {(artifacts.length > 0 ? artifacts : ARTIFACT_TYPES.map((a) => ({ id: "", ...a, status: "ready" }))).map(
+          {(artifacts.length > 0
+            ? artifacts
+            : ARTIFACT_TYPES.map((a) => ({ id: "", artifact_type: a.type, title: a.label, status: "ready" as const }))
+          ).map(
             (a, i) => {
               const typeInfo = ARTIFACT_TYPES.find((t) => t.type === a.artifact_type) ?? ARTIFACT_TYPES[i];
               const card = (
