@@ -43,13 +43,11 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
     return kind === "feature-launch"
       ? {
           title: "Feature Launch",
-          subtitle: "Execute feature rollouts with focused coordination and impact.",
-          badge: "Due today"
+          subtitle: "Execute feature rollouts with focused coordination and impact."
         }
       : {
           title: "Product Launch",
-          subtitle: "Plan and execute product launches with clarity and alignment.",
-          badge: "Due in 2 days"
+          subtitle: "Plan and execute product launches with clarity and alignment."
         };
   }, [kind]);
 
@@ -128,7 +126,6 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
             </Link>
             <span>/</span>
             <span className="text-text2">{meta.title}</span>
-            <span className="rounded-full border border-border bg-surface2 px-2.5 py-1">{meta.badge}</span>
           </div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text" style={{ fontFamily: "var(--font-heading)" }}>
             {meta.title}
@@ -210,9 +207,16 @@ export function LaunchPlaybookDetailClient({ environmentId, kind }: { environmen
       </div>
 
       {lastRunId ? (
-        <div className="mt-6 hs-card p-5 text-sm text-text2">
-          <span className="font-medium text-text">Run started.</span> Run id:{" "}
-          <span className="font-mono text-text">{lastRunId}</span>. (MVP: this is a stub endpoint; next step is persisting runs + statuses.)
+        <div className="mt-6 hs-card p-5">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(0,191,165,0.12)] text-[var(--color-teal)]">✓</span>
+            <div>
+              <div className="text-[13px] font-semibold text-heading">Agents queued</div>
+              <div className="mt-0.5 text-[12px] text-text2">
+                The workflow is running in the background. Artifacts will appear in the <Link href="/dashboard/artifacts" className="text-link hover:underline">Artifact Library</Link> once ready.
+              </div>
+            </div>
+          </div>
         </div>
       ) : null}
 

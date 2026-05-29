@@ -62,34 +62,7 @@ export function ArtifactLibraryClient({ environmentId }: { environmentId: string
   }, [environmentId]);
 
   const artifacts = useMemo<Artifact[]>(() => {
-    if (rows.length === 0) {
-      return [
-        {
-          id: "positioning-stub",
-          title: "Positioning Guide",
-          subtitle: "Core Artifact",
-          status: "draft",
-          href: "/dashboard/launch-playbook/product-launch",
-          accent: "purple"
-        },
-        {
-          id: "messaging-stub",
-          title: "Message Map",
-          subtitle: "Core Artifact",
-          status: "draft",
-          href: "/dashboard/launch-playbook/product-launch",
-          accent: "teal"
-        },
-        {
-          id: "launch-brief-stub",
-          title: "Launch Brief",
-          subtitle: "Playbook Output",
-          status: "draft",
-          href: "/dashboard/launch-playbook/product-launch",
-          accent: "amber"
-        }
-      ];
-    }
+    if (rows.length === 0) return [];
 
     return rows.map((r) => {
       const t = String(r.artifact_type ?? "");
@@ -114,29 +87,34 @@ export function ArtifactLibraryClient({ environmentId }: { environmentId: string
       title="Artifact Library"
       subtitle="A connected set of strategic artifacts your team can reuse across launches and channels. Artifacts are generated and updated by agent workers, powered by Anthropic Claude Sonnet."
       actions={
-        <>
-          <Link
-            href="/dashboard/launch-playbook"
-            className="hs-btn hs-btn-primary"
-          >
-            Open Launch Playbook
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              void environmentId;
-            }}
-            className="hs-btn hs-btn-secondary"
-          >
-            New artifact
-          </button>
-        </>
+        <Link
+          href="/dashboard/launch-playbook"
+          className="hs-btn hs-btn-primary"
+        >
+          Open Launch Playbook
+        </Link>
       }
     >
       <div className="space-y-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {loading ? (
             <div className="hs-card p-5 text-sm text-text2">Loading artifacts…</div>
+          ) : !loading && artifacts.length === 0 ? (
+            <div className="col-span-full hs-card p-8 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light">
+                <span className="text-2xl text-primary">📦</span>
+              </div>
+              <div className="text-[15px] font-semibold text-heading">No artifacts yet</div>
+              <div className="mt-2 text-[13px] leading-relaxed text-text2">
+                Artifacts are generated when you run a Launch Playbook workflow. Each run produces a positioning guide, message map, GTM plan, and sales enablement pack — all saved here automatically.
+              </div>
+              <Link
+                href="/dashboard/launch-playbook"
+                className="mt-5 inline-flex items-center justify-center hs-btn hs-btn-primary"
+              >
+                Run your first playbook →
+              </Link>
+            </div>
           ) : null}
           {artifacts.map((a) => (
             <Link key={a.id} href={a.href} className="hs-card hs-card-hover group p-5">
