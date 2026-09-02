@@ -124,6 +124,11 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/vs" className="transition hover:text-text">
+                  Comparisons
+                </Link>
+              </li>
+              <li>
                 <Link href="/tools/glossary" className="transition hover:text-text">
                   Glossary
                 </Link>

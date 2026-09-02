@@ -74,7 +74,7 @@ You build your messaging framework in AI Marketing Workbench. You deploy it thro
 
 | | AI Marketing Workbench | HubSpot Marketing Hub |
 |---|---|---|
-| Starting price | $19/month | $800/month (Professional) |
+| Starting price | $99/month | $800/month (Professional) |
 | ICP + segmentation | ✓ | ✗ |
 | Positioning studio | ✓ | ✗ |
 | Messaging frameworks | ✓ | ✗ |

@@ -70,7 +70,7 @@ AI Marketing Workbench propagates changes. Update your positioning canvas and th
 
 | | AI Marketing Workbench | Notion (Team) |
 |---|---|---|
-| Starting price | $19/month | $10/user/month |
+| Starting price | $99/month | $10/user/month |
 | PMM-specific structure | ✓ | ✗ |
 | AI generation (PMM context) | ✓ | Limited |
 | Connected modules | ✓ | ✗ |

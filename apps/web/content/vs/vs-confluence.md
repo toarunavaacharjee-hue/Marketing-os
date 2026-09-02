@@ -71,7 +71,7 @@ AI Marketing Workbench doesn't have this problem because modules are connected. 
 
 | | AI Marketing Workbench | Confluence (Standard) |
 |---|---|---|
-| Starting price | $19/month | $5.75/user/month |
+| Starting price | $99/month | $5.75/user/month |
 | PMM-specific modules | ✓ | ✗ |
 | AI generation (PMM context) | ✓ | ✗ |
 | Connected strategy modules | ✓ | ✗ |

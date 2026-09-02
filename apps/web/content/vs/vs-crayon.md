@@ -74,7 +74,7 @@ Both are useful. Crayon wins on real-time alerting volume. AI Marketing Workbenc
 
 | | AI Marketing Workbench | Crayon |
 |---|---|---|
-| Starting price | $19/month | ~$1,500+/month (estimated) |
+| Starting price | $99/month | ~$1,500+/month (estimated) |
 | Competitive monitoring | Manual trigger scan | Automated continuous |
 | Battlecards | ✓ AI-generated | ✓ Template-based |
 | Positioning studio | ✓ | ✗ |
