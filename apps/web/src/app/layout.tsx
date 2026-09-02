@@ -12,7 +12,8 @@ export const metadata: Metadata = {
     default: "AI Marketing Workbench",
     template: "%s | AI Marketing Workbench"
   },
-  description: "The operating system for product marketing and GTM teams.",
+  description:
+    "AI Marketing Workbench is the marketing operating system for B2B teams — ICP, positioning, messaging, campaigns, and launch planning in one connected workspace.",
   applicationName: "AI Marketing Workbench",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }]
@@ -20,7 +21,8 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   openGraph: {
     title: "AI Marketing Workbench",
-    description: "The operating system for product marketing and GTM teams.",
+    description:
+      "The marketing operating system for B2B demand gen, PMM, content, and growth teams. Connect strategy to execution in one AI-powered workspace.",
     type: "website",
     url: SITE_URL,
     siteName: "AI Marketing Workbench",
@@ -29,7 +31,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "AI Marketing Workbench",
-    description: "The operating system for product marketing and GTM teams.",
+    description:
+      "The marketing operating system for B2B demand gen, PMM, content, and growth teams. Connect strategy to execution in one AI-powered workspace.",
     images: [DEFAULT_OG]
   }
 };
