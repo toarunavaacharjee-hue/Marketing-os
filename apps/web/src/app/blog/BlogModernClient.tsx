@@ -28,7 +28,7 @@ export function BlogModernClient({ posts }: { posts: Entry[] }) {
           Blog
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-text2">
-          Practical GTM frameworks, templates, and checklists. Built for operators who want execution speed.
+          Practical frameworks, templates, and playbooks for demand gen, PMM, content, growth, and campaign teams who want faster execution.
         </p>
       </header>
 
@@ -38,7 +38,7 @@ export function BlogModernClient({ posts }: { posts: Entry[] }) {
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-text3">
               <span>{p.date ?? "Latest"}</span>
               <span className="text-text3">•</span>
-              <span className="text-primary">PMM / GTM</span>
+              <span className="text-primary">{p.tags[0] ?? "Marketing"}</span>
             </div>
             <h2 className="mt-3 text-xl font-semibold tracking-tight text-text" style={{ fontFamily: "var(--font-heading)" }}>
               <Link href={`/blog/${p.slug}`} className="transition hover:text-primary">
