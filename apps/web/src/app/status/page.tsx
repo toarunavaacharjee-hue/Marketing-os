@@ -59,8 +59,8 @@ export default function StatusPage() {
 
           <div className="mt-6 text-sm text-text2">
             For incidents or support, email{" "}
-            <a className="underline decoration-border underline-offset-4 hover:text-text" href="mailto:support@aimarketingworkbench.com">
-              support@aimarketingworkbench.com
+            <a className="underline decoration-border underline-offset-4 hover:text-text" href="mailto:orahtechandmarketing@gmail.com">
+              orahtechandmarketing@gmail.com
             </a>
             .
           </div>

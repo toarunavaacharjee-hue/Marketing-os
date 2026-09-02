@@ -38,10 +38,10 @@ export default function ContactPage() {
             </p>
             <div className="mt-4">
               <a
-                href="mailto:support@aimarketingworkbench.com"
+                href="mailto:orahtechandmarketing@gmail.com"
                 className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
               >
-                support@aimarketingworkbench.com
+                orahtechandmarketing@gmail.com
               </a>
             </div>
           </div>
@@ -52,10 +52,10 @@ export default function ContactPage() {
             <p className="mt-2 text-sm leading-relaxed text-text2">Customer support inbox.</p>
             <div className="mt-4">
               <a
-                href="mailto:support@aimarketingworkbench.com"
+                href="mailto:orahtechandmarketing@gmail.com"
                 className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
               >
-                support@aimarketingworkbench.com
+                orahtechandmarketing@gmail.com
               </a>
             </div>
           </div>
