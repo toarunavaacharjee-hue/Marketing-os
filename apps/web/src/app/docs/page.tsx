@@ -82,8 +82,8 @@ export default function DocsPage() {
           </div>
           <div className="mt-6 text-sm text-text2">
             For questions about background runs or troubleshooting, email{" "}
-            <a className="underline decoration-border underline-offset-4 hover:text-text" href="mailto:support@aimarketingworkbench.com">
-              support@aimarketingworkbench.com
+            <a className="underline decoration-border underline-offset-4 hover:text-text" href="mailto:orahtechandmarketing@gmail.com">
+              orahtechandmarketing@gmail.com
             </a>
             .
           </div>
@@ -94,10 +94,10 @@ export default function DocsPage() {
           <p className="mt-2 text-sm leading-relaxed text-text2">Email support and we’ll point you to the right workflow.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <a
-              href="mailto:support@aimarketingworkbench.com"
+              href="mailto:orahtechandmarketing@gmail.com"
               className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
             >
-              support@aimarketingworkbench.com
+              orahtechandmarketing@gmail.com
             </a>
             <Link
               href="/resources"
