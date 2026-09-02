@@ -4,21 +4,21 @@ import { getAllContent } from "@/lib/content";
 import { MarketingFooter, MarketingHeader } from "@/components/marketing/MarketingChrome";
 
 export const metadata: Metadata = {
-  title: "Free PMM Templates",
+  title: "Free Marketing Templates for B2B Teams",
   description:
-    "Free product marketing templates — messaging frameworks, positioning statements, ICP definitions, GTM checklists, battlecards, and more. Copy, fill in, and ship.",
+    "Free marketing templates for demand gen, PMM, content, and campaign teams — messaging frameworks, positioning statements, ICP definitions, campaign briefs, GTM checklists, battlecards, and more. Copy, fill in, and ship.",
   alternates: { canonical: "/tools/templates" },
   openGraph: {
-    title: "Free PMM Templates | AI Marketing Workbench",
-    description: "Free product marketing templates for PMM and GTM teams.",
+    title: "Free Marketing Templates | AI Marketing Workbench",
+    description: "Free marketing templates for demand gen, PMM, content, and campaign teams.",
     type: "website",
     url: "/tools/templates",
-    images: [{ url: "/og?title=Free+PMM+Templates&description=Messaging+frameworks%2C+battlecards%2C+GTM+checklists+and+more&type=template", width: 1200, height: 630 }]
+    images: [{ url: "/og?title=Free+Marketing+Templates&description=Messaging+frameworks%2C+campaign+briefs%2C+battlecards%2C+GTM+checklists+and+more&type=template", width: 1200, height: 630 }]
   },
   twitter: { card: "summary_large_image" }
 };
 
-const CATEGORY_ORDER = ["Messaging", "Positioning", "GTM", "Sales", "Research"];
+const CATEGORY_ORDER = ["Messaging", "Positioning", "Campaigns", "GTM", "Sales", "Research", "Content"];
 
 export default async function TemplatesPage() {
   const templates = await getAllContent("templates");
@@ -58,10 +58,10 @@ export default async function TemplatesPage() {
             className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-text sm:text-5xl"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            PMM Templates
+            Free Marketing Templates
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-text2">
-            Free, copy-pasteable templates for product marketing and GTM teams. Messaging frameworks, positioning statements, battlecards, GTM checklists, and more.
+            Copy-pasteable templates for demand gen, PMM, content, and campaign teams. Messaging frameworks, campaign briefs, positioning statements, battlecards, GTM checklists, and more.
           </p>
         </div>
 

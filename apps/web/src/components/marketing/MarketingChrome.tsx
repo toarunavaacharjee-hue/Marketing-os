@@ -120,7 +120,7 @@ export function MarketingFooter() {
             <ul className="mt-4 space-y-2.5 text-sm text-text2">
               <li>
                 <Link href="/tools/templates" className="transition hover:text-text">
-                  PMM Templates
+                  Marketing Templates
                 </Link>
               </li>
               <li>
