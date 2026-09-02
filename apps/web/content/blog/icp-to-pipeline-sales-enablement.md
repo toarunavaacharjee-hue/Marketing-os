@@ -74,7 +74,7 @@ Each variant gets its own outreach angle, its own email subject line, and its ow
 
 ## Step 3: The sales enablement assets PMMs actually need to build
 
-**Battle cards.** One per major competitor. Structure: what the competitor is, where they're strong, where they're weak, how to handle the comparison. Update them quarterly with new objections from Gong call reviews. See [competitive messaging](/blog/competitive-messaging-framework-b2b-saas) for the framework.
+**Battle cards.** One per major competitor. Structure: what the competitor is, where they're strong, where they're weak, how to handle the comparison. Update them quarterly with new objections from Gong call reviews. See the [battlecard template](/blog/battlecard-template) for the exact structure, and [competitive messaging](/blog/competitive-messaging-framework-b2b-saas) for the underlying framework.
 
 **Segment-specific one-pagers.** One per ICP variant (see Step 2). One page: the trigger event, the pain, your solution, one proof point, one clear next step. Sales reps use these in follow-up emails and executive briefings.
 
@@ -88,7 +88,7 @@ Each variant gets its own outreach angle, its own email subject line, and its ow
 
 Three metrics that tell you if the ICP is working:
 
-**Pipeline coverage by ICP segment.** Are you generating enough pipeline from your primary ICP? If the primary ICP segment is generating less than 60% of your pipeline, either the ICP is wrong or the targeting motion isn't reaching them.
+**Pipeline coverage by ICP segment.** Are you generating enough pipeline from your primary ICP? If the primary ICP segment is generating less than 60% of your pipeline, either the ICP is wrong or the targeting motion isn't reaching them. Use [win/loss analysis](/blog/win-loss-analysis-framework) to diagnose which it is.
 
 **Win rate by ICP fit score.** Score your deals by how closely they match the 5-dimension ICP (see the [ICP framework post](/blog/ideal-customer-profile-icp-framework)). High-fit deals should close at 2–3x the rate of low-fit deals. If they don't, your ICP needs revision.
 
@@ -100,4 +100,4 @@ This framework is well-known in US SaaS communities (Pavilion, Revenue Collectiv
 
 The translation step is the work. It takes a full week to do properly: interviewing customers, extracting trigger events, writing message variants, building the asset templates. AI compresses the creation phase but doesn't replace the customer research.
 
-AI Marketing Workbench has an ICP module that maps all 5 dimensions and generates segment-specific message variants and sales enablement assets from your ICP inputs. Connect it to the [messaging framework](/blog/product-messaging-framework) and [GTM strategy template](/blog/b2b-go-to-market-strategy-template). [Pricing starts at $99/month](/pricing).
+AI Marketing Workbench has an ICP module that maps all 5 dimensions and generates segment-specific message variants and sales enablement assets from your ICP inputs. Connect it to the [messaging framework](/blog/product-messaging-framework) and [GTM strategy template](/blog/b2b-go-to-market-strategy-template). For the full enablement plan structure across all stages, see the [sales enablement plan template](/blog/sales-enablement-plan-template). [Start free](/signup) or [see pricing](/pricing).

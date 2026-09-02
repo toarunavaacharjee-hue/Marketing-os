@@ -148,4 +148,4 @@ For connecting these metrics to your GTM plan, see the [B2B GTM plan template](/
 
 ---
 
-AI Marketing Workbench connects your GTM strategy to campaign tracking, launch metrics, and reporting — so the KPIs you care about are tied to the inputs that drive them. [See pricing](/pricing) — Starter is $99/month.
+AI Marketing Workbench connects your GTM strategy to campaign tracking, launch metrics, and reporting — so the KPIs you care about are tied to the inputs that drive them. [Start free](/signup) or [see pricing](/pricing) — Starter is $99/month.

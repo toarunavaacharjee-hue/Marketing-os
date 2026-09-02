@@ -19,19 +19,19 @@ Here are seven mistakes that show up again and again.
 
 Many teams stay broad because narrowing feels risky. In practice, broad messaging usually creates the bigger risk: nobody feels like the product was built for them.
 
-The fix is not just "pick an ICP." The fix is to define where the team can win fastest and where the product creates the clearest urgency.
+The fix is not just "pick an ICP." The fix is to define where the team can win fastest and where the product creates the clearest urgency. See the [ICP framework](/blog/ideal-customer-profile-icp-framework) for a 5-dimension model built from closed-won data.
 
 ## 2. Treating positioning as copywriting
 
 Positioning is not the homepage headline. It is the strategic decision about who you are for, what job you solve, and why you are different.
 
-When teams treat positioning like copy, they end up rewriting language over and over without resolving the underlying strategic confusion.
+When teams treat positioning like copy, they end up rewriting language over and over without resolving the underlying strategic confusion. The [positioning vs messaging](/blog/positioning-vs-messaging) post explains where the line is and how to make the distinction stick.
 
 ## 3. Launching without a message map
 
 Launches break down when teams do not have reusable language. Marketing says one thing, sales says another, and product explains it differently again.
 
-A message map creates alignment. It gives every function the same foundation for value props, proof, objections, and use cases.
+A message map creates alignment. It gives every function the same foundation for value props, proof, objections, and use cases. See the [SaaS messaging framework](/blog/saas-messaging-framework) for a 6-part structure you can fill in once and use everywhere.
 
 ## 4. Using too many channels too early
 
@@ -43,7 +43,7 @@ At an early stage, it is usually better to focus on one audience, one offer, and
 
 Teams often track everything because it feels rigorous. But the best GTM metrics are the ones that change action.
 
-If a metric does not help decide what to double down on, what to fix, or what to stop doing, it is not helping the team move faster.
+If a metric does not help decide what to double down on, what to fix, or what to stop doing, it is not helping the team move faster. See [marketing metrics: 10 KPIs every team should own](/blog/marketing-metrics-kpis) for the short list that actually drives decisions.
 
 ## 6. Rebuilding context every sprint
 
@@ -77,4 +77,8 @@ They make decisions visible. They keep messaging connected to strategy. They red
 
 Most GTM mistakes are not isolated mistakes. They are symptoms of a missing system.
 
-If you want better execution, the answer is not just more output. It is a better operating model for how the team captures context, makes decisions, and reuses what it learns.
+If you want better execution, the answer is not just more output. It is a better operating model for how the team captures context, makes decisions, and reuses what it learns. The [B2B go-to-market strategy template](/blog/b2b-go-to-market-strategy-template) gives you the structure to build that system, and the [B2B GTM plan](/blog/b2b-go-to-market-plan) covers the execution sprint that follows.
+
+---
+
+AI Marketing Workbench connects ICP, positioning, messaging, and campaign execution in one place — so GTM context compounds instead of resetting each sprint. [Start free](/signup) or [see pricing](/pricing).

@@ -93,4 +93,4 @@ For the competitive intelligence that feeds into your battlecards from win/loss 
 
 ---
 
-AI Marketing Workbench connects win/loss themes to your positioning canvas and battlecards — so findings from the field update your messaging artifacts automatically. [See pricing](/pricing) — Starter is $99/month.
+AI Marketing Workbench connects win/loss themes to your positioning canvas and battlecards — so findings from the field update your messaging artifacts automatically. [Start free](/signup) or [see pricing](/pricing) — Starter is $99/month.

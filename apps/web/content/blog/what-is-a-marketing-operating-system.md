@@ -21,7 +21,7 @@ A marketing operating system is the set of connected workflows, templates, and t
 - **Strategy layer:** ICP segments, positioning, competitive landscape
 - **Content layer:** message maps, battlecards, sales enablement
 - **Execution layer:** campaigns, GTM plans, launch playbooks
-- **Intelligence layer:** market research, customer insights, analytics
+- **Intelligence layer:** market research, customer insights, analytics — and the [marketing metrics](/blog/marketing-metrics-kpis) that connect these to commercial outcomes
 
 ## Why most GTM teams don't have one
 
@@ -51,4 +51,8 @@ The cost of not having one scales with headcount and product complexity. At two 
 
 ---
 
-AI Marketing Workbench is a marketing operating system built for PMM and GTM teams. It connects ICP, positioning, messaging, and launch workflows in one place — with AI that reads your strategy context and generates artifacts in minutes. [See pricing](/pricing) — Starter is $99/month.
+For a deeper look at why the shift to an operating model matters, see [why marketing teams need an operating system](/blog/why-marketing-teams-need-an-operating-system). For the AI-driven GTM workflow that runs inside one, see the [AI product marketing GTM workflow](/blog/ai-product-marketing-gtm-workflow).
+
+---
+
+AI Marketing Workbench is a marketing operating system built for PMM and GTM teams. It connects ICP, positioning, messaging, and launch workflows in one place — with AI that reads your strategy context and generates artifacts in minutes. [Start free](/signup) or [see pricing](/pricing) — Starter is $99/month.
