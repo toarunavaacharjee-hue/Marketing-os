@@ -614,20 +614,20 @@ export default function ProspectResearchClient() {
         <button
           type="button"
           onClick={newProspect}
-          className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 hover:border-primary/30"
+          className="hs-btn hs-btn-secondary"
         >
           New prospect
         </button>
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red">
+        <div className="hs-alert hs-alert-error p-4 text-sm">
           {error}
         </div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(200px,260px)_1fr]">
-        <div className="rounded-2xl border border-border bg-surface p-4">
+        <div className="hs-card p-4">
           <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.5px] text-text3">
             Saved prospects
           </div>
@@ -637,7 +637,7 @@ export default function ProspectResearchClient() {
               <button
                 type="button"
                 onClick={() => void loadList()}
-                className="mt-2 rounded-xl border border-amber-500/40 bg-surface2 px-2 py-1 text-[11px] font-semibold text-text transition hover:bg-surface3"
+                className="hs-btn hs-btn-ghost mt-2 text-[11px]"
               >
                 Retry
               </button>
@@ -672,7 +672,7 @@ export default function ProspectResearchClient() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-surface p-5">
+          <div className="hs-card p-5">
             <div className="mb-4 text-sm font-semibold text-heading">
               Inputs
             </div>
@@ -682,7 +682,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                   placeholder="e.g. Acme Corp — Enterprise renewal"
                 />
               </label>
@@ -691,7 +691,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
               <label className="block text-sm">
@@ -699,7 +699,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                   placeholder="https://"
                 />
               </label>
@@ -708,11 +708,11 @@ export default function ProspectResearchClient() {
                 <input
                   value={dealStage}
                   onChange={(e) => setDealStage(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                   placeholder="e.g. Discovery, Evaluation"
                 />
               </label>
-              <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface2 px-3 py-2">
+              <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2 hs-card2 px-3 py-2">
                 <div className="text-xs text-text3">
                   Auto-fill company basics (public knowledge) from Company name / Website.
                 </div>
@@ -730,7 +730,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={preparedFor}
                   onChange={(e) => setPreparedFor(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                   placeholder="e.g. Andrew Toppin & Marketing Team"
                 />
               </label>
@@ -739,7 +739,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={demoOrMeetingDate}
                   onChange={(e) => setDemoOrMeetingDate(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                   placeholder="e.g. April 17, 2026, 10:00 AM PT"
                 />
               </label>
@@ -748,11 +748,11 @@ export default function ProspectResearchClient() {
                 <input
                   value={sellerName}
                   onChange={(e) => setSellerName(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                   placeholder="For sales strategy notes section"
                 />
               </label>
-              <div className="md:col-span-2 rounded-xl border border-border bg-surface2 p-3">
+              <div className="md:col-span-2 hs-card2 p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="text-xs text-text3">
                     Paste attendee names/emails/LinkedIn URLs (one per line). We’ll enrich names/titles/company and feed
@@ -770,7 +770,7 @@ export default function ProspectResearchClient() {
                 <textarea
                   value={attendeeRaw}
                   onChange={(e) => setAttendeeRaw(e.target.value)}
-                  className="mt-2 h-[84px] w-full resize-y rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text"
+                  className="hs-input mt-2 h-[84px] resize-y"
                   placeholder={"e.g.\nAlex Johnson — VP, Procurement\nalex.johnson@example.com\nhttps://www.linkedin.com/in/alexjohnson/"}
                 />
                 {stakeholders.length ? (
@@ -786,7 +786,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={industrySubvertical}
                   onChange={(e) => setIndustrySubvertical(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
               <label className="block text-sm">
@@ -794,7 +794,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={companySize}
                   onChange={(e) => setCompanySize(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
               <label className="block text-sm">
@@ -802,7 +802,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={geography}
                   onChange={(e) => setGeography(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
               <label className="block text-sm">
@@ -810,7 +810,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={businessModel}
                   onChange={(e) => setBusinessModel(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
               <label className="block text-sm">
@@ -818,7 +818,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={techStack}
                   onChange={(e) => setTechStack(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
               <label className="block text-sm">
@@ -826,7 +826,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={fundingOwnership}
                   onChange={(e) => setFundingOwnership(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
               <label className="block text-sm md:col-span-2">
@@ -834,7 +834,7 @@ export default function ProspectResearchClient() {
                 <input
                   value={recentNewsEvents}
                   onChange={(e) => setRecentNewsEvents(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="hs-input mt-1"
                 />
               </label>
             </div>
@@ -844,7 +844,7 @@ export default function ProspectResearchClient() {
                 value={additionalContext}
                 onChange={(e) => setAdditionalContext(e.target.value)}
                 rows={4}
-                className="mt-1 w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                className="hs-input mt-1"
               />
             </label>
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -862,7 +862,7 @@ export default function ProspectResearchClient() {
                 type="button"
                 onClick={() => uploadRef.current?.click()}
                 disabled={uploading}
-                className="rounded-xl border border-border bg-surface2 px-3 py-2 text-sm font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
+                className="hs-card2 px-3 py-2 text-sm font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
               >
                 {uploading ? "Extracting…" : "Upload info (PDF/DOCX/XLSX/CSV)"}
               </button>
@@ -884,7 +884,7 @@ export default function ProspectResearchClient() {
                 type="button"
                 onClick={() => (selectedId ? updateProspect() : saveProspect())}
                 disabled={saving || !draftMemo}
-                className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
+                className="hs-card2 px-4 py-2 text-sm font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
               >
                 {saving ? "Saving…" : selectedId ? "Save changes" : "Save as prospect"}
               </button>
@@ -904,7 +904,7 @@ export default function ProspectResearchClient() {
           </div>
 
           {draftMemo || selectedId ? (
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="hs-card p-5">
               <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                 <div className="text-sm font-semibold text-heading">
                   Prospect Intelligence Memo
@@ -915,7 +915,7 @@ export default function ProspectResearchClient() {
                       type="button"
                       onClick={() => void downloadMemoDocx()}
                       disabled={exporting !== null}
-                      className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
+                      className="hs-card2 px-3 py-1.5 text-xs font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
                     >
                       {exporting === "docx" ? "Preparing Word…" : "Download Word"}
                     </button>
@@ -923,7 +923,7 @@ export default function ProspectResearchClient() {
                       type="button"
                       onClick={downloadMemoPdf}
                       disabled={exporting !== null}
-                      className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
+                      className="hs-card2 px-3 py-1.5 text-xs font-semibold text-text transition hover:bg-surface3 disabled:opacity-50"
                     >
                       {exporting === "pdf" ? "Preparing PDF…" : "Download PDF"}
                     </button>
@@ -958,7 +958,7 @@ export default function ProspectResearchClient() {
               </div>
             </div>
           ) : generating ? (
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="hs-card p-5">
               <div className="mb-3 text-sm font-semibold text-heading">
                 Prospect Intelligence Memo
               </div>
@@ -981,7 +981,7 @@ export default function ProspectResearchClient() {
           )}
 
           {selectedId && draftMemo ? (
-            <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="hs-card p-5">
               <div className="mb-2 text-sm font-semibold text-heading">
                 Prospect agent
               </div>
@@ -1010,7 +1010,7 @@ export default function ProspectResearchClient() {
                     }
                   }}
                   placeholder="e.g. Who is likely the economic buyer?"
-                  className="flex-1 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text"
+                  className="flex-1 hs-card2 px-3 py-2 text-sm text-text"
                 />
                 <button
                   type="button"
@@ -1022,7 +1022,7 @@ export default function ProspectResearchClient() {
                 </button>
               </div>
               {chatA ? (
-                <div className="mt-4 rounded-xl border border-border bg-surface2 p-4 text-sm text-text">
+                <div className="mt-4 hs-card2 p-4 text-sm text-text">
                   <Markdown content={chatA} />
                 </div>
               ) : null}

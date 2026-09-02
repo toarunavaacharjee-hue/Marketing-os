@@ -339,14 +339,14 @@ export default function TeamSettingsClient({
       ) : null}
 
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
+        <div className="hs-alert hs-alert-error">{error}</div>
       ) : null}
       {ok ? (
-        <div className="rounded-xl border border-teal/30 bg-amber/10 px-3 py-2 text-sm text-teal">{ok}</div>
+        <div className="hs-alert hs-alert-success">{ok}</div>
       ) : null}
 
       {canAdmin ? (
-        <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="hs-card p-6">
           <div className="text-sm text-heading">Product access</div>
           <div className="mt-2 text-sm text-text2">
             Assign which products within this workspace a user can access.
@@ -356,7 +356,7 @@ export default function TeamSettingsClient({
             <select
               value={productAccessUserId}
               onChange={(e) => setProductAccessUserId(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading disabled:opacity-60"
+              className="hs-input disabled:opacity-60"
             >
               <option value="">Select a member…</option>
               {members.map((m) => (
@@ -370,7 +370,7 @@ export default function TeamSettingsClient({
                 type="button"
                 onClick={() => void loadProductsAndAccess()}
                 disabled={productAccessBusy}
-                className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-heading hover:bg-surface2 disabled:opacity-60"
+                className="hs-btn hs-btn-secondary disabled:opacity-60"
               >
                 Refresh products
               </button>
@@ -411,7 +411,7 @@ export default function TeamSettingsClient({
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="text-sm text-heading">Workspace settings</div>
         <div className="mt-2 text-sm text-text2">Rename the workspace, or delete it (owner-only).</div>
 
@@ -420,7 +420,7 @@ export default function TeamSettingsClient({
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             disabled={!canAdmin || savingWorkspace || deletingWorkspace}
-            className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text2 disabled:opacity-60"
+            className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text2 disabled:opacity-60"
             placeholder="Workspace name"
           />
           <div className="md:col-span-2 flex flex-wrap gap-2">
@@ -428,7 +428,7 @@ export default function TeamSettingsClient({
               type="button"
               disabled={!canAdmin || savingWorkspace || deletingWorkspace || !workspaceName.trim()}
               onClick={() => void saveWorkspaceName()}
-              className="rounded-xl border border-border bg-surface2 px-4 py-2 text-sm text-heading hover:bg-surface2 disabled:opacity-60"
+              className="hs-card2 px-4 py-2 text-sm text-heading hover:bg-surface2 disabled:opacity-60"
             >
               {savingWorkspace ? "Saving…" : "Save workspace"}
             </button>
@@ -470,7 +470,7 @@ export default function TeamSettingsClient({
         ) : null}
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="text-sm text-heading">Invites</div>
         <div className="mt-2 text-sm text-text2">
           Create a link invite. Email delivery can be added later; for now you can copy/paste the link.
@@ -482,12 +482,12 @@ export default function TeamSettingsClient({
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="teammate@company.com"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text2"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text2"
             />
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading"
             >
               <option value="member">member</option>
               <option value="admin">admin</option>
@@ -505,7 +505,7 @@ export default function TeamSettingsClient({
         ) : null}
 
         {lastInviteUrl ? (
-          <div className="mt-3 rounded-xl border border-border bg-surface2 p-3">
+          <div className="mt-3 hs-card2 p-3">
             <div className="text-[10px] uppercase text-text2">Invite link</div>
             <div className="mt-1 break-all text-sm text-heading">{lastInviteUrl}</div>
           </div>
@@ -545,7 +545,7 @@ export default function TeamSettingsClient({
                             <button
                               type="button"
                               onClick={() => void navigator.clipboard.writeText(link)}
-                              className="rounded-lg border border-border bg-surface2 px-2 py-1 text-xs text-heading hover:bg-surface2"
+                              className="hs-card2 px-2 py-1 text-xs text-heading hover:bg-surface2"
                             >
                               Copy link
                             </button>
@@ -580,13 +580,13 @@ export default function TeamSettingsClient({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm text-heading">Members</div>
           <button
             type="button"
             onClick={() => void refresh()}
-            className="rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-heading hover:bg-surface2"
+            className="hs-card2 px-3 py-2 text-xs text-heading hover:bg-surface2"
           >
             Refresh
           </button>
@@ -616,7 +616,7 @@ export default function TeamSettingsClient({
                           value={m.role}
                           onChange={(e) => void setRole(m.user_id, e.target.value)}
                           disabled={busy}
-                          className="rounded-lg border border-border bg-surface2 px-2 py-1 text-sm text-heading disabled:opacity-60"
+                          className="hs-card2 px-2 py-1 text-sm text-heading disabled:opacity-60"
                         >
                           {ROLE_OPTIONS.map((r) => (
                             <option key={r} value={r}>

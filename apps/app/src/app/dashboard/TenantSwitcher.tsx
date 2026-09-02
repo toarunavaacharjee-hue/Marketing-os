@@ -10,12 +10,14 @@ export function TenantSwitcher({
   companies,
   products,
   selectedCompanyId,
-  selectedProductId
+  selectedProductId,
+  theme = "dark"
 }: {
   companies: CompanyOptionWithPublicId[];
   products: ProductOption[];
   selectedCompanyId: string | null;
   selectedProductId: string | null;
+  theme?: "dark" | "light";
 }) {
   const [loading, setLoading] = useState(false);
   const syncFixRef = useRef(false);
@@ -57,12 +59,21 @@ export function TenantSwitcher({
     window.location.href = "/dashboard";
   }
 
-  return (
-    <div className="px-4 pb-3 pt-3">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-text3">
-        Workspace
-      </div>
+  const isLight = theme === "light";
+  const labelCls = isLight
+    ? "mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-400"
+    : "mb-2 text-xs font-semibold uppercase tracking-wider text-text3";
+  const selectCls = isLight
+    ? "w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-[13px] text-slate-700 shadow-sm focus:border-primary focus:outline-none"
+    : "w-full rounded-sm border border-transparent bg-sidebar-active px-3 py-2 text-sm text-on-dark shadow-none focus:border-primary focus:outline-none focus:shadow-focus";
+  const linkCls = isLight
+    ? "font-medium text-primary hover:underline"
+    : "font-medium text-primary-light/80 hover:text-primary-light hover:underline transition-colors";
+  const helperCls = isLight ? "text-[11px] text-slate-400" : "text-xs text-on-dark/45";
 
+  return (
+    <div className={isLight ? "px-3 pb-3 pt-2" : "px-4 pb-3 pt-3"}>
+      <div className={labelCls}>Workspace</div>
       <select
         value={selectedCompanyId ?? ""}
         disabled={loading || companies.length === 0}
@@ -72,7 +83,7 @@ export function TenantSwitcher({
             products.find((p) => p.company_id === nextCompanyId) ?? null;
           setContext(nextCompanyId, firstProduct?.id ?? null);
         }}
-        className="w-full rounded-sm border border-transparent bg-sidebar-active px-3 py-2 text-sm text-on-dark shadow-none focus:border-primary focus:outline-none focus:shadow-focus"
+        className={selectCls}
       >
         {companies.map((c) => (
           <option key={c.id} value={c.id}>
@@ -82,19 +93,15 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className="mb-2 mt-3 text-xs font-semibold uppercase tracking-wider text-text3">
-        Product
-      </div>
+      <div className={`${labelCls} ${isLight ? "mt-2.5" : "mb-2 mt-3"}`}>Product</div>
       <select
         value={selectedIsValid ? (selectedProductId ?? "") : ""}
         disabled={loading || companyProducts.length === 0}
         onChange={(e) => setContext(selectedCompanyId ?? "", e.target.value)}
-        className="w-full rounded-sm border border-transparent bg-sidebar-active px-3 py-2 text-sm text-on-dark shadow-none focus:border-primary focus:outline-none focus:shadow-focus"
+        className={selectCls}
       >
         {!selectedIsValid && companyProducts.length > 0 ? (
-          <option value="" disabled>
-            Select product…
-          </option>
+          <option value="" disabled>Select product…</option>
         ) : null}
         {companyProducts.map((p) => (
           <option key={p.id} value={p.id}>
@@ -104,22 +111,10 @@ export function TenantSwitcher({
         ))}
       </select>
 
-      <div className="mt-3 space-y-1 text-xs text-on-dark/75">
-        <div>
-          Want to add a product to this company?{" "}
-          <a
-            className="font-medium text-primary-light hover:underline"
-            href="/dashboard/settings/product#add-product"
-          >
-            Add product
-          </a>
-        </div>
-        <div>
-          Need a new company?{" "}
-          <a className="font-medium text-primary-light hover:underline" href="/onboarding">
-            Create company
-          </a>
-        </div>
+      <div className={`mt-2.5 flex items-center gap-2 ${helperCls}`}>
+        <a className={linkCls} href="/dashboard/settings/product#add-product">+ Add product</a>
+        <span>·</span>
+        <a className={linkCls} href="/onboarding">New company</a>
       </div>
     </div>
   );

@@ -1,222 +1,279 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
-type Initiative = {
+const LAUNCH_TYPES = [
+  {
+    kind: "product-launch" as const,
+    label: "Product Launch",
+    description:
+      "Full launch workflow for a new product or major release. Reads your ICP, positioning, and market research to generate a complete artifact set.",
+    outputs: ["Positioning guide", "Message map", "GTM plan + timeline", "Sales enablement pack"],
+    color: "bg-primary",
+    letter: "P"
+  },
+  {
+    kind: "feature-launch" as const,
+    label: "Feature Launch",
+    description:
+      "Focused workflow for rolling out a feature update. Generates a targeted narrative and enablement materials tied to your segment context.",
+    outputs: ["Feature positioning guide", "Segment-specific message map", "Channel plan + asset list", "Battlecard + call scripts"],
+    color: "bg-[#2563eb]",
+    letter: "F"
+  }
+];
+
+type RecentRun = {
   id: string;
-  kind: "product-launch" | "feature-launch";
-  title: string;
-  description: string;
-  dueLabel: string;
-  members: string[];
-  updatedLabel: string;
-  accent: "purple" | "blue";
+  kind: string;
+  status: string;
+  created_at: string;
+  input_json: { launchName?: string; tier?: string } | null;
 };
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return (parts[0]?.[0] ?? "A").toUpperCase() + (parts[1]?.[0] ?? "").toUpperCase();
+function statusBadge(status: string) {
+  if (status === "completed")
+    return (
+      <span className="rounded-full border border-[rgba(0,191,165,0.3)] bg-[rgba(0,191,165,0.08)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--color-teal)]">
+        Completed
+      </span>
+    );
+  if (status === "failed")
+    return (
+      <span className="rounded-full border border-[rgba(242,84,91,0.3)] bg-[rgba(242,84,91,0.08)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--color-error)]">
+        Failed
+      </span>
+    );
+  if (status === "running")
+    return (
+      <span className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700">
+        Running
+      </span>
+    );
+  return (
+    <span className="rounded-full border border-border bg-surface2 px-2.5 py-0.5 text-[11px] font-medium text-text3">
+      {status}
+    </span>
+  );
 }
 
 export function LaunchPlaybookClient({ environmentId }: { environmentId: string }) {
   const router = useRouter();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [recentRuns, setRecentRuns] = useState<RecentRun[]>([]);
   const pickerRef = useRef<HTMLDivElement | null>(null);
 
-  const initiatives = useMemo<Initiative[]>(
-    () => [
-      {
-        id: "init-1",
-        kind: "product-launch",
-        title: "Product Launch",
-        description: "Plan and execute product launches with clarity and alignment.",
-        dueLabel: "Due in 2 days",
-        members: ["RK", "AM", "SP"],
-        updatedLabel: "2h ago",
-        accent: "purple"
-      },
-      {
-        id: "init-2",
-        kind: "feature-launch",
-        title: "Feature Launch",
-        description: "Execute feature rollouts with focused coordination and impact.",
-        dueLabel: "Due today",
-        members: ["RK"],
-        updatedLabel: "5d ago",
-        accent: "blue"
-      }
-    ],
-    []
-  );
-
   useEffect(() => {
-    if (!pickerOpen) return;
-    function onDocPointerDown(e: PointerEvent) {
-      const el = pickerRef.current;
-      if (!el) return;
-      if (e.target instanceof Node && el.contains(e.target)) return;
-      setPickerOpen(false);
-    }
-    document.addEventListener("pointerdown", onDocPointerDown, { capture: true });
-    return () => document.removeEventListener("pointerdown", onDocPointerDown, { capture: true } as any);
-  }, [pickerOpen]);
+    let cancelled = false;
+    const supabase = createSupabaseBrowserClient();
+    (async () => {
+      const { data } = await supabase
+        .from("launch_playbook_runs")
+        .select("id,kind,status,created_at,input_json")
+        .eq("environment_id", environmentId)
+        .order("created_at", { ascending: false })
+        .limit(6);
+      if (cancelled) return;
+      setRecentRuns((data ?? []) as RecentRun[]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [environmentId]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Playbooks</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text" style={{ fontFamily: "var(--font-heading)" }}>
-            Launch Playbook
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text2">
-            Run launches with agentic workflows: research → narrative → GTM plan → sales enablement. Work is executed by background agent workers powered by
-            Anthropic Claude Sonnet.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/dashboard/artifacts"
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
-          >
+    <ModuleShell
+      title="Launch Playbook"
+      subtitle="Fill in a launch brief, run AI agents, and get a positioning guide, message map, GTM plan, and sales enablement pack — all saved to your Artifact Library and ready to use across modules."
+      actions={
+        <>
+          <Link href="/dashboard/artifacts" className="hs-btn hs-btn-secondary">
             Artifact Library
           </Link>
-
           <div className="relative" ref={pickerRef}>
             <button
               type="button"
               onClick={() => setPickerOpen((v) => !v)}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
+              className="hs-btn hs-btn-primary gap-2"
               aria-haspopup="menu"
               aria-expanded={pickerOpen}
             >
-              New initiative <span aria-hidden>▾</span>
+              New launch <span aria-hidden>▾</span>
             </button>
-
-            {pickerOpen ? (
+            {pickerOpen && (
               <div
                 role="menu"
-                aria-label="Create initiative"
-                className="absolute right-0 top-[calc(100%+8px)] w-[240px] overflow-hidden rounded-xl border border-border bg-surface text-text shadow-dropdown"
+                aria-label="Choose launch type"
+                className="absolute right-0 top-[calc(100%+8px)] z-10 w-[260px] overflow-hidden hs-card text-text shadow-dropdown"
               >
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-surface2"
-                  onClick={() => {
-                    setPickerOpen(false);
-                    void environmentId;
-                    router.push("/dashboard/launch-playbook/product-launch");
-                  }}
-                >
-                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-xs font-bold text-white">
-                    P
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-heading">Product launch</span>
-                    <span className="mt-0.5 block text-xs text-text2">Positioning + message map + launch plan.</span>
-                  </span>
-                </button>
-
-                <div className="h-px bg-border" />
-
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-surface2"
-                  onClick={() => {
-                    setPickerOpen(false);
-                    void environmentId;
-                    router.push("/dashboard/launch-playbook/feature-launch");
-                  }}
-                >
-                  <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#2563eb] text-xs font-bold text-white">
-                    F
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-heading">Feature launch</span>
-                    <span className="mt-0.5 block text-xs text-text2">Rollout plan + enablement materials.</span>
-                  </span>
-                </button>
+                {LAUNCH_TYPES.map((t) => (
+                  <button
+                    key={t.kind}
+                    type="button"
+                    role="menuitem"
+                    className="flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface2"
+                    onClick={() => {
+                      setPickerOpen(false);
+                      router.push(`/dashboard/launch-playbook/${t.kind}`);
+                    }}
+                  >
+                    <span
+                      className={`mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${t.color} text-xs font-bold text-white`}
+                    >
+                      {t.letter}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-heading">{t.label}</span>
+                      <span className="mt-0.5 block text-xs text-text2">{t.description.split(".")[0]}.</span>
+                    </span>
+                  </button>
+                ))}
               </div>
-            ) : null}
+            )}
           </div>
+        </>
+      }
+    >
+      {/* How it works */}
+      <div className="hs-card p-6">
+        <div className="text-[13px] font-semibold uppercase tracking-wide text-text3">How it works</div>
+        <div className="mt-4 grid gap-3 md:grid-cols-4">
+          {[
+            {
+              n: "01",
+              label: "Fill in the brief",
+              detail: "Name the launch, describe what you're launching, set the date and tier, pick your ICP segment."
+            },
+            {
+              n: "02",
+              label: "Run the agents",
+              detail: "The AI reads your ICP, positioning canvas, and market research to generate 4 artifacts."
+            },
+            {
+              n: "03",
+              label: "Review the artifacts",
+              detail: "Positioning guide, message map, GTM plan, and sales enablement pack — saved to Artifact Library."
+            },
+            {
+              n: "04",
+              label: "Use across modules",
+              detail: "Copy narratives into Campaigns, use the GTM checklist in GTM Planner, share the battlecard with sales."
+            }
+          ].map((s) => (
+            <div key={s.n} className="hs-card2 p-4">
+              <div className="text-[11px] font-bold text-text3">{s.n}</div>
+              <div className="mt-1.5 text-[13px] font-semibold text-heading">{s.label}</div>
+              <div className="mt-1 text-[12px] leading-relaxed text-text2">{s.detail}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {initiatives.map((i) => (
+      {/* Launch type cards */}
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        {LAUNCH_TYPES.map((t) => (
           <Link
-            key={i.id}
-            href={`/dashboard/launch-playbook/${i.kind}`}
-            className="group overflow-hidden rounded-2xl border border-border bg-surface shadow-card transition hover:shadow-card-hover"
+            key={t.kind}
+            href={`/dashboard/launch-playbook/${t.kind}`}
+            className="hs-card hs-card-hover group overflow-hidden"
           >
-            <div className="border-b border-border bg-surface2 px-5 py-3">
-              <div className="flex items-center justify-between gap-3 text-[13px] font-medium text-text2">
-                <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-xs">{i.dueLabel}</span>
-                <span
-                  className={`inline-flex h-9 w-9 items-center justify-center rounded-xl text-white ${
-                    i.accent === "blue" ? "bg-[#2563eb]" : "bg-primary"
-                  }`}
-                >
-                  {i.title.slice(0, 1)}
-                </span>
+            <div className="flex items-center gap-4 border-b border-border bg-surface2 px-5 py-4">
+              <span
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${t.color} text-sm font-bold text-white`}
+              >
+                {t.letter}
+              </span>
+              <div>
+                <div className="text-[15px] font-semibold text-heading group-hover:text-primary">{t.label}</div>
+                <div className="mt-0.5 text-[12px] text-text2">AI workflow → 4 artifacts</div>
               </div>
             </div>
-
-            <div className="px-5 py-5">
-              <div className="text-xl font-semibold tracking-tight text-text group-hover:text-primary" style={{ fontFamily: "var(--font-heading)" }}>
-                {i.title}
+            <div className="px-5 py-4">
+              <p className="text-[13px] leading-relaxed text-text2">{t.description}</p>
+              <div className="mt-4 space-y-1.5">
+                {t.outputs.map((o) => (
+                  <div key={o} className="flex items-center gap-2 text-[12px] text-text2">
+                    <span className="text-[var(--color-teal)]">✓</span>
+                    <span>{o}</span>
+                  </div>
+                ))}
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-text2">{i.description}</p>
-
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <div className="flex -space-x-2">
-                  {i.members.slice(0, 3).map((m) => (
-                    <div
-                      key={m}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-[11px] font-semibold text-text2 shadow-sm"
-                      title={m}
-                    >
-                      {initials(m)}
-                    </div>
-                  ))}
-                  {i.members.length > 3 ? (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-[11px] font-semibold text-text2 shadow-sm">
-                      +{i.members.length - 3}
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="flex items-center gap-2 text-xs text-text3">
-                  <span className="rounded-full border border-border bg-surface2 px-2 py-1">Owner</span>
-                  <span>{i.updatedLabel}</span>
-                </div>
-              </div>
+              <div className="mt-4 text-[12px] font-semibold text-primary">Open brief form →</div>
             </div>
           </Link>
         ))}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
-        <div className="text-sm font-semibold text-text">What you get</div>
-        <div className="mt-3 grid gap-3 md:grid-cols-3">
-          {[
-            ["Launch insights", "Customer/competitor/market research turned into a brief."],
-            ["Narrative + messaging", "Positioning, message map, and launch story."],
-            ["Enablement pack", "Sales deck outline, battlecard, email + call scripts."]
-          ].map(([t, d]) => (
-            <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
-              <div className="text-[13px] font-semibold text-text">{t}</div>
-              <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
+      {/* Recent launches */}
+      <div className="mt-4 hs-card p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-[14px] font-semibold text-heading">Recent launches</div>
+          <Link href="/dashboard/artifacts" className="text-[12px] font-medium text-link hover:underline">
+            View all artifacts
+          </Link>
+        </div>
+
+        {recentRuns.length === 0 ? (
+          <div className="mt-4 hs-card2 rounded-xl p-4 text-[13px] text-text2">
+            No launches yet. Click <span className="font-medium text-text">New launch</span> above to run your first
+            workflow.
+          </div>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {recentRuns.map((r) => {
+              const name =
+                r.input_json?.launchName ?? (r.kind === "feature-launch" ? "Feature Launch" : "Product Launch");
+              const kindLabel = r.kind === "feature-launch" ? "Feature" : "Product";
+              return (
+                <div
+                  key={r.id}
+                  className="flex flex-wrap items-center justify-between gap-3 hs-card2 rounded-xl px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate text-[13px] font-semibold text-heading">{name}</div>
+                    <div className="mt-0.5 text-[11px] text-text3">
+                      {kindLabel} launch · {new Date(r.created_at).toLocaleDateString()}
+                      {r.input_json?.tier ? ` · ${r.input_json.tier}` : ""}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {statusBadge(r.status)}
+                    {r.status === "completed" && (
+                      <Link
+                        href="/dashboard/artifacts"
+                        className="text-[12px] font-medium text-link hover:underline"
+                      >
+                        View artifacts
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Artifact Library relationship */}
+      <div className="mt-4 hs-card p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-xl">
+            <div className="text-[14px] font-semibold text-heading">Where do outputs go?</div>
+            <div className="mt-1.5 text-[13px] leading-relaxed text-text2">
+              Every artifact generated by a playbook run is saved to your{" "}
+              <strong className="text-text">Artifact Library</strong>. From there you can review each artifact in
+              full, share it with teammates, or copy the content into Campaigns, GTM Planner, or Battlecards.
             </div>
-          ))}
+          </div>
+          <Link href="/dashboard/artifacts" className="hs-btn hs-btn-secondary shrink-0">
+            Open Artifact Library →
+          </Link>
         </div>
       </div>
-    </div>
+    </ModuleShell>
   );
 }
-

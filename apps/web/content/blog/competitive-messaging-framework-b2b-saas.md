@@ -96,7 +96,7 @@ Use this structure:
 3. **The new way**: how your system changes the model
 4. **The proof**: why your claim should be believed
 
-That gives your team language for the website, sales calls, outbound, decks, and launches without creating a different story in every channel.
+That gives your team language for the website, sales calls, outbound, decks, and launches without creating a different story in every channel. For the full messaging structure this map sits inside, see the [product messaging framework](/blog/product-messaging-framework).
 
 ## What to avoid
 
@@ -116,3 +116,9 @@ Competitive messaging works when it gives the buyer a clearer frame for why the 
 The best competitive messaging does not make your rival look weak. It makes the buyer's old way of working look unsustainable.
 
 That is the shift to aim for. When your message makes the decision feel obvious, you do not need to sound louder than the market. You just need to sound clearer.
+
+Once your competitive story is sharp, translate it into a [battlecard](/blog/battlecard-template) your sales team can use before calls, and validate your claims with a [win/loss analysis](/blog/win-loss-analysis-framework) to ensure they hold up with real buyers. If your positioning itself needs firming up first, start with the [positioning statement template](/blog/positioning-statement-template).
+
+---
+
+AI Marketing Workbench generates competitive messaging, battlecards, and positioning statements from your ICP and market inputs — so your whole team works from the same story. [Start free](/signup) or [see pricing](/pricing).

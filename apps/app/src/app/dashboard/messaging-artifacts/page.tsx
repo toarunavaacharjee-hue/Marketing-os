@@ -3,6 +3,7 @@ import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext"
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { MessagingArtifactsClient } from "@/app/dashboard/messaging-artifacts/MessagingArtifactsClient";
 import { SalesEnablementBriefBlock } from "@/app/dashboard/messaging-artifacts/SalesEnablementBriefBlock";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 export default async function MessagingArtifactsPage() {
   const ctx = await getDefaultEnvironmentIdForSelectedProduct();
@@ -17,16 +18,14 @@ export default async function MessagingArtifactsPage() {
   const productName = String((productRow as { name?: string } | null)?.name ?? "").trim();
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl text-heading" style={{ fontFamily: "var(--font-heading)" }}>
-        Messaging Pillars
-      </h1>
-      <p className="text-sm text-text2">
-        Per-segment messaging pillars: headline, value props, proof point, and objection handling.
-        Used as the foundation for all channel assets.
-      </p>
-      <MessagingArtifactsClient environmentId={ctx.environmentId} productName={productName} />
-      <SalesEnablementBriefBlock environmentId={ctx.environmentId} />
-    </div>
+    <ModuleShell
+      title="Messaging Pillars"
+      subtitle="Per-segment messaging pillars: headline, value props, proof point, and objection handling. Used as the foundation for all channel assets."
+    >
+      <div className="space-y-4">
+        <MessagingArtifactsClient environmentId={ctx.environmentId} productName={productName} />
+        <SalesEnablementBriefBlock environmentId={ctx.environmentId} />
+      </div>
+    </ModuleShell>
   );
 }

@@ -214,7 +214,7 @@ function PageCard({
 
   return (
     <div
-      className={`rounded-2xl border bg-surface shadow-sm transition-shadow ${
+      className={`hs-card hs-card-hover transition-shadow ${
         expanded ? "border-primary/40 shadow-md" : "border-border hover:border-primary/20"
       }`}
     >
@@ -260,7 +260,7 @@ function PageCard({
                 value={page.name}
                 onChange={(e) => onChange({ name: e.target.value })}
                 placeholder="e.g. Homepage, Pricing"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3 focus:border-primary focus:outline-none"
+                className="hs-input"
               />
             </div>
             <div>
@@ -268,7 +268,7 @@ function PageCard({
               <select
                 value={page.pageType}
                 onChange={(e) => onChange({ pageType: e.target.value as PageType })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="hs-input"
               >
                 {PAGE_TYPES.map((t) => (
                   <option key={t.id} value={t.id}>{t.label}</option>
@@ -284,7 +284,7 @@ function PageCard({
               <select
                 value={page.status}
                 onChange={(e) => onChange({ status: e.target.value as PageStatus })}
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading"
+                className="hs-input"
               >
                 {(["draft", "live", "needs-update", "archived"] as PageStatus[]).map((s) => (
                   <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
@@ -297,7 +297,7 @@ function PageCard({
                 value={page.seoKeyword}
                 onChange={(e) => onChange({ seoKeyword: e.target.value })}
                 placeholder="e.g. revenue ops software"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="hs-input"
               />
             </div>
             <div>
@@ -306,7 +306,7 @@ function PageCard({
                 value={page.primaryCta}
                 onChange={(e) => onChange({ primaryCta: e.target.value })}
                 placeholder="e.g. Book demo"
-                className="w-full rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                className="hs-input"
               />
             </div>
             <div>
@@ -316,7 +316,7 @@ function PageCard({
                   value={page.url}
                   onChange={(e) => onChange({ url: e.target.value })}
                   placeholder="/pricing"
-                  className="min-w-0 flex-1 rounded-lg border border-border bg-surface2 px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                  className="hs-input min-w-0 flex-1"
                 />
                 {safeHref(page.url) ? (
                   <a href={safeHref(page.url)!} target="_blank" rel="noopener noreferrer"
@@ -345,7 +345,7 @@ function PageCard({
 
           {/* Copy fields */}
           {hasCopy || page.generatedAt ? (
-            <div className="space-y-3 rounded-xl border border-border bg-surface2 p-3">
+            <div className="space-y-3 hs-card2 p-3">
               <div className="flex items-center justify-between">
                 <div className="text-[10px] font-semibold uppercase tracking-wide text-text3">Page copy</div>
                 {page.generatedAt ? (
@@ -361,7 +361,7 @@ function PageCard({
                   value={page.copy.headline}
                   onChange={(e) => onChange({ copy: { ...page.copy, headline: e.target.value } })}
                   placeholder="Clear, outcome-focused headline"
-                  className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm font-medium text-heading placeholder:text-text3"
+                  className="w-full hs-card px-2 py-1.5 text-sm font-medium text-heading placeholder:text-text3"
                 />
               </div>
 
@@ -371,7 +371,7 @@ function PageCard({
                   value={page.copy.subhead}
                   onChange={(e) => onChange({ copy: { ...page.copy, subhead: e.target.value } })}
                   placeholder="Supporting sentence"
-                  className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                  className="w-full hs-card px-2 py-1.5 text-sm text-heading placeholder:text-text3"
                 />
               </div>
 
@@ -382,7 +382,7 @@ function PageCard({
                   onChange={(e) => onChange({ copy: { ...page.copy, bodyCopy: e.target.value } })}
                   rows={4}
                   placeholder="2–3 paragraphs covering the core message, proof, and benefits"
-                  className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+                  className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3"
                 />
               </div>
 
@@ -393,7 +393,7 @@ function PageCard({
                     value={page.copy.ctaCopy}
                     onChange={(e) => onChange({ copy: { ...page.copy, ctaCopy: e.target.value } })}
                     placeholder="e.g. Start free trial"
-                    className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm font-medium text-heading placeholder:text-text3"
+                    className="w-full hs-card px-2 py-1.5 text-sm font-medium text-heading placeholder:text-text3"
                   />
                 </div>
                 <div>
@@ -405,7 +405,7 @@ function PageCard({
                     onChange={(e) => onChange({ copy: { ...page.copy, metaDescription: e.target.value } })}
                     maxLength={160}
                     placeholder="SEO meta description"
-                    className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                    className="w-full hs-card px-2 py-1.5 text-sm text-heading placeholder:text-text3"
                   />
                   <div className="mt-1 text-right text-[10px] text-text3">
                     {page.copy.metaDescription.length}/155
@@ -423,7 +423,7 @@ function PageCard({
               onChange={(e) => onChange({ notes: e.target.value })}
               rows={2}
               placeholder="A/B tests, conversion rate, copywriter briefing notes…"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
 
@@ -611,7 +611,7 @@ Each section on its own line with the label. Be specific, no filler. Use the pro
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="hs-card p-5">
         <div className="h-4 w-48 animate-pulse rounded bg-surface3" />
         <div className="mt-3 h-3 w-64 animate-pulse rounded bg-surface3" />
       </div>
@@ -641,7 +641,7 @@ Each section on its own line with the label. Be specific, no filler. Use the pro
           <button
             type="button"
             onClick={addPage}
-            className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
+            className="hs-card2 px-3 py-1.5 text-xs font-semibold text-text hover:bg-surface3"
           >
             + Add page
           </button>
@@ -683,13 +683,13 @@ Each section on its own line with the label. Be specific, no filler. Use the pro
       </div>
 
       {ws.aiHistory.length > 0 ? (
-        <details className="rounded-xl border border-border bg-surface p-3">
+        <details className="hs-card p-3">
           <summary className="cursor-pointer text-xs font-medium text-text2 hover:text-text">
             Generation history ({ws.aiHistory.length})
           </summary>
           <ul className="mt-2 max-h-48 space-y-2 overflow-y-auto">
             {ws.aiHistory.map((h) => (
-              <li key={h.id} className="rounded-lg border border-border bg-surface2 p-2">
+              <li key={h.id} className="hs-card2 p-2">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-medium text-text">{h.pageName}</span>
                   <span className="text-[10px] text-text3">{new Date(h.at).toLocaleDateString()}</span>

@@ -17,11 +17,12 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
   );
 }
 
-export default function OperatorNav({ active }: { active: "overview" | "users" | "health" | "audit" }) {
+export default function OperatorNav({ active }: { active: "overview" | "users" | "analytics" | "health" | "audit" }) {
   return (
     <div className="flex flex-wrap gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-2">
       <NavLink href="/operator" label="Overview" active={active === "overview"} />
       <NavLink href="/operator/users" label="Users" active={active === "users"} />
+      <NavLink href="/operator/analytics" label="Analytics" active={active === "analytics"} />
       <NavLink href="/operator/health" label="Tool health" active={active === "health"} />
       <NavLink href="/operator/audit" label="Audit log" active={active === "audit"} />
     </div>

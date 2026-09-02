@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { InsightWorkbench } from "@/app/dashboard/_components/InsightWorkbench";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 type EventStats = {
   total: number;
@@ -40,22 +41,10 @@ export function EventsClient({ environmentId }: { environmentId: string }) {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1
-            className="text-2xl font-semibold tracking-tight text-text"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Events
-          </h1>
-          <p className="mt-1 text-sm text-text2">
-            Track conferences, webinars, and field events. Plan logistics, capture leads, and
-            generate follow-up campaigns.
-          </p>
-        </div>
-        {/* Module flow indicator */}
+    <ModuleShell
+      title="Events"
+      subtitle="Track conferences, webinars, and field events. Plan logistics, capture leads, and generate follow-up campaigns."
+      actions={
         <div className="flex items-center gap-2 text-xs text-text3">
           <span className="rounded-full border border-border bg-surface2 px-3 py-1.5">
             GTM Planner
@@ -69,12 +58,13 @@ export function EventsClient({ environmentId }: { environmentId: string }) {
             Content Studio
           </span>
         </div>
-      </div>
-
+      }
+    >
+    <div className="space-y-6">
       {/* Stats row */}
       <div className="grid gap-3 sm:grid-cols-3">
         {statCards.map((s) => (
-          <div key={s.label} className="saas-card p-4">
+          <div key={s.label} className="hs-card hs-card-hover p-4">
             <div className="text-xs text-text3">{s.sub}</div>
             <div className="mt-1 text-2xl font-semibold text-text">{s.value}</div>
             <div className="mt-0.5 text-sm text-text2">{s.label}</div>
@@ -83,7 +73,7 @@ export function EventsClient({ environmentId }: { environmentId: string }) {
       </div>
 
       {/* Tips row */}
-      <div className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text2">
+      <div className="hs-card2 px-4 py-3 text-sm text-text2">
         <span className="font-medium text-text">Pro tip:</span> Add event details, then use{" "}
         <span className="font-medium text-primary">✦ Generate campaign</span> to create a pre-event
         content plan, booth brief, and post-event follow-up sequence — all in one click.
@@ -92,5 +82,6 @@ export function EventsClient({ environmentId }: { environmentId: string }) {
       {/* The actual InsightWorkbench — owns all event CRUD + AI */}
       <InsightWorkbench environmentId={environmentId} variant="events" title="Events" />
     </div>
+    </ModuleShell>
   );
 }

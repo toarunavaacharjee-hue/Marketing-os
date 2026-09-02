@@ -60,7 +60,7 @@ export function UseCasesModernClient({ useCases }: { useCases: Entry[] }) {
               ))}
             </div>
             <div className="mt-6">
-              <Link href={`/use-cases/${entry.slug}`} className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark">
+              <Link href={`/use-cases/${entry.slug}`} className="saas-btn saas-btn-accent px-4 py-2 text-[13px]">
                 View use case
               </Link>
             </div>

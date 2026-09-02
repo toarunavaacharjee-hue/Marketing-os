@@ -90,7 +90,7 @@ export default async function TeamSettingsPage() {
             Owners/admins can change roles and remove members. This is the foundation for approvals and governance.
           </div>
         </div>
-        <div className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text2">
+        <div className="hs-card px-3 py-2 text-sm text-text2">
           Your role: <span className="text-heading">{myRole}</span>
         </div>
       </div>

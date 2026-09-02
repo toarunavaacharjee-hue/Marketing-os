@@ -135,20 +135,20 @@ export default function SupportPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+      <div className="hs-card p-6 shadow-card">
         <div className="text-sm font-medium text-heading">New ticket</div>
         <div className="mt-3 grid gap-3">
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Subject (e.g., 'Gating blocked Events module')"
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus"
+            className="hs-input w-full text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus"
           />
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="What happened? Steps to reproduce, expected behavior, screenshots…"
-            className="min-h-[120px] w-full rounded-sm border border-input-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus"
+            className="min-h-[120px] hs-input w-full text-text placeholder:text-text3 focus:border-primary focus:outline-none focus:shadow-focus"
           />
 
           {error ? (
@@ -169,7 +169,7 @@ export default function SupportPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface p-6 shadow-card">
+      <div className="hs-card p-6 shadow-card">
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm font-medium text-heading">Recent tickets</div>
           <button
@@ -186,7 +186,7 @@ export default function SupportPage() {
         ) : tickets.length ? (
           <div className="mt-4 space-y-3">
             {tickets.map((t) => (
-              <div key={t.id} className="rounded-lg border border-border bg-surface2 p-4">
+              <div key={t.id} className="hs-card2 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="text-sm text-heading">{t.subject}</div>
                   <div className="text-xs text-text3">

@@ -86,7 +86,7 @@ To make it useful:
 - give it to sales for talk tracks and objections
 - update it after launch with real customer feedback
 
-That turns the message map from a pre-launch exercise into a reusable asset.
+That turns the message map from a pre-launch exercise into a reusable asset. For a full 6-part structure that covers all five blocks above plus an objection map, see the [SaaS messaging framework](/blog/saas-messaging-framework). For the broader messaging architecture the launch map sits inside, see the [product messaging framework](/blog/product-messaging-framework).
 
 ## A simple launch workflow
 
@@ -104,4 +104,8 @@ This makes each launch smarter than the last one.
 
 The goal of launch messaging is not to produce polished words quickly. The goal is to create a shared narrative the whole team can execute from.
 
-When the message map is strong, launches feel more coherent, assets become easier to produce, and post-launch iteration becomes much faster.
+When the message map is strong, launches feel more coherent, assets become easier to produce, and post-launch iteration becomes much faster. For the full launch checklist that puts this map to work across product, sales, and marketing, see the [product launch checklist](/blog/product-launch-checklist).
+
+---
+
+AI Marketing Workbench generates your launch message map from your ICP and positioning inputs — so every channel starts from the same story. [Start free](/signup) or [see pricing](/pricing).

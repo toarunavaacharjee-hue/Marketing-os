@@ -28,11 +28,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
+# local env files — exclude all .env variants to prevent accidental secret commits
+.env
+.env.*
+!.env*.example
+!.env*.local.example
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
+
+# Claude Code agent worktrees
+.claude/

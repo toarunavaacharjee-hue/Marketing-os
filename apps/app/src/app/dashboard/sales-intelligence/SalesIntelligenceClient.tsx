@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AiProgressBar, AI_PROGRESS_ESTIMATE } from "@/app/dashboard/_components/AiProgressBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { ModuleShell } from "@/app/dashboard/_components/ModuleShell";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -535,22 +536,21 @@ SUGGESTED ACTION:
 
   // ── Render ────────────────────────────────────────────────────────────
 
-  if (loading) return <div className="h-12 animate-pulse rounded-2xl bg-surface2" />;
+  if (loading) return <div className="h-12 animate-pulse rounded-xl bg-surface2" />;
 
   const stageData = ws.stages[activeStage];
   const stageMeta = DEAL_STAGES.find((s) => s.id === activeStage)!;
 
   return (
+    <ModuleShell
+      title="Sales Intelligence"
+      subtitle="Objection handling, win/loss analysis, deal-stage playbooks, and coaching insights."
+      actions={<span className="text-xs text-text3">{saving ? "Saving…" : "Saved per product"}</span>}
+    >
     <div className="space-y-5">
 
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-semibold text-text">📊 Sales Intelligence</h1>
-        <span className="text-xs text-text3">{saving ? "Saving…" : "Saved per product"}</span>
-      </div>
-
       {error && (
-        <div className="flex items-center justify-between rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
+        <div className="hs-alert hs-alert-error">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="ml-3 text-xs underline">Dismiss</button>
         </div>
@@ -560,7 +560,7 @@ SUGGESTED ACTION:
       <div className="grid gap-4 lg:grid-cols-[1fr_380px]">
 
         {/* Objection Library */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">🎯 Objection Library</div>
@@ -568,7 +568,7 @@ SUGGESTED ACTION:
             </div>
             <button
               onClick={addObjection}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+              className="hs-btn hs-btn-secondary"
             >
               + Add objection
             </button>
@@ -629,7 +629,7 @@ SUGGESTED ACTION:
                               value={o.name}
                               onChange={(e) => patchObjection(o.id, { name: e.target.value })}
                               placeholder="e.g. Price sensitivity"
-                              className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
+                              className="w-full hs-card px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-2">
@@ -641,7 +641,7 @@ SUGGESTED ACTION:
                                 max={100}
                                 value={o.frequency}
                                 onChange={(e) => patchObjection(o.id, { frequency: Math.max(0, Math.min(100, Number(e.target.value))) })}
-                                className="w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading"
+                                className="w-full hs-card px-2.5 py-1.5 text-sm text-heading"
                               />
                             </div>
                             <div>
@@ -649,7 +649,7 @@ SUGGESTED ACTION:
                               <select
                                 value={o.category}
                                 onChange={(e) => patchObjection(o.id, { category: e.target.value as ObjectionCategory })}
-                                className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                                className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                               >
                                 {(Object.entries(CATEGORY_LABELS) as [ObjectionCategory, string][]).map(([k, v]) => (
                                   <option key={k} value={k}>{v}</option>
@@ -665,7 +665,7 @@ SUGGESTED ACTION:
                             <button
                               onClick={() => void generateRebuttal(o)}
                               disabled={generatingRebuttal === o.id}
-                              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+                              className="hs-btn hs-btn-primary disabled:opacity-50"
                             >
                               {generatingRebuttal === o.id ? "Generating…" : o.rebuttal ? "Regenerate →" : "Generate rebuttal →"}
                             </button>
@@ -698,7 +698,7 @@ SUGGESTED ACTION:
                             onChange={(e) => patchObjection(o.id, { rebuttal: e.target.value })}
                             rows={3}
                             placeholder="What to say when this objection comes up…"
-                            className="w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card px-2.5 py-2 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                         <div>
@@ -711,7 +711,7 @@ SUGGESTED ACTION:
                             onChange={(e) => patchObjection(o.id, { proofPoint: e.target.value })}
                             rows={2}
                             placeholder="Case study, stat, or third-party evidence to back the rebuttal…"
-                            className="w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card px-2.5 py-2 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                         <div>
@@ -723,7 +723,7 @@ SUGGESTED ACTION:
                             value={o.followUpQ}
                             onChange={(e) => patchObjection(o.id, { followUpQ: e.target.value })}
                             placeholder="Question to re-engage the prospect after handling the objection…"
-                            className="w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card px-2.5 py-2 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                       </div>
@@ -736,7 +736,7 @@ SUGGESTED ACTION:
         </div>
 
         {/* Win / Loss */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">📈 Win / Loss by Segment</div>
@@ -744,7 +744,7 @@ SUGGESTED ACTION:
             </div>
             <button
               onClick={addWinLoss}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+              className="hs-btn hs-btn-secondary"
             >
               + Add
             </button>
@@ -800,7 +800,7 @@ SUGGESTED ACTION:
                               value={r.segment}
                               onChange={(e) => patchWinLoss(r.id, { segment: e.target.value })}
                               placeholder="Mid-market"
-                              className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                              className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                             />
                           </div>
                           <div>
@@ -810,7 +810,7 @@ SUGGESTED ACTION:
                               min={0}
                               value={r.wins}
                               onChange={(e) => patchWinLoss(r.id, { wins: Math.max(0, Number(e.target.value)) })}
-                              className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                              className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                             />
                           </div>
                           <div>
@@ -820,7 +820,7 @@ SUGGESTED ACTION:
                               min={0}
                               value={r.losses}
                               onChange={(e) => patchWinLoss(r.id, { losses: Math.max(0, Number(e.target.value)) })}
-                              className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading"
+                              className="w-full hs-card px-2 py-1.5 text-sm text-heading"
                             />
                           </div>
                         </div>
@@ -830,7 +830,7 @@ SUGGESTED ACTION:
                             value={r.topWinReason}
                             onChange={(e) => patchWinLoss(r.id, { topWinReason: e.target.value })}
                             placeholder="e.g. Fastest time-to-value, champion was CMO…"
-                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card px-2 py-1.5 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                         <div>
@@ -839,7 +839,7 @@ SUGGESTED ACTION:
                             value={r.topLossReason}
                             onChange={(e) => patchWinLoss(r.id, { topLossReason: e.target.value })}
                             placeholder="e.g. No champion, lost to price, missed evaluation criteria…"
-                            className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-heading placeholder:text-text3"
+                            className="w-full hs-card px-2 py-1.5 text-sm text-heading placeholder:text-text3"
                           />
                         </div>
                         <button
@@ -859,7 +859,7 @@ SUGGESTED ACTION:
       </div>
 
       {/* Deal-Stage Playbook */}
-      <div className="rounded-2xl border border-border bg-surface p-5">
+      <div className="hs-card p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="text-sm font-semibold text-heading">🗺️ Deal-Stage Playbook</div>
@@ -868,7 +868,7 @@ SUGGESTED ACTION:
           <button
             onClick={() => void generateStageAssets()}
             disabled={generatingStage}
-            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+            className="hs-btn hs-btn-primary disabled:opacity-50"
           >
             {generatingStage ? "Generating…" : `Generate ${stageMeta.emoji} ${stageMeta.label} assets →`}
           </button>
@@ -908,7 +908,7 @@ SUGGESTED ACTION:
               onChange={(e) => patchStage(activeStage, { talkTrack: e.target.value })}
               rows={12}
               placeholder={`Key points to cover during ${stageMeta.label}…`}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
             />
           </div>
           <div>
@@ -923,7 +923,7 @@ SUGGESTED ACTION:
               onChange={(e) => patchStage(activeStage, { emailTemplate: e.target.value })}
               rows={12}
               placeholder={"Subject: …\n\nHi [PROSPECT_NAME],\n\n…"}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 font-mono text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card2 px-3 py-2.5 font-mono text-sm text-heading placeholder:text-text3"
             />
           </div>
           <div>
@@ -938,7 +938,7 @@ SUGGESTED ACTION:
               onChange={(e) => patchStage(activeStage, { keyQuestions: e.target.value })}
               rows={12}
               placeholder="Qualifying and discovery questions for this stage…"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card2 px-3 py-2.5 text-sm text-heading placeholder:text-text3"
             />
           </div>
         </div>
@@ -948,7 +948,7 @@ SUGGESTED ACTION:
       <div className="grid gap-4 lg:grid-cols-[1fr_400px]">
 
         {/* Call Intelligence */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">📞 Call Intelligence</div>
@@ -956,7 +956,7 @@ SUGGESTED ACTION:
             </div>
             <button
               onClick={addCallInsight}
-              className="rounded-xl border border-border bg-surface2 px-3 py-1.5 text-xs font-medium text-heading hover:bg-surface3"
+              className="hs-btn hs-btn-secondary"
             >
               + Add insight
             </button>
@@ -969,19 +969,19 @@ SUGGESTED ACTION:
           ) : (
             <div className="space-y-2">
               {ws.callInsights.map((c) => (
-                <div key={c.id} className="rounded-xl border border-border bg-surface2 p-3">
+                <div key={c.id} className="hs-card2 p-3">
                   <div className="grid gap-2 sm:grid-cols-[1fr_120px_130px_auto] sm:items-center">
                     <input
                       value={c.quote}
                       onChange={(e) => patchCallInsight(c.id, { quote: e.target.value })}
                       placeholder="Quote or insight from the call…"
-                      className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
+                      className="hs-card px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
                     />
                     <input
                       value={c.theme}
                       onChange={(e) => patchCallInsight(c.id, { theme: e.target.value })}
                       placeholder="Theme"
-                      className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
+                      className="hs-card px-2.5 py-1.5 text-sm text-heading placeholder:text-text3"
                     />
                     <select
                       value={c.outcome}
@@ -1013,7 +1013,7 @@ SUGGESTED ACTION:
         </div>
 
         {/* Coaching Playbook */}
-        <div className="rounded-2xl border border-border bg-surface p-5">
+        <div className="hs-card p-5">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <div className="text-sm font-semibold text-heading">🏋️ Coaching Playbook</div>
@@ -1022,7 +1022,7 @@ SUGGESTED ACTION:
             <button
               onClick={() => void generateCoachingPlaybook()}
               disabled={generatingPlaybook}
-              className="rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
+              className="hs-btn hs-btn-primary disabled:opacity-50"
             >
               {generatingPlaybook ? "Generating…" : ws.coachingPlaybook ? "Regenerate →" : "Generate →"}
             </button>
@@ -1042,11 +1042,11 @@ SUGGESTED ACTION:
                 value={ws.coachingPlaybook}
                 onChange={(e) => schedule({ ...ws, coachingPlaybook: e.target.value })}
                 rows={18}
-                className="w-full rounded-xl border border-border bg-surface2 px-3 py-2.5 text-sm text-heading"
+                className="w-full hs-card2 px-3 py-2.5 text-sm text-heading"
               />
               <button
                 onClick={() => void copy(ws.coachingPlaybook)}
-                className="absolute right-2 top-2 rounded-lg border border-border bg-surface px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
+                className="absolute right-2 top-2 hs-card px-2 py-1 text-[10px] font-semibold text-primary hover:bg-surface2"
               >
                 Copy
               </button>
@@ -1060,7 +1060,7 @@ SUGGESTED ACTION:
       </div>
 
       {/* Send to Strategy */}
-      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+      <div className="hs-card p-5">
         <div className="mb-1 flex items-center gap-2">
           <span className="text-sm font-semibold text-heading">Send to Strategy</span>
           <span className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">AI</span>
@@ -1070,7 +1070,7 @@ SUGGESTED ACTION:
         </p>
 
         {strategyError && (
-          <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{strategyError}</div>
+          <div className="hs-alert hs-alert-error mb-3">{strategyError}</div>
         )}
 
         <div className="space-y-2">
@@ -1080,7 +1080,7 @@ SUGGESTED ACTION:
               value={strategyProduct}
               onChange={(e) => setStrategyProduct(e.target.value)}
               placeholder="e.g. AI Marketing Workbench — Campaigns module"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
           <div>
@@ -1090,7 +1090,7 @@ SUGGESTED ACTION:
               onChange={(e) => setStrategyInsight(e.target.value)}
               rows={3}
               placeholder="e.g. Reps are hearing 'we already have HubSpot for this' on 60% of calls this quarter…"
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-heading placeholder:text-text3"
+              className="w-full hs-card px-3 py-2 text-sm text-heading placeholder:text-text3"
             />
           </div>
         </div>
@@ -1106,7 +1106,7 @@ SUGGESTED ACTION:
         <button
           onClick={() => void generateStrategyFeedback()}
           disabled={generatingStrategy || !strategyInsight.trim()}
-          className="mt-3 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-40"
+          className="hs-btn hs-btn-primary mt-3 disabled:opacity-40"
         >
           {generatingStrategy ? "Analysing…" : "Extract strategy signals"}
         </button>
@@ -1117,12 +1117,13 @@ SUGGESTED ACTION:
               <span className="text-xs text-text2">Strategy signals</span>
               <button onClick={() => void copy(strategyOutput)} className="text-[10px] text-primary hover:underline">Copy</button>
             </div>
-            <pre className="whitespace-pre-wrap rounded-xl border border-border bg-surface p-3 text-sm text-heading">
+            <pre className="whitespace-pre-wrap hs-card p-3 text-sm text-heading">
               {strategyOutput}
             </pre>
           </div>
         )}
       </div>
     </div>
+    </ModuleShell>
   );
 }

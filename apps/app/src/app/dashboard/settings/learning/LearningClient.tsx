@@ -129,7 +129,7 @@ export default function LearningClient({ environmentId }: { environmentId: strin
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="text-lg text-heading">Learning & Health</div>
@@ -170,13 +170,13 @@ export default function LearningClient({ environmentId }: { environmentId: strin
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="hs-card p-6">
           <div className="text-sm text-heading">Sync status</div>
           <div className="mt-3 space-y-2">
             {(["ga4", "hubspot", "linkedin_ads", "meta_ads"] as const).map((c) => {
               const latest = syncRuns.find((s) => s.connector === c) ?? null;
               return (
-                <div key={c} className="rounded-xl border border-border bg-surface2 p-4">
+                <div key={c} className="hs-card2 p-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-heading">{labelConnector(c)}</div>
                     <Chip tone={latest?.status ?? "unknown"} text={latest?.status ?? "unknown"} />
@@ -194,14 +194,14 @@ export default function LearningClient({ environmentId }: { environmentId: strin
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-6">
+        <div className="hs-card p-6">
           <div className="text-sm text-heading">Asset ingestion (last seen)</div>
           <div className="mt-3 grid gap-2 md:grid-cols-2">
             {Object.entries(countsByType)
               .sort((a, b) => b[1] - a[1])
               .slice(0, 8)
               .map(([type, n]) => (
-                <div key={type} className="rounded-xl border border-border bg-surface2 p-3">
+                <div key={type} className="hs-card2 p-3">
                   <div className="text-xs uppercase tracking-wider text-text2">{type}</div>
                   <div className="mt-1 text-sm text-heading">{n}</div>
                 </div>
@@ -215,14 +215,14 @@ export default function LearningClient({ environmentId }: { environmentId: strin
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="hs-card p-6">
         <div className="text-sm text-heading">Module coverage</div>
         <div className="mt-1 text-sm text-text2">
           This is a simple “do we have enough signal?” view. We’ll replace this with real coverage rules once connectors are live.
         </div>
         <div className="mt-4 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
           {MODULES.map((m) => (
-            <div key={m} className="rounded-xl border border-border bg-surface2 p-4">
+            <div key={m} className="hs-card2 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm text-heading">{m}</div>
                 <CoveragePill level={coverageScore(m)} />
@@ -269,7 +269,7 @@ function labelConnector(c: string) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface2 p-4">
+    <div className="hs-card2 p-4">
       <div className="text-xs uppercase tracking-wider text-text2">{label}</div>
       <div className="mt-2 text-2xl text-heading">{value}</div>
     </div>

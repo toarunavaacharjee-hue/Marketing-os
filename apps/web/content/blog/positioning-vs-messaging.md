@@ -56,7 +56,7 @@ If you answer yes to all four, your positioning is solid and you're working on m
 
 The Geoffrey Moore template (*Crossing the Chasm*) is the most widely used: "For [target customer] who [need or opportunity], [product name] is a [product category] that [key benefit, compelling reason to buy]. Unlike [primary competitive alternative], our product [primary differentiation]."
 
-It's a starting point, not an end state. The limitation is that it forces a single competitive alternative, which rarely captures reality. Most B2B buyers are choosing between your product, a point solution, a spreadsheet, and doing nothing.
+It's a starting point, not an end state. For a complete fill-in template with worked examples and a channel-by-channel usage guide, see the [positioning statement template](/blog/positioning-statement-template). The limitation is that it forces a single competitive alternative, which rarely captures reality. Most B2B buyers are choosing between your product, a point solution, a spreadsheet, and doing nothing.
 
 The April Dunford alternative is more useful for companies in complex markets:
 

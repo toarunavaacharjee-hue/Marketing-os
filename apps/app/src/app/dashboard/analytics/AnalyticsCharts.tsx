@@ -25,7 +25,7 @@ ChartJS.register(
 export function AnalyticsCharts() {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="hs-card p-4">
         <div className="mb-3 text-sm text-heading">ROAS Trend (8 weeks)</div>
         <Line
           data={{
@@ -51,7 +51,7 @@ export function AnalyticsCharts() {
         />
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="hs-card p-4">
         <div className="mb-3 text-sm text-heading">Budget Mix</div>
         <Doughnut
           data={{

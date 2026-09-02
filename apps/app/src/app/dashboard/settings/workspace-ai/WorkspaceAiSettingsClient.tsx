@@ -18,7 +18,7 @@ type WorkspaceKeyMeta = {
 
 function SetupItem({ title, ok, subtitle }: { title: string; ok: boolean; subtitle: string }) {
   return (
-    <div className="rounded-xl border border-border bg-surface2 p-3 text-sm">
+    <div className="hs-card2 p-3 text-sm">
       <div className="flex items-center justify-between gap-3">
         <div className="font-medium text-text">{title}</div>
         <span
@@ -181,7 +181,7 @@ export default function WorkspaceAiSettingsClient({ email }: { email: string }) 
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+      <div className="hs-card p-6 shadow-sm">
         <div className="text-sm font-medium text-text">Workspace AI</div>
         <div className="mt-1 text-sm text-text2">Copilot and generators use Anthropic (Claude).</div>
         <div className="mt-3 text-xs text-text3">Signed in as {email}</div>
@@ -205,7 +205,7 @@ export default function WorkspaceAiSettingsClient({ email }: { email: string }) 
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+      <div className="hs-card p-6 shadow-sm">
         <div className="text-sm font-medium text-text">AI integration</div>
         <p className="mt-1 text-sm text-text2">
           Starter/Free/Growth can use platform AI when enabled. Enterprise requires a workspace key. A workspace key
@@ -225,7 +225,7 @@ export default function WorkspaceAiSettingsClient({ email }: { email: string }) 
         ) : null}
 
         {!metaLoading && !canManage ? (
-          <div className="mt-4 rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text2">
+          <div className="mt-4 hs-card2 px-3 py-2 text-sm text-text2">
             {configured
               ? "A workspace AI key is configured. Only owners and admins can change it."
               : anthropicReady
@@ -253,7 +253,7 @@ export default function WorkspaceAiSettingsClient({ email }: { email: string }) 
               placeholder="sk-ant-..."
               type="password"
               autoComplete="off"
-              className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
+              className="w-full hs-input placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
             />
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -289,7 +289,7 @@ export default function WorkspaceAiSettingsClient({ email }: { email: string }) 
             ) : null}
 
             {anthropicReady ? (
-              <div className="mt-3 rounded-xl border border-border bg-surface2 px-3 py-2 text-xs text-text2">
+              <div className="mt-3 hs-card2 px-3 py-2 text-xs text-text2">
                 {aiStatus === "checking" ? (
                   <span>Checking connection…</span>
                 ) : aiStatus === "connected" ? (

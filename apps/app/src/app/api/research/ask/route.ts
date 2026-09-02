@@ -1,3 +1,4 @@
+import { checkAiQuota, incrementAiQuota } from "@/lib/ai/quotaGuard";
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
@@ -40,6 +41,9 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
     if (!user)
       return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+
+    const quota = await checkAiQuota();
+    if (!quota.ok) return quota.response;
 
     const selected = await getDefaultEnvironmentIdForSelectedProduct();
     if (!selected)
@@ -137,6 +141,7 @@ Rules:
         : [];
       const message = typeof raw?.message === "string" ? raw.message.trim() : "";
       const answer = [message, ...questions.map((q) => `• ${q}`)].filter(Boolean).join("\n");
+      await incrementAiQuota(quota.userId, "market-research");
       return NextResponse.json({
         answer: answer || "Re-run a scan or narrow your question.",
         needs_input: true,
@@ -148,6 +153,7 @@ Rules:
       typeof raw?.answer === "string" && raw.answer.trim()
         ? raw.answer.trim()
         : text.trim() || "No answer returned.";
+    await incrementAiQuota(quota.userId, "market-research");
     return NextResponse.json({ answer, needs_input: false });
   } catch (e) {
     return NextResponse.json(

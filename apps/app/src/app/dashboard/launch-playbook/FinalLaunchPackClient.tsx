@@ -80,7 +80,7 @@ export function FinalLaunchPackClient({
         <div className="flex flex-wrap gap-2">
           <Link
             href="/dashboard/artifacts"
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+            className="hs-btn hs-btn-secondary"
           >
             Artifact Library
           </Link>
@@ -90,7 +90,7 @@ export function FinalLaunchPackClient({
               const payload = JSON.stringify({ run, artifacts: ordered }, null, 2);
               await navigator.clipboard.writeText(payload);
             }}
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-focus transition hover:bg-primary-dark"
+            className="hs-btn hs-btn-primary"
           >
             Copy pack JSON
           </button>
@@ -99,12 +99,12 @@ export function FinalLaunchPackClient({
 
       <div className="mt-8 space-y-3">
         {ordered.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-text2">
+          <div className="hs-card p-5 text-sm text-text2">
             No artifacts found for this run yet.
           </div>
         ) : (
           ordered.map((a) => (
-            <div key={a.id} className="overflow-hidden rounded-2xl border border-border bg-surface">
+            <div key={a.id} className="overflow-hidden hs-card">
               <button
                 type="button"
                 onClick={() => setExpanded((m) => ({ ...m, [a.id]: !m[a.id] }))}
@@ -128,13 +128,13 @@ export function FinalLaunchPackClient({
               {expanded[a.id] ? (
                 <div className="border-t border-border bg-bg px-5 py-4">
                   {a.content_json?.summary ? (
-                    <div className="rounded-xl border border-border bg-surface p-4 text-sm text-text2">
+                    <div className="hs-card p-4 text-sm text-text2">
                       <div className="text-[13px] font-semibold text-text">Summary</div>
                       <div className="mt-2 leading-relaxed">{String(a.content_json.summary)}</div>
                     </div>
                   ) : null}
 
-                  <pre className="mt-3 max-h-[520px] overflow-auto rounded-xl border border-border bg-surface p-4 text-xs leading-relaxed text-text2">
+                  <pre className="mt-3 max-h-[520px] overflow-auto hs-card p-4 text-xs leading-relaxed text-text2">
 {JSON.stringify(a.content_json ?? {}, null, 2)}
                   </pre>
                 </div>

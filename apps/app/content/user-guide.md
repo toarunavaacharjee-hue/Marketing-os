@@ -17,9 +17,9 @@ The product follows a single **strategy → planning → creation → intelligen
 
 **Canonical journey** (also reflected in product flow logic):
 
-1. Market Research → 2. ICP Segmentation → 3. Positioning Studio → 4. Messaging & Artifacts → 5. Marketing Workbench → 6. Campaigns → 7. GTM Planner → 8. Events → 9. Content Studio → … → Analytics → Battlecards → Prospect Research → Sales Intelligence → Customer Insights → AI Copilot.
+1. Market Research → 2. ICP Segmentation → 3. Positioning Studio → 4. Messaging Pillars → 5. Campaigns → 6. GTM Planner → 7. Events → 8. Content Studio → … → Analytics → Battlecards → Prospect Research → Sales Intelligence → Customer Insights → AI Copilot.
 
-Use this order when you want **one story** from research to revenue; jump in anywhere when you are only refreshing one layer.
+Use this order when you want **one story** from research to revenue; jump in anywhere when you are only refreshing one layer. The **Marketing Workbench** (home) is your cross-module task view — it surfaces work items from every module in one place.
 
 ### AI usage
 
@@ -35,13 +35,25 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 ## 2. Home
 
-### Command Centre (`/dashboard`)
+### Marketing Workbench (`/dashboard`)
 
-**What it is:** Your home dashboard: priorities, digest, and links into the journey.
+**What it is:** Your home page — a live cross-module task view showing all open work items (segments, campaigns, GTM tasks, content queue) in one searchable, filterable list with priority and status.
 
-**How to use it:** Start each week here; open the next module in the spine or jump to a module that needs an update.
+**How to use it:** Start each day here to see what is open, overdue, or due this week across every module. Use Seed / AI draft / Update actions to push work forward without leaving the home screen.
 
-**Benefits:** One place to see “where we are” and avoid working in a silo.
+**Benefits:** One place to see "what needs doing" across all your modules without context-switching.
+
+**Connects to:** All modules — any item can be opened directly in its source module.
+
+**Best practices:** Sort by priority and check the P1 items first each morning; use "Hide done" to keep the list clean.
+
+### Overview (`/dashboard/overview`)
+
+**What it is:** Workspace health dashboard with live checks, integration status, PMM journey map, and a daily digest.
+
+**How to use it:** Use at the start of each week to confirm your product context is complete, integrations are connected, and the narrative chain is intact (profile → segments → positioning → research → analytics).
+
+**Benefits:** Surfaces configuration gaps before they cause downstream problems.
 
 **Connects to:** All modules; **Settings** for profile completeness.
 
@@ -57,7 +69,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **How to use it:** Record sources, claims, and signals you trust. Revisit when the category shifts or before a major launch.
 
-**Benefits:** Stops “random acts of marketing” by anchoring the team in the same market reality.
+**Benefits:** Stops "random acts of marketing" by anchoring the team in the same market reality.
 
 **Connects to:** **ICP Segmentation** (who to win in that market) → **Positioning Studio** (how you win) → **Battlecards** (competitive reality in sales).
 
@@ -71,9 +83,9 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **Benefits:** Focus spend and messaging on accounts you can actually win.
 
-**Connects to:** **Positioning Studio** (“Regenerate from ICP segments”), **Messaging & Artifacts**, **Campaigns** (who you target).
+**Connects to:** **Positioning Studio** ("Regenerate from ICP segments"), **Messaging Pillars**, **Campaigns** (who you target).
 
-**Best practices:** Keep **one primary segment** per major initiative; avoid defining twelve equal “ICPs.”
+**Best practices:** Keep **one primary segment** per major initiative; avoid defining twelve equal "ICPs."
 
 ### Positioning Studio (`/dashboard/positioning-studio`)
 
@@ -83,13 +95,13 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **Benefits:** One canonical story marketing and sales can repeat without drift.
 
-**Connects to:** **ICP Segmentation**, **Messaging & Artifacts**, **Battlecards** (ties to approved positioning where configured), **GTM Planner** narrative.
+**Connects to:** **ICP Segmentation**, **Messaging Pillars**, **Battlecards** (ties to approved positioning where configured), **GTM Planner** narrative.
 
 **Pricing narrative (in-product):** Fill plan/SKU, price, persona, optional proof → **Generate** uses your **canvas text** as guardrails → **Save narrative** stores value-based pricing talk tracks separately from the canvas.
 
 **Best practices:** Good positioning is **narrow** (who + why now), **specific** (problem language), and **defensible** (proof). Avoid rewriting weekly—use **versions** for intentional changes.
 
-### Messaging & Artifacts (`/dashboard/messaging-artifacts`)
+### Messaging Pillars (`/dashboard/messaging-artifacts`)
 
 **What it is:** Track **artifacts** (copy packs, angles) by segment and tone; **artifact generator** for quick drafts.
 
@@ -109,27 +121,15 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **How to use it:** Browse and open items produced in workflows; use as the single **repository** for approved vs draft assets where your team adopts it.
 
-**Benefits:** Reduces Slack/email drift (“which PDF is final?”).
+**Benefits:** Reduces Slack/email drift ("which PDF is final?").
 
-**Connects to:** **Messaging & Artifacts**, **Launch Playbook**, **Content Studio**.
+**Connects to:** **Messaging Pillars**, **Launch Playbook**, **Content Studio**.
 
 **Best practices:** Name artifacts with **audience + format + date**; align status (Draft/Review/Approved) with your marketing ops ritual.
 
 ---
 
 ## 4. Planning
-
-### Marketing Workbench (`/dashboard/work`)
-
-**What it is:** Operational **workbench** for ongoing marketing work items (your “desk” for execution tracking).
-
-**How to use it:** Capture and move work that does not fit a single campaign card or launch checklist.
-
-**Benefits:** Separates **strategy** docs from **weekly execution**.
-
-**Connects to:** **Campaigns**, **GTM Planner**, **Content Studio**.
-
-**Best practices:** Limit WIP (work in progress)—fewer items done beats many items started.
 
 ### Launch Playbook (`/dashboard/launch-playbook`)
 
@@ -139,7 +139,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **Benefits:** Repeatable launches reduce last-minute gaps (enablement, analytics, web).
 
-**Connects to:** **GTM Planner**, **Messaging & Artifacts**, **Events**, **Content Studio**.
+**Connects to:** **GTM Planner**, **Messaging Pillars**, **Events**, **Content Studio**.
 
 **Best practices:** Define **launch tiers** (even informally): what must ship vs nice-to-have for this release.
 
@@ -151,7 +151,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **Benefits:** Visibility for marketing leadership; narrative ties **creative** to **segment + timing**.
 
-**Connects to:** **Messaging & Artifacts**, **Content Studio**, **Social Media**, **Analytics**.
+**Connects to:** **Messaging Pillars**, **Content Studio**, **Social Media**, **Analytics**.
 
 **Best practices:** Start from **one measurable objective** per card; align the narrative to **one primary segment** and **one moment** (fiscal year, event, product moment).
 
@@ -159,7 +159,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **What it is:** **Launch readiness** checklist, **timeline** text, and **stakeholders**—saved per environment.
 
-**How to use it:** Check off readiness items; keep the timeline as the single source for “what happens when.”
+**How to use it:** Check off readiness items; keep the timeline as the single source for "what happens when."
 
 **Benefits:** Surfaces cross-functional risk early (sales enablement, web, creative).
 
@@ -191,7 +191,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **Benefits:** Faster first drafts grounded in **your** ICP and positioning.
 
-**Connects to:** **Messaging & Artifacts**, **Campaigns**, **Website & Pages**, **Analytics** (measure what you publish).
+**Connects to:** **Messaging Pillars**, **Campaigns**, **Website & Pages**, **Analytics** (measure what you publish).
 
 **Best practices:** One **job-to-be-done** per asset; match **funnel stage** (awareness vs evaluation).
 
@@ -227,7 +227,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **Benefits:** One narrative from **Positioning** into **sales** and **field** decks.
 
-**Connects to:** **Battlecards**, **Messaging**, **Sales Intelligence**.
+**Connects to:** **Battlecards**, **Messaging Pillars**, **Sales Intelligence**.
 
 **Best practices:** **One idea per slide**; proof slides after claim slides.
 
@@ -265,7 +265,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **How to use it:** Maintain competitors, strengths/weaknesses, objections; link to **approved positioning** when your team uses governed versions.
 
-**Benefits:** Faster, more honest discovery calls; fewer “we’ll get back to you” moments.
+**Benefits:** Faster, more honest discovery calls; fewer "we'll get back to you" moments.
 
 **Connects to:** **Positioning Studio**, **Market Research**, **Sales Intelligence**.
 
@@ -303,7 +303,7 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 **Benefits:** Grounds external messaging in **real words** customers use.
 
-**Connects to:** **Messaging & Artifacts**, **Content Studio**, **Sales Intelligence**.
+**Connects to:** **Messaging Pillars**, **Content Studio**, **Sales Intelligence**.
 
 **Best practices:** Mine quotes for **headlines**; refresh after every major research round or QBR season.
 
@@ -329,9 +329,9 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 |----------|----------------|
 | **Single source of truth** | Positioning + ICP live in Strategy; downstream modules reference them. |
 | **Govern changes** | Use positioning **versions** and artifact **status** when sales relies on your narrative. |
-| **Measure closes the loop** | Analytics + VOC + win/loss feed the next quarter’s strategy refresh. |
+| **Measure closes the loop** | Analytics + VOC + win/loss feed the next quarter's strategy refresh. |
 | **Tier your launches** | Not every release needs a billboard; match effort to revenue impact. |
-| **Rep-capable briefs** | If sales cannot repeat your story in two sentences, tighten **Messaging** and **Enablement**. |
+| **Rep-capable briefs** | If sales cannot repeat your story in two sentences, tighten **Messaging Pillars** and **Enablement**. |
 
 ---
 
@@ -339,10 +339,11 @@ Under **Settings**, keep **product profile**, **segments**, **integrations**, **
 
 | I want to… | Go to |
 |------------|--------|
-| See priorities and start the day | **Command Centre** |
+| See all open work across modules | **Marketing Workbench** (home) |
+| Check workspace health and priorities | **Overview** |
 | Upload / refine who we sell to | **ICP Segmentation** |
 | Lock our story and pricing talk track | **Positioning Studio** |
-| Draft segment copy and a sales one-pager | **Messaging & Artifacts** |
+| Draft segment copy and a sales one-pager | **Messaging Pillars** |
 | Plan a timed campaign narrative | **Campaigns** (card → Campaign narrative) |
 | Track launch readiness | **GTM Planner** / **Launch Playbook** |
 | Draft blogs, emails, longform | **Content Studio** |

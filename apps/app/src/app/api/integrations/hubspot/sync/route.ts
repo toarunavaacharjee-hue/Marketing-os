@@ -92,9 +92,10 @@ export async function POST() {
       .eq("key", "connectors")
       .maybeSingle();
 
-    const connectors = (settingsRow?.value_json ?? {}) as Record<string, { enabled?: boolean; account_id?: string }>;
+    const connectors = (settingsRow?.value_json ?? {}) as Record<string, { enabled?: boolean; token?: string; account_id?: string }>;
     const hubspot = connectors.hubspot ?? {};
-    const token = (hubspot.account_id ?? "").trim();
+    // token field is preferred; account_id is the legacy fallback from before the field rename
+    const token = (hubspot.token ?? hubspot.account_id ?? "").trim();
     const enabled = Boolean(hubspot.enabled);
 
     if (!enabled || !token) {

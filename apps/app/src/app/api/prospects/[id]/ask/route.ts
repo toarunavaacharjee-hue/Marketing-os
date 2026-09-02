@@ -1,3 +1,4 @@
+import { checkAiQuota, incrementAiQuota } from "@/lib/ai/quotaGuard";
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDefaultEnvironmentIdForSelectedProduct } from "@/lib/productContext";
@@ -27,6 +28,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       data: { user }
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated." }, { status: 401 });
+    const quota = await checkAiQuota();
+    if (!quota.ok) return quota.response;
 
     const selected = await getDefaultEnvironmentIdForSelectedProduct();
     if (!selected) return NextResponse.json({ error: "No product selected." }, { status: 400 });
@@ -93,6 +96,7 @@ Output ONLY valid JSON:
         : text.trim() || "No answer.";
     const needs_input = String(raw?.status ?? "").toLowerCase() === "needs_input";
 
+    await incrementAiQuota(quota.userId, "prospect-research");
     return NextResponse.json({ answer, needs_input });
   } catch (e) {
     return NextResponse.json(

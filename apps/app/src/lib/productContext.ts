@@ -17,7 +17,19 @@ export async function ensureDefaultEnvironmentIdForSelectedProduct(): Promise<{
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated.");
 
-  const productId = await getSelectedProductId();
+  let productId = await getSelectedProductId();
+
+  // If no cookie, fall back to the user's first product membership
+  if (!productId) {
+    const { data: pm } = await supabase
+      .from("product_members")
+      .select("product_id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle();
+    productId = (pm as { product_id?: string } | null)?.product_id ?? null;
+  }
+
   if (!productId) throw new Error("No product selected.");
 
   const { data: envRow } = await supabase

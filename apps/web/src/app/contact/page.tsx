@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact AI Marketing Workbench for support, partnerships, or questions."
+  description: "Contact AI Marketing Workbench for support, partnerships, or questions.",
+  alternates: { canonical: "/contact" }
 };
 
 export default function ContactPage() {
@@ -38,7 +39,7 @@ export default function ContactPage() {
             <div className="mt-4">
               <a
                 href="mailto:support@aimarketingworkbench.com"
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
               >
                 support@aimarketingworkbench.com
               </a>
@@ -52,7 +53,7 @@ export default function ContactPage() {
             <div className="mt-4">
               <a
                 href="mailto:support@aimarketingworkbench.com"
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
               >
                 support@aimarketingworkbench.com
               </a>
@@ -66,13 +67,13 @@ export default function ContactPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               <Link
                 href="/signup?plan=starter"
-                className="inline-flex items-center justify-center rounded-lg bg-[#b8ff6c] px-4 py-2 text-[13px] font-semibold text-[#0a0a0c] shadow-lg shadow-[#b8ff6c]/15 transition hover:bg-[#c8ff7c]"
+                className="inline-flex items-center justify-center rounded-lg saas-btn saas-btn-cta px-4 py-2 text-[13px]"
               >
                 Start free
               </Link>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+                className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
               >
                 View demo
               </Link>

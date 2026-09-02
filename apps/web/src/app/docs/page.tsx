@@ -4,7 +4,8 @@ import { MarketingFooter, MarketingHeader } from "@/components/marketing/Marketi
 
 export const metadata: Metadata = {
   title: "Docs",
-  description: "Documentation for AI Marketing Workbench: setup, workflows, and best practices."
+  description: "Documentation for AI Marketing Workbench: setup, workflows, and best practices.",
+  alternates: { canonical: "/docs" }
 };
 
 const sections = [
@@ -73,7 +74,7 @@ export default function DocsPage() {
               ["Guardrails", "When data is missing, the system prefers TBD over invented facts or links."],
               ["Visibility", "You can track progress in module pages and in your workbench views."]
             ].map(([t, d]) => (
-              <div key={t} className="rounded-xl border border-border bg-surface2 p-4">
+              <div key={t} className="saas-card2 p-4">
                 <div className="text-[13px] font-semibold text-text">{t}</div>
                 <div className="mt-1 text-sm leading-relaxed text-text2">{d}</div>
               </div>
@@ -94,13 +95,13 @@ export default function DocsPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <a
               href="mailto:support@aimarketingworkbench.com"
-              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+              className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
             >
               support@aimarketingworkbench.com
             </a>
             <Link
               href="/resources"
-              className="inline-flex items-center justify-center rounded-lg border border-border bg-surface2 px-4 py-2 text-[13px] font-medium text-text transition hover:bg-surface3"
+              className="saas-btn saas-btn-secondary px-4 py-2 text-[13px]"
             >
               All resources
             </Link>

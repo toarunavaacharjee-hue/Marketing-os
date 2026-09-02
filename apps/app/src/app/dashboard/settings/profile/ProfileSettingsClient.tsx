@@ -57,7 +57,7 @@ export default function ProfileSettingsClient({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+    <div className="hs-card p-6 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-sm font-medium text-text">My profile</div>
@@ -71,7 +71,7 @@ export default function ProfileSettingsClient({
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
+            className="w-full hs-input placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
             placeholder="Your name"
           />
         </div>
@@ -80,7 +80,7 @@ export default function ProfileSettingsClient({
           <input
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
+            className="w-full hs-input placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
             placeholder="What should we call you?"
           />
         </div>
@@ -89,7 +89,7 @@ export default function ProfileSettingsClient({
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
+            className="w-full hs-input placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
             placeholder="Company"
           />
         </div>
@@ -98,7 +98,7 @@ export default function ProfileSettingsClient({
           <input
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
+            className="w-full hs-input placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
             placeholder="e.g. Growth Lead"
           />
         </div>
@@ -107,7 +107,7 @@ export default function ProfileSettingsClient({
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full rounded-sm border border-input-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
+            className="w-full hs-input placeholder:text-text3 transition-[border-color,box-shadow] duration-200 ease-aimw-out focus:border-primary focus:outline-none focus:shadow-focus"
             placeholder="Optional"
           />
         </div>

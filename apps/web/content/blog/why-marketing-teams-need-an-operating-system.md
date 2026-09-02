@@ -80,10 +80,14 @@ That means:
 - more reusable decisions
 - better continuity as the company scales
 
-Instead of asking AI to repeatedly start over, they are building environments where each decision improves the next workflow.
+Instead of asking AI to repeatedly start over, they are building environments where each decision improves the next workflow. For a complete breakdown of what a marketing operating system contains and how to build one, see [what is a marketing operating system](/blog/what-is-a-marketing-operating-system). For the PMM-specific version of this problem, see [the PMM operating system](/blog/pmm-operating-system).
 
 ## Final takeaway
 
 The real opportunity with AI is not just faster output. It is stronger continuity.
 
 Marketing teams that win will not be the ones producing the most content. They will be the ones building systems that keep insight, strategy, and execution connected over time.
+
+---
+
+AI Marketing Workbench is the connected marketing operating system for B2B teams — ICP, positioning, messaging, campaigns, and launch planning in one place. [Start free](/signup) or [see pricing](/pricing).

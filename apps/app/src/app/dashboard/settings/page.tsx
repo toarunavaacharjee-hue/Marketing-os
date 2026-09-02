@@ -83,7 +83,7 @@ export default async function SettingsPage() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text2 shadow-sm">
+          <div className="hs-card px-3 py-2 text-sm text-text2 shadow-sm">
             Plan: <span className="text-text">{plan}</span>
             {status ? (
               <>
@@ -96,14 +96,14 @@ export default async function SettingsPage() {
           </div>
           <ManageBillingButton />
           <form action="/logout" method="post">
-            <button className="rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-text hover:bg-surface3">
+            <button className="hs-card2 px-3 py-2 text-sm text-text hover:bg-surface3">
               Log out
             </button>
           </form>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+      <div className="hs-card p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-sm font-medium text-text">Plan &amp; limits (this workspace)</div>
@@ -138,7 +138,7 @@ export default async function SettingsPage() {
               </li>
             </ul>
           </div>
-          <div className="min-w-[200px] rounded-xl border border-border bg-surface2 p-4 text-sm text-text2">
+          <div className="min-w-[200px] hs-card2 p-4 text-sm text-text2">
             <div className="font-medium text-text">Published list prices</div>
             {listPrices ? (
               <ul className="mt-2 space-y-1">
@@ -162,21 +162,21 @@ export default async function SettingsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Link
           href="/dashboard/settings/profile"
-          className="saas-card-hover rounded-2xl border border-border bg-surface p-5 shadow-card"
+          className="saas-card-hover hs-card p-5 shadow-card"
         >
           <div className="text-sm font-semibold text-heading">My profile</div>
           <div className="mt-1 text-sm text-text2">Your personal details used across the workspace.</div>
         </Link>
         <Link
           href="/dashboard/settings/team"
-          className="saas-card-hover rounded-2xl border border-border bg-surface p-5 shadow-card"
+          className="saas-card-hover hs-card p-5 shadow-card"
         >
           <div className="text-sm font-semibold text-heading">My team</div>
           <div className="mt-1 text-sm text-text2">Members, roles, invites, and governance.</div>
         </Link>
         <Link
           href="/dashboard/settings/integrations"
-          className="saas-card-hover rounded-2xl border border-border bg-surface p-5 shadow-card"
+          className="saas-card-hover hs-card p-5 shadow-card"
         >
           <div className="text-sm font-semibold text-heading">Integrations</div>
           <div className="mt-1 text-sm text-text2">Analytics + ad platform connections for this product.</div>
@@ -185,54 +185,54 @@ export default async function SettingsPage() {
 
       <WorkspaceAiSettingsClient email={user.email ?? ""} />
 
-      <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+      <div className="hs-card p-6 shadow-sm">
         <div className="text-sm font-medium text-text">Module settings</div>
         <div className="mt-2 grid gap-2 md:grid-cols-2">
           <Link
             href="/dashboard/settings/profile"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             My profile → name, company, account details
           </Link>
           <Link
             href="/dashboard/settings/team"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             My team → members, roles, invites, governance
           </Link>
           <Link
             href="/dashboard/support"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             Support → submit tickets (tier-aware)
           </Link>
           <Link
             href="/dashboard/settings/product"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             Product profile → base product + competitors
           </Link>
           <Link
             href="/dashboard/settings/learning"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             Learning & health → sync status + coverage
           </Link>
           <Link
             href="/dashboard/settings/integrations"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             Integrations → GA4 / HubSpot / LinkedIn / Meta
           </Link>
           <Link
             href="/dashboard/settings/segments"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             Segments → configure ICP segments
           </Link>
           <Link
             href="/dashboard/settings/analytics"
-            className="rounded-xl border border-border bg-surface2 px-4 py-3 text-sm text-text hover:bg-surface3"
+            className="hs-card2 px-4 py-3 text-sm text-text hover:bg-surface3"
           >
             Analytics → configure GA4/LinkedIn/Meta placeholders
           </Link>

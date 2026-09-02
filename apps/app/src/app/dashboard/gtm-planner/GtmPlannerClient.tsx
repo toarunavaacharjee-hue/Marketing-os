@@ -462,7 +462,7 @@ export function GtmPlannerClient({
     <div className="space-y-5">
       <ProductStaleBanner environmentId={environmentId} moduleName="GTM Planner" />
       {error ? (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">{error}</div>
+        <div className="hs-alert hs-alert-error">{error}</div>
       ) : null}
 
       {/* Plan switcher */}
@@ -512,7 +512,7 @@ export function GtmPlannerClient({
       ) : null}
 
       {/* Context inputs + AI generate */}
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <div className="hs-card p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="text-sm font-semibold text-heading">Launch context</div>
           <span className="text-xs text-text2">{saving ? "Saving…" : "Saved per product."}</span>
@@ -525,7 +525,7 @@ export function GtmPlannerClient({
               value={plan.productOrFeature}
               onChange={(e) => schedule({ ...plan, productOrFeature: e.target.value })}
               placeholder="e.g. AI Campaign Builder"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -534,7 +534,7 @@ export function GtmPlannerClient({
               value={plan.segment}
               onChange={(e) => schedule({ ...plan, segment: e.target.value })}
               placeholder="e.g. Series B SaaS PMMs"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -543,7 +543,7 @@ export function GtmPlannerClient({
               type="date"
               value={plan.launchDate}
               onChange={(e) => schedule({ ...plan, launchDate: e.target.value })}
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
           <div>
@@ -552,15 +552,13 @@ export function GtmPlannerClient({
               value={plan.goals}
               onChange={(e) => schedule({ ...plan, goals: e.target.value })}
               placeholder="e.g. 50 trials, $200k pipeline"
-              className="w-full rounded-xl border border-border bg-surface2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full hs-card2 px-3 py-2 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
         </div>
 
         {genError ? (
-          <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red">
-            {genError}
-          </div>
+          <div className="hs-alert hs-alert-error mt-3">{genError}</div>
         ) : null}
 
         <AiProgressBar
@@ -576,7 +574,7 @@ export function GtmPlannerClient({
             type="button"
             onClick={() => void generatePlan()}
             disabled={generating}
-            className="rounded-xl bg-amber px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+            className="hs-btn hs-btn-cta disabled:opacity-50"
           >
             {generating ? "Generating plan…" : "AI: Generate GTM plan"}
           </button>
@@ -587,7 +585,7 @@ export function GtmPlannerClient({
       </div>
 
       {/* Overall progress */}
-      <div className="rounded-2xl border border-border bg-surface px-4 py-3 shadow-sm">
+      <div className="hs-card px-4 py-3">
         <div className="mb-2 flex items-center justify-between text-sm">
           <span className="font-medium text-heading">Launch readiness</span>
           <span className="font-semibold text-heading">{overallPct}%</span>
@@ -628,8 +626,8 @@ export function GtmPlannerClient({
           return (
             <div
               key={phase.id}
-              className={`rounded-2xl border bg-surface shadow-sm transition-colors ${
-                pct === 100 ? "border-teal/30" : "border-border"
+              className={`hs-card transition-colors ${
+                pct === 100 ? "border-teal/30" : ""
               }`}
             >
               {/* Phase header */}
@@ -742,7 +740,7 @@ export function GtmPlannerClient({
 
       {/* Stakeholders + risk notes */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+        <div className="hs-card p-4">
           <div className="mb-1 flex items-center justify-between">
             <div className="text-sm font-semibold text-heading">Stakeholders (RACI)</div>
             <span className={`text-[11px] tabular-nums ${plan.stakeholders.length > 800 ? "text-amber" : "text-text3"}`}>
@@ -757,10 +755,10 @@ export function GtmPlannerClient({
             onChange={(e) => schedule({ ...plan, stakeholders: e.target.value })}
             rows={7}
             maxLength={1000}
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full hs-card2 p-3 text-sm text-heading focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+        <div className="hs-card p-4">
           <div className="mb-1 flex items-center justify-between">
             <div className="text-sm font-semibold text-heading">Risks & dependencies</div>
             <span className={`text-[11px] tabular-nums ${plan.riskNotes.length > 800 ? "text-amber" : "text-text3"}`}>
@@ -776,7 +774,7 @@ export function GtmPlannerClient({
             rows={7}
             maxLength={1000}
             placeholder="e.g. Eng feature flag needs sign-off by T-2 weeks&#10;Legal review of pricing page required&#10;Competitor launching same week — monitor closely"
-            className="w-full rounded-xl border border-border bg-surface2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full hs-card2 p-3 text-sm text-heading placeholder:text-text3 focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>

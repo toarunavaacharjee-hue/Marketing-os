@@ -4,7 +4,8 @@ import { PricingModernClient } from "@/app/pricing/PricingModernClient";
 
 export const metadata: Metadata = {
   title: "Pricing | AI Marketing Workbench",
-  description: "Simple plans for modern PMM & GTM teams: Starter, Growth, and Enterprise."
+  description: "Simple plans for modern PMM & GTM teams: Starter, Growth, and Enterprise.",
+  alternates: { canonical: "/pricing" }
 };
 
 export default function PricingPage() {

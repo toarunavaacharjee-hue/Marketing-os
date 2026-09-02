@@ -3,12 +3,10 @@ import { APP_URL } from "@/lib/appUrl";
 
 const nav = [
   { href: "/#features", label: "Features" },
-  { href: "/#how-it-works", label: "How it works" },
   { href: "/use-cases", label: "Use Cases" },
-  { href: "/#modules", label: "Modules" },
+  { href: "/tools/templates", label: "Templates" },
   { href: "/blog", label: "Blog" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" }
+  { href: "/pricing", label: "Pricing" }
 ] as const;
 
 export function MarketingLogo({ className = "" }: { className?: string }) {
@@ -45,13 +43,13 @@ export function MarketingHeader() {
         <div className="flex items-center gap-2">
           <Link
             href={`${APP_URL}/dashboard`}
-            className="hidden rounded-lg border border-border bg-surface2 px-3 py-2 text-[13px] font-medium text-text2 transition hover:bg-surface3 sm:inline-flex"
+            className="hidden saas-btn saas-btn-secondary px-3 py-2 text-[13px] sm:inline-flex"
           >
             View demo
           </Link>
           <Link
             href={`${APP_URL}/signup?plan=starter`}
-            className="rounded-lg bg-amber px-3.5 py-2 text-[13px] font-semibold text-heading shadow-card transition hover:bg-amber-hover"
+            className="saas-btn saas-btn-cta px-3.5 py-2 text-[13px]"
           >
             Start free
           </Link>
@@ -118,11 +116,21 @@ export function MarketingFooter() {
             </ul>
           </div>
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Resources</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-text3">Free Tools</div>
             <ul className="mt-4 space-y-2.5 text-sm text-text2">
               <li>
-                <Link href="/docs" className="transition hover:text-text">
-                  Docs
+                <Link href="/tools/templates" className="transition hover:text-text">
+                  Marketing Templates
+                </Link>
+              </li>
+              <li>
+                <Link href="/vs" className="transition hover:text-text">
+                  Comparisons
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools/glossary" className="transition hover:text-text">
+                  Glossary
                 </Link>
               </li>
               <li>
@@ -131,8 +139,8 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/#faq" className="transition hover:text-text">
-                  FAQ
+                <Link href="/docs" className="transition hover:text-text">
+                  Docs
                 </Link>
               </li>
               <li>

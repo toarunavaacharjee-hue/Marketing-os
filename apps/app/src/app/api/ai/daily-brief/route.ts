@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseJsonObject } from "@/lib/extractJsonObject";
 import { resolveWorkspaceAnthropicKey } from "@/lib/anthropic/resolveWorkspaceAnthropicKey";
+import { checkAiQuota, incrementAiQuota } from "@/lib/ai/quotaGuard";
 
 type AnthropicMessageResponse = {
   content?: Array<{ type: string; text?: string }>;
@@ -26,6 +27,9 @@ function normalizeAnthropicError(message: string | undefined) {
 
 export async function POST() {
   try {
+    const quota = await checkAiQuota();
+    if (!quota.ok) return quota.response;
+
     const keyRes = await resolveWorkspaceAnthropicKey();
     if (!keyRes.ok) {
       return NextResponse.json({ error: keyRes.error }, { status: keyRes.status });
@@ -95,6 +99,7 @@ Rules:
       : [];
     const summary = lines.length ? lines.join("\n") : text.trim() || "No summary returned.";
 
+    await incrementAiQuota(quota.userId, "daily-brief");
     return NextResponse.json({ summary, needs_input: false });
   } catch (e) {
     return NextResponse.json(
