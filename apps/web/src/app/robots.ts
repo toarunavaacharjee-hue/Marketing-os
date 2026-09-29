@@ -1,12 +1,11 @@
 import type { MetadataRoute } from "next";
-
-const CANONICAL = "https://orahtechandmarketing.com";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export default function robots(): MetadataRoute.Robots {
-  // Block all bots on Vercel preview deployments — only allow crawling on
-  // the production domain to prevent duplicate-content and redirect penalties.
-  const host = process.env.VERCEL_URL ?? "";
-  const isPreview = host && !host.includes("orahtechandmarketing.com");
+  // Block all bots on Vercel preview deployments only. VERCEL_URL is always the
+  // per-deployment *.vercel.app host (even in production), so it can't be used
+  // to detect the production domain — VERCEL_ENV can.
+  const isPreview = !!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production";
 
   if (isPreview) {
     return {
@@ -14,9 +13,10 @@ export default function robots(): MetadataRoute.Robots {
     };
   }
 
+  const base = getSiteUrl();
   return {
     rules: [{ userAgent: "*", allow: "/" }],
-    sitemap: `${CANONICAL}/sitemap.xml`
+    sitemap: `${base}/sitemap.xml`,
+    host: base
   };
 }
-
