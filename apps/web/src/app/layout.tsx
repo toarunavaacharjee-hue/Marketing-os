@@ -3,7 +3,7 @@ import "./globals.css";
 import "@fontsource/dm-sans/latin.css";
 import "@fontsource/inter/latin.css";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aimarketingworkbench.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.aimarketingworkbench.com";
 const DEFAULT_OG = `/og?title=AI+Marketing+Workbench&description=The+PMM+%2B+GTM+operating+layer`;
 
 export const metadata: Metadata = {
